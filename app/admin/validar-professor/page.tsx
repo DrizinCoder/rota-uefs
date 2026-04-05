@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
+import { FooterSection } from "@/components/landing/footer-section";
 import { 
   Users, CheckCircle2, XCircle, FileText, 
   Search, ShieldAlert, ArrowLeft 
@@ -126,6 +127,7 @@ export default function AdminValidarProfessorPage() {
           )}
         </div>
       </main>
+      <FooterSection />
     </div>
   );
 }

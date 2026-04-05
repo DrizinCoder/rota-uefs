@@ -118,7 +118,7 @@ export default function PaginaMotorista() {
 
   return (
     <div className="flex min-h-screen flex-col bg-[#E4F2F1] pb-24">
-      <Navigation isMotorista={true} />
+      <Navigation tipoUsuario="motorista" />
 
       <main className="flex-1 w-full max-w-6xl mx-auto py-10 px-4">
         <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -376,6 +376,7 @@ export default function PaginaMotorista() {
           </Button>
         </div>
       </div>
+      
     </div>
   );
 }

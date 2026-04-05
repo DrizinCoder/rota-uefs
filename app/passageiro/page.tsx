@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
-import Link from "next/link";
+import { FooterSection } from "@/components/landing/footer-section";
 import { Button } from "@/components/ui/button";
 import {
   MapPin,
@@ -185,6 +185,7 @@ export default function PaginaAluno() {
           </Button>
         </div>
       </div>
+      <FooterSection />
     </div>
   );
 }

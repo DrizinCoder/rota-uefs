@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
+import { FooterSection } from "@/components/landing/footer-section";
 import { 
   Plus, 
   UserCircle, 
@@ -126,6 +127,7 @@ export default function AdminUsuariosPage() {
           )}
         </div>
       </main>
+      <FooterSection />
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
+import { FooterSection } from "@/components/landing/footer-section";
 import { 
   Bus, Plus, Calendar, Clock, Users, 
   CheckCircle2, ShieldAlert, Search,
@@ -249,6 +250,7 @@ export default function AdminViagensPage() {
           )}
         </div>
       </main>
+      <FooterSection />
     </div>
   );
 }

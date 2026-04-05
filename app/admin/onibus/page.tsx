@@ -112,7 +112,7 @@ function CadastroEdicaoOnibusForm() {
 
   return (
     <div className="flex min-h-screen flex-col bg-[#E4F2F1] pb-24">
-      <Navigation />
+      <Navigation tipoUsuario="admin"/>
 
       <main className="flex-1 w-full max-w-3xl mx-auto py-10 px-4 space-y-6">
         <Button
@@ -237,7 +237,6 @@ function CadastroEdicaoOnibusForm() {
         </form>
       </main>
 
-      <FooterSection />
 
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#103173] text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-6 z-50 border-2 border-[#F2D022]/30 backdrop-blur-md">
         <div className="flex flex-col border-r border-white/20 pr-4">
@@ -271,6 +270,7 @@ function CadastroEdicaoOnibusForm() {
           </Button>
         </div>
       </div>
+      <FooterSection />
     </div>
   );
 }

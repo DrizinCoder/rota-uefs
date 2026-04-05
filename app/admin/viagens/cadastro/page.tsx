@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
+import { FooterSection } from "@/components/landing/footer-section";
 import { 
   ArrowLeft, Save, MapPin, Calendar, Clock, Bus, 
   UserCircle, Users, Repeat, ArrowRightLeft, AlertTriangle, CheckCircle2 
@@ -255,8 +256,9 @@ export default function CadastroViagemPage() {
             </button>
           </div>
         </form>
-
       </main>
+
+      <FooterSection />
     </div>
   );
 }

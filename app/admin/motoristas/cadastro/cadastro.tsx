@@ -63,7 +63,7 @@ export default function CadastroEdicaoMotoristaPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-[#E4F2F1] pb-24">
-      <Navigation />
+      <Navigation tipoUsuario="admin"/>
 
       <main className="flex-1 w-full max-w-4xl mx-auto py-10 px-4 space-y-6">
         <Button
@@ -196,38 +196,6 @@ export default function CadastroEdicaoMotoristaPage() {
 
       <FooterSection />
 
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#103173] text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-6 z-50 border-2 border-[#F2D022]/30 backdrop-blur-md">
-        <div className="flex flex-col border-r border-white/20 pr-4">
-          <span className="text-[9px] font-black uppercase text-[#F2D022] tracking-tighter">Modo de Teste</span>
-          <span className="text-xs font-bold">Alternar Perfil</span>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            size="sm"
-            variant="ghost"
-            className="hover:bg-white/10 text-white gap-2 font-bold"
-            onClick={() => router.push("/passageiro")}
-          >
-            <UserCircle className="h-4 w-4" /> Passageiro
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="hover:bg-[#F2D022] hover:text-[#103173] text-white gap-2 font-bold transition-colors"
-            onClick={() => router.push("/motorista")}
-          >
-            <Bus className="h-4 w-4" /> Motorista
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="bg-red-500 text-white gap-2 font-bold transition-colors shadow-lg shadow-red-500/20"
-            onClick={() => router.push("/admin")}
-          >
-            <ShieldAlert className="h-4 w-4" /> Admin
-          </Button>
-        </div>
-      </div>
     </div>
   );
 }

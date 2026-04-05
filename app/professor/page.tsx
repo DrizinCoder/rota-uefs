@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
-import Link from "next/link";
+import { FooterSection } from "@/components/landing/footer-section";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -245,6 +245,7 @@ export default function PaginaProfessor() {
           </Button>
         </div>
       </div>
+      <FooterSection />
     </div>
   );
 }

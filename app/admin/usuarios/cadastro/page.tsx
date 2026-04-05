@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
+import { FooterSection } from "@/components/landing/footer-section";
 import { 
   ArrowLeft, Save, User, Hash, Lock, 
   ShieldCheck, AlertTriangle, CheckCircle2 
@@ -232,6 +233,7 @@ export default function CadastroAdminPage() {
 
         </form>
       </main>
+      <FooterSection />
     </div>
   );
 }

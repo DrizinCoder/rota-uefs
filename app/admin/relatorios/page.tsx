@@ -3,6 +3,7 @@
   import { useState } from "react";
   import { useRouter } from "next/navigation";
   import { Navigation } from "@/components/landing/navigation";
+  import { FooterSection } from "@/components/landing/footer-section";
   import { 
     FileText, Download, FileSpreadsheet, ShieldAlert, 
     Calendar, Users, AlertTriangle, Building2, 
@@ -241,6 +242,7 @@
           )}
 
         </main>
+        <FooterSection />
       </div>
     );
   }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
+import { FooterSection } from "@/components/landing/footer-section";
 import { Button } from "@/components/ui/button";
 import {
   Clock,
@@ -343,6 +344,7 @@ export default function MotoristaPage() {
           </Button>
         </div>
       </div>
+      <FooterSection />
     </div>
   );
 }

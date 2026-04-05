@@ -3,6 +3,7 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
 import { Bus, MapPin, Calendar, Clock, Ticket, ArrowLeft, ClipboardList } from "lucide-react";
+import { FooterSection } from "@/components/landing/footer-section";
 import { Suspense } from "react";
 import Link from "next/link";
 
@@ -112,6 +113,7 @@ function ViagensContent() {
           )}
         </div>
       </main>
+      <FooterSection />
     </div>
   );
 }

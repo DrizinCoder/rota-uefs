@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
 import { Users, Plus, ChevronRight, UserCircle, ShieldAlert, Bus, Search, ArrowLeft } from "lucide-react";
+import { FooterSection } from "@/components/landing/footer-section";
 import Link from "next/link";
 
 // Dados simulados baseados na estrutura que você já tem
@@ -98,6 +99,7 @@ export default function AdminMotoristasPage() {
           ))}
         </div>
       </main>
+      <FooterSection />
     </div>
   );
 }
