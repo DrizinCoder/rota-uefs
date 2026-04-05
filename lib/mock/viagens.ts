@@ -26,8 +26,8 @@ export const PONTOS_ROTA_MOCK = [
   "Salvador",
   "Feira de Santana",
   "Módulo 5 (UEFS)",
-  "Terminal Central",
-  "Pórtico UEFS",
+  " Burger King/Ao lado do Sam's Club",
+  "UEFS",
 ];
 
 export const VIAGENS_GESTAO_MOCK: ViagemMock[] = [
@@ -119,7 +119,7 @@ export const VIAGENS_GESTAO_MOCK: ViagemMock[] = [
     data: "18/03/2026",
     diaSemana: "Quarta",
     origem: "Módulo 5 (UEFS)",
-    destino: "Terminal Central",
+    destino: " Burger King/Ao lado do Sam's Club",
     horarioSaida: "12:10",
     horarioChegada: "12:50",
     onibusId: "BUS-003",
@@ -139,8 +139,8 @@ export const VIAGENS_GESTAO_MOCK: ViagemMock[] = [
     rotaCodigo: "ROT-9901",
     data: "18/03/2026",
     diaSemana: "Quarta",
-    origem: "Terminal Central",
-    destino: "Pórtico UEFS",
+    origem: " Burger King/Ao lado do Sam's Club",
+    destino: "UEFS",
     horarioSaida: "06:40",
     horarioChegada: "07:20",
     onibusId: "BUS-001",

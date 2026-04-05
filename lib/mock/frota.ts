@@ -53,7 +53,7 @@ export const FROTA_MOCK: OnibusFrota[] = [
     ano: 2020,
     capacidade: 32,
     motorista: "Rafael Lima",
-    rotaPrincipal: "Módulo 5 (UEFS) → Terminal Central",
+    rotaPrincipal: "Módulo 3 (UEFS) →  Burger King/Ao lado do Sam's Club",
     rotasVinculadas: ["ROT-UEFS-002"],
     viagensHoje: 5,
     ocupacaoMedia: 81,

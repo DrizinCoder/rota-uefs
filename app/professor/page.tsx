@@ -17,20 +17,21 @@ import {
   UserPlus,
   X,
   UserCircle,
-  ShieldAlert
+  ShieldAlert,
+  Users
 } from "lucide-react";
 
 const VIAGENS_REQUISITOS = [
-  { id: "1", dia: "segunda", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "06:00", horarioFim: "08:00", inscritos: 18, vagasTotais: 44, jaInscrito: false },
-  { id: "2", dia: "segunda", origem: "Feira de Santana", destino: "Salvador", horarioInicio: "18:30", horarioFim: "20:30", inscritos: 35, vagasTotais: 44, jaInscrito: true },
-  { id: "3", dia: "terca", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "06:00", horarioFim: "08:00", inscritos: 22, vagasTotais: 44, jaInscrito: false },
-  { id: "4", dia: "terca", origem: "Feira de Santana", destino: "Salvador", horarioInicio: "18:30", horarioFim: "20:30", inscritos: 40, vagasTotais: 44, jaInscrito: false },
-  { id: "5", dia: "quarta", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "06:00", horarioFim: "08:00", inscritos: 15, vagasTotais: 44, jaInscrito: false },
-  { id: "6", dia: "quarta", origem: "Feira de Santana", destino: "Salvador", horarioInicio: "18:30", horarioFim: "20:30", inscritos: 30, vagasTotais: 44, jaInscrito: false },
-  { id: "7", dia: "quinta", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "06:00", horarioFim: "08:00", inscritos: 44, vagasTotais: 44, jaInscrito: true },
-  { id: "8", dia: "quinta", origem: "Feira de Santana", destino: "Salvador", horarioInicio: "18:30", horarioFim: "20:30", inscritos: 25, vagasTotais: 44, jaInscrito: false },
-  { id: "9", dia: "sexta", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "06:00", horarioFim: "08:00", inscritos: 38, vagasTotais: 44, jaInscrito: false },
-  { id: "10", dia: "sexta", origem: "Feira de Santana", destino: "Salvador", horarioInicio: "18:30", horarioFim: "20:30", inscritos: 42, vagasTotais: 44, jaInscrito: true },
+  { id: "1", dia: "segunda", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "06:00", horarioFim: "08:00", inscritosAlunos: 15, inscritosProfessores: 3, vagasTotais: 44, jaInscrito: false },
+  { id: "2", dia: "segunda", origem: "Feira de Santana", destino: "Salvador", horarioInicio: "18:30", horarioFim: "20:30", inscritosAlunos: 30, inscritosProfessores: 5, vagasTotais: 44, jaInscrito: true },
+  { id: "3", dia: "terca", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "06:00", horarioFim: "08:00", inscritosAlunos: 20, inscritosProfessores: 2, vagasTotais: 44, jaInscrito: false },
+  { id: "4", dia: "terca", origem: "Feira de Santana", destino: "Salvador", horarioInicio: "18:30", horarioFim: "20:30", inscritosAlunos: 35, inscritosProfessores: 5, vagasTotais: 44, jaInscrito: false },
+  { id: "5", dia: "quarta", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "06:00", horarioFim: "08:00", inscritosAlunos: 12, inscritosProfessores: 3, vagasTotais: 44, jaInscrito: false },
+  { id: "6", dia: "quarta", origem: "Feira de Santana", destino: "Salvador", horarioInicio: "18:30", horarioFim: "20:30", inscritosAlunos: 25, inscritosProfessores: 5, vagasTotais: 44, jaInscrito: false },
+  { id: "7", dia: "quinta", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "06:00", horarioFim: "08:00", inscritosAlunos: 40, inscritosProfessores: 4, vagasTotais: 44, jaInscrito: true },
+  { id: "8", dia: "quinta", origem: "Feira de Santana", destino: "Salvador", horarioInicio: "18:30", horarioFim: "20:30", inscritosAlunos: 20, inscritosProfessores: 5, vagasTotais: 44, jaInscrito: false },
+  { id: "9", dia: "sexta", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "06:00", horarioFim: "08:00", inscritosAlunos: 30, inscritosProfessores: 8, vagasTotais: 44, jaInscrito: false },
+  { id: "10", dia: "sexta", origem: "Feira de Santana", destino: "Salvador", horarioInicio: "18:30", horarioFim: "20:30", inscritosAlunos: 35, inscritosProfessores: 7, vagasTotais: 44, jaInscrito: true },
 ];
 
 const DIAS_SEMANA = [
@@ -103,7 +104,7 @@ export default function PaginaProfessor() {
 
             return (
               <div key={viagem.id} className="bg-white rounded-2xl overflow-hidden shadow-sm p-4">
-                <div className="flex items-start gap-3 mb-6">
+                <div className="flex items-start gap-3 mb-4">
                   <div className="flex flex-col items-center pt-0.5 shrink-0">
                     <CircleDot className="h-4 w-4 text-[#F2D022]" />
                     <div className="w-px h-6 bg-gradient-to-b from-[#F2D022] to-[#103173] my-0.5" />
@@ -118,6 +119,14 @@ export default function PaginaProfessor() {
                       <p className="text-base font-extrabold text-[#103173]">{viagem.destino}</p>
                       <span className="text-[11px] font-bold text-[#103173]/50">{viagem.horarioFim}</span>
                     </div>
+                  </div>
+                </div>
+
+                <div className="bg-[#f0f4f8] rounded-xl p-3 mb-4 flex items-center justify-between">
+                  <p className="text-[10px] font-bold text-[#103173]/60 uppercase tracking-wider">Lista ({viagem.inscritosProfessores}/{viagem.vagasTotais})</p>
+                  <div className="flex items-center gap-2">
+                    <GraduationCap className="w-4 h-4 text-[#F2D022]" />
+                    <span className="text-sm font-semibold text-[#103173]">{viagem.inscritosProfessores} Professores</span>
                   </div>
                 </div>
 

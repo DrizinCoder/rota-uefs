@@ -5,11 +5,11 @@ import { Navigation } from "@/components/landing/navigation";
 import { FooterSection } from "@/components/landing/footer-section";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
-  MapPin, 
-  Clock, 
-  AlertCircle, 
-  CheckCircle2, 
+import {
+  MapPin,
+  Clock,
+  AlertCircle,
+  CheckCircle2,
   ArrowLeft,
   CalendarCheck
 } from "lucide-react";
@@ -19,17 +19,17 @@ export default function ConfirmacaoInscricao() {
 
   // Dados mockados da viagem selecionada (em um cenário real viriam via URL ou Estado)
   const viagemSelecionada = {
-    origem: "Terminal Central",
-    destino: "Pórtico UEFS",
-    horarioInicio: "06:40",
-    horarioFim: "07:20",
-    data: "Segunda-feira, 16 de Outubro"
+    origem: " Burger King/Ao lado do Sam's Club",
+    destino: "UEFS",
+    horarioInicio: "06:00",
+    horarioFim: "08:00",
+    data: "Segunda-feira, 6 de Abril"
   };
 
   const handleConfirmar = () => {
     // Lógica de confirmação aqui
     // Após confirmar, o PDF sugere a "Emissão de verificação" (Status da viagem)
-    router.push("/passageiro/status"); 
+    router.push("/passageiro/status");
   };
 
   return (
@@ -38,8 +38,8 @@ export default function ConfirmacaoInscricao() {
 
       <main className="flex-1 w-full max-w-2xl mx-auto py-12 px-4">
         {/* Botão Voltar */}
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           onClick={() => router.back()}
           className="mb-6 text-[#103173] font-bold hover:bg-[#103173]/5"
         >
@@ -117,7 +117,7 @@ export default function ConfirmacaoInscricao() {
           </CardContent>
 
           <CardFooter className="p-8 pt-0 flex flex-col gap-4">
-            <Button 
+            <Button
               onClick={handleConfirmar}
               className="w-full h-16 bg-[#23B99A] hover:bg-[#1a8a73] text-white font-black text-lg rounded-2xl shadow-xl shadow-[#23B99A]/20 transition-all hover:scale-[1.02] active:scale-95"
             >

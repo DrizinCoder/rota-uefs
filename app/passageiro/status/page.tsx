@@ -6,13 +6,13 @@ import { FooterSection } from "@/components/landing/footer-section";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  MapPin, 
-  Clock, 
-  QrCode, 
-  Info, 
-  ArrowLeft, 
-  Bus, 
+import {
+  MapPin,
+  Clock,
+  QrCode,
+  Info,
+  ArrowLeft,
+  Bus,
   CheckCircle2,
   Users
 } from "lucide-react";
@@ -23,12 +23,12 @@ export default function StatusViagemInscrita() {
   // Mock da viagem que o usuário já se inscreveu
   const viagemInscrita = {
     id: "ROT-UEFS-002",
-    origem: "Módulo 5 (UEFS)",
-    destino: "Terminal Central",
-    horarioInicio: "12:10",
-    horarioFim: "12:50",
-    inscritos: 35,
-    quorum: 20,
+    origem: "Burger King/Ao lado do Sam's Club",
+    destino: "UEFS",
+    horarioInicio: "06:00",
+    horarioFim: "08:00",
+    inscritos: 19,
+    quorum: 1,
     vagasTotais: 44,
     motorista: "João Silva",
     placa: "JLS-1020",
@@ -42,8 +42,8 @@ export default function StatusViagemInscrita() {
       <main className="flex-1 w-full max-w-2xl mx-auto py-10 px-4">
         {/* Cabeçalho de Navegação */}
         <div className="flex items-center justify-between mb-8">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             onClick={() => router.push("/passageiro")}
             className="text-[#103173] font-bold"
           >
@@ -69,8 +69,8 @@ export default function StatusViagemInscrita() {
                   </div>
                 </div>
                 <div className="text-right">
-                   <p className="text-[10px] font-black opacity-70 uppercase">Status</p>
-                   <p className="text-sm font-black text-[#F2D022]">{viagemInscrita.status}</p>
+                  <p className="text-[10px] font-black opacity-70 uppercase">Status</p>
+                  <p className="text-sm font-black text-[#F2D022]">{viagemInscrita.status}</p>
                 </div>
               </div>
             </CardHeader>
@@ -111,7 +111,7 @@ export default function StatusViagemInscrita() {
               {/* Informação do Veículo */}
               <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
                 <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center">
-                   <Info className="text-[#103173] h-6 w-6" />
+                  <Info className="text-[#103173] h-6 w-6" />
                 </div>
                 <div>
                   <p className="text-[10px] font-black text-[#73AABF] uppercase italic">Motorista e Veículo</p>
@@ -122,9 +122,9 @@ export default function StatusViagemInscrita() {
 
             <CardFooter className="p-6 pt-0 flex flex-col gap-4">
               <div className="w-full h-px bg-slate-100 mb-2" />
-              
+
               {/* Ação Principal exigida pelo PDF */}
-              <Button 
+              <Button
                 onClick={() => router.push("/passageiro/validar")} // Certifique-se de que o arquivo novo esteja em app/passageiro/validar/page.tsx
                 className="w-full h-16 bg-[#103173] hover:bg-[#103B73] text-white font-black text-lg rounded-2xl shadow-lg transition-all active:scale-95 flex items-center gap-3"
               >
@@ -132,10 +132,10 @@ export default function StatusViagemInscrita() {
                 VISUALIZAR CÓDIGO
               </Button>
 
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 onClick={() => {
-                  if(confirm("Tem certeza que deseja cancelar sua vaga?")) {
+                  if (confirm("Tem certeza que deseja cancelar sua vaga?")) {
                     router.push("/passageiro");
                   }
                 }}
@@ -148,10 +148,10 @@ export default function StatusViagemInscrita() {
 
           {/* Dica de Segurança */}
           <div className="flex items-center gap-3 px-4 py-3 bg-amber-50 rounded-xl border border-amber-100">
-             <CheckCircle2 className="h-5 w-5 text-amber-600 shrink-0" />
-             <p className="text-xs text-amber-800 font-medium">
-               Apresente-se no ponto de partida com 5 minutos de antecedência. A validação do código é feita diretamente com o motorista no embarque.
-             </p>
+            <CheckCircle2 className="h-5 w-5 text-amber-600 shrink-0" />
+            <p className="text-xs text-amber-800 font-medium">
+              Apresente-se no ponto de partida com 5 minutos de antecedência. A validação do código é feita diretamente com o motorista no embarque.
+            </p>
           </div>
         </div>
       </main>
