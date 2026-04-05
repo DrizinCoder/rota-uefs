@@ -21,6 +21,7 @@ export function Navigation({ tipoUsuario = "aluno" }: NavigationProps) {
           <span className="text-xl font-bold tracking-tight">Rota UEFS</span>
         </Link>
 
+
         <div className="flex items-center gap-6 text-sm font-medium">
 
           {/* Minhas Viagens: redireciona para a nova tela dedicada */}
@@ -32,6 +33,7 @@ export function Navigation({ tipoUsuario = "aluno" }: NavigationProps) {
               Minhas Viagens
             </Link>
           )}
+          
 
           {/* O link agora envia o tipo de usuário na URL via Query Parameter */}
           <Button asChild className="bg-[#F2D022] hover:bg-[#d9ba1f] text-[#103173] font-bold rounded-md px-4 h-9 cursor-pointer">

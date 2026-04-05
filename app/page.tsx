@@ -93,9 +93,28 @@ export default function TelaLogin() {
               {isLoading ? "CARREGANDO..." : "ENTRAR NO SISTEMA"}
             </Button>
 
-            <div className="flex items-center gap-2 text-[#73AABF] text-xs font-bold uppercase tracking-widest mt-2">
-              <ShieldCheck className="h-4 w-4" />
-              Acesso Restrito à Comunidade Acadêmica
+            <div className="flex flex-col sm:flex-row w-full gap-3 mt-1">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.push("/cadastro/aluno")}
+                className="flex-1 border-2 border-[#103173]/10 hover:border-[#103173]/40 hover:bg-[#103173]/5 text-[#103173] font-bold text-xs md:text-sm h-12 rounded-xl transition-all"
+              >
+                Primeiro Acesso: Aluno
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.push("/cadastro/professor")}
+                className="flex-1 border-2 border-[#103173]/10 hover:border-[#103173]/40 hover:bg-[#103173]/5 text-[#103173] font-bold text-xs md:text-sm h-12 rounded-xl transition-all"
+              >
+                Primeiro Acesso: Prof.
+              </Button>
+            </div>
+
+            <div className="flex items-center gap-2 text-[#73AABF] text-[10px] sm:text-xs font-bold uppercase tracking-widest mt-2">
+              <ShieldCheck className="h-4 w-4 shrink-0" />
+              <span>Acesso Restrito à Comunidade Acadêmica</span>
             </div>
           </CardFooter>
         </form>

@@ -31,12 +31,6 @@ export default function AdminMotoristasPage() {
         {/* Cabeçalho no padrão do Dashboard Admin */}
         <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <ShieldAlert className="h-4 w-4 text-[#103173]" />
-              <span className="text-[11px] font-bold text-[#103173] uppercase tracking-widest">
-                Administração
-              </span>
-            </div>
             <h1 className="text-3xl font-extrabold text-[#103173] tracking-tight">
               Gestão de Motoristas
             </h1>

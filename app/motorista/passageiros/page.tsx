@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
 import { FooterSection } from "@/components/landing/footer-section";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -20,10 +20,12 @@ import {
   ClipboardList,
   Bus,
   UserCircle,
-  ShieldAlert
+  ShieldAlert,
+  Megaphone,
+  ListPlus
 } from "lucide-react";
 
-// Mock de dados dos passageiros
+// Mock de dados dos passageiros atualizado com lista de espera
 const PASSAGEIROS_MOCK = [
   { id: 1, nome: "Ana Beatriz Sousa", matricula: "PROF-202401", status: "embarcou" },
   { id: 2, nome: "Carlos Eduardo Silva", matricula: "PROF-202402", status: "pendente" },
@@ -32,6 +34,8 @@ const PASSAGEIROS_MOCK = [
   { id: 5, nome: "Maria Clara Nunes", matricula: "PROF-202405", status: "falta" },
   { id: 6, nome: "Pedro Henrique Santos", matricula: "PROF-202406", status: "pendente" },
   { id: 7, nome: "Rafael Souza Costa", matricula: "PROF-202407", status: "embarcou" },
+  { id: 8, nome: "Lucas Mendes", matricula: "PROF-202408", status: "espera" },
+  { id: 9, nome: "Juliana Martins", matricula: "PROF-202409", status: "espera" },
 ];
 
 export default function ListaPassageiros() {
@@ -47,7 +51,7 @@ export default function ListaPassageiros() {
   );
 
   // Calcula estatísticas
-  const total = passageiros.length;
+  const total = passageiros.filter((p) => p.status !== "espera").length; // Apenas quem não é da lista de espera (opcional)
   const embarcados = passageiros.filter((p) => p.status === "embarcou").length;
 
   // Função para simular o check-in manual na lista
@@ -65,10 +69,29 @@ export default function ListaPassageiros() {
     );
   };
 
+  // Função para chamar o próximo da lista de espera
+  const chamarProximo = () => {
+    const proximo = passageiros.find((p) => p.status === "espera");
+    
+    if (proximo) {
+      alert(`Chamando próximo da lista de espera: ${proximo.nome}\nMatrícula: ${proximo.matricula}`);
+      
+      // Atualiza o status do passageiro de 'espera' para 'pendente' 
+      // para que ele entre oficialmente na lista de chamada para o embarque
+      setPassageiros(
+        passageiros.map((p) =>
+          p.id === proximo.id ? { ...p, status: "pendente" } : p
+        )
+      );
+    } else {
+      alert("Não há mais passageiros na lista de espera.");
+    }
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-[#E4F2F1] pb-24">
       {/* Navegação Padrão */}
-      <Navigation isMotorista={true} />
+      <Navigation tipoUsuario="motorista"/>
 
       <main className="flex-1 w-full max-w-4xl mx-auto py-10 px-4">
         
@@ -121,7 +144,7 @@ export default function ListaPassageiros() {
               <div className="flex items-center gap-4 bg-white/10 p-3 rounded-2xl w-full sm:w-fit justify-center">
                 <div className="text-center px-4 border-r border-white/20">
                   <p className="text-[10px] text-[#73AABF] font-black uppercase tracking-widest">
-                    Total
+                    Vagas Reservadas
                   </p>
                   <p className="text-2xl font-black">{total}</p>
                 </div>
@@ -138,18 +161,28 @@ export default function ListaPassageiros() {
           </CardContent>
         </Card>
 
-        {/* Barra de Pesquisa */}
-        <div className="relative mb-6 shadow-sm rounded-2xl">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-[#73AABF]" />
+        {/* Barra de Pesquisa e Botão Chamar Próximo */}
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
+          <div className="relative flex-1 shadow-sm rounded-2xl">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-[#73AABF]" />
+            </div>
+            <Input
+              type="text"
+              placeholder="Buscar por nome ou matrícula..."
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              className="pl-12 h-14 bg-white border-none rounded-2xl text-[#103173] font-bold focus-visible:ring-2 focus-visible:ring-[#F2D022] shadow-sm w-full"
+            />
           </div>
-          <Input
-            type="text"
-            placeholder="Buscar por nome ou matrícula..."
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            className="pl-12 h-14 bg-white border-none rounded-2xl text-[#103173] font-bold focus-visible:ring-2 focus-visible:ring-[#F2D022] shadow-sm"
-          />
+          
+          <Button 
+            onClick={chamarProximo}
+            className="h-14 px-6 bg-[#23B99A] hover:bg-[#1fa589] text-white rounded-2xl shadow-sm font-bold text-base flex items-center justify-center gap-2 w-full md:w-auto transition-all"
+          >
+            <Megaphone className="h-5 w-5" />
+            Chamar da Espera
+          </Button>
         </div>
 
         {/* Lista de Passageiros */}
@@ -164,7 +197,9 @@ export default function ListaPassageiros() {
             passageirosFiltrados.map((passageiro) => (
               <Card
                 key={passageiro.id}
-                className="border-none shadow-sm hover:shadow-md transition-shadow rounded-2xl overflow-hidden"
+                className={`border-none shadow-sm hover:shadow-md transition-shadow rounded-2xl overflow-hidden ${
+                  passageiro.status === "espera" ? "opacity-75 bg-slate-50" : "bg-white"
+                }`}
               >
                 <CardContent className="p-0 flex items-center">
                   {/* Tarja lateral de cor do status */}
@@ -174,7 +209,9 @@ export default function ListaPassageiros() {
                         ? "bg-[#23B99A]"
                         : passageiro.status === "falta"
                           ? "bg-red-500"
-                          : "bg-[#F2D022]"
+                          : passageiro.status === "espera"
+                            ? "bg-orange-400"
+                            : "bg-[#F2D022]"
                     }`}
                   />
 
@@ -182,7 +219,7 @@ export default function ListaPassageiros() {
                     {/* Info do Passageiro */}
                     <div className="flex items-center gap-4">
                       <div className="h-12 w-12 bg-slate-100 rounded-full flex items-center justify-center shrink-0">
-                        <User className="h-6 w-6 text-[#103173]/50" />
+                        <User className={`h-6 w-6 ${passageiro.status === "espera" ? "text-slate-400" : "text-[#103173]/50"}`} />
                       </div>
                       <div>
                         <h3 className="font-black text-[#103173] text-base md:text-lg leading-tight">
@@ -203,7 +240,9 @@ export default function ListaPassageiros() {
                             ? "border-[#23B99A] text-[#23B99A]"
                             : passageiro.status === "falta"
                               ? "border-red-500 text-red-500"
-                              : "border-[#F2D022] text-[#b39912]"
+                              : passageiro.status === "espera"
+                                ? "border-orange-400 text-orange-500"
+                                : "border-[#F2D022] text-[#b39912]"
                         }`}
                       >
                         {passageiro.status === "embarcou" && (
@@ -215,11 +254,14 @@ export default function ListaPassageiros() {
                         {passageiro.status === "falta" && (
                           <UserX className="w-3 h-3 mr-1" />
                         )}
+                        {passageiro.status === "espera" && (
+                          <ListPlus className="w-3 h-3 mr-1" />
+                        )}
                         {passageiro.status}
                       </Badge>
 
-                      {/* Botão de Check-in Manual */}
-                      {passageiro.status !== "falta" && (
+                      {/* Botão de Check-in Manual (Escondido se for falta ou ainda estiver na espera) */}
+                      {passageiro.status !== "falta" && passageiro.status !== "espera" && (
                         <Button
                           onClick={() => alternarCheckIn(passageiro.id)}
                           variant="ghost"

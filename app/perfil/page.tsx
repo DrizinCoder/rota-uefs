@@ -26,10 +26,11 @@ import {
   Lock,
   KeyRound,
   AlertTriangle,
-  Trash2
+  Trash2,
+  ShieldAlert
 } from "lucide-react";
 
-type TipoUsuario = "motorista" | "aluno" | "professor";
+type TipoUsuario = "motorista" | "aluno" | "professor" | "admin";
 
 function PerfilContent() {
   const router = useRouter();
@@ -52,8 +53,9 @@ function PerfilContent() {
   const isMotorista = tipoUsuario === "motorista";
   const isAluno = tipoUsuario === "aluno";
   const isProfessor = tipoUsuario === "professor";
+  const isAdmin = tipoUsuario === "admin";
   
-  const dadosIniciais = {
+  const dadosIniciais: Record<TipoUsuario, any> = {
     motorista: {
       nome: "João Silva",
       matricula: "MOT-8472",
@@ -72,6 +74,12 @@ function PerfilContent() {
       matricula: "PROF-10293",
       emailOriginal: "carlos.eduardo@uefs.br",
       telefoneOriginal: "(75) 97777-7777",
+    },
+    admin: {
+      nome: "Coordenação de Transportes",
+      matricula: "ADM-99999",
+      emailOriginal: "admin@uefs.br",
+      telefoneOriginal: "(75) 96666-6666",
     }
   };
 
@@ -106,6 +114,7 @@ function PerfilContent() {
   };
 
   const getBadgeConfig = () => {
+    if (isAdmin) return { color: "bg-red-500 text-white", icon: ShieldAlert };
     if (isMotorista) return { color: "bg-[#F2D022] text-[#103173]", icon: BadgeCheck };
     if (isProfessor) return { color: "bg-[#103173] text-white", icon: Briefcase };
     return { color: "bg-[#23B99A] text-white", icon: GraduationCap };
@@ -203,37 +212,41 @@ function PerfilContent() {
                   </div>
                 )}
 
-                <div className="space-y-2">
-                  <Label className="text-xs font-black text-[#73AABF] uppercase tracking-widest flex items-center gap-2">
-                    <Phone className="h-4 w-4" /> Telefone / WhatsApp
-                  </Label>
-                  <Input 
-                    value={telefone} 
-                    onChange={(e) => setTelefone(e.target.value)}
-                    className="h-14 font-bold border-2 border-[#103173]/20 focus-visible:ring-[#103173] text-[#103173]"
-                  />
-                </div>
+                {!isAdmin && (
+                  <>
+                    <div className="space-y-2">
+                      <Label className="text-xs font-black text-[#73AABF] uppercase tracking-widest flex items-center gap-2">
+                        <Phone className="h-4 w-4" /> Telefone / WhatsApp
+                      </Label>
+                      <Input 
+                        value={telefone} 
+                        onChange={(e) => setTelefone(e.target.value)}
+                        className="h-14 font-bold border-2 border-[#103173]/20 focus-visible:ring-[#103173] text-[#103173]"
+                      />
+                    </div>
 
-                <div className="space-y-2">
-                  <Label className="text-xs font-black text-[#73AABF] uppercase tracking-widest flex items-center gap-2">
-                    <Mail className="h-4 w-4" /> E-mail {isAluno && "Institucional"}
-                  </Label>
-                  <Input 
-                    value={email} 
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={isMotorista || isAluno}
-                    className={`h-14 font-bold ${
-                      isProfessor 
-                      ? "border-2 border-[#103173]/20 focus-visible:ring-[#103173] text-[#103173]" 
-                      : "bg-slate-50 border-slate-200 text-[#103173] disabled:opacity-70"
-                    }`}
-                  />
-                  {(isMotorista || isAluno) && (
-                    <p className="text-[10px] text-slate-400 font-bold">
-                      Dado bloqueado. Contate a secretaria para alterar.
-                    </p>
-                  )}
-                </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs font-black text-[#73AABF] uppercase tracking-widest flex items-center gap-2">
+                        <Mail className="h-4 w-4" /> E-mail {isAluno && "Institucional"}
+                      </Label>
+                      <Input 
+                        value={email} 
+                        onChange={(e) => setEmail(e.target.value)}
+                        disabled={isMotorista || isAluno}
+                        className={`h-14 font-bold ${
+                          isProfessor 
+                          ? "border-2 border-[#103173]/20 focus-visible:ring-[#103173] text-[#103173]" 
+                          : "bg-slate-50 border-slate-200 text-[#103173] disabled:opacity-70"
+                        }`}
+                      />
+                      {(isMotorista || isAluno) && (
+                        <p className="text-[10px] text-slate-400 font-bold">
+                          Dado bloqueado. Contate a secretaria para alterar.
+                        </p>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
             </section>
 
@@ -277,10 +290,11 @@ function PerfilContent() {
             )}
 
             {/* ZONA DE PERIGO */}
-            <section className="pt-6 border-t border-red-100">
-              <h3 className="text-lg font-black text-red-600 mb-4 flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5" /> Zona de Perigo
-              </h3>
+            {!isAdmin && (
+              <section className="pt-6 border-t border-red-100">
+                <h3 className="text-lg font-black text-red-600 mb-4 flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5" /> Zona de Perigo
+                </h3>
               <div className="bg-red-50 p-6 rounded-2xl border border-red-100 flex flex-col sm:flex-row items-center justify-between gap-6">
                 <div>
                   <p className="font-bold text-red-900 text-base">Excluir Conta</p>
@@ -298,6 +312,7 @@ function PerfilContent() {
                 </Button>
               </div>
             </section>
+            )}
           </CardContent>
 
           <CardFooter className="bg-slate-50 border-t border-slate-100 p-6 flex justify-end">

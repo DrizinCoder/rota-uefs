@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { UserCircle, Route, UserRound, BarChart3 } from "lucide-react";
+import { UserCircle, Route, UserRound, BarChart3, Users } from "lucide-react";
 
 export function NavigationAdmin() {
   const router = useRouter();
@@ -23,6 +23,10 @@ export function NavigationAdmin() {
       <div className="w-px h-4 bg-slate-200 hidden sm:block" />
       <Button variant="ghost" size="sm" className="text-slate-600 font-semibold" onClick={() => router.push("/admin/relatorios")}>
         <BarChart3 className="h-4 w-4 mr-2 text-[#73AABF]" /> Relatórios
+      </Button>
+      <div className="w-px h-4 bg-slate-200 hidden sm:block" />
+      <Button variant="ghost" size="sm" className="text-slate-600 font-semibold" onClick={() => router.push("/admin/validar-professor")}>
+        <Users className="h-4 w-4 mr-2 text-[#73AABF]" /> Validar Acesso de professor
       </Button>
     </section>
   );

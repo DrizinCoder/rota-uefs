@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
-import { NavigationAdmin } from "@/components/landing/navigation_admin";
 import { 
   Plus, 
   UserCircle, 
@@ -74,8 +73,6 @@ export default function AdminUsuariosPage() {
               className="flex-1 bg-transparent border-none focus:outline-none text-[#103173] placeholder:text-slate-400 text-sm py-2"
             />
         </div>
-
-        <NavigationAdmin />
 
         {/* Lista de Administradores */}
         <div className="grid gap-4">
