@@ -21,7 +21,7 @@ export function NavigationAdmin() {
         <UserRound className="h-4 w-4 mr-2 text-[#73AABF]" /> Usuários
       </Button>
       <div className="w-px h-4 bg-slate-200 hidden sm:block" />
-      <Button variant="ghost" size="sm" className="text-slate-600 font-semibold" onClick={() => router.push("/admin/usuarios")}>
+      <Button variant="ghost" size="sm" className="text-slate-600 font-semibold" onClick={() => router.push("/admin/relatorios")}>
         <BarChart3 className="h-4 w-4 mr-2 text-[#73AABF]" /> Relatórios
       </Button>
     </section>
