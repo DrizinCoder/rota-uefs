@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
+import { NavigationAdmin } from "@/components/landing/navigation_admin";
 import { FooterSection } from "@/components/landing/footer-section";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -129,23 +130,7 @@ export default function PaginaAdmin() {
         </section>
 
         {/* BARRA DE FERRAMENTAS / NAVEGAÇÃO RÁPIDA */}
-        <section className="bg-white p-2 rounded-xl border border-slate-200 shadow-sm flex flex-wrap gap-2 items-center">
-          <Button variant="ghost" size="sm" className="text-slate-600 font-semibold" onClick={() => router.push("/admin/motoristas")}>
-            <UserCircle className="h-4 w-4 mr-2 text-[#73AABF]" /> Motoristas
-          </Button>
-          <div className="w-px h-4 bg-slate-200 hidden sm:block" />
-          <Button variant="ghost" size="sm" className="text-slate-600 font-semibold" onClick={() => router.push("/admin/viagens")}>
-            <Route className="h-4 w-4 mr-2 text-[#73AABF]" /> Viagens
-          </Button>
-          <div className="w-px h-4 bg-slate-200 hidden sm:block" />
-          <Button variant="ghost" size="sm" className="text-slate-600 font-semibold" onClick={() => router.push("/admin/usuarios")}>
-            <UserRound className="h-4 w-4 mr-2 text-[#73AABF]" /> Usuários
-          </Button>
-          <div className="w-px h-4 bg-slate-200 hidden sm:block" />
-          <Button variant="ghost" size="sm" className="text-slate-600 font-semibold" onClick={() => router.push("/admin/usuarios")}>
-            <BarChart3 className="h-4 w-4 mr-2 text-[#73AABF]" /> Relatórios
-          </Button>
-        </section>
+        <NavigationAdmin />
 
         {/* ÁREA DE LISTAGEM DOS ÔNIBUS */}
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">

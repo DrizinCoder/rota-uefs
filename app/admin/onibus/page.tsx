@@ -121,7 +121,7 @@ function CadastroEdicaoOnibusForm() {
           onClick={() => router.push("/admin")}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          VOLTAR PARA GESTÃO DE ÔNIBUS
+          VOLTAR PARA ADMIN
         </Button>
 
         <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">

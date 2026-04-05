@@ -2,26 +2,22 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Navigation } from "@/components/landing/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Clock,
   CheckCircle2,
-  ChevronRight,
-  Info,
   MapPin,
   CircleDot,
   Bus,
   Users,
-  PlayCircle,
-  Flag,
   UserCircle,
   ShieldAlert,
-  LifeBuoy, // Novo ícone para suporte
-  Phone,    // Ícone para telefone
-  MessageCircle, // Ícone para WhatsApp
-  AlertTriangle  // Ícone para emergência
+  LifeBuoy,
+  Phone,
+  MessageCircle,
+  AlertTriangle,
+  CalendarDays
 } from "lucide-react";
 import {
   Dialog,
@@ -32,6 +28,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
+// Dados simulados atualizados para testar o filtro de dias
 const VIAGENS = [
   {
     id: "VG-0042",
@@ -55,9 +52,29 @@ const VIAGENS = [
     dia: "Segunda-feira",
     statusInicial: "bloqueada",
   },
+  {
+    id: "VG-0044",
+    origem: "Salvador",
+    destino: "Camaçari",
+    horarioPartida: "07:00",
+    horarioChegada: "08:15",
+    passageirosConfirmados: 25,
+    vagasTotais: 44,
+    dia: "Terça-feira",
+    statusInicial: "bloqueada",
+  },
 ];
 
-// RF14 - Componente de Central de Suporte e Emergência
+// Dias da semana simulados para o filtro (Seg a Sex)
+const DIAS_SEMANA = [
+  { id: "segunda", label: "Seg", full: "Segunda-feira" },
+  { id: "terca", label: "Ter", full: "Terça-feira" },
+  { id: "quarta", label: "Qua", full: "Quarta-feira" },
+  { id: "quinta", label: "Qui", full: "Quinta-feira" },
+  { id: "sexta", label: "Sex", full: "Sexta-feira" },
+];
+
+
 function CentralSuporte() {
   const contatos = [
     { nome: "Suporte Uninfra", tel: "0800123456", tipo: "phone" },
@@ -69,7 +86,7 @@ function CentralSuporte() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <button className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-full border border-red-100 hover:bg-red-100 transition-colors shadow-sm mb-6">
+        <button className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-full border border-red-100 hover:bg-red-100 transition-colors shadow-sm md:mb-0 mb-6 shrink-0">
           <LifeBuoy className="h-4 w-4" />
           <span className="text-xs font-bold uppercase tracking-wider">Ajuda e Emergência</span>
         </button>
@@ -100,7 +117,6 @@ function CentralSuporte() {
                   <p className="text-xs text-slate-500">{contato.tel}</p>
                 </div>
               </div>
-              <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-[#103173]" />
             </a>
           ))}
         </div>
@@ -128,8 +144,7 @@ function ViagemCard({ viagem }: { viagem: (typeof VIAGENS)[0] }) {
   };
 
   return (
-    <div className="mb-8">
-      {/* ... (restante do código do ViagemCard igual ao original) ... */}
+    <div className="mb-6">
       <div className="bg-white rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(16,49,115,0.06),0_8px_24px_rgba(16,49,115,0.04)]">
         <div className="bg-[#103173]/5 px-4 py-3 flex items-center justify-between border-b border-[#103173]/5">
           <div className="flex items-center gap-2">
@@ -222,34 +237,17 @@ function ViagemCard({ viagem }: { viagem: (typeof VIAGENS)[0] }) {
           </div>
         </div>
       </div>
-
-      <Link
-        href={`/motorista/informacao?viagem=${viagem.id}`}
-        className="block -mt-4"
-      >
-        <div className="flex items-center justify-between p-4 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#F2D022]/15 flex items-center justify-center">
-              <Info className="h-5 w-5 text-[#b8960a]" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-[#103173]">
-                Informações da Escala
-              </p>
-              <p className="text-[11px] text-[#103173]/40 font-medium">
-                Ver detalhes e lista de passageiros
-              </p>
-            </div>
-          </div>
-          <ChevronRight className="h-5 w-5 text-[#103173]/20" />
-        </div>
-      </Link>
     </div>
   );
 }
 
 export default function MotoristaPage() {
   const router = useRouter();
+  const [diaSelecionado, setDiaSelecionado] = useState("Segunda-feira");
+  const [diaAtivo, setDiaAtivo] = useState("segunda");
+
+  // Filtra as viagens para mostrar apenas as do dia selecionado
+  const viagensFiltradas = VIAGENS.filter((viagem) => viagem.dia === diaSelecionado);
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f0f4f8]">
@@ -265,20 +263,43 @@ export default function MotoristaPage() {
               </span>
             </div>
             <h1 className="text-3xl font-extrabold text-[#103173] tracking-tight">
-              Suas viagens de hoje
+              Suas escalas
             </h1>
             <p className="text-[#73AABF] text-sm mt-1 font-medium">
-              Confira os detalhes e faça a gestão do embarque.
+              Selecione o dia da semana para ver as viagens agendadas.
             </p>
           </div>
           
-          {/* RF14 - Botão de Suporte inserido no header para fácil acesso */}
           <CentralSuporte />
         </header>
 
-        {VIAGENS.map((viagem) => (
-          <ViagemCard key={viagem.id} viagem={viagem} />
-        ))}
+        {/* Seletor de Dias da Semana (Layout mais espaçado) */}
+        <div className="max-w-lg md:max-w-3xl lg:max-w-5xl mx-auto px-4 py-3">
+          <div className="flex gap-2">
+            {DIAS_SEMANA.map((dia) => (
+              <button
+                key={dia.id}
+                onClick={() => setDiaAtivo(dia.id)}
+                className={`flex-1 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all duration-200 relative ${dia.id === diaAtivo ? "bg-[#103173] text-white shadow-lg" : "bg-white text-[#103173]/70 border border-[#103173]/8"}`}
+              >
+                {dia.label}
+              </button>
+            ))}
+            </div>
+          </div>
+
+        {/* Lista de Viagens do Dia Selecionado */}
+        {viagensFiltradas.length > 0 ? (
+          viagensFiltradas.map((viagem) => (
+            <ViagemCard key={viagem.id} viagem={viagem} />
+          ))
+        ) : (
+          <div className="flex flex-col items-center justify-center p-10 bg-white rounded-2xl border border-dashed border-slate-300 text-center">
+            <CalendarDays className="h-10 w-10 text-slate-300 mb-3" />
+            <p className="text-[#103173] font-bold">Nenhuma escala para este dia</p>
+            <p className="text-slate-500 text-sm mt-1">Você está livre de viagens na {diaSelecionado.toLowerCase()}.</p>
+          </div>
+        )}
       </main>
 
       {/* --- MODO DE TESTE --- */}

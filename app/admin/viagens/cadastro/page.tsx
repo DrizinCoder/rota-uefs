@@ -1,668 +1,262 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ComponentType, type FormEvent } from "react";
-import { Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
-import { FooterSection } from "@/components/landing/footer-section";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
-import { FROTA_MOCK, ROTAS_MOCK } from "@/lib/mock/frota";
-import { MOTORISTAS_GESTAO_MOCK } from "@/lib/mock/motoristas";
-import {
-  PONTOS_ROTA_MOCK,
-  VIAGENS_GESTAO_MOCK,
-  gerarProximoIdViagem,
-  type StatusViagem,
-  type ViagemMock,
-} from "@/lib/mock/viagens";
-import {
-  ArrowLeft,
-  Bus,
-  CalendarDays,
-  CheckCircle2,
-  MapPin,
-  Plus,
-  Route,
-  Save,
-  ShieldAlert,
-  UserCircle,
-  UserRound,
+import { 
+  ArrowLeft, Save, MapPin, Calendar, Clock, Bus, 
+  UserCircle, Users, Repeat, ArrowRightLeft, AlertTriangle, CheckCircle2 
 } from "lucide-react";
 
-interface ViagemFormState {
-  id: string;
-  rotaCodigo: string;
-  data: string;
-  diaSemana: string;
-  origem: string;
-  destino: string;
-  horarioSaida: string;
-  horarioChegada: string;
-  onibusPlaca: string;
-  motoristaNome: string;
-  inscritos: string;
-  capacidade: string;
-  quorumMinimo: string;
-  status: StatusViagem;
-  codigoCheckin: string;
-  observacoes: string;
-  ultimaAtualizacao: string;
-}
-
-function montarEstadoInicial(viagem?: ViagemMock): ViagemFormState {
-  if (!viagem) {
-    return {
-      id: gerarProximoIdViagem(),
-      rotaCodigo: "",
-      data: "",
-      diaSemana: "",
-      origem: "",
-      destino: "",
-      horarioSaida: "",
-      horarioChegada: "",
-      onibusPlaca: "",
-      motoristaNome: "",
-      inscritos: "0",
-      capacidade: "44",
-      quorumMinimo: "20",
-      status: "programada",
-      codigoCheckin: "",
-      observacoes: "",
-      ultimaAtualizacao: "Agora",
-    };
-  }
-
-  return {
-    id: viagem.id,
-    rotaCodigo: viagem.rotaCodigo,
-    data: viagem.data,
-    diaSemana: viagem.diaSemana,
-    origem: viagem.origem,
-    destino: viagem.destino,
-    horarioSaida: viagem.horarioSaida,
-    horarioChegada: viagem.horarioChegada,
-    onibusPlaca: viagem.onibusPlaca,
-    motoristaNome: viagem.motoristaNome,
-    inscritos: String(viagem.inscritos),
-    capacidade: String(viagem.capacidade),
-    quorumMinimo: String(viagem.quorumMinimo),
-    status: viagem.status,
-    codigoCheckin: viagem.codigoCheckin ?? "",
-    observacoes: viagem.observacoes,
-    ultimaAtualizacao: viagem.ultimaAtualizacao,
-  };
-}
-
-function getStatusBadge(status: StatusViagem) {
-  if (status === "programada") {
-    return {
-      label: "PROGRAMADA",
-      className: "bg-[#103173] text-white font-bold",
-    };
-  }
-
-  if (status === "em_andamento") {
-    return {
-      label: "EM ANDAMENTO",
-      className: "bg-[#23B99A] text-white font-bold",
-    };
-  }
-
-  if (status === "concluida") {
-    return {
-      label: "CONCLUÍDA",
-      className: "bg-[#73AABF] text-white font-bold",
-    };
-  }
-
-  return {
-    label: "CANCELADA",
-    className: "bg-red-500 text-white font-bold",
-  };
-}
-
-function ViagemFormContent() {
+export default function CadastroViagemPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const modoNovo = searchParams.get("modo") === "novo";
-  const id = searchParams.get("id");
 
-  const viagemSelecionada = useMemo(
-    () => (id ? VIAGENS_GESTAO_MOCK.find((item) => item.id === id) : undefined),
-    [id],
-  );
-  const emEdicao = Boolean(viagemSelecionada) && !modoNovo;
-  const referenciaInvalida = Boolean(id) && !viagemSelecionada && !modoNovo;
+  // Estados do formulário
+  const [tipoViagem, setTipoViagem] = useState("ida");
+  const [recorrencia, setRecorrencia] = useState("individual");
+  const [origem, setOrigem] = useState("");
+  const [destino, setDestino] = useState("");
+  const [data, setData] = useState("");
+  const [horario, setHorario] = useState("");
+  const [onibus, setOnibus] = useState("");
+  const [motorista, setMotorista] = useState("");
+  const [quorum, setQuorum] = useState("");
+  const [vagas, setVagas] = useState("46");
 
-  const [formData, setFormData] = useState<ViagemFormState>(() =>
-    montarEstadoInicial(modoNovo ? undefined : viagemSelecionada),
-  );
+  // Estados de feedback
+  const [erro, setErro] = useState("");
+  const [sucesso, setSucesso] = useState(false);
 
-  useEffect(() => {
-    setFormData(montarEstadoInicial(modoNovo ? undefined : viagemSelecionada));
-  }, [modoNovo, viagemSelecionada]);
+  const handleSalvar = (e: React.FormEvent) => {
+    e.preventDefault();
+    setErro("");
+    setSucesso(false);
 
-  const statusBadge = getStatusBadge(formData.status);
-  const inscritosPreview = Math.max(0, Number(formData.inscritos) || 0);
-  const capacidadePreview = Math.max(1, Number(formData.capacidade) || 1);
-  const quorumPreview = Math.max(0, Number(formData.quorumMinimo) || 0);
-  const ocupacaoPreview = Math.max(0, Math.min(100, (inscritosPreview / capacidadePreview) * 100));
-
-  const atualizarCampo = <K extends keyof ViagemFormState>(campo: K, valor: ViagemFormState[K]) => {
-    setFormData((atual) => ({
-      ...atual,
-      [campo]: valor,
-    }));
-  };
-
-  const preencherRotaSugerida = () => {
-    atualizarCampo("rotaCodigo", ROTAS_MOCK[0]);
-    atualizarCampo("origem", PONTOS_ROTA_MOCK[0]);
-    atualizarCampo("destino", PONTOS_ROTA_MOCK[1]);
-  };
-
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (
-      !formData.rotaCodigo.trim() ||
-      !formData.origem.trim() ||
-      !formData.destino.trim() ||
-      !formData.horarioSaida.trim() ||
-      !formData.horarioChegada.trim()
-    ) {
-      window.alert("Preencha ao menos Rota, Origem, Destino e Horários.");
+    // Validação de campos obrigatórios
+    if (!origem || !destino || !data || !horario || !onibus || !motorista || !quorum || !vagas) {
+      setErro("Inconsistência de preenchimento: Todos os campos são obrigatórios.");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
-    const mensagem = emEdicao
-      ? `Protótipo: viagem ${formData.id} atualizada com sucesso.`
-      : `Protótipo: viagem ${formData.id} cadastrada com sucesso.`;
+    // Validação da regra de negócio: limite de vagas
+    if (parseInt(vagas) > 46) {
+      setErro("A capacidade máxima permitida é de 46 vagas por veículo.");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
 
-    window.alert(mensagem);
-    router.push("/admin/viagens");
+    if (parseInt(quorum) > parseInt(vagas)) {
+      setErro("O quórum mínimo não pode ser maior que o número de vagas.");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    // Simulação de Sucesso
+    setSucesso(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Redireciona após 2 segundos
+    setTimeout(() => {
+      router.push("/admin/viagens");
+    }, 2000);
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#E4F2F1] pb-24">
-      <Navigation />
+    <div className="flex flex-col min-h-screen bg-[#f0f4f8]">
+      <Navigation tipoUsuario="admin" />
 
-      <main className="flex-1 w-full max-w-6xl mx-auto py-10 px-4 space-y-6">
-        <Button
-          variant="ghost"
-          className="w-fit text-[#103173] font-black hover:bg-[#103173]/10"
-          onClick={() => router.push("/admin/viagens")}
+      <main className="flex-1 max-w-3xl mx-auto w-full px-4 pt-6 pb-32">
+        <button 
+          onClick={() => router.back()}
+          className="flex items-center gap-2 text-sm font-bold text-[#103173] hover:text-[#103173]/70 transition-colors mb-6"
         >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          VOLTAR PARA GESTÃO DE VIAGENS
-        </Button>
+          <ArrowLeft className="h-4 w-4" />
+          Voltar para Viagens
+        </button>
 
-        <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="space-y-2">
-            <h1 className="text-3xl md:text-4xl font-black text-[#103173] flex items-center gap-3 tracking-tight">
-              <div className="bg-[#103173] p-2 rounded-xl shadow-lg shadow-[#103173]/20">
-                <Route className="h-7 w-7 text-[#F2D022]" />
-              </div>
-              {emEdicao ? "Edição de Viagem" : "Cadastro de Viagem"}
-            </h1>
-            <p className="text-[#73AABF] font-bold text-sm md:text-base">
-              Formulário administrativo mockado para configuração completa de rotas e execução.
-            </p>
-          </div>
-          <Badge className={statusBadge.className}>
-            {emEdicao ? "MODO EDIÇÃO" : "MODO CADASTRO"}
-          </Badge>
+        <header className="mb-8">
+          <h1 className="text-3xl font-extrabold text-[#103173] tracking-tight">
+            Nova Viagem
+          </h1>
+          <p className="text-[#73AABF] text-sm mt-1 font-medium">
+            Configure a rota, horários e equipe operacional da viagem.
+          </p>
         </header>
 
-        {referenciaInvalida ? (
-          <Card className="border-none shadow-md bg-amber-50 border border-amber-100">
-            <CardContent className="p-4">
-              <p className="text-sm font-bold text-amber-800">
-                Viagem não encontrada para edição. O formulário foi aberto no modo cadastro.
-              </p>
-            </CardContent>
-          </Card>
-        ) : null}
+        {/* Feedback de Erro */}
+        {erro && (
+          <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-bold text-red-800">Falha ao cadastrar</p>
+              <p className="text-sm text-red-600 mt-1">{erro}</p>
+            </div>
+          </div>
+        )}
 
-        <form className="grid xl:grid-cols-[1.35fr_1fr] gap-6" onSubmit={handleSubmit}>
-          <div className="space-y-6">
-            <Card className="border-none shadow-lg bg-white">
-              <CardHeader className="pb-4 border-b border-slate-100">
-                <CardTitle className="text-[#103173] font-black text-xl">Identificação da Viagem</CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-[#103173] font-bold">Código Interno</Label>
-                  <Input value={formData.id} disabled className="h-11 bg-slate-50 border-slate-200 font-bold" />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between gap-3">
-                    <Label htmlFor="rota-codigo" className="text-[#103173] font-bold">
-                      Código da Rota
-                    </Label>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="h-8 text-[10px] font-black border-[#103173]/20 text-[#103173]"
-                      onClick={preencherRotaSugerida}
-                    >
-                      SUGESTÃO
-                    </Button>
-                  </div>
-                  <Input
-                    id="rota-codigo"
-                    list="rotas-sugestoes"
-                    value={formData.rotaCodigo}
-                    onChange={(event) => atualizarCampo("rotaCodigo", event.target.value.toUpperCase())}
-                    placeholder="Ex: ROT-001"
-                    className="h-11 border-[#73AABF]/30 focus:border-[#103173] focus:ring-[#103173]"
-                    required
-                  />
-                  <datalist id="rotas-sugestoes">
-                    {ROTAS_MOCK.map((rota) => (
-                      <option key={rota} value={rota} />
-                    ))}
-                  </datalist>
-                </div>
+        {/* Feedback de Sucesso */}
+        {sucesso && (
+          <div className="mb-6 p-4 rounded-xl bg-[#23B99A]/10 border border-[#23B99A]/30 flex items-start gap-3">
+            <CheckCircle2 className="h-5 w-5 text-[#23B99A] shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-bold text-[#1fa889]">Sucesso!</p>
+              <p className="text-sm text-[#23B99A] mt-1">Viagem cadastrada e associada ao veículo com sucesso. Redirecionando...</p>
+            </div>
+          </div>
+        )}
 
-                <div className="space-y-2">
-                  <Label htmlFor="data" className="text-[#103173] font-bold">
-                    Data
-                  </Label>
-                  <Input
-                    id="data"
-                    value={formData.data}
-                    onChange={(event) => atualizarCampo("data", event.target.value)}
-                    placeholder="DD/MM/AAAA"
-                    className="h-11 border-[#73AABF]/30 focus:border-[#103173] focus:ring-[#103173]"
-                  />
+        <form onSubmit={handleSalvar} className="space-y-6">
+          
+          {/* SEÇÃO 1: Roteiro e Tipo */}
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+            <h2 className="text-lg font-extrabold text-[#103173] mb-4 flex items-center gap-2 border-b border-slate-100 pb-3">
+              <ArrowRightLeft className="h-5 w-5 text-[#F2D022]" /> 
+              Roteiro e Tipo
+            </h2>
+            
+            <div className="grid md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Modalidade</label>
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="tipo" value="ida" checked={tipoViagem === "ida"} onChange={(e) => setTipoViagem(e.target.value)} className="accent-[#103173]" />
+                    <span className="text-sm font-bold text-[#103173]">Somente Ida</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="tipo" value="ida_volta" checked={tipoViagem === "ida_volta"} onChange={(e) => setTipoViagem(e.target.value)} className="accent-[#103173]" />
+                    <span className="text-sm font-bold text-[#103173]">Ida e Volta</span>
+                  </label>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="dia-semana" className="text-[#103173] font-bold">
-                    Dia da Semana
-                  </Label>
-                  <Input
-                    id="dia-semana"
-                    value={formData.diaSemana}
-                    onChange={(event) => atualizarCampo("diaSemana", event.target.value)}
-                    placeholder="Ex: Segunda"
-                    className="h-11 border-[#73AABF]/30 focus:border-[#103173] focus:ring-[#103173]"
-                  />
-                </div>
-              </CardContent>
-            </Card>
+              </div>
 
-            <Card className="border-none shadow-lg bg-white">
-              <CardHeader className="pb-4 border-b border-slate-100">
-                <CardTitle className="text-[#103173] font-black text-xl">Trajeto e Alocação</CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="origem" className="text-[#103173] font-bold">
-                    Origem
-                  </Label>
-                  <Input
-                    id="origem"
-                    list="pontos-sugestoes"
-                    value={formData.origem}
-                    onChange={(event) => atualizarCampo("origem", event.target.value)}
-                    placeholder="Ex: Salvador"
-                    className="h-11 border-[#73AABF]/30 focus:border-[#103173] focus:ring-[#103173]"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="destino" className="text-[#103173] font-bold">
-                    Destino
-                  </Label>
-                  <Input
-                    id="destino"
-                    list="pontos-sugestoes"
-                    value={formData.destino}
-                    onChange={(event) => atualizarCampo("destino", event.target.value)}
-                    placeholder="Ex: Feira de Santana"
-                    className="h-11 border-[#73AABF]/30 focus:border-[#103173] focus:ring-[#103173]"
-                    required
-                  />
-                  <datalist id="pontos-sugestoes">
-                    {PONTOS_ROTA_MOCK.map((ponto) => (
-                      <option key={ponto} value={ponto} />
-                    ))}
-                  </datalist>
-                </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Recorrência</label>
+                <select 
+                  value={recorrencia} onChange={(e) => setRecorrencia(e.target.value)}
+                  className="w-full p-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#103173] focus:outline-none"
+                >
+                  <option value="individual">Viagem Única (Individual)</option>
+                  <option value="semanal">Escala Semanal Fixa</option>
+                  <option value="mensal">Escala Mensal Fixa</option>
+                </select>
+              </div>
+            </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="saida" className="text-[#103173] font-bold">
-                    Horário de Saída
-                  </Label>
-                  <Input
-                    id="saida"
-                    value={formData.horarioSaida}
-                    onChange={(event) => atualizarCampo("horarioSaida", event.target.value)}
-                    placeholder="HH:MM"
-                    className="h-11 border-[#73AABF]/30 focus:border-[#103173] focus:ring-[#103173]"
-                    required
-                  />
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Origem</label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <input type="text" value={origem} onChange={(e) => setOrigem(e.target.value)} placeholder="Ex: Salvador (Iguatemi)" className="w-full pl-9 p-2.5 rounded-xl border border-slate-200 text-sm focus:border-[#103173] focus:outline-none" />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="chegada" className="text-[#103173] font-bold">
-                    Horário de Chegada
-                  </Label>
-                  <Input
-                    id="chegada"
-                    value={formData.horarioChegada}
-                    onChange={(event) => atualizarCampo("horarioChegada", event.target.value)}
-                    placeholder="HH:MM"
-                    className="h-11 border-[#73AABF]/30 focus:border-[#103173] focus:ring-[#103173]"
-                    required
-                  />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Destino</label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <input type="text" value={destino} onChange={(e) => setDestino(e.target.value)} placeholder="Ex: Feira de Santana (UEFS)" className="w-full pl-9 p-2.5 rounded-xl border border-slate-200 text-sm focus:border-[#103173] focus:outline-none" />
                 </div>
+              </div>
+            </div>
+          </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="onibus" className="text-[#103173] font-bold">
-                    Ônibus
-                  </Label>
-                  <Input
-                    id="onibus"
-                    list="onibus-sugestoes"
-                    value={formData.onibusPlaca}
-                    onChange={(event) => atualizarCampo("onibusPlaca", event.target.value.toUpperCase())}
-                    placeholder="Ex: JLS-1020"
-                    className="h-11 border-[#73AABF]/30 focus:border-[#103173] focus:ring-[#103173]"
-                  />
-                  <datalist id="onibus-sugestoes">
-                    {FROTA_MOCK.map((onibus) => (
-                      <option key={onibus.id} value={onibus.placa} />
-                    ))}
-                  </datalist>
+          {/* SEÇÃO 2: Data e Horário */}
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+            <h2 className="text-lg font-extrabold text-[#103173] mb-4 flex items-center gap-2 border-b border-slate-100 pb-3">
+              <Calendar className="h-5 w-5 text-[#F2D022]" /> 
+              Agendamento
+            </h2>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Data de Saída</label>
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                  <input type="date" value={data} onChange={(e) => setData(e.target.value)} className="w-full pl-9 p-2.5 rounded-xl border border-slate-200 text-sm focus:border-[#103173] focus:outline-none text-[#103173] font-medium" />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="motorista" className="text-[#103173] font-bold">
-                    Motorista
-                  </Label>
-                  <Input
-                    id="motorista"
-                    list="motoristas-sugestoes"
-                    value={formData.motoristaNome}
-                    onChange={(event) => atualizarCampo("motoristaNome", event.target.value)}
-                    placeholder="Ex: João Silva"
-                    className="h-11 border-[#73AABF]/30 focus:border-[#103173] focus:ring-[#103173]"
-                  />
-                  <datalist id="motoristas-sugestoes">
-                    {MOTORISTAS_GESTAO_MOCK.map((motorista) => (
-                      <option key={motorista.id} value={motorista.nome} />
-                    ))}
-                  </datalist>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Horário de Saída</label>
+                <div className="relative">
+                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                  <input type="time" value={horario} onChange={(e) => setHorario(e.target.value)} className="w-full pl-9 p-2.5 rounded-xl border border-slate-200 text-sm focus:border-[#103173] focus:outline-none text-[#103173] font-medium" />
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
+          </div>
 
-            <Card className="border-none shadow-lg bg-white">
-              <CardHeader className="pb-4 border-b border-slate-100">
-                <CardTitle className="text-[#103173] font-black text-xl">Operação e Controle</CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="inscritos" className="text-[#103173] font-bold">
-                    Inscritos
-                  </Label>
-                  <Input
-                    id="inscritos"
-                    type="number"
-                    min={0}
-                    max={120}
-                    value={formData.inscritos}
-                    onChange={(event) => atualizarCampo("inscritos", event.target.value)}
-                    className="h-11 border-[#73AABF]/30 focus:border-[#103173] focus:ring-[#103173]"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="capacidade" className="text-[#103173] font-bold">
-                    Capacidade
-                  </Label>
-                  <Input
-                    id="capacidade"
-                    type="number"
-                    min={1}
-                    max={120}
-                    value={formData.capacidade}
-                    onChange={(event) => atualizarCampo("capacidade", event.target.value)}
-                    className="h-11 border-[#73AABF]/30 focus:border-[#103173] focus:ring-[#103173]"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="quorum" className="text-[#103173] font-bold">
-                    Quórum Mínimo
-                  </Label>
-                  <Input
-                    id="quorum"
-                    type="number"
-                    min={0}
-                    max={120}
-                    value={formData.quorumMinimo}
-                    onChange={(event) => atualizarCampo("quorumMinimo", event.target.value)}
-                    className="h-11 border-[#73AABF]/30 focus:border-[#103173] focus:ring-[#103173]"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="status" className="text-[#103173] font-bold">
-                    Status
-                  </Label>
-                  <select
-                    id="status"
-                    value={formData.status}
-                    onChange={(event) => atualizarCampo("status", event.target.value as StatusViagem)}
-                    className="h-11 w-full rounded-md border border-[#73AABF]/30 bg-white px-3 text-sm text-[#103173] font-bold focus:outline-none focus:ring-2 focus:ring-[#103173]/40"
-                  >
-                    <option value="programada">Programada</option>
-                    <option value="em_andamento">Em andamento</option>
-                    <option value="concluida">Concluída</option>
-                    <option value="cancelada">Cancelada</option>
+          {/* SEÇÃO 3: Operacional */}
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+            <h2 className="text-lg font-extrabold text-[#103173] mb-4 flex items-center gap-2 border-b border-slate-100 pb-3">
+              <Bus className="h-5 w-5 text-[#F2D022]" /> 
+              Equipe e Operacional
+            </h2>
+            
+            <div className="grid md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Veículo Escalado</label>
+                <div className="relative">
+                  <Bus className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <select value={onibus} onChange={(e) => setOnibus(e.target.value)} className="w-full pl-9 p-2.5 rounded-xl border border-slate-200 text-sm focus:border-[#103173] focus:outline-none bg-white">
+                    <option value="" disabled>Selecione o ônibus...</option>
+                    <option value="volare-01">Volare Fly 10 (ABC-1234) - 30 vagas</option>
+                    <option value="marcopolo-02">Marcopolo Paradiso (XYZ-9876) - 46 vagas</option>
                   </select>
                 </div>
-
-                <div className="sm:col-span-2 space-y-2">
-                  <Label htmlFor="codigo-checkin" className="text-[#103173] font-bold">
-                    Código de Check-in (opcional)
-                  </Label>
-                  <Input
-                    id="codigo-checkin"
-                    value={formData.codigoCheckin}
-                    onChange={(event) => atualizarCampo("codigoCheckin", event.target.value.toUpperCase())}
-                    placeholder="Ex: UEFS-7729-X"
-                    className="h-11 border-[#73AABF]/30 focus:border-[#103173] focus:ring-[#103173]"
-                  />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Motorista</label>
+                <div className="relative">
+                  <UserCircle className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <select value={motorista} onChange={(e) => setMotorista(e.target.value)} className="w-full pl-9 p-2.5 rounded-xl border border-slate-200 text-sm focus:border-[#103173] focus:outline-none bg-white">
+                    <option value="" disabled>Selecione o motorista...</option>
+                    <option value="mot-01">Carlos Silva (MOT-001)</option>
+                    <option value="mot-02">Ana Souza (MOT-002)</option>
+                  </select>
                 </div>
+              </div>
+            </div>
 
-                <div className="sm:col-span-2 space-y-2">
-                  <Label htmlFor="observacoes" className="text-[#103173] font-bold">
-                    Observações
-                  </Label>
-                  <Textarea
-                    id="observacoes"
-                    value={formData.observacoes}
-                    onChange={(event) => atualizarCampo("observacoes", event.target.value)}
-                    placeholder="Notas operacionais, regras da rota, restrições ou avisos..."
-                    className="min-h-28 border-[#73AABF]/30 focus:border-[#103173] focus:ring-[#103173]"
-                  />
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Quórum Mínimo</label>
+                <div className="relative">
+                  <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <input type="number" min="1" max="46" value={quorum} onChange={(e) => setQuorum(e.target.value)} placeholder="Ex: 20" className="w-full pl-9 p-2.5 rounded-xl border border-slate-200 text-sm focus:border-[#103173] focus:outline-none" />
                 </div>
-
-                <div className="sm:col-span-2 space-y-2">
-                  <Label htmlFor="ultima-atualizacao" className="text-[#103173] font-bold">
-                    Última Atualização
-                  </Label>
-                  <Input
-                    id="ultima-atualizacao"
-                    value={formData.ultimaAtualizacao}
-                    onChange={(event) => atualizarCampo("ultimaAtualizacao", event.target.value)}
-                    className="h-11 border-[#73AABF]/30 focus:border-[#103173] focus:ring-[#103173]"
-                  />
+                <p className="text-[10px] text-slate-400 mt-1">Mínimo de passageiros para confirmar viagem</p>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Capacidade (Máx 46)</label>
+                <div className="relative">
+                  <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <input type="number" min="1" max="46" value={vagas} onChange={(e) => setVagas(e.target.value)} placeholder="46" className="w-full pl-9 p-2.5 rounded-xl border border-slate-200 text-sm focus:border-[#103173] focus:outline-none" />
                 </div>
-              </CardContent>
-            </Card>
+                <p className="text-[10px] text-slate-400 mt-1">Limite do sistema e do veículo</p>
+              </div>
+            </div>
           </div>
 
-          <div className="space-y-6 xl:sticky xl:top-24 h-fit">
-            <Card className="border-none shadow-lg bg-white overflow-hidden">
-              <CardHeader className="bg-[#103173] text-white py-5">
-                <CardTitle className="text-xl font-black flex items-center gap-2">
-                  <Route className="h-5 w-5 text-[#F2D022]" />
-                  Pré-visualização
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 space-y-5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-[#73AABF]">Viagem</p>
-                    <p className="text-xl font-black text-[#103173]">{formData.id}</p>
-                  </div>
-                  <Badge className={statusBadge.className}>{statusBadge.label}</Badge>
-                </div>
-
-                <div className="rounded-2xl border border-slate-100 bg-[#E4F2F1] p-4 space-y-2">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-[#73AABF]">Trajeto</p>
-                  <p className="text-sm font-black text-[#103173] flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
-                    {formData.origem || "---"}
-                    <span className="text-[#73AABF]">→</span>
-                    {formData.destino || "---"}
-                  </p>
-                  <p className="text-xs font-bold text-[#73AABF]">
-                    {formData.data || "--/--/----"} • {formData.horarioSaida || "--:--"} -{" "}
-                    {formData.horarioChegada || "--:--"}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <ResumoItem icon={Bus} label="Ônibus" value={formData.onibusPlaca || "---"} />
-                  <ResumoItem icon={UserCircle} label="Motorista" value={formData.motoristaNome || "---"} />
-                  <ResumoItem icon={UserRound} label="Inscritos" value={String(inscritosPreview)} />
-                  <ResumoItem icon={CheckCircle2} label="Quórum" value={String(quorumPreview)} />
-                </div>
-
-                <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4 space-y-2">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-[#73AABF]">Ocupação</p>
-                  <div className="w-full h-3 bg-white border border-slate-200 rounded-full overflow-hidden">
-                    <div className="h-full bg-[#103173]" style={{ width: `${ocupacaoPreview}%` }} />
-                  </div>
-                  <p className="text-sm font-black text-[#103173]">
-                    {inscritosPreview}/{capacidadePreview} ({ocupacaoPreview.toFixed(0)}%)
-                  </p>
-                </div>
-
-                {formData.codigoCheckin ? (
-                  <Badge className="bg-[#103173] text-white font-bold">CHECK-IN {formData.codigoCheckin}</Badge>
-                ) : null}
-              </CardContent>
-
-              <CardFooter className="p-6 pt-0 flex flex-col gap-3">
-                <Button
-                  type="submit"
-                  className="w-full h-12 bg-[#23B99A] hover:bg-[#1d957c] text-white font-black shadow-lg shadow-[#23B99A]/20"
-                >
-                  {emEdicao ? (
-                    <>
-                      <Save className="h-4 w-4 mr-2" />
-                      SALVAR ALTERAÇÕES
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="h-4 w-4 mr-2" />
-                      CADASTRAR VIAGEM
-                    </>
-                  )}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full h-11 border-2 border-[#103173] text-[#103173] font-black hover:bg-[#103173] hover:text-white"
-                  onClick={() => router.push("/admin/viagens")}
-                >
-                  CANCELAR
-                </Button>
-              </CardFooter>
-            </Card>
-
-            <Card className="border-none shadow-md bg-white">
-              <CardContent className="p-4 flex items-start gap-3">
-                <div className="bg-[#103173]/10 p-2 rounded-lg">
-                  <CalendarDays className="h-4 w-4 text-[#103173]" />
-                </div>
-                <p className="text-xs font-bold text-[#103173] leading-relaxed">
-                  Dados mockados consistentes com as telas já prontas: `ROT-001`, `ROT-9901`,
-                  `JLS-1020`, `João Silva` e código `UEFS-7729-X`.
-                </p>
-              </CardContent>
-            </Card>
+          {/* Ações */}
+          <div className="flex flex-col md:flex-row gap-3 pt-4">
+            <button 
+              type="submit" 
+              className="flex-1 bg-[#23B99A] text-white py-3.5 rounded-xl font-extrabold text-lg flex items-center justify-center gap-2 hover:bg-[#1fa889] transition-all active:scale-[0.98] shadow-md"
+            >
+              <Save className="h-5 w-5" />
+              Salvar Viagem
+            </button>
+            <button 
+              type="button" 
+              onClick={() => router.back()}
+              className="md:w-32 bg-white text-slate-500 border border-slate-200 py-3.5 rounded-xl font-bold flex items-center justify-center hover:bg-slate-50 transition-all active:scale-[0.98]"
+            >
+              Cancelar
+            </button>
           </div>
         </form>
+
       </main>
-
-      <FooterSection />
-
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#103173] text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-6 z-50 border-2 border-[#F2D022]/30 backdrop-blur-md">
-        <div className="flex flex-col border-r border-white/20 pr-4">
-          <span className="text-[9px] font-black uppercase text-[#F2D022] tracking-tighter">Modo de Teste</span>
-          <span className="text-xs font-bold">Alternar Perfil</span>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            size="sm"
-            variant="ghost"
-            className="hover:bg-white/10 text-white gap-2 font-bold"
-            onClick={() => router.push("/passageiro")}
-          >
-            <UserCircle className="h-4 w-4" /> Passageiro
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="hover:bg-[#F2D022] hover:text-[#103173] text-white gap-2 font-bold transition-colors"
-            onClick={() => router.push("/motorista")}
-          >
-            <Bus className="h-4 w-4" /> Motorista
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="bg-red-500 text-white gap-2 font-bold transition-colors shadow-lg shadow-red-500/20"
-            onClick={() => router.push("/admin")}
-          >
-            <ShieldAlert className="h-4 w-4" /> Admin
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default function CadastroEdicaoViagemPage() {
-  return (
-    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-[#E4F2F1]">A carregar formulário...</div>}>
-      <ViagemFormContent />
-    </Suspense>
-  );
-}
-
-interface ResumoItemProps {
-  icon: ComponentType<{ className?: string }>;
-  label: string;
-  value: string;
-}
-
-function ResumoItem({ icon: Icon, label, value }: ResumoItemProps) {
-  return (
-    <div className="rounded-xl border border-slate-100 bg-[#E4F2F1] p-3 space-y-1">
-      <div className="flex items-center gap-1 text-[#73AABF]">
-        <Icon className="h-3.5 w-3.5" />
-        <p className="text-[9px] uppercase font-black tracking-widest">{label}</p>
-      </div>
-      <p className="text-xs font-black text-[#103173] leading-tight">{value}</p>
     </div>
   );
 }

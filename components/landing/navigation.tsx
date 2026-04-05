@@ -24,7 +24,7 @@ export function Navigation({ tipoUsuario = "aluno" }: NavigationProps) {
         <div className="flex items-center gap-6 text-sm font-medium">
 
           {/* Minhas Viagens: redireciona para a nova tela dedicada */}
-          {tipoUsuario !== "admin" && (
+          {tipoUsuario !== "admin" && tipoUsuario !== "motorista" && (
             <Link 
               href={`/minhas-viagens?tipo=${tipoUsuario}`} 
               className="hover:text-[#F2D022] transition-colors"
