@@ -23,11 +23,22 @@ import {
 const VIAGENS_REQUISITOS = [
   { id: "1", dia: "segunda", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "06:00", horarioFim: "08:00", inscritos: 18, vagasTotais: 44, jaInscrito: false },
   { id: "2", dia: "segunda", origem: "Feira de Santana", destino: "Salvador", horarioInicio: "18:30", horarioFim: "20:30", inscritos: 35, vagasTotais: 44, jaInscrito: true },
+  { id: "3", dia: "terca", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "06:00", horarioFim: "08:00", inscritos: 22, vagasTotais: 44, jaInscrito: false },
+  { id: "4", dia: "terca", origem: "Feira de Santana", destino: "Salvador", horarioInicio: "18:30", horarioFim: "20:30", inscritos: 40, vagasTotais: 44, jaInscrito: false },
+  { id: "5", dia: "quarta", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "06:00", horarioFim: "08:00", inscritos: 15, vagasTotais: 44, jaInscrito: false },
+  { id: "6", dia: "quarta", origem: "Feira de Santana", destino: "Salvador", horarioInicio: "18:30", horarioFim: "20:30", inscritos: 30, vagasTotais: 44, jaInscrito: false },
+  { id: "7", dia: "quinta", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "06:00", horarioFim: "08:00", inscritos: 44, vagasTotais: 44, jaInscrito: true },
+  { id: "8", dia: "quinta", origem: "Feira de Santana", destino: "Salvador", horarioInicio: "18:30", horarioFim: "20:30", inscritos: 25, vagasTotais: 44, jaInscrito: false },
+  { id: "9", dia: "sexta", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "06:00", horarioFim: "08:00", inscritos: 38, vagasTotais: 44, jaInscrito: false },
+  { id: "10", dia: "sexta", origem: "Feira de Santana", destino: "Salvador", horarioInicio: "18:30", horarioFim: "20:30", inscritos: 42, vagasTotais: 44, jaInscrito: true },
 ];
 
 const DIAS_SEMANA = [
   { id: "segunda", label: "Seg", full: "Segunda-feira" },
   { id: "terca", label: "Ter", full: "Terça-feira" },
+  { id: "quarta", label: "Qua", full: "Quarta-feira" },
+  { id: "quinta", label: "Qui", full: "Quinta-feira" },
+  { id: "sexta", label: "Sex", full: "Sexta-feira" },
 ];
 
 export default function PaginaProfessor() {
@@ -47,17 +58,30 @@ export default function PaginaProfessor() {
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f0f4f8]">
-      <div className="bg-[#103173] relative overflow-hidden border-b-4 border-[#F2D022]">
+      <div className="bg-[#103173] relative overflow-hidden">
         <Navigation tipoUsuario="professor" />
 
-        <div className="max-w-lg md:max-w-3xl lg:max-w-5xl mx-auto px-4 pt-4 pb-7 relative">
-          <div className="flex items-center gap-2 mb-1">
-            <GraduationCap className="h-4 w-4 text-[#F2D022]" />
-            <span className="text-[11px] font-bold text-[#F2D022] uppercase tracking-widest">Portal do Professor (Prioridade)</span>
-          </div>
-          <h1 className="text-2xl font-extrabold text-white leading-tight tracking-tight">Gestão de Viagens</h1>
-        </div>
+        
       </div>
+
+      <main className="flex-1 max-w-lg md:max-w-3xl lg:max-w-5xl mx-auto w-full px-4 pt-5 pb-32">
+         <header className="mb-8">
+            <div className="flex items-center gap-2 mb-1">
+              <GraduationCap className="h-4 w-4 text-[#103173]" />
+              <span className="text-[11px] font-bold text-[#103173] uppercase tracking-widest">
+                Portal do Professor (Prioridade) 
+              </span>
+            </div>
+            <h1 className="text-3xl font-extrabold text-[#103173] tracking-tight">
+              Inscreva-se na sua rota
+            </h1>
+            <p className="text-[#73AABF] text-sm mt-1 mb-1 font-medium">
+              Confira as viagens do dias. 
+            </p>
+            <span className="text-[15px] font-bold text-[#103173] uppercase tracking-widest">
+              (06/04 - 10/04)
+            </span>
+        </header>
 
       <div className="sticky top-0 z-20 bg-[#f0f4f8]/95 backdrop-blur-md border-b border-[#103173]/5">
         <div className="max-w-lg md:max-w-3xl lg:max-w-5xl mx-auto px-4 py-3 flex gap-2">
@@ -70,10 +94,9 @@ export default function PaginaProfessor() {
               {dia.label}
             </button>
           ))}
+          </div>
         </div>
-      </div>
-
-      <main className="flex-1 max-w-lg md:max-w-3xl lg:max-w-5xl mx-auto w-full px-4 pt-5 pb-32">
+       
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {viagensDoDia.map((viagem) => {
             const modalidadeAtual = modalidades[viagem.id] || "ida";

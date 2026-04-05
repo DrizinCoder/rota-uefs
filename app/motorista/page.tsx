@@ -265,9 +265,12 @@ export default function MotoristaPage() {
             <h1 className="text-3xl font-extrabold text-[#103173] tracking-tight">
               Suas escalas
             </h1>
-            <p className="text-[#73AABF] text-sm mt-1 font-medium">
+            <p className="text-[#73AABF] text-sm mt-1 mb-1 font-medium">
               Selecione o dia da semana para ver as viagens agendadas.
             </p>
+            <span className="text-[15px] font-bold text-[#103173] uppercase tracking-widest">
+              (06/04 - 10/04)
+            </span> 
           </div>
           
           <CentralSuporte />
