@@ -18,7 +18,19 @@ import {
   Flag,
   UserCircle,
   ShieldAlert,
+  LifeBuoy, // Novo ícone para suporte
+  Phone,    // Ícone para telefone
+  MessageCircle, // Ícone para WhatsApp
+  AlertTriangle  // Ícone para emergência
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const VIAGENS = [
   {
@@ -45,6 +57,58 @@ const VIAGENS = [
   },
 ];
 
+// RF14 - Componente de Central de Suporte e Emergência
+function CentralSuporte() {
+  const contatos = [
+    { nome: "Suporte Uninfra", tel: "0800123456", tipo: "phone" },
+    { nome: "WhatsApp Uninfra", tel: "5571999999999", tipo: "whatsapp" },
+    { nome: "Emergência (SAMU)", tel: "192", tipo: "emergency" },
+    { nome: "Polícia Rodoviária", tel: "191", tipo: "emergency" },
+  ];
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <button className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-full border border-red-100 hover:bg-red-100 transition-colors shadow-sm mb-6">
+          <LifeBuoy className="h-4 w-4" />
+          <span className="text-xs font-bold uppercase tracking-wider">Ajuda e Emergência</span>
+        </button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-[#103173] flex items-center gap-2">
+            <ShieldAlert className="h-5 w-5 text-red-600" />
+            Central de Suporte
+          </DialogTitle>
+          <DialogDescription>
+            Contatos diretos para suporte operacional e emergências.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          {contatos.map((contato, index) => (
+            <a
+              key={index}
+              href={contato.tipo === "whatsapp" ? `https://wa.me/${contato.tel}` : `tel:${contato.tel}`}
+              className="flex items-center justify-between p-4 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors group"
+            >
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg ${contato.tipo === "emergency" ? "bg-red-100 text-red-600" : "bg-blue-100 text-[#103173]"}`}>
+                  {contato.tipo === "whatsapp" ? <MessageCircle className="h-5 w-5" /> : contato.tipo === "emergency" ? <AlertTriangle className="h-5 w-5" /> : <Phone className="h-5 w-5" />}
+                </div>
+                <div>
+                  <p className="font-bold text-[#103173]">{contato.nome}</p>
+                  <p className="text-xs text-slate-500">{contato.tel}</p>
+                </div>
+              </div>
+              <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-[#103173]" />
+            </a>
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function ViagemCard({ viagem }: { viagem: (typeof VIAGENS)[0] }) {
   const router = useRouter();
   const [statusViagem, setStatusViagem] = useState<
@@ -65,6 +129,7 @@ function ViagemCard({ viagem }: { viagem: (typeof VIAGENS)[0] }) {
 
   return (
     <div className="mb-8">
+      {/* ... (restante do código do ViagemCard igual ao original) ... */}
       <div className="bg-white rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(16,49,115,0.06),0_8px_24px_rgba(16,49,115,0.04)]">
         <div className="bg-[#103173]/5 px-4 py-3 flex items-center justify-between border-b border-[#103173]/5">
           <div className="flex items-center gap-2">
@@ -191,19 +256,24 @@ export default function MotoristaPage() {
       <Navigation tipoUsuario="motorista" />
 
       <main className="flex-1 max-w-lg md:max-w-3xl lg:max-w-5xl mx-auto w-full px-4 pt-10 pb-32">
-        <header className="mb-8">
-          <div className="flex items-center gap-2 mb-1">
-            <Bus className="h-4 w-4 text-[#103173]" />
-            <span className="text-[11px] font-bold text-[#103173] uppercase tracking-widest">
-              Painel do Motorista
-            </span>
+        <header className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Bus className="h-4 w-4 text-[#103173]" />
+              <span className="text-[11px] font-bold text-[#103173] uppercase tracking-widest">
+                Painel do Motorista
+              </span>
+            </div>
+            <h1 className="text-3xl font-extrabold text-[#103173] tracking-tight">
+              Suas viagens de hoje
+            </h1>
+            <p className="text-[#73AABF] text-sm mt-1 font-medium">
+              Confira os detalhes e faça a gestão do embarque.
+            </p>
           </div>
-          <h1 className="text-3xl font-extrabold text-[#103173] tracking-tight">
-            Suas viagens de hoje
-          </h1>
-          <p className="text-[#73AABF] text-sm mt-1 font-medium">
-            Confira os detalhes e faça a gestão do embarque.
-          </p>
+          
+          {/* RF14 - Botão de Suporte inserido no header para fácil acesso */}
+          <CentralSuporte />
         </header>
 
         {VIAGENS.map((viagem) => (

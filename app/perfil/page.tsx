@@ -316,40 +316,6 @@ function PerfilContent() {
       
       <FooterSection />
 
-      {/* FOOTER DE TESTE PARA ALTERNAR PERFIS RAPIDAMENTE */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#103173] text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-4 z-50 border-2 border-[#F2D022]/30 backdrop-blur-md w-[90%] sm:w-auto overflow-x-auto no-scrollbar">
-        <div className="flex flex-col border-r border-white/20 pr-4 shrink-0">
-          <span className="text-[9px] font-black uppercase text-[#F2D022] tracking-tighter">Modo de Teste</span>
-          <span className="text-xs font-bold">Ver Perfil Como</span>
-        </div>
-        
-        <div className="flex gap-2 shrink-0">
-          <Button 
-            size="sm" variant="ghost" 
-            className={`gap-1.5 font-bold transition-colors ${isAluno ? 'bg-[#23B99A] text-white' : 'hover:bg-white/10 text-white'}`}
-            onClick={() => setTipoUsuario("aluno")}
-          >
-            <GraduationCap className="h-4 w-4" /> Aluno
-          </Button>
-
-          <Button 
-            size="sm" variant="ghost" 
-            className={`gap-1.5 font-bold transition-colors ${isProfessor ? 'bg-white text-[#103173]' : 'hover:bg-white/10 text-white'}`}
-            onClick={() => setTipoUsuario("professor")}
-          >
-            <Briefcase className="h-4 w-4" /> Professor
-          </Button>
-
-          <Button 
-            size="sm" variant="ghost" 
-            className={`gap-1.5 font-bold transition-colors ${isMotorista ? 'bg-[#F2D022] text-[#103173]' : 'hover:bg-white/10 text-white'}`}
-            onClick={() => setTipoUsuario("motorista")}
-          >
-            <Bus className="h-4 w-4" /> Motorista
-          </Button>
-        </div>
-      </div>
-
       {/* POP-UP / MODAL DE EXCLUSÃO DE CONTA */}
       {showDeleteModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#103173]/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">

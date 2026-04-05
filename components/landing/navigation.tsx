@@ -10,7 +10,6 @@ interface NavigationProps {
 }
 
 export function Navigation({ tipoUsuario = "aluno" }: NavigationProps) {
-  const isMotorista = tipoUsuario === "motorista";
 
   return (
     <nav className="w-full bg-[#103173] text-[#E4F2F1] shadow-md border-b-2 border-[#73AABF]">
@@ -19,20 +18,19 @@ export function Navigation({ tipoUsuario = "aluno" }: NavigationProps) {
           <div className="bg-[#F2D022] p-1.5 rounded-md">
             <Bus className="h-5 w-5 text-[#103173]" />
           </div>
-          <span className="text-xl font-bold tracking-tight">Roteiro</span>
+          <span className="text-xl font-bold tracking-tight">Rota UEFS</span>
         </Link>
 
         <div className="flex items-center gap-6 text-sm font-medium">
-          {/* Só mostra esses links se NÃO for motorista e nem admin */}
-          {!isMotorista && tipoUsuario !== "admin" && (
-            <>
-              <Link href="#" className="hover:text-[#F2D022] transition-colors">
-                Rotas
-              </Link>
-              <Link href="#" className="hover:text-[#F2D022] transition-colors">
-                Minhas Viagens
-              </Link>
-            </>
+
+          {/* Minhas Viagens: redireciona para a nova tela dedicada */}
+          {tipoUsuario !== "admin" && (
+            <Link 
+              href={`/minhas-viagens?tipo=${tipoUsuario}`} 
+              className="hover:text-[#F2D022] transition-colors"
+            >
+              Minhas Viagens
+            </Link>
           )}
 
           {/* O link agora envia o tipo de usuário na URL via Query Parameter */}
