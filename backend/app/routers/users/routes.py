@@ -1,3 +1,9 @@
+from fastapi import HTTPException
+from dataclasses import asdict
+from app.repositories.user_repository import UserRepository
+from fastapi import Depends
+from app.database.db import get_session
+from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter
 
 from app.DTOs.users.dtos import UpdateProfileUserDTO, UpdateProfileServidorDTO, UpdateProfileMotoristaDTO
@@ -27,12 +33,39 @@ def delete_account(id: str):
 
 # Perfil do estudante
 
-@router.patch("/update/estudante")
-def update_profile(dados: UpdateProfileUserDTO):
-    return {"message": "olá! bem-vindo a update perfil aluno"}
+@router.get("/estudantes")
+async def get_all_estudantes(session: AsyncSession = Depends(get_session)):
+    repo = UserRepository(session)
+
+    return await repo.list_all() 
+
+@router.get("id/{id}/estudante")
+async def get_estudante(id: str, session: AsyncSession = Depends(get_session)):
+    repo = UserRepository(session)
+    
+    return await repo.get_by_id(id)
+
+@router.get("registration/{registration_id}/estudante")
+async def get_estudante_by_registration_id(registration_id: str, session: AsyncSession = Depends(get_session)):
+    repo = UserRepository(session)
+    
+    return await repo.get_by_registration_id(registration_id)
+
+@router.patch("/update/{id}/estudante")
+async def update_profile(id: str, dados: UpdateProfileUserDTO, session: AsyncSession = Depends(get_session)):
+    repo = UserRepository(session)
+
+    data_dict = asdict(dados)
+
+    updated_user = await repo.patch(id, data_dict)
+    
+    if not updated_user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+        
+    return updated_user
 
 @router.delete("/delete/account/estudante")
-def delete_account():
+async def delete_account(session: AsyncSession = Depends(get_session)):
     return {"message": "olá! bem-vindo ao delete perfil estudante"}
 
 # Funcionalidades [Estudante, Servidor, Motorista]

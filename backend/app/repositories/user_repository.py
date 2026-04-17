@@ -41,7 +41,8 @@ class UserRepository:
             return None
 
         for key, value in update_data.items():
-            setattr(db_user, key, value)
+            if value is not None:
+                setattr(db_user, key, value)
 
         self.session.add(db_user)
         await self.session.commit()
