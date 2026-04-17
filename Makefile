@@ -1,36 +1,34 @@
 UID := $(shell id -u)
 GID := $(shell id -g)
 
-# 🔥 Desenvolvimento (hot reload)
-dev:
-	UID=$(UID) GID=$(GID) docker compose up
+.DEFAULT_GOAL := help
 
-# 🔁 Desenvolvimento com rebuild
-dev-build:
-	UID=$(UID) GID=$(GID) docker compose up --build
+.PHONY: help
+help: ## Mostra esta ajuda
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
 
-# 🚀 Produção (build otimizado)
-prod:
-	docker compose -f docker-compose.yml up --build
+dev: ## 🔥 Desenvolvimento (hot reload)
+	UID=$(UID) GID=$(GID) docker-compose up
 
-# 🛑 Parar containers
-down:
-	docker compose down
+dev-build: ## 🔁 Desenvolvimento com rebuild
+	UID=$(UID) GID=$(GID) docker-compose up --build
 
-# 📜 Ver logs em tempo real
-logs:
-	docker compose logs -f
+prod: ## 🚀 Produção (build otimizado)
+	docker-compose -f docker-compose.yml up --build
 
-# 🧹 Limpeza completa (containers + volumes + cache leve)
-clean:
-	docker compose down -v
+down: ## 🛑 Parar containers
+	docker-compose down
+
+logs: ## 📜 Ver logs em tempo real
+	docker-compose logs -f
+
+clean: ## 🧹 Limpeza completa (containers + volumes + cache leve)
+	docker-compose down -v
 	docker system prune -f
 
-# 🔄 Reiniciar ambiente dev
-restart:
+restart: ## 🔄 Reiniciar ambiente dev
 	make down
 	make dev
 
-# 🧱 Rebuild completo do zero (sem cache)
-rebuild:
-	docker compose build --no-cache
+rebuild: ## 🧱 Rebuild completo do zero (sem cache)
+	docker-compose build --no-cache
