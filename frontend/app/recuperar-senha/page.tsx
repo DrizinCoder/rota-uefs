@@ -5,7 +5,14 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Mail, ArrowLeft, KeyRound, Send, CheckCircle2 } from "lucide-react";
 
 export default function RecuperarSenha() {
@@ -26,7 +33,7 @@ export default function RecuperarSenha() {
     }
 
     setIsLoading(true);
-    
+
     // Simulando a requisição para o backend
     setTimeout(() => {
       setIsLoading(false);
@@ -41,12 +48,11 @@ export default function RecuperarSenha() {
       <div className="absolute bottom-[-10%] right-[-5%] w-96 h-96 bg-[#F2D022] opacity-10 rounded-full blur-3xl" />
 
       <Card className="w-full max-w-md border-none shadow-2xl bg-white/80 backdrop-blur-md z-10 relative">
-        
         {/* Botão de Voltar absoluto no canto do Card */}
         {!isEnviado && (
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             className="absolute left-4 top-4 text-[#73AABF] hover:text-[#103173] hover:bg-[#103173]/10 z-20"
             onClick={() => router.push("/")}
           >
@@ -65,15 +71,16 @@ export default function RecuperarSenha() {
                 E-mail Enviado!
               </CardTitle>
               <CardDescription className="text-[#73AABF] font-bold text-base px-4">
-                Enviamos as instruções de recuperação para <br/>
+                Enviamos as instruções de recuperação para <br />
                 <span className="text-[#103173] font-black">{email}</span>
               </CardDescription>
             </CardHeader>
             <CardContent className="text-sm font-medium text-slate-500 pb-2">
-              Verifique sua caixa de entrada e a pasta de spam. O link de recuperação expira em 30 minutos.
+              Verifique sua caixa de entrada e a pasta de spam. O link de
+              recuperação expira em 30 minutos.
             </CardContent>
             <CardFooter className="pt-6">
-              <Button 
+              <Button
                 onClick={() => router.push("/")}
                 className="w-full h-14 bg-[#103173] hover:bg-[#103B73] text-white font-black text-lg rounded-xl shadow-lg transition-all active:scale-95"
               >
@@ -82,7 +89,6 @@ export default function RecuperarSenha() {
             </CardFooter>
           </div>
         ) : (
-          
           /* ETAPA 1: FORMULÁRIO DE SOLICITAÇÃO */
           <div className="animate-in fade-in duration-300">
             <CardHeader className="space-y-4 pb-8 text-center pt-10">
@@ -94,7 +100,8 @@ export default function RecuperarSenha() {
                   Recuperar Senha
                 </CardTitle>
                 <CardDescription className="text-[#73AABF] font-bold px-2">
-                  Informe o e-mail associado à sua conta para receber o link de redefinição.
+                  Informe o e-mail associado à sua conta para receber o link de
+                  redefinição.
                 </CardDescription>
               </div>
 
@@ -108,15 +115,20 @@ export default function RecuperarSenha() {
             <form onSubmit={handleRecuperar}>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-[#103173] font-bold ml-1">E-mail Cadastrado</Label>
+                  <Label
+                    htmlFor="email"
+                    className="text-[#103173] font-bold ml-1"
+                  >
+                    E-mail Cadastrado
+                  </Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 h-5 w-5 text-[#73AABF]" />
-                    <Input 
-                      id="email" 
+                    <Input
+                      id="email"
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="seu.email@exemplo.com" 
+                      placeholder="seu.email@exemplo.com"
                       className="pl-10 h-12 border-[#73AABF]/20 focus:border-[#103173] focus:ring-[#103173] rounded-xl font-medium"
                       required
                     />
@@ -125,8 +137,8 @@ export default function RecuperarSenha() {
               </CardContent>
 
               <CardFooter className="flex flex-col gap-4 pt-4 pb-8">
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   disabled={isLoading}
                   className="w-full h-14 bg-[#103173] hover:bg-[#103B73] text-white font-black text-lg rounded-xl shadow-lg transition-all active:scale-95"
                 >
