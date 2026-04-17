@@ -24,3 +24,19 @@ class BusStatus(str, Enum):
     ACTIVE = "Active"
     MAINTENANCE = "Maintenance"
     INACTIVE = "Inactive"
+
+class TripStatus(str, Enum):
+    PENDING = "Pending"
+    CONFIRMED = "Confirmed"
+    CANCELLED = "Cancelled"
+    COMPLETED = "Completed"
+
+class PassengerType(str, Enum):
+    HOLDER = "Holder"
+    GUEST = "Guest"       
+    EXTRA_STAFF = "Staff"  
+
+class BoardingStatus(str, Enum):
+    BOARDED = "Boarded"
+    NOT_BOARDED = "Not Boarded"
+    CANCELLED = "Cancelled"
