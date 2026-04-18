@@ -1,6 +1,15 @@
 .DEFAULT_GOAL := help
 
-DOCKER_COMPOSE := docker compose
+# padrão moderno
+DOCKER_COMPOSE_MODERN := docker compose
+DOCKER_COMPOSE_LEGACY := docker-compose
+
+# escolha via flag
+ifeq ($(LGY),1)
+DOCKER_COMPOSE := $(DOCKER_COMPOSE_LEGACY)
+else
+DOCKER_COMPOSE := $(DOCKER_COMPOSE_MODERN)
+endif
 
 .PHONY: help
 help: ## 📖 Mostra esta ajuda
