@@ -35,16 +35,6 @@ async def update_profile(id: uuid.UUID, dados: UpdateProfileServidorDTO, session
 
     return {"Message": "Staff Updated", "User": updated_user}
 
-@router.delete("/delete/{id}/account/servidor")
-async def delete_account(id: uuid.UUID, session: AsyncSession = Depends(get_session)):
-    repo = UserRepository(session)
-    deleted_user = await repo.delete(id)
-
-    if not deleted_user:
-        raise HTTPException(status_code=404, detail="Staff not found")
-
-    return {"Message": "Staff Deleted", "User": deleted_user}
-
 #  -------- Perfil do motorista ----------------
 
 @router.get("/drivers")
