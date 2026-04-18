@@ -1,7 +1,0 @@
-services:
-  frontend:
-    command: npm run dev
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    user: "${UID}:${GID}"
