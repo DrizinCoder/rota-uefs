@@ -1,4 +1,3 @@
-from ast import List
 from app.database.enums import TripStatus
 from datetime import time
 from datetime import date
@@ -11,7 +10,7 @@ from app.database.enums import UserProfile
 from app.database.enums import AccessLevel
 from app.database.enums import EmploymentType
 import uuid
-from typing import Optional
+from typing import Optional, List
 from sqlmodel import SQLModel, Field, Relationship
 
 

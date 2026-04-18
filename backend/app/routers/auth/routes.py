@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.DTOs.auth import RegisterServidorDTO, RegisterUserDTO, LoginUserDTO
+from app.DTOs.auth.dtos import RegisterServidorDTO, RegisterUserDTO, LoginUserDTO
 
 router = APIRouter()
 
