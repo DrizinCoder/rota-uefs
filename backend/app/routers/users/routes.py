@@ -35,19 +35,39 @@ async def update_profile(id: uuid.UUID, dados: UpdateProfileServidorDTO, session
 
     return {"Message": "Staff Updated", "User": updated_user}
 
-@router.delete("/delete/account/servidor")
-def delete_account():
-    return {"message": "olá! bem-vindo ao delete perfil servidor"}
+@router.delete("/delete/{id}/account/servidor")
+async def delete_account(id: uuid.UUID, session: AsyncSession = Depends(get_session)):
+    repo = UserRepository(session)
+    deleted_user = await repo.delete(id)
+
+    if not deleted_user:
+        raise HTTPException(status_code=404, detail="Staff not found")
+
+    return {"Message": "Staff Deleted", "User": deleted_user}
 
 #  -------- Perfil do motorista ----------------
 
-@router.patch("/update/motorista")
-def update_profile(dados: UpdateProfileUserDTO):
-    return {"message": "olá! bem-vindo a update perfil motorista"}
+@router.get("/drivers")
+async def get_all_drivers(session: AsyncSession = Depends(get_session)):
+    repo = UserRepository(session)
 
-@router.delete("/delete/account/motorista")
-def delete_account(id: str):
-    return {"message": "olá! bem-vindo ao delete perfil servidor"}
+    users = await repo.list_all_drivers()
+
+    if not users:
+        raise HTTPException(status_code=404, detail="Drivers not found")
+
+    return {"Message": "Drivers Found", "Users": users}
+
+
+@router.patch("/update/{id}/motorista")
+async def update_profile(id: uuid.UUID, dados: UpdateProfileUserDTO, session: AsyncSession = Depends(get_session)):
+    repo = UserRepository(session)
+    updated_user = await repo.patch(id, dados)
+
+    if not updated_user:
+        raise HTTPException(status_code=404, detail="Driver not found")
+
+    return {"Message": "Driver Updated", "User": updated_user}
 
 # ----------- Perfil do estudante ------------
 
@@ -62,18 +82,18 @@ async def get_all_estudantes(session: AsyncSession = Depends(get_session)):
 
     return {"Message": "Students Found", "Users": users} 
 
-@router.get("id/{id}/usuário")
-async def get_estudante(id: uuid.UUID, session: AsyncSession = Depends(get_session)):
+@router.get("usuário/{id}")
+async def get_user(id: uuid.UUID, session: AsyncSession = Depends(get_session)):
     repo = UserRepository(session)
 
     user = repo.get_by_id(id)
 
     if not user:
-        raise HTTPException(status_code=404, detail="Student not found")
+        raise HTTPException(status_code=404, detail="User not found")
 
-    return {"Message": "Student Found", "User": user}
+    return {"Message": "User Found", "User": user}
 
-@router.get("registration/{registration_id}/estudante")
+@router.get("matricula/{registration_id}/")
 async def get_estudante_by_registration_id(registration_id: uuid.UUID, session: AsyncSession = Depends(get_session)):
     repo = UserRepository(session)
     
@@ -95,19 +115,21 @@ async def update_profile(id: uuid.UUID, dados: UpdateProfileUserDTO, session: As
         
     return {"Message": "Student Updated", "User": updated_user}
 
-@router.delete("/delete/account/{id}/estudante")
+# Essa rota pode ser usada para deletar qualquer usuário
+@router.delete("/delete/account/{id}/")
 async def delete_account(id: uuid.UUID, session: AsyncSession = Depends(get_session)):
     repo = UserRepository(session)
 
-    deleted_user = await repo.delete(id)
+    deleted_user = await repo.anonymize(id)
 
     if not deleted_user:
-        raise HTTPException(status_code=404, detail="Student not found")
+        raise HTTPException(status_code=404, detail="User not found")
 
-    return {"Message": "Student Deleted", "User": deleted_user} 
+    return {"Message": "User Deleted", "User": deleted_user} 
 
-@router.post("/create/estudante")
-async def create_estudante(dados: CreateSimpleUserDTO, session: AsyncSession = Depends(get_session)):
+# Simple user = Estudante e Motorista
+@router.post("/create/simple_user")
+async def create_simple_user(dados: CreateSimpleUserDTO, session: AsyncSession = Depends(get_session)):
     repo = UserRepository(session)
 
     user = await repo.create_simple_user(dados)

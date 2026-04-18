@@ -12,14 +12,19 @@ class UserRepository:
         self.session = session
     
     async def list_all_students(self):
-        statement = select(User).where(User.profile == UserProfile.STUDENT)
+        statement = select(User).where(User.profile == UserProfile.STUDENT and User.is_anonymized == False)
         result = await self.session.execute(statement)
         return result.scalars().all()
     
     async def list_all_staff(self):
-        statement = select(User).where(User.profile == UserProfile.STAFF)
+        statement = select(User).where(User.profile == UserProfile.STAFF and User.is_anonymized == False)
         result = await self.session.execute(statement)
-        return result.scalars().all()()
+        return result.scalars().all()
+
+    async def list_all_drivers(self):
+        statemente = select(User).where(User.profile == UserProfile.DRIVER and User.is_anonymized == False)
+        result = await self.session.execute(statemente)
+        return result.scalars().all()
 
     async def get_by_id(self, user_id: uuid.UUID):
         statement = select(User).where(User.user_id == user_id)
@@ -58,10 +63,16 @@ class UserRepository:
         await self.session.refresh(db_user)
         return db_user
 
-    async def delete(self, user_id: uuid.UUID):
-        user = await self.get_by_id(user_id)
-        if not user:
+    async def anonymize(self, user_id: uuid.UUID):
+        db_user = await self.get_by_id(user_id)
+        if not db_user:
             return None
-        await self.session.delete(user)
+
+        db_user.full_name = "Usuário Anonimizado"
+        db_user.email = f"deleted_{user_id}@system.local"
+        db_user.phone = "00000000000"
+        db_user.is_anonymized = True
+        
+        self.session.add(db_user)
         await self.session.commit()
-        return user
+        return db_user
