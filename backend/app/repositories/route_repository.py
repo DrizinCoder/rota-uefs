@@ -3,7 +3,6 @@ from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database.models import Route
 from app.DTOs.routes.dtos import CreateRouteDTO, UpdateRouteDTO
-from dataclasses import asdict
 
 class RouteRepository:
     def __init__(self, session: AsyncSession):
@@ -20,7 +19,7 @@ class RouteRepository:
         return result.scalars().first()
 
     async def create(self, route_dto: CreateRouteDTO):
-        route_model = Route(**asdict(route_dto)) 
+        route_model = Route(**route_dto.model_dump()) 
         self.session.add(route_model)
         await self.session.commit()
         await self.session.refresh(route_model)
@@ -31,7 +30,7 @@ class RouteRepository:
         if not db_route:
             return None
         
-        update_dict = asdict(route_dto)
+        update_dict = route_dto.model_dump()
         db_route.sqlmodel_update(update_dict)
         
         self.session.add(db_route)
@@ -44,7 +43,7 @@ class RouteRepository:
         if not db_route:
             return None
 
-        update_dict = {k: v for k, v in asdict(update_data).items() if v is not None}
+        update_dict = {k: v for k, v in update_data.model_dump(exclude_none=True)}
         db_route.sqlmodel_update(update_dict)
 
         self.session.add(db_route)
