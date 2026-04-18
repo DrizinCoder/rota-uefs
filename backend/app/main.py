@@ -7,4 +7,4 @@ app.include_router(router)
 
 @app.get("/")
 def health_check():
-    return {"message": "Rota UEFS Backend is r"}
+    return {"message": "Rota UEFS Backend is running"}

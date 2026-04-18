@@ -12,7 +12,7 @@ async def get_all():
 
 @router.get("/{plate}")
 async def get_by_id(plate: str):
-    return {"message": f"Get fleet with id {plate} endpoint"}
+    return {"message": f"Get fleet with plate: {plate} endpoint"}
 
 @router.post("/")
 async def create_bus():

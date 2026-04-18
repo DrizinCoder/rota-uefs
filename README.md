@@ -28,6 +28,7 @@ Para facilitar o dia a dia, utilizamos um `Makefile`. Abaixo estão os comandos 
 | `make clean` | Remove containers e volumes (limpeza total) |
 
 > **Nota:** Se você utiliza uma versão legada do docker-compose, use a flag `LGY=1` (ex: `make up LGY=1`).
+
 > **Nota 2** Para visualizar os outros comando do Makefile com descrição use **`make help`**.
 ---
 
