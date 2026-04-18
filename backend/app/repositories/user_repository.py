@@ -3,7 +3,7 @@ from app.database.enums import UserProfile
 from app.DTOs.users.dtos import CreateSimpleUserDTO
 import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
+from sqlalchemy import and_, select 
 from app.database.models import User
 
 class UserRepository:
@@ -12,17 +12,32 @@ class UserRepository:
         self.session = session
     
     async def list_all_students(self):
-        statement = select(User).where(User.profile == UserProfile.STUDENT and User.is_anonymized == False)
+        statement = select(User).where(
+                and_(
+                User.profile == UserProfile.STUDENT,
+                User.is_anonymized == False
+            )
+        )
         result = await self.session.execute(statement)
         return result.scalars().all()
     
     async def list_all_staff(self):
-        statement = select(User).where(User.profile == UserProfile.STAFF and User.is_anonymized == False)
+        statement = select(User).where(
+            and_(
+                User.profile == UserProfile.STAFF,
+                User.is_anonymized == False
+            )
+        )
         result = await self.session.execute(statement)
         return result.scalars().all()
 
     async def list_all_drivers(self):
-        statemente = select(User).where(User.profile == UserProfile.DRIVER and User.is_anonymized == False)
+        statemente = select(User).where(
+            and_(
+                User.profile == UserProfile.DRIVER,
+                User.is_anonymized == False
+            )
+        )
         result = await self.session.execute(statemente)
         return result.scalars().all()
 
@@ -72,6 +87,8 @@ class UserRepository:
         db_user.email = f"deleted_{user_id}@system.local"
         db_user.phone = "00000000000"
         db_user.is_anonymized = True
+        db_user.password = ""
+        db_user.registration_id = f"anon_{user_id}"
         
         self.session.add(db_user)
         await self.session.commit()
