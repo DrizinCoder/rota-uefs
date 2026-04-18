@@ -43,7 +43,7 @@ class RouteRepository:
         if not db_route:
             return None
 
-        update_dict = {k: v for k, v in update_data.model_dump(exclude_none=True)}
+        update_dict = update_data.model_dump(exclude_none=True)
         db_route.sqlmodel_update(update_dict)
 
         self.session.add(db_route)
