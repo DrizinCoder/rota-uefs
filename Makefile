@@ -1,34 +1,79 @@
-UID := $(shell id -u)
-GID := $(shell id -g)
-
 .DEFAULT_GOAL := help
 
+# padrão moderno
+DOCKER_COMPOSE_MODERN := docker compose
+DOCKER_COMPOSE_LEGACY := docker-compose
+
+# escolha via flag
+ifeq ($(LGY),1)
+DOCKER_COMPOSE := $(DOCKER_COMPOSE_LEGACY)
+else
+DOCKER_COMPOSE := $(DOCKER_COMPOSE_MODERN)
+endif
+
 .PHONY: help
-help: ## Mostra esta ajuda
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
+help: ## 📖 Mostra esta ajuda
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-18s\033[0m %s\n", $$1, $$2}'
 
-dev: ## 🔥 Desenvolvimento (hot reload)
-	UID=$(UID) GID=$(GID) docker-compose up
+# =========================
+# 🚀 UP / DOWN
+# =========================
 
-dev-build: ## 🔁 Desenvolvimento com rebuild
-	UID=$(UID) GID=$(GID) docker-compose up --build
+up: ## 🚀 Sobe o sistema
+	$(DOCKER_COMPOSE) up
 
-prod: ## 🚀 Produção (build otimizado)
-	docker-compose -f docker-compose.yml up --build
+up-build: ## 🧱 Sobe com build
+	$(DOCKER_COMPOSE) up --build
 
-down: ## 🛑 Parar containers
-	docker-compose down
+up-detach: ## 🧩 Sobe em background
+	$(DOCKER_COMPOSE) up -d
 
-logs: ## 📜 Ver logs em tempo real
-	docker-compose logs -f
+down: ## 🛑 Para tudo
+	$(DOCKER_COMPOSE) down
 
-clean: ## 🧹 Limpeza completa (containers + volumes + cache leve)
-	docker-compose down -v
-	docker system prune -f
+restart: ## 🔄 Reinicia tudo
+	$(DOCKER_COMPOSE) down && $(DOCKER_COMPOSE) up
 
-restart: ## 🔄 Reiniciar ambiente dev
+# =========================
+# 📜 LOGS
+# =========================
+
+logs: ## 📜 Logs geral
+	$(DOCKER_COMPOSE) logs -f
+
+logs-backend: ## 📜 Logs backend
+	$(DOCKER_COMPOSE) logs -f backend
+
+logs-frontend: ## 📜 Logs frontend
+	$(DOCKER_COMPOSE) logs -f frontend
+
+logs-db: ## 📜 Logs banco
+	$(DOCKER_COMPOSE) logs -f db
+
+# =========================
+# 🧱 BUILD
+# =========================
+
+build: ## 🧱 Build geral
+	$(DOCKER_COMPOSE) build
+
+rebuild: ## 🧱 Rebuild sem cache
+	$(DOCKER_COMPOSE) build --no-cache
+
+# =========================
+# 🧹 LIMPEZA
+# =========================
+
+clean: ## 🧹 Remove containers e volumes do projeto
+	$(DOCKER_COMPOSE) down -v --remove-orphans
+
+prune: ## ⚠️ Limpeza pesada global (CUIDADO)
+	docker system prune -af --volumes
+
+init-db: ## 💾 Inicializa o banco de dados manualmente
+	docker-compose exec backend python -m scripts.init_db
+
+reset-db: ## 💣 Destrói o banco e recria tudo (cuidado!)
 	make down
-	make dev
-
-rebuild: ## 🧱 Rebuild completo do zero (sem cache)
-	docker-compose build --no-cache
+	docker volume rm postgres_data || true
+	make dev-build
