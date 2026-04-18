@@ -1,14 +1,13 @@
-from dataclasses import dataclass
+from app.database.enums import BoardingStatus
+from sqlmodel import SQLModel, Field
 from typing import Optional
 
-@dataclass
-class CreateRouteDTO:
+class CreateRouteDTO(SQLModel):
     name: str
     boarding_point: str
     drop_off_point: str
 
-@dataclass
-class UpdateRouteDTO:
+class UpdateRouteDTO(SQLModel):
     name: Optional[str] = None
     boarding_point: Optional[str] = None
     drop_off_point: Optional[str] = None
