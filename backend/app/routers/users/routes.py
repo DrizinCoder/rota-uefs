@@ -75,14 +75,14 @@ async def update_profile(id: uuid.UUID, dados: UpdateProfileUserDTO, session: As
 async def get_all_estudantes(session: AsyncSession = Depends(get_session)):
     repo = UserRepository(session)
 
-    users = await repo.list_all()
+    users = await repo.list_all_students()
 
     if not users:
         raise HTTPException(status_code=404, detail="Students not found")
 
     return {"Message": "Students Found", "Users": users} 
 
-@router.get("usuário/{id}")
+@router.get("/{id}")
 async def get_user(id: uuid.UUID, session: AsyncSession = Depends(get_session)):
     repo = UserRepository(session)
 
@@ -93,7 +93,7 @@ async def get_user(id: uuid.UUID, session: AsyncSession = Depends(get_session)):
 
     return {"Message": "User Found", "User": user}
 
-@router.get("matricula/{registration_id}/")
+@router.get("/matricula/{registration_id}/")
 async def get_estudante_by_registration_id(registration_id: uuid.UUID, session: AsyncSession = Depends(get_session)):
     repo = UserRepository(session)
     
@@ -116,7 +116,7 @@ async def update_profile(id: uuid.UUID, dados: UpdateProfileUserDTO, session: As
     return {"Message": "Student Updated", "User": updated_user}
 
 # Essa rota pode ser usada para deletar qualquer usuário
-@router.delete("/delete/account/{id}/")
+@router.delete("/delete/account/{id}")
 async def delete_account(id: uuid.UUID, session: AsyncSession = Depends(get_session)):
     repo = UserRepository(session)
 

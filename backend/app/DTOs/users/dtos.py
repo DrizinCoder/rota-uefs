@@ -4,7 +4,7 @@ from sqlmodel import SQLModel
 from typing import Optional
 
 class BaseProfileUpdate(SQLModel):
-    telefone: Optional[str] = None
+    phone: Optional[str] = None
     password: Optional[str] = None
 
 class UpdateProfileUserDTO(BaseProfileUpdate):

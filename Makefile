@@ -32,3 +32,11 @@ restart: ## 🔄 Reiniciar ambiente dev
 
 rebuild: ## 🧱 Rebuild completo do zero (sem cache)
 	docker-compose build --no-cache
+
+init-db: ## 💾 Inicializa o banco de dados manualmente
+	docker-compose exec backend python -m scripts.init_db
+
+reset-db: ## 💣 Destrói o banco e recria tudo (cuidado!)
+	make down
+	docker volume rm postgres_data || true
+	make dev-build
