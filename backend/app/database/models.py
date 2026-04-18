@@ -1,4 +1,3 @@
-from ast import List
 from app.database.enums import TripStatus
 from datetime import time
 from datetime import date
@@ -11,7 +10,7 @@ from app.database.enums import UserProfile
 from app.database.enums import AccessLevel
 from app.database.enums import EmploymentType
 import uuid
-from typing import Optional
+from typing import Optional, List
 from sqlmodel import SQLModel, Field, Relationship
 
 
@@ -31,8 +30,14 @@ class User(SQLModel, table=True):
     registration_status: RegistrationStatus = Field(default=RegistrationStatus.PENDING)
     is_anonymized: bool = Field(default=False) 
 
-    staff_member: Optional["Staff"] = Relationship(back_populates="user")
-    admin_member: Optional["Admin"] = Relationship(back_populates="user")
+    staff_member: Optional["Staff"] = Relationship(
+        back_populates="user", 
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    )
+    admin_member: Optional["Admin"] = Relationship(
+        back_populates="user",
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    )
     reservations: List["Reservation"] = Relationship(back_populates="user")
 
 class Staff(SQLModel, table=True):

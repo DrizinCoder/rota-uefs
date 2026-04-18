@@ -11,97 +11,25 @@ O projeto utiliza variáveis de ambiente distintas para o frontend e o backend. 
 
 ## 🛠️ Uso do Makefile
 
-Para simplificar o fluxo de desenvolvimento e execução do projeto, utilizamos um `Makefile` com comandos prontos para **ambiente de desenvolvimento** e **produção**.
+Certifique-se de ter o **Docker** e o **Docker Compose** instalados em sua máquina.
 
----
+### Comandos do Makefile
 
-### 🔥 Desenvolvimento (Hot Reload)
+Para facilitar o dia a dia, utilizamos um `Makefile`. Abaixo estão os comandos disponíveis:
 
-```bash
-make dev
-```
+| Comando | Descrição |
+| :--- | :--- |
+| `make up` | Sobe o sistema em modo interativo |
+| `make up-detach` | Sobe o sistema em segundo plano |
+| `make down` | Para e remove os containers |
+| `make logs` | Exibe os logs de todos os serviços |
+| `make init-db` | Executa o script de inicialização do banco |
+| `make rebuild` | Reconstrói as imagens ignorando o cache |
+| `make clean` | Remove containers e volumes (limpeza total) |
 
-- Inicia todos os serviços com suporte a **hot reload**
-- Frontend roda com `npm run dev`
-- Backend roda com `uvicorn --reload`
-- Alterações no código são refletidas automaticamente
+> **Nota:** Se você utiliza uma versão legada do docker-compose, use a flag `LGY=1` (ex: `make up LGY=1`).
 
-#### 🔁 Rebuild no desenvolvimento
-
-```bash
-make dev-build
-```
-
-- Recria as imagens Docker antes de subir os containers
-- Útil quando há mudanças em dependências ou Dockerfiles
-
----
-
-### 🚀 Produção (Build Otimizado)
-
-```bash
-make prod
-```
-
-- Executa o build completo das aplicações
-- Frontend roda com `npm run build` + `npm start`
-- Sem uso de volumes (ambiente mais estável)
-- Ideal para deploy
-
----
-
-### 🧰 Comandos auxiliares
-
-#### 🛑 Parar containers
-
-```bash
-make down
-```
-
----
-
-#### 📜 Ver logs em tempo real
-
-```bash
-make logs
-```
-
----
-
-#### 🧹 Limpeza completa
-
-```bash
-make clean
-```
-
-- Remove containers e volumes
-- Limpa recursos não utilizados do Docker
-
----
-
-#### 🔄 Reiniciar ambiente de desenvolvimento
-
-```bash
-make restart
-```
-
-- Executa `make down` seguido de `make dev`
-- Útil para reiniciar rapidamente todo o ambiente
-
----
-
-#### 🧱 Rebuild completo (sem cache)
-
-```bash
-make rebuild
-```
-
-- Reconstrói todas as imagens do zero
-- Ignora cache do Docker
-- Útil para resolver problemas persistentes de build
-
----
-
+> **Nota 2** Para visualizar os outros comando do Makefile com descrição use **`make help`**.
 ---
 
 ### 🌿 Arquitetura de Branches (Ramificações)
