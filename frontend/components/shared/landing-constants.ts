@@ -24,9 +24,9 @@ export interface QuickFeature {
 }
 
 export const QUICK_FEATURES: QuickFeature[] = [
-  { icon: Bus, label: "Transporte Gratuito", desc: "Sem custo para docentes e discentes da UEFS", color: "#103173" },
-  { icon: Clock, label: "Horários Fixos", desc: "Viagens regulares entre Feira de Santana e Salvador", color: "#F2D022" },
-  { icon: Shield, label: "Segurança", desc: "Motoristas credenciados e veículos inspecionados", color: "#73AABF" },
+  { icon: Bus, label: "Transporte Gratuito", desc: "Sem custo para docentes e discentes da UEFS", color: "#0f172a" },
+  { icon: Clock, label: "Horários Fixos", desc: "Viagens regulares entre Feira de Santana e Salvador", color: "#06b6d4" },
+  { icon: Shield, label: "Segurança", desc: "Motoristas credenciados e veículos inspecionados", color: "#8b5cf6" },
 ];
 
 /* ── Route stops ── */
@@ -48,8 +48,8 @@ export interface RouteInfoItem {
 }
 
 export const ROUTE_INFO_ITEMS: RouteInfoItem[] = [
-  { text: "Trajeto pela BR-324", color: "#F2D022" },
-  { text: "Duração média: ~2 horas", color: "#F2D022" },
-  { text: "Horários fixos de ida e volta", color: "#F2D022" },
-  { text: "Faça login para consultar horários e rotas", color: "#73AABF" },
+  { text: "Trajeto pela BR-324", color: "#06b6d4" },
+  { text: "Duração média: ~2 horas", color: "#06b6d4" },
+  { text: "Horários fixos de ida e volta", color: "#06b6d4" },
+  { text: "Faça login para consultar horários e rotas", color: "#8b5cf6" },
 ];

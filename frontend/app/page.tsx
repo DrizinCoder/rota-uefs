@@ -7,7 +7,7 @@ import { FooterSection } from "@/components/landing/footer-section";
 
 export default function PaginaInicial() {
   return (
-    <main className="min-h-screen bg-[#f0f4f8]">
+    <main className="min-h-screen bg-slate-50">
       <LandingNavbar />
       <LandingHero />
       <LandingQuickFeatures />
