@@ -56,7 +56,7 @@ class RegisterAlunoDTO(SQLModel):
     @classmethod
     def validate_institutional_email(cls, v: str, info) -> str:
         matricula = info.data.get("registration_id")
-        expected_email = f"{matricula}@discentes.uefs.br"
+        expected_email = f"{matricula}@discente.uefs.br"
         if v != expected_email:
             raise ValueError("E-mail Inválido")
         return v
