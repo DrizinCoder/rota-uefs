@@ -6,7 +6,8 @@ from fastapi import Depends
 from app.database.db import get_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter
-
+from app.core.exceptions import NotFoundException, BadRequestException
+from app.core.responses import ResponseHandler
 from app.DTOs.users.dtos import UpdateProfileUserDTO, UpdateProfileServidorDTO
 from app.DTOs.operational.dtos import CreateReservaDTO, DeleteReservaDTO
 
@@ -21,9 +22,7 @@ async def get_all_servidores(session: AsyncSession = Depends(get_session)):
     users = await repo.list_all_staff()
 
     if not users:
-        raise HTTPException(status_code=404, detail="Staff not found")
-
-    return {"Message": "Staff Found", "Users": users}
+        raise NotFoundException("Staff not found")
 
 @router.patch("/update/{id}/servidor")
 async def update_profile(id: uuid.UUID, dados: UpdateProfileServidorDTO, session: AsyncSession = Depends(get_session)):
@@ -31,9 +30,9 @@ async def update_profile(id: uuid.UUID, dados: UpdateProfileServidorDTO, session
     updated_user = await repo.patch(id, dados)
 
     if not updated_user:
-        raise HTTPException(status_code=404, detail="Staff not found")
+        raise NotFoundException("Nenhum servidor encontrado")
 
-    return {"Message": "Staff Updated", "User": updated_user}
+    return ResponseHandler.ok(updated_user, "Servidores encontrados")
 
 #  -------- Perfil do motorista ----------------
 
@@ -117,17 +116,15 @@ async def delete_account(id: uuid.UUID, session: AsyncSession = Depends(get_sess
 
     return {"Message": "User Deleted", "User": deleted_user} 
 
-# Simple user = Estudante e Motorista
 @router.post("/create/simple_user")
 async def create_simple_user(dados: CreateSimpleUserDTO, session: AsyncSession = Depends(get_session)):
     repo = UserRepository(session)
-
     user = await repo.create_simple_user(dados)
 
     if not user:
-        raise HTTPException(status_code=404, detail="Student not found")
+        raise BadRequestException("Erro ao criar usuário")
 
-    return {"Message": "Student Created", "User": user}
+    return ResponseHandler.created(user, "Usuário criado com sucesso")
 
 # Funcionalidades [Estudante, Servidor, Motorista]
 
