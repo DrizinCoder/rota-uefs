@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 from pydantic import field_validator
 from app.enums.enums import RegistrationStatus
@@ -63,5 +64,10 @@ class RegisterAlunoDTO(SQLModel):
 class LoginUserDTO(SQLModel):
     matricula: str
     senha: str
-    
+
+class AlunoRegisterResponseDTO(SQLModel):
+    user_id: uuid.UUID
+    full_name: str
+    registration_id: str
+    email: str
     

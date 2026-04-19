@@ -72,6 +72,11 @@ class UserRepository:
         result = await self.session.execute(statement)
         return result.scalars().first()
     
+    async def get_by_email(self, email: str):
+        statement = select(User).where(User.email == email)
+        result = await self.session.execute(statement)
+        return result.scalars().first()
+
     async def create_simple_user(self, user_dto: CreateSimpleUserDTO):
         user_model = User.model_validate(user_dto)
         self.session.add(user_model)

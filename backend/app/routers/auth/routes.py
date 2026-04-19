@@ -1,3 +1,4 @@
+from app.DTOs.auth.dtos import AlunoRegisterResponseDTO
 from app.core.responses import ResponseHandler
 from app.core.exceptions import ConflictException
 from app.database.db import get_session
@@ -22,14 +23,16 @@ async def register_motorista(dados: RegisterUserDTO):
 async def register_aluno(dados: RegisterAlunoDTO, session: AsyncSession = Depends(get_session)):
     repo = UserRepository(session)
 
-    student = repo.find_by_email(dados.email)
+    student = await repo.get_by_email(dados.email)
     
     if student:
-        raise ConflictException("Usuário já cadastrado")
+       raise ConflictException("Usuário já cadastrado")
 
-    student_created = repo.create_user(dados)
+    student_created = await repo.create_user(dados)
 
-    return ResponseHandler.created(student_created)
+    response_data = AlunoRegisterResponseDTO.model_validate(student_created)
+
+    return ResponseHandler.created(data=response_data.model_dump(mode='json'))
 
 @router.post("/register/admin")
 async def register_administrador(dados: RegisterUserDTO):
