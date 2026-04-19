@@ -21,6 +21,14 @@ def register_exception_handlers(app):
 
     @app.exception_handler(RequestValidationError)
     async def validation_handler(request: Request, exc: RequestValidationError):
+        details = []
+        for error in exc.errors():
+            details.append({
+                "field": error["loc"][-1] if len(error["loc"]) > 1 else error["loc"][0],
+                "message": error["msg"],
+                "type": error["type"]
+            })
+
         return JSONResponse(
             status_code=422,
             content={
@@ -28,7 +36,7 @@ def register_exception_handlers(app):
                 "error": {
                     "code": "VALIDATION_ERROR",
                     "message": "Invalid request data",
-                    "details": exc.errors()
+                    "details": details
                 }
             }
         )
