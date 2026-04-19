@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from app.routers.routes import router
 from app.database.db import init_db, engine
+from app.core.handlers import register_exception_handlers
 logger = logging.getLogger("uvicorn")
 
 @asynccontextmanager
@@ -17,6 +18,8 @@ async def lifespan(app: FastAPI):
     logger.info("🛑 Aplicação encerrada...")
 
 app = FastAPI(lifespan=lifespan)
+
+register_exception_handlers(app)
 
 app.include_router(router)
 
