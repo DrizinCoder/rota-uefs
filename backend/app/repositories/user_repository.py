@@ -1,17 +1,37 @@
+from app.DTOs.auth.dtos import RegisterAlunoDTO
 from sqlmodel import SQLModel
 from app.DTOs.users.dtos import CreateSimpleUserDTO
 import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import and_, select 
-
+from passlib.context import CryptContext
 from app.models.models import User
-
 from app.enums.enums import UserProfile
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class UserRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
     
+    async def create_user(self, data: RegisterAlunoDTO):
+        hashed_password = pwd_context.hash(data.password)
+        
+        user = User(
+            full_name=data.full_name,
+            password=hashed_password,
+            registration_id=data.registration_id,
+            phone=data.phone,
+            email=data.email,
+            profile=data.profile,
+            registration_status=data.registration_status
+        )
+        
+        self.session.add(user)
+        await self.session.commit()
+        await self.session.refresh(user)
+        return user
+
     async def list_all_students(self):
         statement = select(User).where(
                 and_(
@@ -52,6 +72,11 @@ class UserRepository:
         result = await self.session.execute(statement)
         return result.scalars().first()
     
+    async def get_by_email(self, email: str):
+        statement = select(User).where(User.email == email)
+        result = await self.session.execute(statement)
+        return result.scalars().first()
+
     async def create_simple_user(self, user_dto: CreateSimpleUserDTO):
         user_model = User.model_validate(user_dto)
         self.session.add(user_model)
