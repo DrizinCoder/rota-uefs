@@ -1,3 +1,4 @@
+from app.DTOs.auth.dtos import RegisterAlunoDTO
 from fastapi import APIRouter
 from app.DTOs.auth.dtos import RegisterServidorDTO, RegisterUserDTO, LoginUserDTO
 
@@ -11,9 +12,9 @@ async def register_servidor(dados: RegisterServidorDTO):
 async def register_motorista(dados: RegisterUserDTO):
     return {"message": "olá! bem-vindo a registro de motorista"}
 
-@router.post("/register/estudante")
-async def register_estudante(dados: RegisterUserDTO):
-    return {"message": "olá! bem-vindo a registro de estudantes"}
+@router.post("/register/aluno")
+async def register_aluno(dados: RegisterAlunoDTO):
+    return {"message": "olá! bem-vindo a registro de alunos"}
 
 @router.post("/register/admin")
 async def register_administrador(dados: RegisterUserDTO):
