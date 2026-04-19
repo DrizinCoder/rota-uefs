@@ -1,17 +1,32 @@
-from dataclasses import dataclass
+from app.database.enums import UserProfile
+from pydantic import EmailStr, Field
+from sqlmodel import SQLModel
+from typing import Optional
 
-@dataclass
-class UpdateProfileUserDTO:
-    telefone: str | None
-    password: str | None
-   
-@dataclass
-class UpdateProfileServidorDTO:
-    telefone: str | None
-    e_mail: str | None
-    password: str | None
-   
-@dataclass
-class UpdateProfileMotoristaDTO:
-    telefone: str | None
-    
+class BaseProfileUpdate(SQLModel):
+    phone: Optional[str] = None
+    password: Optional[str] = None
+
+class UpdateProfileUserDTO(BaseProfileUpdate):
+    pass
+
+class UpdateProfileServidorDTO(BaseProfileUpdate):
+    e_mail: Optional[EmailStr] = None
+
+class UserBaseDTO(SQLModel):
+    full_name: str = Field(min_length=3)
+    registration_id: str
+    phone: str
+    email: Optional[EmailStr] = None
+    password: str = Field(min_length=8)
+    profile: UserProfile
+
+class CreateStaffDTO(UserBaseDTO):
+    employment_type: str 
+    department: str
+
+class CreateAdminDTO(UserBaseDTO):
+    access_level: str 
+
+class CreateSimpleUserDTO(UserBaseDTO):
+    pass

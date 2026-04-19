@@ -1,8 +1,10 @@
+import asyncio
 from app.database.db import init_db
+from app.database.models import User, Staff, Admin, Reservation, Bus
 
-# Script para criação e população do banco com dados mockado
+async def main():
+    await init_db()
+    print("Banco de dados criado com sucesso!")
 
 if __name__ == "__main__":
-    init_db()    
-
-    print("Banco de dados criado com sucesso!")
+    asyncio.run(main())
