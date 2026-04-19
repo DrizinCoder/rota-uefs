@@ -1,18 +1,12 @@
-from app.database.enums import TripStatus
+import uuid
+
 from datetime import time
 from datetime import date
-from app.database.enums import BoardingStatus
-from app.database.enums import PassengerType
 from datetime import datetime
-from app.database.enums import BusStatus
-from app.database.enums import RegistrationStatus
-from app.database.enums import UserProfile
-from app.database.enums import AccessLevel
-from app.database.enums import EmploymentType
-import uuid
 from typing import Optional, List
 from sqlmodel import SQLModel, Field, Relationship
 
+from app.enums.enums import UserProfile, AccessLevel, BoardingStatus, BusStatus, EmploymentType, PassengerType, RegistrationStatus, TripStatus
 
 class User(SQLModel, table=True):
     user_id: uuid.UUID = Field(

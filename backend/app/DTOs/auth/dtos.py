@@ -1,4 +1,4 @@
-from app.database.enums import EmploymentType
+from app.enums.enums import EmploymentType
 from pydantic import EmailStr
 from pydantic import Field
 from sqlmodel import SQLModel

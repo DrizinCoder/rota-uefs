@@ -1,4 +1,4 @@
-from app.database.enums import BusStatus
+from app.enums.enums import BusStatus
 from typing import List
 from sqlmodel import SQLModel
 

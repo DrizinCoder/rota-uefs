@@ -1,3 +1,4 @@
+import uuid
 from sqlmodel import col
 from app.DTOs.fleet.dtos import BusCreateBatchDTO
 from app.DTOs.fleet.dtos import BusCreateDTO
@@ -5,8 +6,7 @@ from app.DTOs.fleet.dtos import BusUpdateBatchDTO
 from app.DTOs.fleet.dtos import BusUpdateDTO
 from typing import List
 from sqlalchemy import select, delete
-import uuid
-from app.database.models import Bus
+from app.models.models import Bus
 from sqlalchemy.ext.asyncio import AsyncSession
 
 class BusRepository:

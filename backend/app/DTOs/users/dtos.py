@@ -1,7 +1,8 @@
-from app.database.enums import UserProfile
 from pydantic import EmailStr, Field
 from sqlmodel import SQLModel
 from typing import Optional
+
+from app.enums.enums import UserProfile
 
 class BaseProfileUpdate(SQLModel):
     phone: Optional[str] = None

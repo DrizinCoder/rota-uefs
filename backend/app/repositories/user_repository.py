@@ -1,13 +1,14 @@
 from sqlmodel import SQLModel
-from app.database.enums import UserProfile
 from app.DTOs.users.dtos import CreateSimpleUserDTO
 import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import and_, select 
-from app.database.models import User
+
+from app.models.models import User
+
+from app.enums.enums import UserProfile
 
 class UserRepository:
-
     def __init__(self, session: AsyncSession):
         self.session = session
     
