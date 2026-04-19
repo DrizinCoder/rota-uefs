@@ -1,4 +1,4 @@
-from app.database.enums import BoardingStatus
+from app.enums.enums import BoardingStatus
 from sqlmodel import SQLModel, Field
 from typing import Optional
 
