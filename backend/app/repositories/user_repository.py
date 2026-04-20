@@ -180,6 +180,19 @@ class UserRepository:
         result = await self.session.execute(statement)
         return result.scalars().first()
 
+    async def get_by_registration(self, registration_id: str):
+        from sqlalchemy.orm import selectinload
+        statement = (
+            select(User)
+            .where(User.registration_id == registration_id)
+            .options(
+                selectinload(User.admin_member),
+                selectinload(User.staff_member)
+            )
+        )
+        result = await self.session.execute(statement)
+        return result.scalars().first()
+
     async def create_simple_user(self, user_dto: CreateSimpleUserDTO):
         user_model = User.model_validate(user_dto)
         self.session.add(user_model)
