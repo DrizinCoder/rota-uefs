@@ -36,7 +36,7 @@ class AuthService:
     @staticmethod
     def create_token_for_user(user: User) -> dict:
         token_data = {
-            "sub": str(user.user_id),
+            "id": str(user.user_id),
             "registration_id": user.registration_id,
             "email": user.email,
             "profile": user.profile.value,
