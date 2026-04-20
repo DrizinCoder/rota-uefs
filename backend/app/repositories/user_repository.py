@@ -62,6 +62,16 @@ class UserRepository:
         result = await self.session.execute(statemente)
         return result.scalars().all()
 
+    async def list_all_admins(self):
+        statement = select(User).where(
+            and_(
+                User.profile == UserProfile.ADMIN,
+                User.is_anonymized == False
+            )
+        )
+        result = await self.session.execute(statement)
+        return result.scalars().all()
+
     async def get_by_id(self, user_id: uuid.UUID):
         statement = select(User).where(User.user_id == user_id)
         result = await self.session.execute(statement)
