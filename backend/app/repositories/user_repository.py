@@ -1,3 +1,7 @@
+from app.core.exceptions import InternalServerException
+from logging import exception
+from app.models.models import Admin
+from app.DTOs.auth.dtos import RegisterAdminDTO
 import random
 from app.DTOs.auth.dtos import RegisterMotoristaDTO
 from app.DTOs.auth.dtos import RegisterAlunoDTO
@@ -54,8 +58,38 @@ class UserRepository:
         await self.session.refresh(user)
         return user
 
-    async def create_admin(self, data: RegisterAlunoDTO):
-        pass
+    async def create_admin(self, data: RegisterAdminDTO):
+        plain_password = data.password or f"{data.full_name.split()[0].lower()}_admin_{random.randint(1000, 9999)}"
+        hashed_password = pwd_context.hash(plain_password)
+
+        try:
+            user = User(
+                full_name=data.full_name,
+                password=hashed_password,
+                registration_id=data.registration_id,
+                phone=data.phone,
+                email=data.email,
+                profile=data.profile,
+                registration_status=data.registration_status
+            )
+            
+            self.session.add(user)
+            await self.session.flush()
+            
+            admin = Admin(
+                admin_id=user.user_id,
+                access_level=data.access_level
+            )
+            self.session.add(admin)
+            
+            await self.session.commit()
+            await self.session.refresh(user)
+            
+            return user, admin, plain_password
+        
+        except Exception as e:
+            await self.session.rollback()
+            raise InternalServerException("Erro ao criar administrador")
 
     async def list_all_students(self):
         statement = select(User).where(
