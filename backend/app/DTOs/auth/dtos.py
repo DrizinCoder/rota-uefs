@@ -1,3 +1,6 @@
+from app.enums.enums import AccessLevel
+from random import random
+from typing import Optional
 import uuid
 from datetime import datetime
 from pydantic import field_validator
@@ -17,14 +20,25 @@ class RegisterServidorDTO(SQLModel):
     e_mail: EmailStr
     departamento: str
     vinculo: EmploymentType
- 
- 
-class RegisterUserDTO(SQLModel):
-    name: str = Field(min_length=3)
-    senha: str = Field(min_length=8)
-    matricula: str
-    telefone: str
-    e_mail: EmailStr
+
+class RegisterMotoristaDTO(SQLModel):
+    full_name: str = Field(min_length=3)
+    registration_id: str
+    phone: str
+    email: Optional[EmailStr] = None
+    profile: UserProfile = UserProfile.DRIVER
+    registration_status: RegistrationStatus = RegistrationStatus.ACTIVE
+    password: Optional[str] = None 
+
+class RegisterAdminDTO(SQLModel):
+    full_name: str = Field(min_length=3)
+    registration_id: str
+    phone: Optional[str] = "Not Defined"
+    email: Optional[EmailStr] = None
+    profile: UserProfile = UserProfile.ADMIN
+    registration_status: RegistrationStatus = RegistrationStatus.ACTIVE
+    password: Optional[str] = None 
+    access_level: Optional[AccessLevel] = AccessLevel.OPERATOR
 
 class RegisterAlunoDTO(SQLModel):
     full_name: str = Field(min_length=3)
@@ -70,4 +84,14 @@ class AlunoRegisterResponseDTO(SQLModel):
     full_name: str
     registration_id: str
     email: str
-    
+
+class MotoristaRegisterResponseDTO(SQLModel):
+    user_id: uuid.UUID
+    full_name: str
+    registration_id: str
+    phone: str
+
+class AdminRegisterResponseDTO(SQLModel):
+    user_id: uuid.UUID
+    full_name: str
+    registration_id: str

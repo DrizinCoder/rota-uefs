@@ -7,17 +7,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.repositories.user_repository import UserRepository
 from app.DTOs.auth.dtos import RegisterAlunoDTO
 from fastapi import APIRouter
-from app.DTOs.auth.dtos import RegisterServidorDTO, RegisterUserDTO, LoginUserDTO
+from app.DTOs.auth.dtos import RegisterServidorDTO, LoginUserDTO
 
 router = APIRouter()
 
 @router.post("/register/servidor")
 async def register_servidor(dados: RegisterServidorDTO):
   return {"message": "olá! bem-vindo a registro de servidor"}
-
-@router.post("/register/motorista")
-async def register_motorista(dados: RegisterUserDTO):
-    return {"message": "olá! bem-vindo a registro de motorista"}
 
 @router.post("/register/aluno")
 async def register_aluno(dados: RegisterAlunoDTO, session: AsyncSession = Depends(get_session)):
@@ -28,16 +24,12 @@ async def register_aluno(dados: RegisterAlunoDTO, session: AsyncSession = Depend
     if student:
        raise ConflictException("Usuário já cadastrado")
 
-    student_created = await repo.create_user(dados)
+    student_created = await repo.create_student(dados)
 
     response_data = AlunoRegisterResponseDTO.model_validate(student_created)
 
     return ResponseHandler.created(data=response_data.model_dump(mode='json'))
-
-@router.post("/register/admin")
-async def register_administrador(dados: RegisterUserDTO):
-    return {"message": "olá! bem-vindo a registro de admin"}
-
+    
 @router.post("/login/admin")
 async def login(dados: LoginUserDTO):
     return {"message": "olá! bem-vindo a login de adm"}
