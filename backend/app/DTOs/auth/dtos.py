@@ -1,3 +1,5 @@
+from random import random
+from typing import Optional
 import uuid
 from datetime import datetime
 from pydantic import field_validator
@@ -25,6 +27,15 @@ class RegisterUserDTO(SQLModel):
     matricula: str
     telefone: str
     e_mail: EmailStr
+
+class RegisterMotoristaDTO(SQLModel):
+    full_name: str = Field(min_length=3)
+    registration_id: str
+    phone: str
+    email: Optional[EmailStr] = None
+    profile: UserProfile = UserProfile.DRIVER
+    registration_status: RegistrationStatus = RegistrationStatus.ACTIVE
+    password: Optional[str] = None 
 
 class RegisterAlunoDTO(SQLModel):
     full_name: str = Field(min_length=3)
@@ -70,4 +81,9 @@ class AlunoRegisterResponseDTO(SQLModel):
     full_name: str
     registration_id: str
     email: str
-    
+
+class MotoristaRegisterResponseDTO(SQLModel):
+    user_id: uuid.UUID
+    full_name: str
+    registration_id: str
+    phone: str

@@ -1,3 +1,5 @@
+import random
+from app.DTOs.auth.dtos import RegisterMotoristaDTO
 from app.DTOs.auth.dtos import RegisterAlunoDTO
 from sqlmodel import SQLModel
 from app.DTOs.users.dtos import CreateSimpleUserDTO
@@ -13,8 +15,28 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 class UserRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
-    
-    async def create_user(self, data: RegisterAlunoDTO):
+
+    async def create_driver(self, data: RegisterMotoristaDTO):
+        first_name = data.full_name.split()[0].lower()
+        plain_password = f"{first_name}_pass_{random.randint(1000, 9999)}"
+        hashed_password = pwd_context.hash(plain_password)
+            
+        user = User(
+            full_name=data.full_name,
+            password=hashed_password,
+            registration_id=data.registration_id,
+            phone=data.phone,
+            email=data.email,
+            profile=data.profile,
+            registration_status=data.registration_status
+        )
+        
+        self.session.add(user)
+        await self.session.commit()
+        await self.session.refresh(user)
+        return user, plain_password
+
+    async def create_student(self, data: RegisterAlunoDTO):
         hashed_password = pwd_context.hash(data.password)
         
         user = User(
@@ -31,6 +53,9 @@ class UserRepository:
         await self.session.commit()
         await self.session.refresh(user)
         return user
+
+    async def create_admin(self, data: RegisterAlunoDTO):
+        pass
 
     async def list_all_students(self):
         statement = select(User).where(
