@@ -13,7 +13,8 @@ import { TripCard } from "@/entities/viagem/ui/TripCard";
 import { TripRouteHeader } from "@/entities/viagem/ui/TripRouteHeader";
 import { PassengerListInfo } from "@/entities/viagem/ui/PassengerListInfo";
 import { TripModeToggle } from "@/entities/viagem/ui/TripModeToggle";
-
+import { ManageSubscriptionButton } from "@/features/gerenciar-inscricao/ui/ManageSubscriptionButton";
+import { SubscribeButton } from "@/features/inscrever-rota/ui/SubscribeButton";
 
 import {
   MapPin,
@@ -27,8 +28,8 @@ import {
   GraduationCap,
   Users
 } from "lucide-react";
-import { ManageSubscriptionButton } from "@/features/gerenciar-inscricao/ui/ManageSubscriptionButton";
-import { SubscribeButton } from "@/features/inscrever-rota/ui/SubscribeButton";
+
+
 
 // Dados mock atualizados
 const VIAGENS_REQUISITOS = [

@@ -14,6 +14,11 @@ import { Label } from "@/components/ui/label";
 import { TripRouteHeader } from "@/entities/viagem/ui/TripRouteHeader";
 import { PassengerListInfo } from "@/entities/viagem/ui/PassengerListInfo";
 import { GuestSubscribeButton } from "@/features/inscrever-convidado/ui/GuestSubscribeButton";
+import { GuestSubscribeModal } from "@/features/inscrever-convidado/ui/GuestSubscribeModal";
+import { TripCard } from "@/entities/viagem/ui/TripCard";
+import { ManageSubscriptionButton } from "@/features/gerenciar-inscricao/ui/ManageSubscriptionButton";
+import { TripModeToggle } from "@/entities/viagem/ui/TripModeToggle";
+import { SubscribeButton } from "@/features/inscrever-rota/ui/SubscribeButton";
 
 import {
   MapPin,
@@ -28,11 +33,6 @@ import {
   ShieldAlert,
   Users
 } from "lucide-react";
-import { GuestSubscribeModal } from "@/features/inscrever-convidado/ui/GuestSubscribeModal";
-import { TripCard } from "@/entities/viagem/ui/TripCard";
-import { ManageSubscriptionButton } from "@/features/gerenciar-inscricao/ui/ManageSubscriptionButton";
-import { TripModeToggle } from "@/entities/viagem/ui/TripModeToggle";
-import { SubscribeButton } from "@/features/inscrever-rota/ui/SubscribeButton";
 
 const VIAGENS_REQUISITOS = [
   { id: "1", dia: "segunda", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "06:00", horarioFim: "08:00", inscritosAlunos: 15, inscritosProfessores: 3, vagasTotais: 44, jaInscrito: false },
@@ -61,9 +61,7 @@ export default function PaginaProfessor() {
   const diaAtual = DIAS_SEMANA.find((d) => d.id === diaAtivo);
   const [modalConvidado, setModalConvidado] = useState<string | null>(null);
 
-  // Estado para os botões de modalidade da viagem principal e do convidado
   const [modalidades, setModalidades] = useState<Record<string, "ida" | "ida-volta">>({});
-  const [modalidadeConvidado, setModalidadeConvidado] = useState<"ida" | "ida-volta">("ida");
 
   const viagensDoDia = VIAGENS_REQUISITOS.filter((v) => v.dia === diaAtivo);
 
@@ -116,7 +114,6 @@ export default function PaginaProfessor() {
 
                   <div className="w-full h-px bg-[#103173]/5 my-1" />
 
-                  {/* O NOVO BOTÃO DE CONVIDADO */}
                   <GuestSubscribeButton onClick={() => setModalConvidado(viagem.id)} />
                 </div>
               </TripCard>
@@ -125,7 +122,6 @@ export default function PaginaProfessor() {
         </div>
       </main>
 
-        {/* O NOVO MODAL NO FINAL DA PÁGINA */}
         <GuestSubscribeModal 
           viagemId={modalConvidado} 
           onClose={() => setModalConvidado(null)} 
