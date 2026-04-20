@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.repositories.user_repository import UserRepository
 from app.DTOs.auth.dtos import RegisterAlunoDTO
 from fastapi import APIRouter
-from app.DTOs.auth.dtos import RegisterServidorDTO, RegisterUserDTO, LoginUserDTO
+from app.DTOs.auth.dtos import RegisterServidorDTO, LoginUserDTO
 
 router = APIRouter()
 
