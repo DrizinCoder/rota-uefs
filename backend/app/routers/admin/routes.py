@@ -2,7 +2,7 @@ import uuid
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.DTOs.users.dtos import CreateAdminDTO
+from app.DTOs.auth.dtos import RegisterAdminDTO
 from app.services.admin_service import AdminService
 from app.repositories.user_repository import UserRepository
 from app.controllers.admin_controller import AdminController
@@ -17,10 +17,10 @@ async def get_admin_controller(session: AsyncSession = Depends(get_session)) -> 
 
 @router.post("/")
 async def create_admin(
-    admin_data: CreateAdminDTO,
+    dados: RegisterAdminDTO,
     controller: AdminController = Depends(get_admin_controller)
 ):
-    result = await controller.create(admin_data)
+    result = await controller.create(dados)
     return ResponseHandler.created(result, "Administrador criado com sucesso")
 
 
@@ -74,3 +74,4 @@ async def delete_admin(
         raise NotFoundException("Administrador não encontrado")
     
     return ResponseHandler.ok({"deleted": True}, "Administrador removido com sucesso")
+
