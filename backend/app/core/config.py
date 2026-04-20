@@ -26,6 +26,20 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
 
+    MAIL_USERNAME: str
+    MAIL_PASSWORD: str
+    MAIL_FROM: str
+    MAIL_PORT: int = 587
+    MAIL_SERVER: str = "smtp.gmail.com"
+    MAIL_FROM_NAME: str = "Rota UEFS"
+    MAIL_STARTTLS: bool = True
+    MAIL_SSL_TLS: bool = False
+    USE_CREDENTIALS: bool = True
+    VALIDATE_CERTS: bool = True
+
+    class Config:
+        env_file = ".env"
+
 settings = Settings()
 
 def setup_logging():
