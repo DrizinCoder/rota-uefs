@@ -1,5 +1,4 @@
 from app.core.exceptions import InternalServerException
-from logging import exception
 from app.models.models import Admin
 from app.DTOs.auth.dtos import RegisterAdminDTO
 import random
@@ -11,7 +10,6 @@ from app.DTOs.users.dtos import CreateSimpleUserDTO
 import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import and_, select 
-from sqlalchemy.orm import joinedload 
 from passlib.context import CryptContext
 from app.models.models import User
 from app.models.models import Staff
