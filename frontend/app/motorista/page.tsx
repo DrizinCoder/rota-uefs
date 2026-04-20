@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
 import { FooterSection } from "@/components/landing/footer-section";
 import { Button } from "@/components/ui/button";
+import { RoleHeader } from "@/components/shared/role-header";
 import {
   Clock,
   CheckCircle2,
@@ -255,27 +256,14 @@ export default function MotoristaPage() {
       <Navigation tipoUsuario="motorista" />
 
       <main className="flex-1 max-w-lg md:max-w-3xl lg:max-w-5xl mx-auto w-full px-4 pt-10 pb-32">
-        <header className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <Bus className="h-4 w-4 text-[#103173]" />
-              <span className="text-[11px] font-bold text-[#103173] uppercase tracking-widest">
-                Painel do Motorista
-              </span>
-            </div>
-            <h1 className="text-3xl font-extrabold text-[#103173] tracking-tight">
-              Suas escalas
-            </h1>
-            <p className="text-[#73AABF] text-sm mt-1 mb-1 font-medium">
-              Selecione o dia da semana para ver as viagens agendadas.
-            </p>
-            <span className="text-[15px] font-bold text-[#103173] uppercase tracking-widest">
-              (06/04 - 10/04)
-            </span> 
-          </div>
-          
-          <CentralSuporte />
-        </header>
+        <RoleHeader
+          icon={<Bus className="h-4 w-4 text-[#103173]" />}
+          portalName="Painel do Motorista"
+          title="Suas escalas"
+          subtitle="Selecione o dia da semana para ver as viagens agendadas."
+          dateRange="(06/04 - 10/04)"
+          rightContent={<CentralSuporte />}
+        />
 
         {/* Seletor de Dias da Semana (Layout mais espaçado) */}
         <div className="max-w-lg md:max-w-3xl lg:max-w-5xl mx-auto px-4 py-3">

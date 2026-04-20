@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
 import { FooterSection } from "@/components/landing/footer-section";
 import { Button } from "@/components/ui/button";
+import { RoleHeader } from "@/components/shared/role-header";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -65,24 +66,14 @@ export default function PaginaProfessor() {
         
       </div>
 
-      <main className="flex-1 max-w-lg md:max-w-3xl lg:max-w-5xl mx-auto w-full px-4 pt-5 pb-32">
-         <header className="mb-8">
-            <div className="flex items-center gap-2 mb-1">
-              <GraduationCap className="h-4 w-4 text-[#103173]" />
-              <span className="text-[11px] font-bold text-[#103173] uppercase tracking-widest">
-                Portal do Professor (Prioridade) 
-              </span>
-            </div>
-            <h1 className="text-3xl font-extrabold text-[#103173] tracking-tight">
-              Inscreva-se na sua rota
-            </h1>
-            <p className="text-[#73AABF] text-sm mt-1 mb-1 font-medium">
-              Confira as viagens do dias. 
-            </p>
-            <span className="text-[15px] font-bold text-[#103173] uppercase tracking-widest">
-              (06/04 - 10/04)
-            </span>
-        </header>
+      <main className="flex-1 max-w-lg md:max-w-3xl lg:max-w-5xl mx-auto w-full px-4 pt-10 pb-32">
+         <RoleHeader
+          icon={<GraduationCap className="h-4 w-4 text-[#103173]" />}
+          portalName="Portal do Professor (Prioridade)"
+          title="Inscreva-se na sua rota"
+          subtitle="Confira as viagens do dias."
+          dateRange="(06/04 - 10/04)"
+        />
 
       <div className="sticky top-0 z-20 bg-[#f0f4f8]/95 backdrop-blur-md border-b border-[#103173]/5">
         <div className="max-w-lg md:max-w-3xl lg:max-w-5xl mx-auto px-4 py-3 flex gap-2">
