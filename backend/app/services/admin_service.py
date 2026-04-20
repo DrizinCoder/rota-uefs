@@ -7,7 +7,7 @@ from app.DTOs.users.dtos import CreateAdminDTO
 from app.enums.enums import UserProfile, AccessLevel, RegistrationStatus
 from app.models.models import User, Admin
 from app.repositories.user_repository import UserRepository
-from app.core.exceptions import ConflictException, NotFoundException
+from app.core.exceptions import ConflictException
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -16,9 +16,56 @@ class AdminService:
         self.user_repository = user_repository
     
     async def create_admin(self, admin_data: CreateAdminDTO) -> Admin:
+        existing_user = await self.user_repository.get_by_registration_id(admin_data.registration_id)
+        
+        if existing_user and not existing_user.is_anonymized:
+            raise ConflictException("Registration ID já está em uso")
+        
+        if existing_user and existing_user.is_anonymized:
+            
+            password_bytes = admin_data.password.encode('utf-8')
+            if len(password_bytes) > 72:
+                password_bytes = password_bytes[:72]
+            password = password_bytes.decode('utf-8', errors='ignore')
+                    
+            hashed_password = pwd_context.hash(password)    
+            
+            existing_user.full_name = admin_data.full_name
+            existing_user.password = hashed_password
+            existing_user.phone = admin_data.phone
+            existing_user.email = admin_data.email
+            existing_user.profile = UserProfile.ADMIN
+            existing_user.registration_status = RegistrationStatus.ACTIVE
+            existing_user.is_anonymized = False
+            
+            await self.user_repository.session.commit()
+            await self.user_repository.session.refresh(existing_user)
+            
+            existing_admin = await self.user_repository.get_admin_full(existing_user.user_id)
+            if existing_admin:
+                existing_admin.access_level = AccessLevel(admin_data.access_level)
+                await self.user_repository.session.commit()
+                return existing_admin
+            
+            admin = Admin(
+                admin_id=existing_user.user_id,
+                access_level=AccessLevel(admin_data.access_level)
+            )
+            self.user_repository.session.add(admin)
+            await self.user_repository.session.commit()
+            await self.user_repository.session.refresh(admin)
+            return admin
+
+        password_bytes = admin_data.password.encode('utf-8')
+        if len(password_bytes) > 72:
+            password_bytes = password_bytes[:72]
+        password = password_bytes.decode('utf-8', errors='ignore')
+        
+        hashed_password = pwd_context.hash(password)
+        
         user = User(
             full_name=admin_data.full_name,
-            password=admin_data.password,
+            password=hashed_password,
             registration_id=admin_data.registration_id,
             phone=admin_data.phone,
             email=admin_data.email,
@@ -46,18 +93,17 @@ class AdminService:
 
         self.user_repository.session.add(admin)
         await self.user_repository.session.commit()
-        await self.user_repository.session.refresh(admin)
 
-        return admin
+        return await self.get_admin_by_id(user.user_id)
 
     async def get_admin_by_id(self, admin_id: uuid.UUID) -> Optional[Admin]:
-        return await self.user_repository.get_by_id(admin_id)
+        return await self.user_repository.get_admin_full(admin_id)
 
-    async def list_all_admins(self) -> List[Admin]:
-        return await self.user_repository.list_all_admins()
+    async def get_alls_admins(self) -> List[Admin]:
+        return await self.user_repository.list_all_admins_full()
 
     async def update_admin(self, admin_id: uuid.UUID, update_data: dict) -> Optional[Admin]:
-        admin = await self.user_repository.get_by_id(admin_id)
+        admin = await self.user_repository.get_admin_full(admin_id)  
         if not admin:
             return None
 
@@ -70,21 +116,22 @@ class AdminService:
             if existing and existing.user_id != admin_id:
                 raise ConflictException("Email já está em uso")
             admin.user.email = update_data["email"]
-        if "password" in update_data:
-            admin.user.password = pwd_context.hash(update_data["password"])
         if "access_level" in update_data:
             admin.access_level = AccessLevel(update_data["access_level"])
 
-        return await self.user_repository.update(admin.user)
+        await self.user_repository.session.commit()
+        await self.user_repository.session.refresh(admin)
+        return admin
 
     async def delete_admin(self, admin_id: uuid.UUID) -> bool:
-        admin = await self.user_repository.get_by_id(admin_id)
+        admin = await self.user_repository.get_admin_full(admin_id)  
         if not admin:
             return False
+        
+        if admin.user.is_anonymized:
+            return False
 
-        admin.user.is_anonymized = True
-        await self.user_repository.session.commit()
-        return True
+        return await self.user_repository.anonymize(admin_id)
     
     def _serialize_admin(self, admin: Admin) -> Dict[str, Any]:
         return {
@@ -110,10 +157,11 @@ class AdminService:
     def serialize_admin_detail(self, admin: Admin) -> Dict[str, Any]:
         return self._serialize_admin(admin)
 
-    def serialize_admin_update(self, admin: User) -> Dict[str, Any]:
+    def serialize_admin_update(self, admin: Admin) -> Dict[str, Any]:
         return {
-            "admin_id": str(admin.user_id),
-            "full_name": admin.full_name,
-            "email": admin.email,
-            "phone": admin.phone
+            "admin_id": str(admin.admin_id),
+            "full_name": admin.user.full_name,
+            "email": admin.user.email,
+            "phone": admin.user.phone
         }
+          
