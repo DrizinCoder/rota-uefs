@@ -11,7 +11,7 @@ async def test_verify_token(current_user: TokenData = Depends(get_current_user))
         "success": True,
         "message": "Token válido!",
         "data": {
-            "user_id": current_user.id,
+            "sub": current_user.id,
             "registration_id": current_user.registration_id,
             "email": current_user.email,
             "profile": current_user.profile,
@@ -32,7 +32,7 @@ async def test_student_only(current_user: TokenData = Depends(require_student)):
         "success": True,
         "message": "Acesso permitido! Você é um aluno.",
         "data": {
-            "user_id": current_user.id,
+            "sub": current_user.id,
             "profile": current_user.profile,
             "student_id": current_user.student_id
         }
@@ -45,7 +45,7 @@ async def test_admin_only(current_user: TokenData = Depends(require_admin)):
         "success": True,
         "message": "Acesso permitido! Você é um administrador.",
         "data": {
-            "user_id": current_user.id,
+            "sub": current_user.id,
             "profile": current_user.profile,
             "access_level": current_user.access_level
         }
