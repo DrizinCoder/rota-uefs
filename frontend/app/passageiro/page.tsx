@@ -7,6 +7,8 @@ import { FooterSection } from "@/components/landing/footer-section";
 import { Button } from "@/components/ui/button";
 import { RoleHeader } from "@/components/shared/role-header";
 import { DevModeBar } from "@/components/shared/dev-mode-bar";
+import { WeekDaysMenu } from "@/components/shared/week-days-menu";
+import { CurrentDayHeader } from "@/components/shared/current-day-header";
 import {
   MapPin,
   ArrowRight,
@@ -37,12 +39,15 @@ const DIAS_SEMANA = [
 
 export default function PaginaAluno() {
   const router = useRouter();
+  
   const [diaAtivo, setDiaAtivo] = useState("segunda");
+  const diaAtual = DIAS_SEMANA.find((d) => d.id === diaAtivo);
+
   // Estado para armazenar a modalidade escolhida para cada card de viagem
   const [modalidades, setModalidades] = useState<Record<string, "ida" | "ida-volta">>({});
 
   const viagensDoDia = VIAGENS_REQUISITOS.filter((v) => v.dia === diaAtivo);
-  const diaAtual = DIAS_SEMANA.find((d) => d.id === diaAtivo);
+  
 
   const selecionarModalidade = (viagemId: string, modalidade: "ida" | "ida-volta") => {
     setModalidades(prev => ({ ...prev, [viagemId]: modalidade }));
@@ -62,23 +67,9 @@ export default function PaginaAluno() {
           subtitle="Confira as viagens do dias."
           dateRange="(06/04 - 10/04)"
         />
-        <div className="max-w-lg md:max-w-3xl lg:max-w-5xl mx-auto px-4 py-3">
-          <div className="flex gap-2">
-            {DIAS_SEMANA.map((dia) => (
-              <button
-                key={dia.id}
-                onClick={() => setDiaAtivo(dia.id)}
-                className={`flex-1 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all duration-200 relative ${dia.id === diaAtivo ? "bg-[#103173] text-white shadow-lg" : "bg-white text-[#103173]/70 border border-[#103173]/8"}`}
-              >
-                {dia.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        <WeekDaysMenu dias={DIAS_SEMANA} diaAtivo={diaAtivo} onDiaChange={setDiaAtivo} />
       
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-xs font-bold text-[#103173]/40 uppercase tracking-widest">{diaAtual?.full}</span>
-        </div>
+        <CurrentDayHeader dayName={diaAtual?.full} />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {viagensDoDia.map((viagem) => {

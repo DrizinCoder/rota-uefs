@@ -7,6 +7,8 @@ import { FooterSection } from "@/components/landing/footer-section";
 import { Button } from "@/components/ui/button";
 import { RoleHeader } from "@/components/shared/role-header";
 import { DevModeBar } from "@/components/shared/dev-mode-bar";
+import { WeekDaysMenu } from "@/components/shared/week-days-menu";
+import { CurrentDayHeader } from "@/components/shared/current-day-header";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -47,6 +49,7 @@ const DIAS_SEMANA = [
 export default function PaginaProfessor() {
   const router = useRouter();
   const [diaAtivo, setDiaAtivo] = useState("segunda");
+  const diaAtual = DIAS_SEMANA.find((d) => d.id === diaAtivo);
   const [modalConvidado, setModalConvidado] = useState<string | null>(null);
 
   // Estado para os botões de modalidade da viagem principal e do convidado
@@ -70,26 +73,17 @@ export default function PaginaProfessor() {
       <main className="flex-1 max-w-lg md:max-w-3xl lg:max-w-5xl mx-auto w-full px-4 pt-10 pb-32">
          <RoleHeader
           icon={<GraduationCap className="h-4 w-4 text-[#103173]" />}
-          portalName="Portal do Professor (Prioridade)"
+          portalName="Portal do Professor"
           title="Inscreva-se na sua rota"
           subtitle="Confira as viagens do dias."
           dateRange="(06/04 - 10/04)"
         />
 
-      <div className="sticky top-0 z-20 bg-[#f0f4f8]/95 backdrop-blur-md border-b border-[#103173]/5">
-        <div className="max-w-lg md:max-w-3xl lg:max-w-5xl mx-auto px-4 py-3 flex gap-2">
-          {DIAS_SEMANA.map((dia) => (
-            <button
-              key={dia.id}
-              onClick={() => setDiaAtivo(dia.id)}
-              className={`flex-1 py-2.5 rounded-xl text-xs font-extrabold uppercase transition-all duration-200 ${dia.id === diaAtivo ? "bg-[#103173] text-white shadow-lg" : "bg-white text-[#103173]/70"}`}
-            >
-              {dia.label}
-            </button>
-          ))}
-          </div>
-        </div>
+      <div className="sticky top-0 z-20 bg-[#f0f4f8]/95 backdrop-blur-md">
+        <WeekDaysMenu dias={DIAS_SEMANA} diaAtivo={diaAtivo} onDiaChange={setDiaAtivo} />
+      </div>
        
+        <CurrentDayHeader dayName={diaAtual?.full} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {viagensDoDia.map((viagem) => {
             const modalidadeAtual = modalidades[viagem.id] || "ida";

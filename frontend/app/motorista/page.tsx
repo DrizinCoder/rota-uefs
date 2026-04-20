@@ -6,8 +6,9 @@ import { Navigation } from "@/components/landing/navigation";
 import { FooterSection } from "@/components/landing/footer-section";
 import { Button } from "@/components/ui/button";
 import { RoleHeader } from "@/components/shared/role-header";
-
 import { DevModeBar } from "@/components/shared/dev-mode-bar";
+import { WeekDaysMenu } from "@/components/shared/week-days-menu";
+import { CurrentDayHeader } from "@/components/shared/current-day-header";
 
 import {
   Clock,
@@ -248,11 +249,11 @@ function ViagemCard({ viagem }: { viagem: (typeof VIAGENS)[0] }) {
 
 export default function MotoristaPage() {
   const router = useRouter();
-  const [diaSelecionado, setDiaSelecionado] = useState("Segunda-feira");
   const [diaAtivo, setDiaAtivo] = useState("segunda");
+  const diaAtual = DIAS_SEMANA.find((d) => d.id === diaAtivo);
 
   // Filtra as viagens para mostrar apenas as do dia selecionado
-  const viagensFiltradas = VIAGENS.filter((viagem) => viagem.dia === diaSelecionado);
+  const viagensFiltradas = VIAGENS.filter((viagem) => viagem.dia === diaAtual?.full);
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f0f4f8]">
@@ -268,20 +269,14 @@ export default function MotoristaPage() {
           rightContent={<CentralSuporte />}
         />
 
-        {/* Seletor de Dias da Semana (Layout mais espaçado) */}
-        <div className="max-w-lg md:max-w-3xl lg:max-w-5xl mx-auto px-4 py-3">
-          <div className="flex gap-2">
-            {DIAS_SEMANA.map((dia) => (
-              <button
-                key={dia.id}
-                onClick={() => setDiaAtivo(dia.id)}
-                className={`flex-1 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all duration-200 relative ${dia.id === diaAtivo ? "bg-[#103173] text-white shadow-lg" : "bg-white text-[#103173]/70 border border-[#103173]/8"}`}
-              >
-                {dia.label}
-              </button>
-            ))}
-            </div>
-          </div>
+        {/* Seletor de Dias da Semana */}
+        <WeekDaysMenu 
+          dias={DIAS_SEMANA} 
+          diaAtivo={diaAtivo} 
+          onDiaChange={setDiaAtivo} 
+        />
+
+        <CurrentDayHeader dayName={diaAtual?.full} />
 
         {/* Lista de Viagens do Dia Selecionado */}
         {viagensFiltradas.length > 0 ? (
@@ -292,7 +287,7 @@ export default function MotoristaPage() {
           <div className="flex flex-col items-center justify-center p-10 bg-white rounded-2xl border border-dashed border-slate-300 text-center">
             <CalendarDays className="h-10 w-10 text-slate-300 mb-3" />
             <p className="text-[#103173] font-bold">Nenhuma escala para este dia</p>
-            <p className="text-slate-500 text-sm mt-1">Você está livre de viagens na {diaSelecionado.toLowerCase()}.</p>
+            <p className="text-slate-500 text-sm mt-1">Você está livre de viagens na {diaAtual?.full.toLowerCase()}.</p>
           </div>
         )}
       </main>
