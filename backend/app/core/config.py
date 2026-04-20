@@ -1,12 +1,12 @@
 import logging
 import os
 from dotenv import load_dotenv
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 
 load_dotenv()
 
 class Settings(BaseSettings):
-    DATABASE_URL: str = os.getenv("DATABASE_URL")
+    DATABASE_URL: str = "postgresql+asyncpg://user:password@127.0.0.1:5432/meu_banco"
 
     MAIL_USERNAME: str
     MAIL_PASSWORD: str
