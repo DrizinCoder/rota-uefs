@@ -6,7 +6,7 @@ from pydantic_settings import BaseSettings
 load_dotenv()
 
 class Settings(BaseSettings):
-    DATABASE_URL: str = "postgresql+asyncpg://user:password@127.0.0.1:5432/meu_banco"
+    DATABASE_URL: str = os.getenv("DATABASE_URL")
 
     MAIL_USERNAME: str
     MAIL_PASSWORD: str
