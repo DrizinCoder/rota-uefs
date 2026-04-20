@@ -59,7 +59,10 @@ class UserRepository:
         return user
 
     async def create_admin(self, data: RegisterAdminDTO):
-        plain_password = data.password or f"{data.full_name.split()[0].lower()}_admin_{random.randint(1000, 9999)}"
+        base_name = data.full_name.split()[0].lower()[:20] if data.full_name else "admin"
+        plain_password = data.password or f"{base_name}_{random.randint(1000, 9999)}"
+        if len(plain_password.encode('utf-8')) > 72:
+            plain_password = plain_password[:72]
         hashed_password = pwd_context.hash(plain_password)
 
         try:
@@ -130,6 +133,37 @@ class UserRepository:
         )
         result = await self.session.execute(statement)
         return result.scalars().all()
+
+    async def list_all_admins_full(self):
+        from sqlalchemy.orm import selectinload
+        statement = select(Admin).options(selectinload(Admin.user)).where(
+            Admin.admin_id.in_(
+                select(User.user_id).where(
+                    and_(
+                        User.profile == UserProfile.ADMIN,
+                        User.is_anonymized == False
+                    )
+                )
+            )
+        )
+        result = await self.session.execute(statement)
+        return result.scalars().all()
+
+    async def get_admin_full(self, admin_id: uuid.UUID):
+        from sqlalchemy.orm import selectinload
+        statement = (
+            select(Admin)
+            .options(selectinload(Admin.user))
+            .join(User, Admin.admin_id == User.user_id) 
+            .where(
+                and_(
+                    Admin.admin_id == admin_id,
+                    User.is_anonymized == False
+                )
+            )
+        )
+        result = await self.session.execute(statement)
+        return result.scalars().first()
 
     async def get_by_id(self, user_id: uuid.UUID):
         statement = select(User).where(User.user_id == user_id)
