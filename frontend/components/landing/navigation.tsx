@@ -13,7 +13,7 @@ interface NavigationProps {
 export function Navigation({ tipoUsuario = "aluno" }: NavigationProps) {
 
   return (
-    <nav className="w-full bg-slate-950/95 backdrop-blur-md shadow-xl border-b border-white/10">
+    <nav className="w-full bg-slate-950 shadow-xl border-b border-white/10">
       <div className="container max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3 group">
           <Image
