@@ -33,6 +33,15 @@ async def get_all_servidores(session: AsyncSession = Depends(get_session)):
         raise HTTPException(status_code=404, detail="Staff not found")
     
     return {"Message": "Staff Found", "Users": users}
+@router.patch("/update/{id}/servidor")
+async def update_profile(id: uuid.UUID, dados: UpdateProfileServidorDTO, session: AsyncSession = Depends(get_session)):
+    repo = UserRepository(session)
+    updated_user = await repo.patch(id, dados)
+
+    if not updated_user:
+        raise NotFoundException("Nenhum servidor encontrado")
+
+    return ResponseHandler.ok(updated_user, "Servidores encontrados")
 
 #  -------- Perfil do motorista ----------------
 

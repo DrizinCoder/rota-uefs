@@ -10,6 +10,7 @@ from app.DTOs.users.dtos import CreateSimpleUserDTO
 import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import and_, select 
+from sqlalchemy.orm import joinedload 
 from passlib.context import CryptContext
 from app.models.models import User
 from app.models.models import Staff
