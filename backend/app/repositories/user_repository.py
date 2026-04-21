@@ -5,14 +5,17 @@ from app.DTOs.auth.dtos import RegisterAdminDTO
 import random
 from app.DTOs.auth.dtos import RegisterMotoristaDTO
 from app.DTOs.auth.dtos import RegisterAlunoDTO
+from app.DTOs.auth.dtos import RegisterServidorDTO
 from sqlmodel import SQLModel
 from app.DTOs.users.dtos import CreateSimpleUserDTO
 import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import and_, select 
+from sqlalchemy.orm import joinedload 
 from passlib.context import CryptContext
 from app.models.models import User
-from app.enums.enums import UserProfile
+from app.models.models import Staff
+from app.enums.enums import UserProfile, EmploymentType
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -57,6 +60,38 @@ class UserRepository:
         await self.session.commit()
         await self.session.refresh(user)
         return user
+
+    async def create_staff(self, data: RegisterServidorDTO):
+        hashed_password = pwd_context.hash(data.password)
+        
+        try:
+            user = User(
+                full_name=data.full_name,
+                password=hashed_password,
+                registration_id=data.registration_id,
+                phone=data.phone,
+                email=data.email,
+                profile=data.profile,
+                registration_status=data.registration_status
+            )
+
+            self.session.add(user)
+            await self.session.flush()
+
+            staff = Staff(
+                staff_id=user.user_id,
+                employment_type=EmploymentType(data.employment),
+                department=data.department
+            )
+            
+            self.session.add(staff)
+            await self.session.commit()
+            await self.session.refresh(user, ["staff_member"])
+            return user
+    
+        except Exception as e:
+            await self.session.rollback()
+            raise InternalServerException("Erro ao criar servidor")
 
     async def create_admin(self, data: RegisterAdminDTO):
         base_name = data.full_name.split()[0].lower()[:20] if data.full_name else "admin"
@@ -105,14 +140,28 @@ class UserRepository:
         return result.scalars().all()
     
     async def list_all_staff(self):
-        statement = select(User).where(
-            and_(
-                User.profile == UserProfile.STAFF,
-                User.is_anonymized == False
+        statement = (
+            select(
+                User.user_id,
+                User.full_name,
+                User.registration_id,
+                User.phone,
+                User.email,
+                User.profile,
+                User.registration_status, 
+                Staff.department,
+                Staff.employment_type
+            )
+            .join(Staff, User.user_id == Staff.staff_id)
+            .where(
+                and_(
+                    User.profile == UserProfile.STAFF,
+                    User.is_anonymized == False
+                )
             )
         )
         result = await self.session.execute(statement)
-        return result.scalars().all()
+        return result.mappings().all()
 
     async def list_all_drivers(self):
         statemente = select(User).where(
