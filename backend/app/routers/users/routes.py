@@ -86,7 +86,7 @@ async def get_user(id: uuid.UUID, session: AsyncSession = Depends(get_session)):
     return {"Message": "User Found", "User": user}
 
 @router.get("/matricula/{registration_id}/")
-async def get_estudante_by_registration_id(registration_id: uuid.UUID, session: AsyncSession = Depends(get_session)):
+async def get_estudante_by_registration_id(registration_id: str, session: AsyncSession = Depends(get_session)):
     repo = UserRepository(session)
     
     user = repo.get_by_registration_id(registration_id)
