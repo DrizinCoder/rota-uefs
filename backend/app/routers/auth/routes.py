@@ -1,4 +1,5 @@
 from app.DTOs.auth.dtos import AlunoRegisterResponseDTO
+from app.DTOs.auth.dtos import ServidorRegisterResponseDTO
 from app.core.responses import ResponseHandler
 from app.core.exceptions import ConflictException
 from app.database.db import get_session
@@ -19,8 +20,18 @@ def get_auth_controller(session: AsyncSession = Depends(get_session)) -> AuthCon
 
 
 @router.post("/register/servidor")
-async def register_servidor(dados: RegisterServidorDTO):
-  return {"message": "olá! bem-vindo a registro de servidor"}
+async def register_servidor(dados: RegisterServidorDTO, session: AsyncSession = Depends(get_session)):
+    repo = UserRepository(session)
+
+    staff = await repo.get_by_email(dados.email)
+    
+    if staff:
+       raise ConflictException("Usuário já cadastrado")
+
+    user_created = await repo.create_staff(dados)
+    response_data = ServidorRegisterResponseDTO.model_validate(user_created)
+
+    return ResponseHandler.created(data=response_data.model_dump(mode='json'))
 
 
 @router.post("/register/aluno")
