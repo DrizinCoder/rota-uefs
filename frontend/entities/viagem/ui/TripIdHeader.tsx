@@ -12,11 +12,11 @@ export function TripIdHeader({ id, diaSemana, status }: TripIdHeaderProps) {
   const isActive = status === "pronta" || status === "em_curso";
 
   return (
-    <div className="flex items-center justify-between px-1 mb-3 border-b border-slate-100 pb-2">
+    <div className="flex items-center justify-between mb-3 border-b border-slate-100 pb-2 py">
       <div className="flex items-center gap-2">
         <Circle 
           className={cn(
-            "h-2 w-2",
+            "h-2.5 w-2.5",
             isActive 
               ? "fill-emerald-500 text-emerald-500" 
               : "fill-slate-300 text-slate-300"
