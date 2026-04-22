@@ -219,7 +219,7 @@ class UserRepository:
         result = await self.session.execute(statement)
         return result.scalars().first()
 
-    async def get_by_registration_id(self, user_id: uuid.UUID):
+    async def get_by_registration_id(self, user_id: str):
         statement = select(User).where(User.registration_id == user_id)
         result = await self.session.execute(statement)
         return result.scalars().first()
