@@ -3,7 +3,7 @@ from random import random
 from typing import Optional
 import uuid
 from datetime import datetime
-from pydantic import field_validator
+from pydantic import AliasPath, field_validator
 from app.enums.enums import RegistrationStatus
 from app.enums.enums import UserProfile
 from app.enums.enums import EmploymentType
@@ -13,13 +13,15 @@ from sqlmodel import SQLModel
 import re
 
 class RegisterServidorDTO(SQLModel):
-    name: str = Field(min_length=3)
-    senha: str = Field(min_length=8)
-    matricula: str
-    telefone: str
-    e_mail: EmailStr
-    departamento: str
-    vinculo: EmploymentType
+    full_name: str = Field(min_length=3)
+    password: str = Field(min_length=8)
+    registration_id: str
+    phone: str
+    email: EmailStr
+    department: str
+    employment: str
+    profile: UserProfile = UserProfile.STAFF
+    registration_status: RegistrationStatus = RegistrationStatus.PENDING
 
 class RegisterMotoristaDTO(SQLModel):
     full_name: str = Field(min_length=3)
@@ -84,6 +86,17 @@ class AlunoRegisterResponseDTO(SQLModel):
     full_name: str
     registration_id: str
     email: str
+
+class ServidorRegisterResponseDTO(SQLModel):
+    user_id: uuid.UUID
+    full_name: str
+    registration_id: str
+    email: str
+    department: str = Field(validation_alias=AliasPath("staff_member", "department"))
+    employment: str = Field(validation_alias=AliasPath("staff_member", "employment_type"))
+
+    class Config:
+        from_attributes = True
 
 class MotoristaRegisterResponseDTO(SQLModel):
     user_id: uuid.UUID
