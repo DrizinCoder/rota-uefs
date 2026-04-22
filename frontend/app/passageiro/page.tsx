@@ -73,7 +73,7 @@ export default function PaginaAluno() {
           icon={<GraduationCap className="h-4 w-4 text-[#103173]" />}
           portalName="Portal do Aluno"
           title="Inscreva-se na sua rota"
-          subtitle="Confira as viagens do dias."
+          subtitle="Confira as viagens da semana."
           dateRange="(06/04 - 10/04)"
         />
         <WeekDaysMenu dias={DIAS_SEMANA} diaAtivo={diaAtivo} onDiaChange={setDiaAtivo} />
