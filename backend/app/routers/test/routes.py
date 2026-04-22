@@ -3,6 +3,7 @@ from app.core.exceptions import NotFoundException
 from app.middleware import get_current_user, require_student, require_admin, TokenData
 from app.services.email.use_cases import EmailUseCases
 from app.core.responses import ResponseHandler
+from app.middleware.auth_middleware import TokenData, get_current_user, require_student, require_admin
 
 from fastapi import BackgroundTasks
 
