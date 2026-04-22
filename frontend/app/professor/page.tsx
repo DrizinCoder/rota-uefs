@@ -74,7 +74,6 @@ export default function PaginaProfessor() {
       <div className="bg-[#103173] relative overflow-hidden">
         <Navigation tipoUsuario="professor" />
 
-        
       </div>
 
       <main className="flex-1 max-w-lg md:max-w-3xl lg:max-w-5xl mx-auto w-full px-4 pt-10 pb-32">
@@ -82,11 +81,11 @@ export default function PaginaProfessor() {
           icon={<GraduationCap className="h-4 w-4 text-[#103173]" />}
           portalName="Portal do Professor"
           title="Inscreva-se na sua rota"
-          subtitle="Confira as viagens do dias."
+          subtitle="Confira as viagens da semana."
           dateRange="(06/04 - 10/04)"
         />
 
-      <div className="sticky top-0 z-20 bg-[#f0f4f8]/95 backdrop-blur-md">
+      <div className="sticky top-0 z-20 bg-[#f0f4f8]/95 backdrop-blur-md ">
         <WeekDaysMenu dias={DIAS_SEMANA} diaAtivo={diaAtivo} onDiaChange={setDiaAtivo} />
       </div>
        
@@ -112,7 +111,7 @@ export default function PaginaProfessor() {
                     </div>
                   )}
 
-                  <div className="w-full h-px bg-[#103173]/5 my-1" />
+                  <div className="w-full h-px bg-[#103173]/5 my-0" />
 
                   <GuestSubscribeButton onClick={() => setModalConvidado(viagem.id)} />
                 </div>

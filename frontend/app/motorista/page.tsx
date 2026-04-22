@@ -10,20 +10,19 @@ import { DevModeBar } from "@/components/shared/dev-mode-bar";
 import { WeekDaysMenu } from "@/components/shared/week-days-menu";
 import { CurrentDayHeader } from "@/components/shared/current-day-header";
 import { EmergencyDialog } from "@/features/ajuda-emergencia/ui/EmergencyDialog";
+import { EmergencyButton } from "@/features/ajuda-emergencia/ui/EmergencyButton";
+import { TripCard } from "@/entities/viagem/ui/TripCard";
+import { TripIdHeader } from "@/entities/viagem/ui/TripIdHeader";
+import { PassengerListInfo } from "@/entities/viagem/ui/PassengerListInfo";
+import { CheckinButton } from "@/features/fazer-checkin/ui/CheckinButton";
+import { StartTripButton } from "@/features/iniciar-viagem/ui/StartTripButton";
+import { TripRouteHeader } from "@/entities/viagem/ui/TripRouteHeader";
+
 
 import {
-  Clock,
-  CheckCircle2,
   MapPin,
   CircleDot,
   Bus,
-  Users,
-  UserCircle,
-  ShieldAlert,
-  LifeBuoy,
-  Phone,
-  MessageCircle,
-  AlertTriangle,
   CalendarDays
 } from "lucide-react";
 import {
@@ -34,7 +33,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { EmergencyButton } from "@/features/ajuda-emergencia/ui/EmergencyButton";
+
 
 // Dados simulados atualizados para testar o filtro de dias
 const VIAGENS = [
@@ -111,100 +110,38 @@ function ViagemCard({ viagem }: { viagem: (typeof VIAGENS)[0] }) {
   };
 
   return (
-    <div className="mb-6">
-      <div className="bg-white rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(16,49,115,0.06),0_8px_24px_rgba(16,49,115,0.04)]">
-        <div className="bg-[#103173]/5 px-4 py-3 flex items-center justify-between border-b border-[#103173]/5">
-          <div className="flex items-center gap-2">
-            <div
-              className={`w-2 h-2 rounded-full ${statusViagem === "em_curso" ? "bg-[#F2D022]" : statusViagem === "bloqueada" ? "bg-slate-300" : "bg-[#23B99A]"} ${statusViagem !== "bloqueada" && statusViagem !== "finalizada" ? "animate-pulse" : ""}`}
+    <TripCard className="p-0 shadow-[0_1px_3px_rgba(16,49,115,0.06),0_8px_24px_rgba(16,49,115,0.04)] mb-6">
+      <div className="bg-[#103173]/5 pt-3 px-3">
+        <TripIdHeader id={viagem.id} diaSemana={viagem.dia} />
+      </div>
+
+      <div className="px-5 pt-2 pb-5">
+
+        <TripRouteHeader origem={viagem.origem} destino={viagem.destino} horarioInicio={viagem.horarioPartida} horarioFim={viagem.horarioChegada} />
+
+        <PassengerListInfo 
+          userType="motorista" 
+          vagasTotais={viagem.vagasTotais} 
+          inscritosAlunos={viagem.passageirosConfirmados}
+          inscritosProfessores={0} 
+        />
+
+        <div className="flex flex-col gap-3">
+          {statusViagem !== "finalizada" && (
+            <CheckinButton 
+              viagemId={viagem.id} 
+              onClick={handleCheckIn} 
+              className="py-10 rounded-2xl text-lg font-extrabold"
             />
-            <span className="text-xs font-extrabold text-[#103173] uppercase tracking-wider">
-              {viagem.id}
-            </span>
-          </div>
-          <span className="text-xs font-bold text-[#103173]/40">
-            {viagem.dia}
-          </span>
-        </div>
-
-        <div className="p-5">
-          <div className="flex items-start gap-3 mb-5">
-            <div className="flex flex-col items-center pt-0.5 shrink-0">
-              <CircleDot className="h-5 w-5 text-[#F2D022]" />
-              <div className="w-px h-8 bg-gradient-to-b from-[#F2D022] to-[#103173] my-1" />
-              <MapPin className="h-5 w-5 text-[#103173]" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-baseline justify-between">
-                <p className="text-lg font-extrabold text-[#103173]">
-                  {viagem.origem}
-                </p>
-                <span className="text-sm font-bold text-[#103173]/50 ml-2 shrink-0">
-                  {viagem.horarioPartida}
-                </span>
-              </div>
-              <div className="flex items-baseline justify-between mt-4">
-                <p className="text-lg font-extrabold text-[#103173]">
-                  {viagem.destino}
-                </p>
-                <span className="text-sm font-bold text-[#103173]/50 ml-2 shrink-0">
-                  {viagem.horarioChegada}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 p-3 bg-[#103173]/[0.03] rounded-xl mb-5">
-            <Users className="h-5 w-5 text-[#103173]/60" />
-            <div className="flex-1">
-              <p className="text-xs font-bold text-[#103173]/40 uppercase tracking-wider">
-                Passageiros
-              </p>
-              <p className="text-lg font-extrabold text-[#103173]">
-                {viagem.passageirosConfirmados}{" "}
-                <span className="text-sm font-bold text-[#103173]/30">
-                  / {viagem.vagasTotais}
-                </span>
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-3">
-            {statusViagem !== "finalizada" && (
-              <button
-                onClick={handleCheckIn}
-                className="w-full py-4 rounded-2xl text-lg font-extrabold bg-[#23B99A] text-white hover:bg-[#1fa889] active:scale-[0.97] transition-all shadow-lg flex items-center justify-center gap-3"
-              >
-                <CheckCircle2 className="h-6 w-6" /> Fazer Check-in
-              </button>
-            )}
-            <button
-              onClick={handleAcaoViagem}
-              disabled={
-                statusViagem === "bloqueada" || statusViagem === "finalizada"
-              }
-              className={`w-full py-4 rounded-2xl text-lg font-extrabold transition-all duration-300 flex items-center justify-center gap-3 ${
-                statusViagem === "bloqueada"
-                  ? "bg-slate-200 text-slate-400"
-                  : statusViagem === "pronta"
-                    ? "bg-[#103173] text-white"
-                    : statusViagem === "em_curso"
-                      ? "bg-[#F2D022] text-[#103173]"
-                      : "bg-slate-100 text-slate-400"
-              }`}
-            >
-              {statusViagem === "bloqueada"
-                ? "Aguardando Horário"
-                : statusViagem === "pronta"
-                  ? "Iniciar Viagem"
-                  : statusViagem === "em_curso"
-                    ? "Confirmar Chegada"
-                    : "Viagem Concluída"}
-            </button>
-          </div>
+          )}
+          <StartTripButton 
+            status={statusViagem} 
+            onClick={handleAcaoViagem} 
+            className="py-8 rounded-2xl text-lg font-extrabold "
+          />
         </div>
       </div>
-    </div>
+    </TripCard>
   );
 }
 

@@ -21,7 +21,7 @@ export function TripRouteHeader({ origem, destino, horarioInicio, horarioFim }: 
           <p className="text-base font-extrabold text-[#103173]">{origem}</p>
           <span className="text-[11px] font-bold text-[#103173]/50">{horarioInicio}</span>
         </div>
-        <div className="flex justify-between mt-3">
+        <div className="flex justify-between mt-4.5">
           <p className="text-base font-extrabold text-[#103173]">{destino}</p>
           <span className="text-[11px] font-bold text-[#103173]/50">{horarioFim}</span>
         </div>

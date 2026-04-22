@@ -1,7 +1,7 @@
 import { Users, GraduationCap } from "lucide-react";
 
 interface PassengerListInfoProps {
-  userType: "aluno" | "professor";
+  userType: "aluno" | "professor" | "motorista";
   vagasTotais: number;
   inscritosAlunos: number;
   inscritosProfessores: number;
@@ -17,6 +17,20 @@ export function PassengerListInfo({ userType, vagasTotais, inscritosAlunos, insc
         <div className="flex items-center gap-2">
           <GraduationCap className="w-4 h-4 text-[#F2D022]" />
           <span className="text-sm font-semibold text-[#103173]">{inscritosProfessores} Professores</span>
+        </div>
+      </div>
+    );
+  }if (userType === "motorista") {
+    return (
+      <div className="bg-[#f0f4f8] rounded-xl p-3 mb-4 flex items-center gap-4">
+        <Users className="w-5 h-5 text-slate-400" />
+        <div className="flex flex-col">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+            Passageiros
+          </span>
+          <span className="text-base font-extrabold text-[#103173]">
+            {totalInscritos} <span className="font-normal text-slate-400">/ {vagasTotais}</span>
+          </span>
         </div>
       </div>
     );

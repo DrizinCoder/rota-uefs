@@ -18,7 +18,7 @@ export function RoleHeader({
   rightContent,
 }: RoleHeaderProps) {
   return (
-    <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <header className="mb-1 md:mb-3 flex flex-col md:flex-row md:items-end justify-between gap-4">
       <div>
         <div className="flex items-center gap-2 mb-1">
           {icon}
