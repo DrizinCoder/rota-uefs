@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { BusFront, Lock, User, ShieldCheck } from "lucide-react";
+import { AuthPageShell } from "@/components/auth/auth-page-shell";
+import { LabeledIconInput } from "@/components/auth/labeled-icon-input";
 
 export default function TelaLogin() {
   const router = useRouter();
@@ -25,11 +26,7 @@ export default function TelaLogin() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-[#E4F2F1] p-4 relative overflow-hidden">
-      {/* Elementos Decorativos de Fundo */}
-      <div className="absolute top-[-10%] left-[-5%] w-72 h-72 bg-[#103173] opacity-5 rounded-full blur-3xl" />
-      <div className="absolute bottom-[-10%] right-[-5%] w-96 h-96 bg-[#F2D022] opacity-10 rounded-full blur-3xl" />
-
+    <AuthPageShell>
       <Card className="w-full max-w-md border-none shadow-2xl bg-white/80 backdrop-blur-md z-10">
         <CardHeader className="space-y-4 pb-8 text-center">
           <div className="mx-auto bg-[#103173] p-4 rounded-2xl w-fit shadow-lg shadow-[#103173]/20">
@@ -47,18 +44,7 @@ export default function TelaLogin() {
 
         <form onSubmit={handleLogin}>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="matricula" className="text-[#103173] font-bold ml-1">Matrícula</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-3 h-5 w-5 text-[#73AABF]" />
-                <Input
-                  id="matricula"
-                  placeholder="000000000"
-                  className="pl-10 h-12 border-[#73AABF]/20 focus:border-[#103173] focus:ring-[#103173] rounded-xl font-medium"
-                  required
-                />
-              </div>
-            </div>
+            <LabeledIconInput id="matricula" label="Matrícula" icon={User} placeholder="000000000" required />
 
             <div className="space-y-2">
               <div className="flex justify-between items-center ml-1">
@@ -71,16 +57,16 @@ export default function TelaLogin() {
                   Esqueceu a senha?
                 </button>
               </div>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-5 w-5 text-[#73AABF]" />
-                <Input
-                  id="pass"
-                  type="password"
-                  placeholder="••••••••"
-                  className="pl-10 h-12 border-[#73AABF]/20 focus:border-[#103173] focus:ring-[#103173] rounded-xl font-medium"
-                  required
-                />
-              </div>
+              <LabeledIconInput
+                id="pass"
+                label=""
+                icon={Lock}
+                type="password"
+                placeholder="••••••••"
+                containerClassName="space-y-0"
+                labelClassName="hidden"
+                required
+              />
             </div>
           </CardContent>
 
@@ -126,6 +112,6 @@ export default function TelaLogin() {
         <Button variant="ghost" size="sm" onClick={() => router.push("/motorista")} className="text-[#103173] font-bold">Ir para Motorista</Button>
         <Button variant="ghost" size="sm" onClick={() => router.push("/admin")} className="text-[#103173] font-bold">Ir para Admin</Button>
       </div>
-    </div>
+    </AuthPageShell>
   );
 }

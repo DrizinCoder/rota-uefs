@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { GraduationCap, Lock, Mail, Phone, User, ArrowLeft, KeyRound, ShieldCheck } from "lucide-react";
+import { GraduationCap, Lock, Mail, Phone, User, ArrowLeft, KeyRound } from "lucide-react";
+import { AuthPageShell } from "@/components/auth/auth-page-shell";
+import { LabeledIconInput } from "@/components/auth/labeled-icon-input";
 
 export default function CadastroAluno() {
   const router = useRouter();
@@ -65,10 +65,7 @@ export default function CadastroAluno() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-[#E4F2F1] p-4 relative overflow-hidden py-10">
-      <div className="absolute top-[-10%] left-[-5%] w-72 h-72 bg-[#103173] opacity-5 rounded-full blur-3xl" />
-      <div className="absolute bottom-[-10%] right-[-5%] w-96 h-96 bg-[#F2D022] opacity-10 rounded-full blur-3xl" />
-
+    <AuthPageShell className="py-10">
       <Card className="w-full max-w-md border-none shadow-2xl bg-white/80 backdrop-blur-md z-10">
         <CardHeader className="space-y-4 pb-6 text-center relative">
           <Button 
@@ -104,57 +101,47 @@ export default function CadastroAluno() {
         {etapa === 1 ? (
           <form onSubmit={handleCadastrar}>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="nome" className="text-[#103173] font-bold ml-1">Nome Completo</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-3 h-5 w-5 text-[#73AABF]" />
-                  <Input 
-                    id="nome" value={formData.nome} onChange={(e) => setFormData({...formData, nome: e.target.value})}
-                    placeholder="João da Silva" 
-                    className="pl-10 h-12 border-[#73AABF]/20 focus:border-[#103173] focus:ring-[#103173] rounded-xl font-medium"
-                    required
-                  />
-                </div>
-              </div>
+              <LabeledIconInput
+                id="nome"
+                label="Nome Completo"
+                icon={User}
+                value={formData.nome}
+                onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                placeholder="João da Silva"
+                required
+              />
 
-              <div className="space-y-2">
-                <Label htmlFor="telefone" className="text-[#103173] font-bold ml-1">Telefone</Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-3 h-5 w-5 text-[#73AABF]" />
-                  <Input 
-                    id="telefone" value={formData.telefone} onChange={(e) => setFormData({...formData, telefone: e.target.value})}
-                    placeholder="(75) 90000-0000" 
-                    className="pl-10 h-12 border-[#73AABF]/20 focus:border-[#103173] focus:ring-[#103173] rounded-xl font-medium"
-                    required
-                  />
-                </div>
-              </div>
+              <LabeledIconInput
+                id="telefone"
+                label="Telefone"
+                icon={Phone}
+                value={formData.telefone}
+                onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
+                placeholder="(75) 90000-0000"
+                required
+              />
 
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-[#103173] font-bold ml-1">E-mail Institucional</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-5 w-5 text-[#73AABF]" />
-                  <Input 
-                    id="email" type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    placeholder="aluno@uefs.br" 
-                    className="pl-10 h-12 border-[#73AABF]/20 focus:border-[#103173] focus:ring-[#103173] rounded-xl font-medium"
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="senha" className="text-[#103173] font-bold ml-1">Senha</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-5 w-5 text-[#73AABF]" />
-                  <Input 
-                    id="senha" type="password" value={formData.senha} onChange={(e) => setFormData({...formData, senha: e.target.value})}
-                    placeholder="Crie uma senha forte" 
-                    className="pl-10 h-12 border-[#73AABF]/20 focus:border-[#103173] focus:ring-[#103173] rounded-xl font-medium"
-                    required
-                  />
-                </div>
-              </div>
+              <LabeledIconInput
+                id="email"
+                label="E-mail Institucional"
+                icon={Mail}
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                placeholder="aluno@uefs.br"
+                required
+              />
+
+              <LabeledIconInput
+                id="senha"
+                label="Senha"
+                icon={Lock}
+                type="password"
+                value={formData.senha}
+                onChange={(e) => setFormData({ ...formData, senha: e.target.value })}
+                placeholder="Crie uma senha forte"
+                required
+              />
             </CardContent>
 
             <CardFooter className="flex flex-col gap-4 pt-4">
@@ -169,17 +156,18 @@ export default function CadastroAluno() {
         ) : (
           <form onSubmit={handleValidarCodigo}>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="codigo" className="text-[#103173] font-bold ml-1">Código de Validação</Label>
-                <div className="relative">
-                  <KeyRound className="absolute left-3 top-3 h-5 w-5 text-[#73AABF]" />
-                  <Input 
-                    id="codigo" value={formData.codigo} onChange={(e) => setFormData({...formData, codigo: e.target.value})}
-                    placeholder="Ex: 123456" maxLength={6}
-                    className="pl-10 h-12 border-[#73AABF]/20 focus:border-[#103173] focus:ring-[#103173] rounded-xl font-black tracking-widest text-center text-lg"
-                    required
-                  />
-                </div>
+              <div>
+                <LabeledIconInput
+                  id="codigo"
+                  label="Código de Validação"
+                  icon={KeyRound}
+                  value={formData.codigo}
+                  onChange={(e) => setFormData({ ...formData, codigo: e.target.value })}
+                  placeholder="Ex: 123456"
+                  maxLength={6}
+                  inputClassName="font-black tracking-widest text-center text-lg"
+                  required
+                />
                 <p className="text-xs font-bold text-[#73AABF] text-center mt-4">
                   Dica: Para o protótipo, digite "123456".
                 </p>
@@ -200,6 +188,6 @@ export default function CadastroAluno() {
           </form>
         )}
       </Card>
-    </div>
+    </AuthPageShell>
   );
 }
