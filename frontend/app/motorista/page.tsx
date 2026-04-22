@@ -112,7 +112,11 @@ function ViagemCard({ viagem }: { viagem: (typeof VIAGENS)[0] }) {
   return (
     <TripCard className="p-0 shadow-[0_1px_3px_rgba(16,49,115,0.06),0_8px_24px_rgba(16,49,115,0.04)] mb-6">
       <div className="bg-[#103173]/5 pt-3 px-3">
-        <TripIdHeader id={viagem.id} diaSemana={viagem.dia} />
+        <TripIdHeader 
+          id={viagem.id} 
+          diaSemana={viagem.dia} 
+          status={statusViagem} 
+        />
       </div>
 
       <div className="px-5 pt-2 pb-5">
