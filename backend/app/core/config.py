@@ -7,7 +7,8 @@ load_dotenv()
 
 class Settings(BaseSettings):
     DATABASE_URL: str = os.getenv("DATABASE_URL")
-
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
+    SECRET_KEY: str = os.getenv("SECRET_KEY")
     MAIL_USERNAME: str
     MAIL_PASSWORD: str
     MAIL_FROM: str
