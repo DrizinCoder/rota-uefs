@@ -6,7 +6,6 @@ from app.routers.admin.routes import router as adm_router
 from app.routers.auth.routes import router as auth_router
 from app.routers.bus_routes.routes import router as bus_routes_router
 from app.routers.fleet.routes import router as fleet_router
-from app.core.exceptions import NotFoundException
 
 router = APIRouter()
 
