@@ -28,12 +28,6 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
-target_metadata = None
-
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
@@ -101,14 +95,25 @@ def run_migrations_online() -> None:
         poolclass=pool.NullPool,
     )
 
-    with connectable.connect() as connection:
+    import asyncio
+    
+    def do_run_migrations(connection):
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection, 
+            target_metadata=target_metadata,
+            compare_type=True,
+            compare_server_default=True
         )
-
         with context.begin_transaction():
             context.run_migrations()
 
+    async def run_async_migrations():
+        async with connectable.connect() as connection:
+            await connection.run_sync(do_run_migrations)
+
+    asyncio.run(run_async_migrations())
+    
+    asyncio.run(connectable.dispose())
 
 if context.is_offline_mode():
     run_migrations_offline()
