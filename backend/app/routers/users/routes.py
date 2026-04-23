@@ -5,6 +5,13 @@ from app.middleware import require_profile
 from app.repositories.user_repository import pwd_context
 from app.core.exceptions import UnprocessableEntityException
 from app.middleware import require_admin
+from app.core.exceptions import UnprocessableEntityException
+from app.repositories.user_repository import pwd_context
+from http.client import NOT_FOUND
+from http.client import UNAUTHORIZED
+from app.enums.enums import UserProfile
+from app.DTOs.users.dtos import PasswordUpdate
+from app.DTOs.users.dtos import PhoneUpdate
 import uuid
 from app.DTOs.auth.dtos import RegisterServidorDTO
 from app.DTOs.users.dtos import CreateSimpleUserDTO
@@ -60,6 +67,16 @@ async def get_all_drivers(
 
     return {"Message": "Drivers Found", "Users": users}
 
+
+@router.patch("/update/phone/{id}")
+async def update_profile(id: uuid.UUID, dados: PhoneUpdate, session: AsyncSession = Depends(get_session)):
+    repo = UserRepository(session)
+    updated_user = await repo.patch(id, dados)
+
+    if not updated_user:
+        raise HTTPException(status_code=404, detail="Driver not found")
+
+    return {"Message": "Phone Updated", "User": updated_user}
 
 # ----------- Perfil do estudante ------------
 '''

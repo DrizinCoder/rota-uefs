@@ -34,6 +34,7 @@ class CreateAdminDTO(UserBaseDTO):
 class CreateSimpleUserDTO(UserBaseDTO):
     pass
 
+
 class PasswordUpdate(SQLModel):
     password: str = Field(min_length=8)
     confirm_password: str = Field(min_length=8)
