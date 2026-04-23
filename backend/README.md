@@ -131,3 +131,13 @@ app/
 > **Regra de ouro:** `routers` → `services` → `repositories` → `database`. Nenhuma camada deve pular uma etapa ou ter dependência invertida.
 
 ---
+
+# Migrations
+
+| Comando | Objetivo | Quando usar |
+| :--- | :--- | :--- |
+| `alembic revision --autogenerate -m "msg"` | Comparar código vs banco | Após mudar qualquer campo nos seus modelos. |
+| `alembic upgrade head` | Sincronizar o banco | Sempre que você criar uma revisão ou puxar código novo. |
+| `alembic downgrade -1` | Desfazer erro | Quando precisar reverter a última alteração. |
+
+---
