@@ -37,7 +37,6 @@ def get_current_user(
         user_id = payload.get("sub")
         profile = payload.get("profile")
 
-        print("Oiii", user_id, "ddsds", profile)
         
         if not user_id or not profile:
             raise UnauthorizedException("Token inválido: dados do usuário ausentes")

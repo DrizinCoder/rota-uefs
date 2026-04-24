@@ -51,7 +51,7 @@ class UserController:
 
             if not user_id_str or not new_email or token_type != "email_change":
                 return RedirectResponse(url=f"{settings.BASE_URL_FRONTEND}/email-change/confirm", status_code=400)
-
+            
             user_id = uuid.UUID(user_id_str)
 
         except JWTError:
