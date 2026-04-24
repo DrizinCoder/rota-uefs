@@ -162,13 +162,14 @@ async def request_email_change(
     base_url = str(request.base_url).rstrip('/')
     
     # current_user.id guarda o UUID do usuário logado que extraímos do Token de Login dele
-    user_id = uuid.UUID(current_user.id)
+    user_id = uuid.UUID(current_user.sub)
     
     result = await controller.request_email_change(
         user_id=user_id,
         new_email=dados.new_email,
         base_url=base_url
     )
+
     return ResponseHandler.ok(data=result)
 
 @router.post("/email-change/confirm")
