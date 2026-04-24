@@ -169,7 +169,7 @@ export default function CadastroAluno() {
                   required
                 />
                 <p className="text-xs font-bold text-[#73AABF] text-center mt-4">
-                  Dica: Para o protótipo, digite "123456".
+                  Dica: Para o protótipo, digite &quot;123456&quot;.
                 </p>
               </div>
             </CardContent>
