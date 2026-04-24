@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends
 from app.core.exceptions import NotFoundException
-from app.middleware import get_current_user, require_student, require_admin, TokenData
 from app.services.email.use_cases import EmailUseCases
 from app.core.responses import ResponseHandler
 from app.middleware.auth_middleware import TokenData, get_current_user, require_student, require_admin
@@ -50,7 +49,7 @@ async def test_admin_only(current_user: TokenData = Depends(require_admin)):
         "success": True,
         "message": "Acesso permitido! Você é um administrador.",
         "data": {
-            "sub": current_user.id,
+            "sub": current_user.sub,
             "profile": current_user.profile,
             "access_level": current_user.access_level
         }
