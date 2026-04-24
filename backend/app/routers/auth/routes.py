@@ -1,4 +1,5 @@
-from app.DTOs.auth.dtos import AlunoRegisterResponseDTO, RecoverPasswordDTO
+from jose import jwt
+from app.DTOs.auth.dtos import AlunoRegisterResponseDTO, ResetPasswordDTO
 from app.DTOs.auth.dtos import ServidorRegisterResponseDTO
 from app.core.responses import ResponseHandler
 from app.core.exceptions import ConflictException
@@ -69,5 +70,7 @@ async def recover_password(email: str, controller: AuthController = Depends(get_
     return ResponseHandler.ok(token)
 
 @router.post("/reset/password")
-async def reset_password(data: RecoverPasswordDTO, controller: AuthController = Depends(get_auth_controller)):
-    pass
+async def reset_password(data: ResetPasswordDTO, token: str, controller: AuthController = Depends(get_auth_controller)):
+
+    await controller.reset_password(token, data)
+    return ResponseHandler.no_content()

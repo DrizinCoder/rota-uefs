@@ -35,7 +35,7 @@ class EmailUseCases:
                 "recover_password.html",
                 {
                     "name": name,
-                    "link": token
+                    "link": f"https://rota-uefs/reset/password?token={token}"
                 }
             )
 

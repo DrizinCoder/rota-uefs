@@ -109,7 +109,7 @@ class AdminRegisterResponseDTO(SQLModel):
     full_name: str
     registration_id: str
 
-class RecoverPasswordDTO(SQLModel):
+class ResetPasswordDTO(SQLModel):
     user_id: uuid.UUID
     password: str
     password_confirmation: str
