@@ -14,7 +14,7 @@ from app.DTOs.operational.dtos import CreateReservaDTO, DeleteReservaDTO
 from app.DTOs.users.email_dtos import RequestEmailChangeDTO, ConfirmEmailChangeDTO
 from app.controllers.user_controller import UserController
 from app.middleware.auth_middleware import TokenData, get_current_user
-from fastapi import Request
+from fastapi import Request, Query
 
 router = APIRouter()
 
@@ -76,18 +76,7 @@ async def get_all_estudantes(session: AsyncSession = Depends(get_session)):
     if not users:
         raise HTTPException(status_code=404, detail="Students not found")
 
-    return {"Message": "Students Found", "Users": users} 
-
-@router.get("/{id}")
-async def get_user(id: uuid.UUID, session: AsyncSession = Depends(get_session)):
-    repo = UserRepository(session)
-
-    user = repo.get_by_id(id)
-
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    return {"Message": "User Found", "User": user}
+    return {"Message": "Students Found", "Users": users}
 
 @router.get("/matricula/{registration_id}/")
 async def get_estudante_by_registration_id(registration_id: str, session: AsyncSession = Depends(get_session)):
@@ -172,10 +161,22 @@ async def request_email_change(
 
     return ResponseHandler.ok(data=result)
 
-@router.post("/email-change/confirm")
+@router.get("/email-change/confirm")
 async def confirm_email_change(
-    dados: ConfirmEmailChangeDTO,
+    token: str = Query(..., description="Token de confirmação de mudança de email"),
     controller: UserController = Depends(get_user_controller)
 ):
-    result = await controller.confirm_email_change(token=dados.token)
+    print(f"Token recebido para confirmação de email: {token}")
+    result = await controller.confirm_email_change(token=token)
     return ResponseHandler.ok(data=result)
+
+@router.get("/{id}")
+async def get_user(id: uuid.UUID, session: AsyncSession = Depends(get_session)):
+    repo = UserRepository(session)
+
+    user = repo.get_by_id(id)
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return {"Message": "User Found", "User": user}

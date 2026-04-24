@@ -33,7 +33,7 @@ class UserController:
         )
 
         # 3. Cria o link de confirmação que vai no botão do e-mail
-        confirmation_link = f"{base_url}/confirm-email?token={token}"
+        confirmation_link = f"{base_url}/users/email-change/confirm?token={token}"
 
         # 4. Envia o e-mail
         self.email_use_cases.send_email_change_confirmation(new_email, confirmation_link)
