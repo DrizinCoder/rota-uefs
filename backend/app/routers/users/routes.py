@@ -15,6 +15,8 @@ from app.DTOs.users.email_dtos import RequestEmailChangeDTO, ConfirmEmailChangeD
 from app.controllers.user_controller import UserController
 from app.middleware.auth_middleware import TokenData, get_current_user
 from fastapi import Request, Query
+from fastapi.responses import RedirectResponse
+from app.core.config import settings
 
 router = APIRouter()
 
@@ -166,9 +168,8 @@ async def confirm_email_change(
     token: str = Query(..., description="Token de confirmação de mudança de email"),
     controller: UserController = Depends(get_user_controller)
 ):
-    print(f"Token recebido para confirmação de email: {token}")
     result = await controller.confirm_email_change(token=token)
-    return ResponseHandler.ok(data=result)
+    return RedirectResponse(url=f"{settings.BASE_URL_FRONTEND}/email-change/confirm", status_code=302)
 
 @router.get("/{id}")
 async def get_user(id: uuid.UUID, session: AsyncSession = Depends(get_session)):

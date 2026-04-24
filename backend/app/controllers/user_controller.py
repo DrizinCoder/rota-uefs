@@ -7,6 +7,7 @@ from app.core.exceptions import ConflictException, BadRequestException, NotFound
 from app.repositories.user_repository import UserRepository
 from app.services.auth_service import AuthService
 from app.services.email.use_cases import EmailUseCases
+from fastapi.responses import RedirectResponse
 
 class UserController:
     def __init__(self, repository: UserRepository):
@@ -49,8 +50,8 @@ class UserController:
             token_type = payload.get("type")
 
             if not user_id_str or not new_email or token_type != "email_change":
-                raise BadRequestException("Token inválido para esta operação.")
-            
+                return RedirectResponse(url=f"{settings.BASE_URL_FRONTEND}/email-change/confirm", status_code=400)
+
             user_id = uuid.UUID(user_id_str)
 
         except JWTError:

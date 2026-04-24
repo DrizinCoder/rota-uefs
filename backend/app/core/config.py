@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     MAIL_SSL_TLS: bool = False
     USE_CREDENTIALS: bool = True
     VALIDATE_CERTS: bool = True
+    BASE_URL_FRONTEND: str = os.getenv("BASE_URL_FRONTEND")
 
     class Config:
         env_file = ".env"
