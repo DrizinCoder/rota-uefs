@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Briefcase, Lock, Mail, Phone, User, ArrowLeft, BadgeCheck, ShieldAlert, BriefcaseBusiness } from "lucide-react";
 import { AuthPageShell } from "@/components/auth/auth-page-shell";
