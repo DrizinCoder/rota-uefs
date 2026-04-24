@@ -75,6 +75,7 @@ class EmailUseCases:
 
             self.email_service.send(
                 subject=f"{first_name}, ative sua conta no Rota UEFS",
+                subject="Recuperação de Senha - Rota UEFS 🚍",
                 email_to=email,
                 html_content=html
             )
@@ -82,4 +83,5 @@ class EmailUseCases:
         except Exception as e:
             raise InternalServerException(
                 message=f"Erro ao enviar confirmação: {str(e)}"
+                message=f"Erro ao enviar email: {str(e)}"
             )
