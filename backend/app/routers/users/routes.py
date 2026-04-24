@@ -17,6 +17,7 @@ from app.middleware.auth_middleware import TokenData, get_current_user
 from fastapi import Request, Query
 from fastapi.responses import RedirectResponse
 from app.core.config import settings
+from fastapi import BackgroundTasks
 
 router = APIRouter()
 
@@ -146,22 +147,19 @@ def get_user_controller(session: AsyncSession = Depends(get_session)) -> UserCon
 async def request_email_change(
     request: Request,
     dados: RequestEmailChangeDTO,
+    background_tasks: BackgroundTasks,
     current_user: TokenData = Depends(get_current_user),
     controller: UserController = Depends(get_user_controller)
 ):
     # Passamos o host atual para gerar o link (ex: http://localhost:8000)
     base_url = str(request.base_url).rstrip('/')
-    
+
     # current_user.id guarda o UUID do usuário logado que extraímos do Token de Login dele
     user_id = uuid.UUID(current_user.sub)
-    
-    result = await controller.request_email_change(
-        user_id=user_id,
-        new_email=dados.new_email,
-        base_url=base_url
-    )
 
-    return ResponseHandler.ok(data=result)
+    background_tasks.add_task(controller.request_email_change, user_id=user_id, new_email=dados.new_email, base_url=base_url)
+
+    return ResponseHandler.ok(data={"message": "E-mail de confirmação será enviado em breve."})
 
 @router.get("/email-change/confirm")
 async def confirm_email_change(
