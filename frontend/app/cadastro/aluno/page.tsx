@@ -49,15 +49,13 @@ const handleSubmit = async (e: React.FormEvent) => {
     setErro("");
 
     try {
-      // console.log("Enviando dados do discente:", formData);
       
-      // Aqui a mágica da integração acontece!
       const resposta = await authService.cadastroAluno(formData);
       
-      //console.log("Deu bom! Aluno cadastrado:", resposta);
-      alert("Cadastro realizado com sucesso!");
+      setEtapa(2);
+
     } catch (error) {
-      // console.error("Deu ruim na requisição:", error);
+
       alert("Erro ao cadastrar. Olhe o terminal/console.");
     } finally {
       setIsLoading(false);
