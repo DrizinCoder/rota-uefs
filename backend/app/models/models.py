@@ -52,6 +52,7 @@ class Admin(SQLModel, table=True):
     access_level: AccessLevel
 
     user: "User" = Relationship(back_populates="admin_member")
+    logs: List["AuditLog"] = Relationship(back_populates="admin")
     
 class Bus(SQLModel, table=True):
     bus_plate: str = Field(primary_key=True, index=True, nullable=False)
@@ -79,6 +80,9 @@ class AuditLog(SQLModel, table=True):
     action: str
     timestamp: datetime = Field(default_factory=datetime.now)
 
+    admin_id: uuid.UUID = Field(foreign_key="admin.admin_id")
+    admin: "Admin" = Relationship(back_populates="logs")
+
 class Trip(SQLModel, table=True):
     trip_id: uuid.UUID = Field(
         default_factory=uuid.uuid4,
@@ -103,15 +107,15 @@ class Reservation(SQLModel, table=True):
         index=True
     )
     
-    user_id: Optional[uuid.UUID] = Field(default=None, foreign_key="user.user_id")
+    user_id: uuid.UUID = Field(foreign_key="user.user_id")
     trip_id: uuid.UUID = Field(foreign_key="trip.trip_id")
     
-    passenger_type: PassengerType
     extra_passenger_name: Optional[str] = Field(default=None) 
     
     boarding_confirmation: BoardingStatus = Field(default=BoardingStatus.NOT_BOARDED)
-    confirmation_code: str = Field(unique=True, index=True)
     boarding_timestamp: Optional[datetime] = Field(default=None)
 
+    reservation_timestamp: datetime = Field(default_factory=datetime.now)
+
     trip: Trip = Relationship(back_populates="reservations")
-    user: Optional["User"] = Relationship()
+    user: User = Relationship(back_populates="reservations")

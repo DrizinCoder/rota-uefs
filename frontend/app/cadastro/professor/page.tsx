@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Briefcase, Lock, Mail, Phone, User, ArrowLeft, BadgeCheck, ShieldAlert, CheckCircle2, BriefcaseBusiness } from "lucide-react";
+import { Briefcase, Lock, Mail, Phone, User, ArrowLeft, BadgeCheck, ShieldAlert, BriefcaseBusiness } from "lucide-react";
+import { AuthPageShell } from "@/components/auth/auth-page-shell";
+import { LabeledIconInput } from "@/components/auth/labeled-icon-input";
 
 export default function CadastroProfessor() {
   const router = useRouter();
@@ -24,17 +25,56 @@ export default function CadastroProfessor() {
     senha: ""
   });
 
+  const validarFormulario = () => {
+    const nome = formData.nome.trim();
+    const matricula = formData.matricula.trim();
+    const departamento = formData.departamento.trim();
+    const telefoneNumeros = formData.telefone.replace(/\D/g, "");
+    const email = formData.email.trim().toLowerCase();
+    const senha = formData.senha;
+
+    if (nome.length < 3) {
+      return "Nome completo deve ter pelo menos 3 caracteres.";
+    }
+
+    if (!/^[A-Za-z0-9-]{4,20}$/.test(matricula)) {
+      return "Matrícula inválida. Use de 4 a 20 caracteres (letras, números e hífen).";
+    }
+
+    if (!formData.vinculo) {
+      return "Selecione um tipo de vínculo válido.";
+    }
+
+    if (departamento.length < 2) {
+      return "Departamento inválido.";
+    }
+
+    if (telefoneNumeros.length < 10 || telefoneNumeros.length > 11) {
+      return "Telefone inválido. Informe DDD + número com 10 ou 11 dígitos.";
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return "Formato de e-mail inválido.";
+    }
+
+    if (!email.endsWith("@uefs.br")) {
+      return "Use um e-mail institucional terminado em @uefs.br.";
+    }
+
+    if (senha.length < 8) {
+      return "A senha deve ter pelo menos 8 caracteres.";
+    }
+
+    return null;
+  };
+
   const handleCadastrar = (e: React.FormEvent) => {
     e.preventDefault();
     setErro("");
 
-    if (!formData.vinculo) {
-      setErro("Selecione um tipo de vínculo válido.");
-      return;
-    }
-
-    if (!formData.email.includes("@")) {
-      setErro("Formato de e-mail inválido.");
+    const erroValidacao = validarFormulario();
+    if (erroValidacao) {
+      setErro(erroValidacao);
       return;
     }
 
@@ -49,10 +89,7 @@ export default function CadastroProfessor() {
 
   if (isSucesso) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-[#E4F2F1] p-4 relative overflow-hidden">
-        <div className="absolute top-[-10%] left-[-5%] w-72 h-72 bg-[#103173] opacity-5 rounded-full blur-3xl" />
-        <div className="absolute bottom-[-10%] right-[-5%] w-96 h-96 bg-[#F2D022] opacity-10 rounded-full blur-3xl" />
-        
+      <AuthPageShell>
         <Card className="w-full max-w-md border-none shadow-2xl bg-white/80 backdrop-blur-md z-10 text-center py-8">
           <CardHeader>
             <div className="mx-auto bg-amber-100 p-4 rounded-full w-fit mb-4">
@@ -77,15 +114,12 @@ export default function CadastroProfessor() {
             </Button>
           </CardFooter>
         </Card>
-      </div>
+      </AuthPageShell>
     );
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-[#E4F2F1] p-4 relative overflow-hidden py-10">
-      <div className="absolute top-[-10%] left-[-5%] w-72 h-72 bg-[#103173] opacity-5 rounded-full blur-3xl" />
-      <div className="absolute bottom-[-10%] right-[-5%] w-96 h-96 bg-[#F2D022] opacity-10 rounded-full blur-3xl" />
-
+    <AuthPageShell className="py-10">
       <Card className="w-full max-w-md border-none shadow-2xl bg-white/80 backdrop-blur-md z-10">
         <CardHeader className="space-y-4 pb-6 text-center relative">
           <Button 
@@ -118,31 +152,29 @@ export default function CadastroProfessor() {
 
         <form onSubmit={handleCadastrar}>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="nome" className="text-[#103173] font-bold ml-1">Nome Completo</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-3 h-5 w-5 text-[#73AABF]" />
-                <Input 
-                  id="nome" value={formData.nome} onChange={(e) => setFormData({...formData, nome: e.target.value})}
-                  placeholder="Seu nome completo" 
-                  className="pl-10 h-12 border-[#73AABF]/20 focus:border-[#103173] focus:ring-[#103173] rounded-xl font-medium"
-                  required
-                />
-              </div>
-            </div>
+            <LabeledIconInput
+              id="nome"
+              label="Nome Completo"
+              icon={User}
+              value={formData.nome}
+              onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+              placeholder="Seu nome completo"
+              required
+            />
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="matricula" className="text-[#103173] font-bold ml-1">Matrícula</Label>
-                <div className="relative">
-                  <BadgeCheck className="absolute left-3 top-3 h-5 w-5 text-[#73AABF]" />
-                  <Input 
-                    id="matricula" value={formData.matricula} onChange={(e) => setFormData({...formData, matricula: e.target.value})}
-                    placeholder="0000000" 
-                    className="pl-10 h-12 border-[#73AABF]/20 focus:border-[#103173] focus:ring-[#103173] rounded-xl font-medium"
-                    required
-                  />
-                </div>
+                <LabeledIconInput
+                  id="matricula"
+                  label="Matrícula"
+                  icon={BadgeCheck}
+                  value={formData.matricula}
+                  onChange={(e) =>
+                    setFormData({ ...formData, matricula: e.target.value.toUpperCase().replace(/\s/g, "") })
+                  }
+                  placeholder="2024101"
+                  required
+                />
               </div>
 
               <div className="space-y-2">
@@ -162,57 +194,47 @@ export default function CadastroProfessor() {
               
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="departamento" className="text-[#103173] font-bold ml-1">Departamento</Label>
-              <div className="relative">
-                <BriefcaseBusiness className="absolute left-3 top-3 h-5 w-5 text-[#73AABF]" />
-                <Input 
-                  id="telefone" value={formData.departamento} onChange={(e) => setFormData({...formData, departamento: e.target.value})}
-                  placeholder="Ex: DTEC" 
-                  className="pl-10 h-12 border-[#73AABF]/20 focus:border-[#103173] focus:ring-[#103173] rounded-xl font-medium"
-                  required
-                />
-              </div>
-            </div>
+            <LabeledIconInput
+              id="telefone"
+              label="Departamento"
+              icon={BriefcaseBusiness}
+              value={formData.departamento}
+              onChange={(e) => setFormData({ ...formData, departamento: e.target.value })}
+              placeholder="Ex: DTEC"
+              required
+            />
 
-            <div className="space-y-2">
-              <Label htmlFor="telefone" className="text-[#103173] font-bold ml-1">Telefone</Label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-3 h-5 w-5 text-[#73AABF]" />
-                <Input 
-                  id="telefone" value={formData.telefone} onChange={(e) => setFormData({...formData, telefone: e.target.value})}
-                  placeholder="(75) 90000-0000" 
-                  className="pl-10 h-12 border-[#73AABF]/20 focus:border-[#103173] focus:ring-[#103173] rounded-xl font-medium"
-                  required
-                />
-              </div>
-            </div>
+            <LabeledIconInput
+              id="telefone"
+              label="Telefone"
+              icon={Phone}
+              value={formData.telefone}
+              onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
+              placeholder="(75) 90000-0000"
+              required
+            />
 
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-[#103173] font-bold ml-1">E-mail</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-5 w-5 text-[#73AABF]" />
-                <Input 
-                  id="email" type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  placeholder="Ex: email@uefs.br" 
-                  className="pl-10 h-12 border-[#73AABF]/20 focus:border-[#103173] focus:ring-[#103173] rounded-xl font-medium"
-                  required
-                />
-              </div>
-            </div>
+            <LabeledIconInput
+              id="email"
+              label="E-mail"
+              icon={Mail}
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              placeholder="Ex: email@uefs.br"
+              required
+            />
             
-            <div className="space-y-2">
-              <Label htmlFor="senha" className="text-[#103173] font-bold ml-1">Senha</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-5 w-5 text-[#73AABF]" />
-                <Input 
-                  id="senha" type="password" value={formData.senha} onChange={(e) => setFormData({...formData, senha: e.target.value})}
-                  placeholder="••••••••" 
-                  className="pl-10 h-12 border-[#73AABF]/20 focus:border-[#103173] focus:ring-[#103173] rounded-xl font-medium"
-                  required
-                />
-              </div>
-            </div>
+            <LabeledIconInput
+              id="senha"
+              label="Senha"
+              icon={Lock}
+              type="password"
+              value={formData.senha}
+              onChange={(e) => setFormData({ ...formData, senha: e.target.value })}
+              placeholder="••••••••"
+              required
+            />
           </CardContent>
 
           <CardFooter className="flex flex-col gap-4 pt-4">
@@ -225,6 +247,6 @@ export default function CadastroProfessor() {
           </CardFooter>
         </form>
       </Card>
-    </div>
+    </AuthPageShell>
   );
 }

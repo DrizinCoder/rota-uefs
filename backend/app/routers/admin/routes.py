@@ -11,7 +11,27 @@ from app.repositories.user_repository import UserRepository
 from app.services.admin_service import AdminService
 from app.controllers.admin_controller import AdminController
 
+from app.DTOs.auth.dtos import RegisterAdminDTO
+from app.services.admin_service import AdminService
+from app.repositories.user_repository import UserRepository
+from app.controllers.admin_controller import AdminController
+from app.database.db import get_session
+from app.core.responses import ResponseHandler
+from app.core.exceptions import NotFoundException
 router = APIRouter()
+async def get_admin_controller(session: AsyncSession = Depends(get_session)) -> AdminController:
+    user_repo = UserRepository(session)
+    admin_service = AdminService(user_repo)
+    return AdminController(admin_service)
+
+@router.post("/")
+async def create_admin(
+    dados: RegisterAdminDTO,
+    controller: AdminController = Depends(get_admin_controller)
+):
+    result = await controller.create(dados)
+    return ResponseHandler.created(result, "Administrador criado com sucesso")
+
 
 async def get_admin_controller(session: AsyncSession = Depends(get_session)) -> AdminController:
     user_repo = UserRepository(session)

@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { GraduationCap, Lock, Mail, Phone, User, ArrowLeft, KeyRound, ShieldCheck } from "lucide-react";
+import { GraduationCap, Lock, Mail, Phone, User, ArrowLeft, KeyRound, BadgeCheck } from "lucide-react";
+import { AuthPageShell } from "@/components/auth/auth-page-shell";
+import { LabeledIconInput } from "@/components/auth/labeled-icon-input";
 
 export default function CadastroAluno() {
   const router = useRouter();
@@ -16,19 +16,59 @@ export default function CadastroAluno() {
   
   const [formData, setFormData] = useState({
     nome: "",
+    matricula: "",
     telefone: "",
     email: "",
     senha: "",
     codigo: ""
   });
 
+  const validarFormulario = () => {
+    const nome = formData.nome.trim();
+    const matricula = formData.matricula.trim();
+    const telefoneNumeros = formData.telefone.replace(/\D/g, "");
+    const email = formData.email.trim().toLowerCase();
+    const senha = formData.senha;
+
+    if (nome.length < 3) {
+      return "Nome completo deve ter pelo menos 3 caracteres.";
+    }
+
+    if (!/^\d{8}$/.test(matricula)) {
+      return "Matrícula inválida. Informe 8 dígitos numéricos.";
+    }
+
+    const anoMatricula = Number.parseInt(matricula.slice(0, 2), 10);
+    const semestreMatricula = matricula.slice(2, 3);
+    const anoAtualDoCurso = new Date().getFullYear() - 2000;
+
+    if (anoMatricula > anoAtualDoCurso || !["1", "2"].includes(semestreMatricula)) {
+      return "Matrícula inválida. Verifique ano e semestre.";
+    }
+
+    if (telefoneNumeros.length < 10 || telefoneNumeros.length > 11) {
+      return "Telefone inválido. Informe DDD + número com 10 ou 11 dígitos.";
+    }
+
+    const emailEsperado = `${matricula}@discente.uefs.br`;
+    if (email !== emailEsperado) {
+      return `E-mail institucional inválido. Use ${emailEsperado}.`;
+    }
+
+    if (senha.length < 8) {
+      return "A senha deve ter pelo menos 8 caracteres.";
+    }
+
+    return null;
+  };
+
   const handleCadastrar = (e: React.FormEvent) => {
     e.preventDefault();
     setErro("");
 
-    // Validação simples de email institucional (exemplo)
-    if (!formData.email.includes("@")) {
-      setErro("Formato de e-mail inválido.");
+    const erroValidacao = validarFormulario();
+    if (erroValidacao) {
+      setErro(erroValidacao);
       return;
     }
 
@@ -65,10 +105,7 @@ export default function CadastroAluno() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-[#E4F2F1] p-4 relative overflow-hidden py-10">
-      <div className="absolute top-[-10%] left-[-5%] w-72 h-72 bg-[#103173] opacity-5 rounded-full blur-3xl" />
-      <div className="absolute bottom-[-10%] right-[-5%] w-96 h-96 bg-[#F2D022] opacity-10 rounded-full blur-3xl" />
-
+    <AuthPageShell className="py-10">
       <Card className="w-full max-w-md border-none shadow-2xl bg-white/80 backdrop-blur-md z-10">
         <CardHeader className="space-y-4 pb-6 text-center relative">
           <Button 
@@ -104,57 +141,63 @@ export default function CadastroAluno() {
         {etapa === 1 ? (
           <form onSubmit={handleCadastrar}>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="nome" className="text-[#103173] font-bold ml-1">Nome Completo</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-3 h-5 w-5 text-[#73AABF]" />
-                  <Input 
-                    id="nome" value={formData.nome} onChange={(e) => setFormData({...formData, nome: e.target.value})}
-                    placeholder="João da Silva" 
-                    className="pl-10 h-12 border-[#73AABF]/20 focus:border-[#103173] focus:ring-[#103173] rounded-xl font-medium"
-                    required
-                  />
-                </div>
-              </div>
+              <LabeledIconInput
+                id="nome"
+                label="Nome Completo"
+                icon={User}
+                value={formData.nome}
+                onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                placeholder="João da Silva"
+                required
+              />
 
-              <div className="space-y-2">
-                <Label htmlFor="telefone" className="text-[#103173] font-bold ml-1">Telefone</Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-3 h-5 w-5 text-[#73AABF]" />
-                  <Input 
-                    id="telefone" value={formData.telefone} onChange={(e) => setFormData({...formData, telefone: e.target.value})}
-                    placeholder="(75) 90000-0000" 
-                    className="pl-10 h-12 border-[#73AABF]/20 focus:border-[#103173] focus:ring-[#103173] rounded-xl font-medium"
-                    required
-                  />
-                </div>
-              </div>
+              <LabeledIconInput
+                id="telefone"
+                label="Telefone"
+                icon={Phone}
+                value={formData.telefone}
+                onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
+                placeholder="(75) 90000-0000"
+                required
+              />
 
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-[#103173] font-bold ml-1">E-mail Institucional</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-5 w-5 text-[#73AABF]" />
-                  <Input 
-                    id="email" type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    placeholder="aluno@uefs.br" 
-                    className="pl-10 h-12 border-[#73AABF]/20 focus:border-[#103173] focus:ring-[#103173] rounded-xl font-medium"
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="senha" className="text-[#103173] font-bold ml-1">Senha</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-5 w-5 text-[#73AABF]" />
-                  <Input 
-                    id="senha" type="password" value={formData.senha} onChange={(e) => setFormData({...formData, senha: e.target.value})}
-                    placeholder="Crie uma senha forte" 
-                    className="pl-10 h-12 border-[#73AABF]/20 focus:border-[#103173] focus:ring-[#103173] rounded-xl font-medium"
-                    required
-                  />
-                </div>
-              </div>
+              <LabeledIconInput
+                id="matricula"
+                label="Matrícula"
+                icon={BadgeCheck}
+                value={formData.matricula}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    matricula: e.target.value.replace(/\D/g, "").slice(0, 8),
+                  })
+                }
+                placeholder="23121111"
+                maxLength={8}
+                required
+              />
+
+              <LabeledIconInput
+                id="email"
+                label="E-mail Institucional"
+                icon={Mail}
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                placeholder="23121111@discente.uefs.br"
+                required
+              />
+
+              <LabeledIconInput
+                id="senha"
+                label="Senha"
+                icon={Lock}
+                type="password"
+                value={formData.senha}
+                onChange={(e) => setFormData({ ...formData, senha: e.target.value })}
+                placeholder="Crie uma senha forte"
+                required
+              />
             </CardContent>
 
             <CardFooter className="flex flex-col gap-4 pt-4">
@@ -169,19 +212,20 @@ export default function CadastroAluno() {
         ) : (
           <form onSubmit={handleValidarCodigo}>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="codigo" className="text-[#103173] font-bold ml-1">Código de Validação</Label>
-                <div className="relative">
-                  <KeyRound className="absolute left-3 top-3 h-5 w-5 text-[#73AABF]" />
-                  <Input 
-                    id="codigo" value={formData.codigo} onChange={(e) => setFormData({...formData, codigo: e.target.value})}
-                    placeholder="Ex: 123456" maxLength={6}
-                    className="pl-10 h-12 border-[#73AABF]/20 focus:border-[#103173] focus:ring-[#103173] rounded-xl font-black tracking-widest text-center text-lg"
-                    required
-                  />
-                </div>
+              <div>
+                <LabeledIconInput
+                  id="codigo"
+                  label="Código de Validação"
+                  icon={KeyRound}
+                  value={formData.codigo}
+                  onChange={(e) => setFormData({ ...formData, codigo: e.target.value })}
+                  placeholder="Ex: 123456"
+                  maxLength={6}
+                  inputClassName="font-black tracking-widest text-center text-lg"
+                  required
+                />
                 <p className="text-xs font-bold text-[#73AABF] text-center mt-4">
-                  Dica: Para o protótipo, digite "123456".
+                  Dica: Para o protótipo, digite &quot;123456&quot;.
                 </p>
               </div>
             </CardContent>
@@ -200,6 +244,6 @@ export default function CadastroAluno() {
           </form>
         )}
       </Card>
-    </div>
+    </AuthPageShell>
   );
 }

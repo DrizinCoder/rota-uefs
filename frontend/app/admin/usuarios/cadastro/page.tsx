@@ -26,7 +26,13 @@ export default function CadastroAdminPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const valorSanitizado =
+      name === "matricula"
+        ? value.toUpperCase().replace(/\s/g, "").replace(/[^A-Z0-9-]/g, "")
+        : name === "nome"
+          ? value.replace(/\s{2,}/g, " ")
+          : value;
+    setFormData(prev => ({ ...prev, [name]: valorSanitizado }));
     // Limpa o erro do campo assim que o usuário digita
     if (erros[name as keyof typeof erros]) {
       setErros(prev => ({ ...prev, [name]: "", geral: "" }));
@@ -53,6 +59,25 @@ export default function CadastroAdminPage() {
     }
     if (!formData.senha.trim()) {
       novosErros.senha = "A senha é obrigatória.";
+      hasError = true;
+    }
+
+    const nome = formData.nome.trim();
+    const matricula = formData.matricula.trim();
+    const senha = formData.senha;
+
+    if (nome && nome.length < 3) {
+      novosErros.nome = "O nome deve ter pelo menos 3 caracteres.";
+      hasError = true;
+    }
+
+    if (matricula && !/^[A-Z0-9-]{4,20}$/.test(matricula)) {
+      novosErros.matricula = "Matrícula inválida. Use de 4 a 20 caracteres (letras, números e hífen).";
+      hasError = true;
+    }
+
+    if (senha.trim() && senha.length < 8) {
+      novosErros.senha = "A senha deve ter pelo menos 8 caracteres.";
       hasError = true;
     }
 

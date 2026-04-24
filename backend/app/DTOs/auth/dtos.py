@@ -108,3 +108,4 @@ class AdminRegisterResponseDTO(SQLModel):
     user_id: uuid.UUID
     full_name: str
     registration_id: str
+    registration_id: str

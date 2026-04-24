@@ -1,6 +1,8 @@
+from pydantic import validator
 from pydantic import EmailStr, Field
 from sqlmodel import SQLModel
 from typing import Optional
+import re
 
 from app.enums.enums import UserProfile
 
@@ -31,3 +33,4 @@ class CreateAdminDTO(UserBaseDTO):
 
 class CreateSimpleUserDTO(UserBaseDTO):
     pass
+
