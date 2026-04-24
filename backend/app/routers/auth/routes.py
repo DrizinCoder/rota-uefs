@@ -15,6 +15,7 @@ from app.DTOs.auth.dtos import RegisterAlunoDTO
 from fastapi import APIRouter
 from app.DTOs.auth.dtos import RegisterServidorDTO, LoginUserDTO
 from app.controllers.auth_controller import AuthController
+from app.services.user_service import UserService
 from app.services.auth_service import AuthService
 from app.services.email.use_cases import EmailUseCases
 
@@ -87,3 +88,8 @@ async def activate_account(
     service = UserService(UserRepository(session))
 
     return await service.activate_account(token)
+async def recover_password(email: str, controller: AuthController = Depends(get_auth_controller)):
+    
+    token = await controller.recover_password(email)
+    return ResponseHandler.ok(token)
+
