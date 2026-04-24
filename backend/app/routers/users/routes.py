@@ -11,6 +11,10 @@ from app.core.exceptions import NotFoundException, BadRequestException
 from app.core.responses import ResponseHandler
 from app.DTOs.users.dtos import UpdateProfileUserDTO, UpdateProfileServidorDTO
 from app.DTOs.operational.dtos import CreateReservaDTO, DeleteReservaDTO
+from app.DTOs.users.email_dtos import RequestEmailChangeDTO, ConfirmEmailChangeDTO
+from app.controllers.user_controller import UserController
+from app.middleware.auth_middleware import TokenData, get_current_user
+from fastapi import Request
 
 router = APIRouter()
 
@@ -139,3 +143,38 @@ def update_profile(dados: CreateReservaDTO):
 @router.delete("/delete/reserva")
 def update_profile(dados: DeleteReservaDTO):
     return {"message": "olá! bem-vindo a delete reserva"}
+
+
+# ----------- Funcionalidades de E-mail ------------
+
+def get_user_controller(session: AsyncSession = Depends(get_session)) -> UserController:
+    repo = UserRepository(session)
+    return UserController(repo)
+
+@router.post("/email-change/request")
+async def request_email_change(
+    request: Request,
+    dados: RequestEmailChangeDTO,
+    current_user: TokenData = Depends(get_current_user),
+    controller: UserController = Depends(get_user_controller)
+):
+    # Passamos o host atual para gerar o link (ex: http://localhost:8000)
+    base_url = str(request.base_url).rstrip('/')
+    
+    # current_user.id guarda o UUID do usuário logado que extraímos do Token de Login dele
+    user_id = uuid.UUID(current_user.id)
+    
+    result = await controller.request_email_change(
+        user_id=user_id,
+        new_email=dados.new_email,
+        base_url=base_url
+    )
+    return ResponseHandler.ok(data=result)
+
+@router.post("/email-change/confirm")
+async def confirm_email_change(
+    dados: ConfirmEmailChangeDTO,
+    controller: UserController = Depends(get_user_controller)
+):
+    result = await controller.confirm_email_change(token=dados.token)
+    return ResponseHandler.ok(data=result)
