@@ -1,3 +1,10 @@
+from app.core.exceptions import UnprocessableEntityException
+from app.repositories.user_repository import pwd_context
+from http.client import NOT_FOUND
+from http.client import UNAUTHORIZED
+from app.enums.enums import UserProfile
+from app.DTOs.users.dtos import PasswordUpdate
+from app.DTOs.users.dtos import PhoneUpdate
 import uuid
 from app.DTOs.auth.dtos import RegisterServidorDTO
 from app.DTOs.users.dtos import CreateSimpleUserDTO
@@ -26,7 +33,6 @@ async def get_all_servidores(session: AsyncSession = Depends(get_session)):
         raise HTTPException(status_code=404, detail="Staff not found")
     
     return {"Message": "Staff Found", "Users": users}
-
 @router.patch("/update/{id}/servidor")
 async def update_profile(id: uuid.UUID, dados: UpdateProfileServidorDTO, session: AsyncSession = Depends(get_session)):
     repo = UserRepository(session)
@@ -51,15 +57,15 @@ async def get_all_drivers(session: AsyncSession = Depends(get_session)):
     return {"Message": "Drivers Found", "Users": users}
 
 
-@router.patch("/update/{id}/motorista")
-async def update_profile(id: uuid.UUID, dados: UpdateProfileUserDTO, session: AsyncSession = Depends(get_session)):
+@router.patch("/update/phone/{id}")
+async def update_profile(id: uuid.UUID, dados: PhoneUpdate, session: AsyncSession = Depends(get_session)):
     repo = UserRepository(session)
     updated_user = await repo.patch(id, dados)
 
     if not updated_user:
         raise HTTPException(status_code=404, detail="Driver not found")
 
-    return {"Message": "Driver Updated", "User": updated_user}
+    return {"Message": "Phone Updated", "User": updated_user}
 
 # ----------- Perfil do estudante ------------
 
@@ -96,16 +102,32 @@ async def get_estudante_by_registration_id(registration_id: str, session: AsyncS
 
     return {"Message": "Student Found", "User": user}
 
-@router.patch("/update/{id}/estudante")
-async def update_profile(id: uuid.UUID, dados: UpdateProfileUserDTO, session: AsyncSession = Depends(get_session)):
+@router.patch("/update/password/{id}")
+async def update_password(id: uuid.UUID, dados: PasswordUpdate, session: AsyncSession = Depends(get_session)):
     repo = UserRepository(session)
 
-    updated_user = await repo.patch(id, dados)
+    # Isso deveria ser em um service!
+    user = await repo.get_by_id(id)
     
+    if not user:
+        raise NotFoundException("Usuário não encontrado!")
+
+    hashed_password = pwd_context.hash(dados.password)
+
+    if pwd_context.verify(dados.password, user.password):
+        raise UnprocessableEntityException("A senha fornecida é a mesma senha atual!")
+
+    if dados.password != dados.confirm_password:
+        raise BadRequestException("As senhas não coincidem!")
+
+    dados.password = hashed_password
+
+    updated_user = await repo.patch(id, dados)
+
     if not updated_user:
-        raise HTTPException(status_code=404, detail="Student not found")
-        
-    return {"Message": "Student Updated", "User": updated_user}
+        raise NotFoundException("Erro ao atualizar senha!")
+
+    return {"Message": "Password Updated", "User": updated_user}
 
 # Essa rota pode ser usada para deletar qualquer usuário
 @router.delete("/delete/account/{id}")

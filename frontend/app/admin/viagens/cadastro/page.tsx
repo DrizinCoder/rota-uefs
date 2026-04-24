@@ -32,24 +32,52 @@ export default function CadastroViagemPage() {
     e.preventDefault();
     setErro("");
     setSucesso(false);
+    const origemNormalizada = origem.trim();
+    const destinoNormalizado = destino.trim();
+    const quorumNumero = Number.parseInt(quorum, 10);
+    const vagasNumero = Number.parseInt(vagas, 10);
 
-    // Validação de campos obrigatórios
-    if (!origem || !destino || !data || !horario || !onibus || !motorista || !quorum || !vagas) {
+    if (!origemNormalizada || !destinoNormalizado || !data || !horario || !onibus || !motorista || !quorum || !vagas) {
       setErro("Inconsistência de preenchimento: Todos os campos são obrigatórios.");
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
-    // Validação da regra de negócio: limite de vagas
-    if (parseInt(vagas) > 46) {
+    if (origemNormalizada.toLowerCase() === destinoNormalizado.toLowerCase()) {
+      setErro("Origem e destino não podem ser iguais.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    if (Number.isNaN(quorumNumero) || Number.isNaN(vagasNumero)) {
+      setErro("Quórum e vagas devem ser números inteiros válidos.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    if (quorumNumero < 1 || vagasNumero < 1) {
+      setErro("Quórum e vagas devem ser maiores que zero.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    if (vagasNumero > 46) {
       setErro("A capacidade máxima permitida é de 46 vagas por veículo.");
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
-    if (parseInt(quorum) > parseInt(vagas)) {
+    if (quorumNumero > vagasNumero) {
       setErro("O quórum mínimo não pode ser maior que o número de vagas.");
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    const agora = new Date();
+    const dataHoraViagem = new Date(`${data}T${horario}:00`);
+    if (Number.isNaN(dataHoraViagem.getTime()) || dataHoraViagem < agora) {
+      setErro("Data e horário de saída devem estar no futuro.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 

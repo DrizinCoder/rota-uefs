@@ -3,10 +3,10 @@
 
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { GraduationCap, Lock, Mail, Phone, User, ArrowLeft, KeyRound, ShieldCheck } from "lucide-react";
+import { GraduationCap, Lock, Mail, Phone, User, ArrowLeft, KeyRound, BadgeCheck } from "lucide-react";
+import { AuthPageShell } from "@/components/auth/auth-page-shell";
+import { LabeledIconInput } from "@/components/auth/labeled-icon-input";
 
 // Bloco de código referente à integração com o backend (authService)
 
@@ -18,6 +18,7 @@ export default function CadastroAlunoPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [erro, setErro] = useState("");
+  const [etapa, setEtapa] = useState<1 | 2>(1);
 
   // Criando o state com os campos vazios
   const [formData, setFormData] = useState<RegisterAlunoDTO>({
@@ -29,13 +30,18 @@ export default function CadastroAlunoPage() {
   });
 
 const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    
-    setFormData(estadoAnterior => ({
-      ...estadoAnterior, // Mantém o que já tinha digitado nos outros campos
-      [name]: value      // Atualiza só o campo que o usuário tá mexendo agora
-    }));
-  };
+  let { name, value } = e.target;
+  
+  // Máscara para matrícula (apenas números, máximo 8 caracteres)
+  if (name === "registration_id") {
+    value = value.replace(/\D/g, "").slice(0, 8);
+  }
+
+  setFormData(estadoAnterior => ({
+    ...estadoAnterior,
+    [name]: value      
+  }));
+};
 
 const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); // MUITO IMPORTANTE: Evita que a página recarregue do nada
@@ -58,60 +64,65 @@ const handleSubmit = async (e: React.FormEvent) => {
     }
   };
 
+  // ADICIONAR INTEGRAÇÃO DA VALIDAÇÃO DO CÓDIGO
+  
 
 // Fim do bloco integração
 
 
-// export default function CadastroAluno() {
-//   const router = useRouter();
-//   const [isLoading, setIsLoading] = useState(false);
-//   const [etapa, setEtapa] = useState<1 | 2>(1); // 1: Dados, 2: Validação de Código
-//   const [erro, setErro] = useState("");
-  
-//   const [formData, setFormData] = useState({
-//     nome: "",
-//     matricula: "",
-//     telefone: "",
-//     email: "",
-//     senha: "",
-//     codigo: ""
-//   });
 
-  // const handleValidarCodigo = (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   setErro("");
 
-  //   if (formData.codigo.length < 6) {
-  //     setErro("O código deve ter 6 dígitos.");
-  //     return;
+  // const validarFormulario = () => {
+  //   const nome = formData.nome.trim();
+  //   const matricula = formData.matricula.trim();
+  //   const telefoneNumeros = formData.telefone.replace(/\D/g, "");
+  //   const email = formData.email.trim().toLowerCase();
+  //   const senha = formData.senha;
+
+  //   if (nome.length < 3) {
+  //     return "Nome completo deve ter pelo menos 3 caracteres.";
   //   }
 
-  //   setIsLoading(true);
+  //   if (!/^\d{8}$/.test(matricula)) {
+  //     return "Matrícula inválida. Informe 8 dígitos numéricos.";
+  //   }
 
-  //   // Simula verificação do código
-  //   setTimeout(() => {
-  //     setIsLoading(false);
-  //     if (formData.codigo === "123456") { // Código mockado para sucesso
-  //       window.alert("Cadastro realizado com sucesso! Bem-vindo ao sistema.");
-  //       router.push("/");
-  //     } else {
-  //       setErro("Código incorreto ou expirado. Tente novamente.");
-  //     }
-  //   }, 1500);
+  //   const anoMatricula = Number.parseInt(matricula.slice(0, 2), 10);
+  //   const semestreMatricula = matricula.slice(2, 3);
+  //   const anoAtualDoCurso = new Date().getFullYear() - 2000;
+
+  //   if (anoMatricula > anoAtualDoCurso || !["1", "2"].includes(semestreMatricula)) {
+  //     return "Matrícula inválida. Verifique ano e semestre.";
+  //   }
+
+  //   if (telefoneNumeros.length < 10 || telefoneNumeros.length > 11) {
+  //     return "Telefone inválido. Informe DDD + número com 10 ou 11 dígitos.";
+  //   }
+
+  //   const emailEsperado = `${matricula}@discente.uefs.br`;
+  //   if (email !== emailEsperado) {
+  //     return `E-mail institucional inválido. Use ${emailEsperado}.`;
+  //   }
+
+  //   if (senha.length < 8) {
+  //     return "A senha deve ter pelo menos 8 caracteres.";
+  //   }
+
+  //   return null;
   // };
 
-  return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-[#E4F2F1] p-4 relative overflow-hidden py-10">
-      <div className="absolute top-[-10%] left-[-5%] w-72 h-72 bg-[#103173] opacity-5 rounded-full blur-3xl" />
-      <div className="absolute bottom-[-10%] right-[-5%] w-96 h-96 bg-[#F2D022] opacity-10 rounded-full blur-3xl" />
 
+
+
+  return (
+    <AuthPageShell className="py-10">
       <Card className="w-full max-w-md border-none shadow-2xl bg-white/80 backdrop-blur-md z-10">
         <CardHeader className="space-y-4 pb-6 text-center relative">
           <Button 
             variant="ghost" 
             size="icon" 
             className="absolute left-4 top-4 text-[#73AABF] hover:text-[#103173] hover:bg-[#103173]/10"
-            onClick={() => router.push("/")}
+            onClick={() => etapa === 2 ? setEtapa(1) : router.push("/")}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
@@ -119,13 +130,14 @@ const handleSubmit = async (e: React.FormEvent) => {
           <div className="mx-auto bg-[#103173] p-4 rounded-2xl w-fit shadow-lg shadow-[#103173]/20">
             <GraduationCap className="h-10 w-10 text-[#F2D022]" />
           </div>
-          
           <div className="space-y-1">
             <CardTitle className="text-3xl font-black text-[#103173] tracking-tight">
-              Cadastro Aluno
+              {etapa === 1 ? "Cadastro Aluno" : "Validar E-mail"}
             </CardTitle>
             <CardDescription className="text-[#73AABF] font-bold">
-              Crie sua conta para acessar os roteiros
+              {etapa === 1 
+                ? "Crie sua conta para acessar os roteiros" 
+                : `Enviamos um código para ${formData.email || 'seu e-mail'}`}
             </CardDescription>
           </div>
           
@@ -136,104 +148,112 @@ const handleSubmit = async (e: React.FormEvent) => {
           )}
         </CardHeader>
 
-        {/* 👇 Aqui começa o Formulário Único */}
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
-            
-            <div className="space-y-2">
-              <Label htmlFor="nome" className="text-[#103173] font-bold ml-1">Nome Completo</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-3 h-5 w-5 text-[#73AABF]" />
-                <Input 
-                  id="nome"
-                  name="full_name"
-                  value={formData.full_name}
-                  onChange={handleChange}
-                  placeholder="João da Silva" 
-                  className="pl-10 h-12 border-[#73AABF]/20 focus:border-[#103173] focus:ring-[#103173] rounded-xl font-medium"
+        {etapa === 1 ? (
+          <form onSubmit={handleSubmit}>
+            <CardContent className="space-y-4">
+              <LabeledIconInput
+                id="nome"
+                name="full_name"
+                label="Nome Completo"
+                icon={User}
+                value={formData.full_name}
+                onChange={handleChange}
+                placeholder="João da Silva"
+                required
+              />
+
+              <LabeledIconInput
+                id="telefone"
+                label="Telefone"
+                name="phone"
+                icon={Phone}
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="(75) 90000-0000"
+                required
+              />
+
+              <LabeledIconInput
+                id="matricula"
+                name="registration_id"
+                label="Matrícula"
+                icon={BadgeCheck}
+                value={formData.registration_id}
+                onChange={handleChange}
+                placeholder="23121111"
+                maxLength={8}
+                required
+              />
+
+              <LabeledIconInput
+                id="email"
+                name="email"
+                label="E-mail Institucional"
+                icon={Mail}
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="23121111@discente.uefs.br"
+                required
+              />
+
+              <LabeledIconInput
+                id="senha"
+                name="password"
+                label="Senha"
+                icon={Lock}
+                type="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Crie uma senha forte"
+                required
+              />
+            </CardContent>
+
+            <CardFooter className="flex flex-col gap-4 pt-4">
+              <Button 
+                type="submit" disabled={isLoading}
+                className="w-full h-14 bg-[#103173] hover:bg-[#103B73] text-white font-black text-lg rounded-xl shadow-lg transition-all active:scale-95"
+              >
+                {isLoading ? "PROCESSANDO..." : "CADASTRAR"}
+              </Button>
+            </CardFooter>
+          </form>
+        ) : (
+          <form onSubmit={handleValidarCodigo}>
+            <CardContent className="space-y-4">
+              <div>
+                <LabeledIconInput
+                  id="codigo"
+                  label="Código de Validação"
+                  icon={KeyRound}
+                  value={formData.codigo}
+                  onChange={(e) => setFormData({ ...formData, codigo: e.target.value })}
+                  placeholder="Ex: 123456"
+                  maxLength={6}
+                  inputClassName="font-black tracking-widest text-center text-lg"
                   required
                 />
+                <p className="text-xs font-bold text-[#73AABF] text-center mt-4">
+                  Dica: Para o protótipo, digite &quot;123456&quot;.
+                </p>
               </div>
-            </div>
+            </CardContent>
 
-            <div className="space-y-2">
-              <Label htmlFor="matricula" className="text-[#103173] font-bold ml-1">Matrícula</Label>
-              <div className="relative">
-                <ShieldCheck className="absolute left-3 top-3 h-5 w-5 text-[#73AABF]" />
-                <Input 
-                  id="matricula" 
-                  name="registration_id"
-                  value={formData.registration_id} 
-                  onChange={handleChange}
-                  placeholder="Sua matrícula (8 dígitos)" 
-                  className="pl-10 h-12 border-[#73AABF]/20 focus:border-[#103173] focus:ring-[#103173] rounded-xl font-medium"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="telefone" className="text-[#103173] font-bold ml-1">Telefone</Label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-3 h-5 w-5 text-[#73AABF]" />
-                <Input 
-                  id="telefone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  placeholder="(75) 90000-0000" 
-                  className="pl-10 h-12 border-[#73AABF]/20 focus:border-[#103173] focus:ring-[#103173] rounded-xl font-medium"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-[#103173] font-bold ml-1">E-mail Institucional</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-5 w-5 text-[#73AABF]" />
-                <Input 
-                  id="email"
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="aluno@uefs.br" 
-                  className="pl-10 h-12 border-[#73AABF]/20 focus:border-[#103173] focus:ring-[#103173] rounded-xl font-medium"
-                  required
-                />
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="senha" className="text-[#103173] font-bold ml-1">Senha</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-5 w-5 text-[#73AABF]" />
-                <Input 
-                  id="senha"
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Crie uma senha forte" 
-                  className="pl-10 h-12 border-[#73AABF]/20 focus:border-[#103173] focus:ring-[#103173] rounded-xl font-medium"
-                  required
-                />
-              </div>
-            </div>
-
-          </CardContent>
-
-          <CardFooter className="flex flex-col gap-4 pt-4">
-            <Button 
-              type="submit" disabled={isLoading}
-              className="w-full h-14 bg-[#103173] hover:bg-[#103B73] text-white font-black text-lg rounded-xl shadow-lg transition-all active:scale-95"
-            >
-              {isLoading ? "PROCESSANDO..." : "CADASTRAR"}
-            </Button>
-          </CardFooter>
-        </form>
+            <CardFooter className="flex flex-col gap-4 pt-4">
+              <Button 
+                type="submit" disabled={isLoading}
+                className="w-full h-14 bg-[#23B99A] hover:bg-[#1d957c] text-white font-black text-lg rounded-xl shadow-lg transition-all active:scale-95"
+              >
+                {isLoading ? "VALIDANDO..." : "CONFIRMAR CADASTRO"}
+              </Button>
+              <button type="button" className="text-xs font-bold text-[#73AABF] hover:text-[#103173] mt-2">
+                Não recebeu o código? Reenviar.
+              </button>
+            </CardFooter>
+          </form>
+        )}
       </Card>
-    </div>
+    </AuthPageShell>
   );
 }

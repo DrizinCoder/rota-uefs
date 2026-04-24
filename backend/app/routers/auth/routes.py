@@ -32,8 +32,6 @@ async def register_servidor(dados: RegisterServidorDTO, session: AsyncSession = 
     response_data = ServidorRegisterResponseDTO.model_validate(user_created)
 
     return ResponseHandler.created(data=response_data.model_dump(mode='json'))
-
-
 @router.post("/register/aluno")
 async def register_aluno(dados: RegisterAlunoDTO, session: AsyncSession = Depends(get_session)):
     repo = UserRepository(session)

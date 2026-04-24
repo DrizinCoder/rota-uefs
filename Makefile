@@ -71,9 +71,19 @@ prune: ## ⚠️ Limpeza pesada global (CUIDADO)
 	docker system prune -af --volumes
 
 init-db: ## 💾 Inicializa o banco de dados manualmente
-	docker-compose exec backend python -m scripts.init_db
+	$(DOCKER_COMPOSE) exec backend python -m scripts.init_db
 
 reset-db: ## 💣 Destrói o banco e recria tudo (cuidado!)
 	make down
 	docker volume rm postgres_data || true
 	make dev-build
+
+# =========================
+# 🧹 Migration
+# =========================
+
+migrate: ## Atualiza Head do alembic (Aplica migrations)
+	$(DOCKER_COMPOSE) run --rm backend alembic upgrade head
+
+revision: ## Cria migration - Coloque mensagem personalizada com msg="<Exemplo>"
+	$(DOCKER_COMPOSE) run --rm backend alembic revision --autogenerate -m "$(msg)"

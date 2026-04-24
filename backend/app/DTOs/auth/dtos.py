@@ -1,5 +1,4 @@
 from app.enums.enums import AccessLevel
-from random import random
 from typing import Optional
 import uuid
 from datetime import datetime
@@ -97,7 +96,6 @@ class ServidorRegisterResponseDTO(SQLModel):
 
     class Config:
         from_attributes = True
-
 class MotoristaRegisterResponseDTO(SQLModel):
     user_id: uuid.UUID
     full_name: str

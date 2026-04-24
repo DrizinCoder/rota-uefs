@@ -1,42 +1,19 @@
 import uuid
-
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.DTOs.auth.dtos import RegisterAdminDTO, MotoristaRegisterResponseDTO, RegisterMotoristaDTO
-from app.core.responses import ResponseHandler
-from app.core.exceptions import ConflictException, NotFoundException
-from app.database.db import get_session
-from app.repositories.user_repository import UserRepository
+from app.DTOs.auth.dtos import RegisterAdminDTO
 from app.services.admin_service import AdminService
+from app.repositories.user_repository import UserRepository
 from app.controllers.admin_controller import AdminController
-
+from app.database.db import get_session
+from app.core.responses import ResponseHandler
+from app.core.exceptions import NotFoundException
 router = APIRouter()
-
 async def get_admin_controller(session: AsyncSession = Depends(get_session)) -> AdminController:
     user_repo = UserRepository(session)
     admin_service = AdminService(user_repo)
     return AdminController(admin_service)
-
-
-@router.post("/register/motorista")
-async def register_motorista(dados: RegisterMotoristaDTO, session: AsyncSession = Depends(get_session)):
-    repo = UserRepository(session)
-
-    driver = await repo.get_by_registration_id(dados.registration_id)
-    if driver:
-        raise ConflictException("Motorista já cadastrado")
-
-    driver_created, temp_password = await repo.create_driver(dados)
-
-    response_data = MotoristaRegisterResponseDTO.model_validate(driver_created)
-
-    response_dict = response_data.model_dump(mode='json')
-    response_dict["temp_password"] = temp_password
-
-    return ResponseHandler.created(data=response_dict)
-
-# ============ Rotas do CRUD ============
 
 @router.post("/")
 async def create_admin(
@@ -97,4 +74,3 @@ async def delete_admin(
         raise NotFoundException("Administrador não encontrado")
     
     return ResponseHandler.ok({"deleted": True}, "Administrador removido com sucesso")
-
