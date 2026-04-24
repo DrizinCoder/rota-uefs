@@ -12,15 +12,32 @@ import { LabeledIconInput } from "@/components/auth/labeled-icon-input";
 export default function TelaLogin() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [erro, setErro] = useState("");
+  const [formData, setFormData] = useState({
+    matricula: "",
+    senha: "",
+  });
 
-  // Função simples para simular o login e redirecionar
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    setErro("");
+
+    const matricula = formData.matricula.trim();
+    const senha = formData.senha;
+
+    if (!/^\d{8}$/.test(matricula)) {
+      setErro("Informe uma matrícula válida com 8 dígitos.");
+      return;
+    }
+
+    if (senha.length < 8) {
+      setErro("A senha deve ter pelo menos 8 caracteres.");
+      return;
+    }
+
     setIsLoading(true);
 
-    // Simulando um delay de rede
     setTimeout(() => {
-      // Por padrão, vamos mandar para a tela de passageiro
       router.push("/passageiro");
     }, 1000);
   };
@@ -40,11 +57,30 @@ export default function TelaLogin() {
               Entre com sua matrícula para acessar o transporte
             </CardDescription>
           </div>
+          {erro && (
+            <div className="bg-red-50 text-red-600 text-sm font-bold p-3 rounded-xl border border-red-100 mt-2">
+              {erro}
+            </div>
+          )}
         </CardHeader>
 
         <form onSubmit={handleLogin}>
           <CardContent className="space-y-4">
-            <LabeledIconInput id="matricula" label="Matrícula" icon={User} placeholder="000000000" required />
+            <LabeledIconInput
+              id="matricula"
+              label="Matrícula"
+              icon={User}
+              placeholder="23121111"
+              value={formData.matricula}
+              onChange={(e) =>
+                setFormData((atual) => ({
+                  ...atual,
+                  matricula: e.target.value.replace(/\D/g, "").slice(0, 8),
+                }))
+              }
+              maxLength={8}
+              required
+            />
 
             <div className="space-y-2">
               <div className="flex justify-between items-center ml-1">
@@ -63,6 +99,13 @@ export default function TelaLogin() {
                 icon={Lock}
                 type="password"
                 placeholder="••••••••"
+                value={formData.senha}
+                onChange={(e) =>
+                  setFormData((atual) => ({
+                    ...atual,
+                    senha: e.target.value,
+                  }))
+                }
                 containerClassName="space-y-0"
                 labelClassName="hidden"
                 required

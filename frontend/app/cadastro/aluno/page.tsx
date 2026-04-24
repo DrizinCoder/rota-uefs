@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { GraduationCap, Lock, Mail, Phone, User, ArrowLeft, KeyRound } from "lucide-react";
+import { GraduationCap, Lock, Mail, Phone, User, ArrowLeft, KeyRound, BadgeCheck } from "lucide-react";
 import { AuthPageShell } from "@/components/auth/auth-page-shell";
 import { LabeledIconInput } from "@/components/auth/labeled-icon-input";
 
@@ -16,19 +16,59 @@ export default function CadastroAluno() {
   
   const [formData, setFormData] = useState({
     nome: "",
+    matricula: "",
     telefone: "",
     email: "",
     senha: "",
     codigo: ""
   });
 
+  const validarFormulario = () => {
+    const nome = formData.nome.trim();
+    const matricula = formData.matricula.trim();
+    const telefoneNumeros = formData.telefone.replace(/\D/g, "");
+    const email = formData.email.trim().toLowerCase();
+    const senha = formData.senha;
+
+    if (nome.length < 3) {
+      return "Nome completo deve ter pelo menos 3 caracteres.";
+    }
+
+    if (!/^\d{8}$/.test(matricula)) {
+      return "Matrícula inválida. Informe 8 dígitos numéricos.";
+    }
+
+    const anoMatricula = Number.parseInt(matricula.slice(0, 2), 10);
+    const semestreMatricula = matricula.slice(2, 3);
+    const anoAtualDoCurso = new Date().getFullYear() - 2000;
+
+    if (anoMatricula > anoAtualDoCurso || !["1", "2"].includes(semestreMatricula)) {
+      return "Matrícula inválida. Verifique ano e semestre.";
+    }
+
+    if (telefoneNumeros.length < 10 || telefoneNumeros.length > 11) {
+      return "Telefone inválido. Informe DDD + número com 10 ou 11 dígitos.";
+    }
+
+    const emailEsperado = `${matricula}@discente.uefs.br`;
+    if (email !== emailEsperado) {
+      return `E-mail institucional inválido. Use ${emailEsperado}.`;
+    }
+
+    if (senha.length < 8) {
+      return "A senha deve ter pelo menos 8 caracteres.";
+    }
+
+    return null;
+  };
+
   const handleCadastrar = (e: React.FormEvent) => {
     e.preventDefault();
     setErro("");
 
-    // Validação simples de email institucional (exemplo)
-    if (!formData.email.includes("@")) {
-      setErro("Formato de e-mail inválido.");
+    const erroValidacao = validarFormulario();
+    if (erroValidacao) {
+      setErro(erroValidacao);
       return;
     }
 
@@ -122,13 +162,29 @@ export default function CadastroAluno() {
               />
 
               <LabeledIconInput
+                id="matricula"
+                label="Matrícula"
+                icon={BadgeCheck}
+                value={formData.matricula}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    matricula: e.target.value.replace(/\D/g, "").slice(0, 8),
+                  })
+                }
+                placeholder="23121111"
+                maxLength={8}
+                required
+              />
+
+              <LabeledIconInput
                 id="email"
                 label="E-mail Institucional"
                 icon={Mail}
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="aluno@uefs.br"
+                placeholder="23121111@discente.uefs.br"
                 required
               />
 

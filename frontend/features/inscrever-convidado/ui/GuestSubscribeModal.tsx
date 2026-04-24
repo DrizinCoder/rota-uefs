@@ -14,10 +14,17 @@ interface GuestSubscribeModalProps {
 
 export function GuestSubscribeModal({ viagemId, onClose }: GuestSubscribeModalProps) {
   const [modalidade, setModalidade] = useState<"ida" | "ida-volta">("ida");
+  const [nomeConvidado, setNomeConvidado] = useState("");
+  const [erro, setErro] = useState("");
 
   if (!viagemId) return null;
 
   const handleConfirmar = () => {
+    setErro("");
+    if (nomeConvidado.trim().length < 3) {
+      setErro("Informe o nome completo do convidado.");
+      return;
+    }
     alert("Convidado inscrito com sucesso!");
     onClose();
   };
@@ -35,7 +42,13 @@ export function GuestSubscribeModal({ viagemId, onClose }: GuestSubscribeModalPr
         <div className="space-y-4">
           <div className="space-y-1">
             <Label htmlFor="nome" className="text-xs font-bold text-[#103173]">Nome do Convidado</Label>
-            <Input id="nome" placeholder="Digite o nome completo" />
+            <Input
+              id="nome"
+              value={nomeConvidado}
+              onChange={(e) => setNomeConvidado(e.target.value)}
+              placeholder="Digite o nome completo"
+            />
+            {erro && <p className="text-xs font-bold text-red-600">{erro}</p>}
           </div>
 
           <TripModeToggle 

@@ -42,12 +42,18 @@ export default function ListaPassageiros() {
   const router = useRouter();
   const [busca, setBusca] = useState("");
   const [passageiros, setPassageiros] = useState(PASSAGEIROS_MOCK);
+  const termoBusca = busca.trim().toLowerCase();
+  const sanitizarBusca = (valor: string) =>
+    valor
+      .normalize("NFKC")
+      .replace(/[^\p{L}\p{N}\s-]/gu, "")
+      .replace(/\s{2,}/g, " ");
 
   // Filtra os passageiros baseados na barra de pesquisa
   const passageirosFiltrados = passageiros.filter(
     (p) =>
-      p.nome.toLowerCase().includes(busca.toLowerCase()) ||
-      p.matricula.toLowerCase().includes(busca.toLowerCase())
+      p.nome.toLowerCase().includes(termoBusca) ||
+      p.matricula.toLowerCase().includes(termoBusca)
   );
 
   // Calcula estatísticas
@@ -171,7 +177,7 @@ export default function ListaPassageiros() {
               type="text"
               placeholder="Buscar por nome ou matrícula..."
               value={busca}
-              onChange={(e) => setBusca(e.target.value)}
+              onChange={(e) => setBusca(sanitizarBusca(e.target.value))}
               className="pl-12 h-14 bg-white border-none rounded-2xl text-[#103173] font-bold focus-visible:ring-2 focus-visible:ring-[#F2D022] shadow-sm w-full"
             />
           </div>

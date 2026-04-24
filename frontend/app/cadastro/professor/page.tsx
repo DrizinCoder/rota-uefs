@@ -25,17 +25,56 @@ export default function CadastroProfessor() {
     senha: ""
   });
 
+  const validarFormulario = () => {
+    const nome = formData.nome.trim();
+    const matricula = formData.matricula.trim();
+    const departamento = formData.departamento.trim();
+    const telefoneNumeros = formData.telefone.replace(/\D/g, "");
+    const email = formData.email.trim().toLowerCase();
+    const senha = formData.senha;
+
+    if (nome.length < 3) {
+      return "Nome completo deve ter pelo menos 3 caracteres.";
+    }
+
+    if (!/^[A-Za-z0-9-]{4,20}$/.test(matricula)) {
+      return "Matrícula inválida. Use de 4 a 20 caracteres (letras, números e hífen).";
+    }
+
+    if (!formData.vinculo) {
+      return "Selecione um tipo de vínculo válido.";
+    }
+
+    if (departamento.length < 2) {
+      return "Departamento inválido.";
+    }
+
+    if (telefoneNumeros.length < 10 || telefoneNumeros.length > 11) {
+      return "Telefone inválido. Informe DDD + número com 10 ou 11 dígitos.";
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return "Formato de e-mail inválido.";
+    }
+
+    if (!email.endsWith("@uefs.br")) {
+      return "Use um e-mail institucional terminado em @uefs.br.";
+    }
+
+    if (senha.length < 8) {
+      return "A senha deve ter pelo menos 8 caracteres.";
+    }
+
+    return null;
+  };
+
   const handleCadastrar = (e: React.FormEvent) => {
     e.preventDefault();
     setErro("");
 
-    if (!formData.vinculo) {
-      setErro("Selecione um tipo de vínculo válido.");
-      return;
-    }
-
-    if (!formData.email.includes("@")) {
-      setErro("Formato de e-mail inválido.");
+    const erroValidacao = validarFormulario();
+    if (erroValidacao) {
+      setErro(erroValidacao);
       return;
     }
 
@@ -130,8 +169,10 @@ export default function CadastroProfessor() {
                   label="Matrícula"
                   icon={BadgeCheck}
                   value={formData.matricula}
-                  onChange={(e) => setFormData({ ...formData, matricula: e.target.value })}
-                  placeholder="0000000"
+                  onChange={(e) =>
+                    setFormData({ ...formData, matricula: e.target.value.toUpperCase().replace(/\s/g, "") })
+                  }
+                  placeholder="2024101"
                   required
                 />
               </div>
