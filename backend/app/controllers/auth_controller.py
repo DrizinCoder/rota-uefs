@@ -29,3 +29,21 @@ class AuthController:
         token_data = self.auth_service.create_token_for_user(user)
         
         return token_data
+    
+    async def recover_password(self, email: str) -> dict:
+        user = await self.repository.get_by_email(email)
+        
+        if not user:
+            raise NotFoundException("Usuário não encontrado")
+        
+        if user.registration_status == RegistrationStatus.BLOCKED:
+            raise UnauthorizedException("Usuário bloqueado. Entre em contato com o administrador.")
+        
+        if user.registration_status == RegistrationStatus.PENDING:
+            raise UnauthorizedException("Cadastro pendente de aprovação.")
+        
+        token_data = self.auth_service.create_token_recovery_password(user)
+        
+        #enviar email
+
+        return token_data["user"]
