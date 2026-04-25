@@ -19,7 +19,6 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 class AuthService:
     def __init__(self, repository: UserRepository):
         self.repository = repository
-        self.auth_service = AuthService()
         self.email_use_cases = EmailUseCases()
         
     @staticmethod
@@ -107,7 +106,7 @@ class AuthService:
         dados.registration_status = "PENDING" 
         user = await self.repository.create_student(dados)
 
-        token = self.auth_service.create_access_token(
+        token = AuthService.create_access_token(
             data={
                 "sub": str(user.user_id),
                 "type": "account_activation"

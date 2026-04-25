@@ -12,7 +12,7 @@ from fastapi import BackgroundTasks
 class AuthController:
     def __init__(self, repository: UserRepository):
         self.repository = repository
-        self.auth_service = AuthService()
+        self.auth_service = AuthService(repository)
 
     async def register_student(self, dados, background_tasks):
         user = await self.auth_service.register_student(dados, background_tasks)
