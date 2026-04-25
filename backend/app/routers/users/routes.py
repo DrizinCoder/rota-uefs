@@ -1,3 +1,4 @@
+from app.core.exceptions import ForbiddenException
 from app.DTOs.users.dtos import PasswordUpdate
 from app.DTOs.users.dtos import PhoneUpdate
 from app.middleware import require_profile
@@ -48,7 +49,7 @@ async def get_all_servidores(
 @router.get("/drivers")
 async def get_all_drivers(
     session: AsyncSession = Depends(get_session),
-    
+    current_user: TokenData = Depends(require_admin)
 ):
     repo = UserRepository(session)
 
@@ -61,11 +62,10 @@ async def get_all_drivers(
 
 
 # ----------- Perfil do estudante ------------
-
+'''
 @router.get("/estudantes")
 async def get_all_estudantes(
-    session: AsyncSession = Depends(get_session),
-
+    session: AsyncSession = Depends(get_session)  
 ):
     repo = UserRepository(session)
 
@@ -78,8 +78,7 @@ async def get_all_estudantes(
 
 @router.get("/matricula/{registration_id}/")
 async def get_estudante_by_registration_id(
-    registration_id: str, session: AsyncSession = Depends(get_session),
-    
+    registration_id: str, session: AsyncSession = Depends(get_session)
 ):
     repo = UserRepository(session)
     
@@ -89,16 +88,33 @@ async def get_estudante_by_registration_id(
         raise HTTPException(status_code=404, detail="User not found")
 
     return {"Message": "Student Found", "User": user}
+'''
 
-# Essa rota pode ser usada para deletar qualquer usuário
+# --- Essa rota pode ser usada para um admin deletar qualquer usuário ---
 @router.delete("/delete/account/{id}")
 async def delete_account(
-    id: uuid.UUID, session: AsyncSession = Depends(get_session),
-
+    id: uuid.UUID, 
+    session: AsyncSession = Depends(get_session),
+    current_user: TokenData = Depends(require_admin)
 ):
     repo = UserRepository(session)
 
     deleted_user = await repo.anonymize(id)
+
+    if not deleted_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return {"Message": "User Deleted", "User": deleted_user} 
+
+# --- Rota utilizada para se deletar ---
+@router.delete("/delete/account/me")
+async def delete_account(
+    session: AsyncSession = Depends(get_session),
+    current_user: TokenData = Depends(get_current_user)
+):
+    repo = UserRepository(session)
+
+    deleted_user = await repo.anonymize(current_user.sub)
 
     if not deleted_user:
         raise HTTPException(status_code=404, detail="User not found")
