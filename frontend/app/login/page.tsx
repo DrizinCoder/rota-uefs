@@ -35,6 +35,16 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   }));
 };
 
+const REDIRECT_MAP: Record<string, string> = {
+  "Student": "/passageiro",
+  "Staff": "/professor",
+  "Faculty": "/professor",
+  "Driver": "/motorista",
+  "Admin": "/admin",
+};
+
+
+
 const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); // MUITO IMPORTANTE: Evita que a página recarregue do nada
     setIsLoading(true);
@@ -43,8 +53,12 @@ const handleSubmit = async (e: React.FormEvent) => {
     try {
       
       const resposta = await authService.login(formData);
-      console.log("Resposta do login:", resposta.data.user.profile);
-    
+      const profile = resposta.data.user.profile;
+      const destino = REDIRECT_MAP[profile] || "/login";
+      //console.log("Resposta do login:", resposta.data.user.profile);
+
+      localStorage.setItem('token', resposta.data.access_token);
+      router.push(destino);
 
     } catch (error) {
 
