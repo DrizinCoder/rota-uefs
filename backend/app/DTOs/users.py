@@ -1,4 +1,4 @@
-from pydantic import validator
+from pydantic import field_validator
 from pydantic import EmailStr, Field
 from sqlmodel import SQLModel
 from typing import Optional
@@ -24,7 +24,7 @@ class PasswordUpdate(SQLModel):
 class PhoneUpdate(SQLModel):
     phone: str
 
-    @validator('phone')
+    @field_validator('phone')
     def validate_phone(cls, v):
         if not re.match(r'^\+?1?\d{9,15}$', v):
             raise ValueError('Formato de telefone inválido')

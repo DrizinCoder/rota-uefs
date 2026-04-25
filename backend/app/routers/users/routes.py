@@ -121,8 +121,9 @@ async def update_password(
 
 @user_router.patch("/update/phone/{id}")
 async def update_profile(
-    id: uuid.UUID, data: 
-    PhoneUpdate, session: AsyncSession = Depends(get_session),
+    id: uuid.UUID, 
+    data: PhoneUpdate, 
+    session: AsyncSession = Depends(get_session),
     _: TokenData = Depends(require_profile("DRIVER", "STUDENT"))
 ):
     repo = UserRepository(session)
