@@ -11,7 +11,7 @@ from app.core.exceptions import BadRequestException, NotFoundException, Unproces
 from app.database.db import get_session
 from app.middleware.auth_middleware import TokenData, get_current_user, require_profile
 from app.repositories.user_repository import UserRepository
-from app.DTOs.email_dtos import RequestEmailChangeDTO
+from app.DTOs.email import RequestEmailChangeDTO
 from app.controllers.user_controller import UserController
 from app.core.config import settings
 from app.core.responses import ResponseHandler

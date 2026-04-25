@@ -21,8 +21,8 @@ class AuthController:
     async def activate_account(self, token: str):
         return await self.auth_service.activate_account(token)
 
-    async def login(self, dados: LoginUserDTO) -> dict:
-        user = await self.repository.get_by_registration(dados.matricula)
+    async def login(self, data: LoginUserDTO) -> dict:
+        user = await self.repository.get_by_registration(data.registration_id)
         
         if not user:
             raise NotFoundException("Usuário não encontrado")
@@ -33,7 +33,7 @@ class AuthController:
         if user.registration_status == RegistrationStatus.PENDING:
             raise UnauthorizedException("Cadastro pendente de aprovação.")
         
-        if not self.auth_service.verify_password(dados.senha, user.password):
+        if not self.auth_service.verify_password(data.password, user.password):
             raise UnauthorizedException("Credenciais inválidas")
         
         token_data = self.auth_service.create_token_for_user(user)

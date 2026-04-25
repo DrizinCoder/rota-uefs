@@ -4,9 +4,7 @@ from typing import Optional
 import uuid
 from datetime import datetime
 from pydantic import AliasPath, field_validator
-from app.enums.enums import RegistrationStatus
-from app.enums.enums import UserProfile
-from app.enums.enums import EmploymentType
+from app.enums.enums import RegistrationStatus, UserProfile
 from pydantic import EmailStr
 from pydantic import Field
 from sqlmodel import SQLModel
@@ -78,8 +76,8 @@ class RegisterAlunoDTO(SQLModel):
         return v
 
 class LoginUserDTO(SQLModel):
-    matricula: str
-    senha: str
+    registration_id: str
+    password: str
 
 class AlunoRegisterResponseDTO(SQLModel):
     user_id: uuid.UUID
@@ -95,19 +93,12 @@ class ServidorRegisterResponseDTO(SQLModel):
     department: str = Field(validation_alias=AliasPath("staff_member", "department"))
     employment: str = Field(validation_alias=AliasPath("staff_member", "employment_type"))
 
-    class Config:
-        from_attributes = True
 
 class MotoristaRegisterResponseDTO(SQLModel):
     user_id: uuid.UUID
     full_name: str
     registration_id: str
     phone: str
-
-class AdminRegisterResponseDTO(SQLModel):
-    user_id: uuid.UUID
-    full_name: str
-    registration_id: str
 
 class ResetPasswordDTO(SQLModel):
     user_id: uuid.UUID
