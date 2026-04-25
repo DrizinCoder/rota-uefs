@@ -7,7 +7,6 @@ from app.DTOs.auth.dtos import RegisterMotoristaDTO
 from app.DTOs.auth.dtos import RegisterAlunoDTO
 from app.DTOs.auth.dtos import RegisterServidorDTO
 from sqlmodel import SQLModel
-from app.DTOs.users.dtos import CreateSimpleUserDTO
 import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import and_, select 
@@ -162,6 +161,31 @@ class UserRepository:
         )
         result = await self.session.execute(statement)
         return result.mappings().all()
+    
+    async def list_all_staff_status_peding(self):
+        statement = (
+            select(
+                User.user_id,
+                User.full_name,
+                User.registration_id,
+                User.phone,
+                User.email,
+                User.profile,
+                User.registration_status, 
+                Staff.department,
+                Staff.employment_type
+            )
+            .join(Staff, User.user_id == Staff.staff_id)
+            .where(
+                and_(
+                    User.profile == UserProfile.STAFF,
+                    User.is_anonymized == False,
+                    User.registration_status == "PENDING"
+                )
+            )
+        )
+        result = await self.session.execute(statement)
+        return result.mappings().all()
 
     async def list_all_drivers(self):
         statemente = select(User).where(
@@ -241,13 +265,6 @@ class UserRepository:
         )
         result = await self.session.execute(statement)
         return result.scalars().first()
-
-    async def create_simple_user(self, user_dto: CreateSimpleUserDTO):
-        user_model = User.model_validate(user_dto)
-        self.session.add(user_model)
-        await self.session.commit()
-        await self.session.refresh(user_model)
-        return user_model
     
     async def update(self, user: User):
         self.session.add(user)

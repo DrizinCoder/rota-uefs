@@ -19,6 +19,7 @@ from app.controllers.admin_controller import AdminController
 from app.database.db import get_session
 from app.core.responses import ResponseHandler
 from app.core.exceptions import NotFoundException
+from backend.app.middleware.auth_middleware import TokenData
 
 router = APIRouter(
     dependencies=[Depends(require_admin)]
@@ -115,3 +116,16 @@ async def delete_admin(
     
     return ResponseHandler.ok({"deleted": True}, "Administrador removido com sucesso")
 
+@router.delete("/delete/account/{id}")
+async def delete_account(
+    id: uuid.UUID, 
+    session: AsyncSession = Depends(get_session)
+):
+    repo = UserRepository(session)
+
+    deleted_user = await repo.anonymize(id)
+
+    if not deleted_user:
+        raise NotFoundException("User not found")
+
+    return ResponseHandler.ok("User account has been anonymized successfully")

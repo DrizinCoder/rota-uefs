@@ -16,12 +16,10 @@ class UserController:
         self.email_use_cases = EmailUseCases()
 
     async def request_email_change(self, user_id: uuid.UUID, new_email: str, base_url: str) -> dict:
-        # 1. Verifica se o e-mail já não pertence a outro usuário
         existing_user = await self.repository.get_by_email(new_email)
         if existing_user:
             raise ConflictException("Este e-mail já está em uso por outro usuário.")
 
-        # 2. Gera o Token de Segurança (JWT) válido por 30 minutos
         token_data = {
             "sub": str(user_id),
             "new_email": new_email,
@@ -33,17 +31,14 @@ class UserController:
             expires_delta=timedelta(minutes=30)
         )
 
-        # 3. Cria o link de confirmação que vai no botão do e-mail
         confirmation_link = f"{base_url}/users/email-change/confirm?token={token}"
 
-        # 4. Envia o e-mail
         self.email_use_cases.send_email_change_confirmation(new_email, confirmation_link)
 
         return {"message": "E-mail de confirmação enviado com sucesso."}
 
     async def confirm_email_change(self, token: str) -> dict:
         try:
-            # 1. Tenta abrir e ler o token secreto usando a chave do servidor
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
             user_id_str = payload.get("sub")
             new_email = payload.get("new_email")
@@ -56,13 +51,11 @@ class UserController:
 
         except JWTError:
             raise BadRequestException("Token inválido ou expirado.")
-
-        # 2. Busca o usuário no banco de dados
+        
         user = await self.repository.get_by_id(user_id)
         if not user:
             raise NotFoundException("Usuário não encontrado.")
 
-        # 3. Atualiza o e-mail usando o repositório
         user.email = new_email
         await self.repository.update(user)
 
