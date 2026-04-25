@@ -25,7 +25,7 @@ class EmailUseCases:
             )
 
         except Exception as e:
-            raise InternalServerException(
+            return InternalServerException(
                 message=f"Erro ao enviar email: {str(e)}"
             )
         
@@ -61,4 +61,25 @@ class EmailUseCases:
                 html_content=html
             )
         except Exception as e:
-            raise InternalServerException(message=f"Erro ao enviar confirmação: {str(e)}")
+            return InternalServerException(message=f"Erro ao enviar confirmação: {str(e)}")
+
+    def send_account_confirmation(self, email: str, first_name: str, link: str):
+        try:
+            html = self.template_service.render(
+                "account_confirmation.html",
+                {
+                    "link": link,
+                    "first_name": first_name
+                }
+            )
+
+            self.email_service.send(
+                subject=f"{first_name}, ative sua conta no Rota UEFS",
+                email_to=email,
+                html_content=html
+            )
+
+        except Exception as e:
+            raise InternalServerException(
+                message=f"Erro ao enviar confirmação: {str(e)}"
+            )
