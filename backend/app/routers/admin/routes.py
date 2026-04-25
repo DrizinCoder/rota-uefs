@@ -1,3 +1,4 @@
+from app.middleware import require_admin
 import uuid
 
 from fastapi import APIRouter, Depends
@@ -18,19 +19,15 @@ from app.controllers.admin_controller import AdminController
 from app.database.db import get_session
 from app.core.responses import ResponseHandler
 from app.core.exceptions import NotFoundException
-router = APIRouter()
+
+router = APIRouter(
+    dependencies=[Depends(require_admin)]
+)
+
 async def get_admin_controller(session: AsyncSession = Depends(get_session)) -> AdminController:
     user_repo = UserRepository(session)
     admin_service = AdminService(user_repo)
     return AdminController(admin_service)
-
-@router.post("/")
-async def create_admin(
-    dados: RegisterAdminDTO,
-    controller: AdminController = Depends(get_admin_controller)
-):
-    result = await controller.create(dados)
-    return ResponseHandler.created(result, "Administrador criado com sucesso")
 
 
 async def get_admin_controller(session: AsyncSession = Depends(get_session)) -> AdminController:

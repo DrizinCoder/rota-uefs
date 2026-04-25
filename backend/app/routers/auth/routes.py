@@ -1,3 +1,7 @@
+from app.routers.admin.routes import get_admin_controller
+from app.controllers.admin_controller import AdminController
+from app.DTOs.auth.dtos import RegisterAdminDTO
+from app.DTOs.auth.dtos import AlunoRegisterResponseDTO
 from jose import jwt
 from app.DTOs.auth.dtos import AlunoRegisterResponseDTO, ResetPasswordDTO
 from app.DTOs.auth.dtos import ServidorRegisterResponseDTO
@@ -15,7 +19,6 @@ from app.services.auth_service import AuthService
 from app.services.email.use_cases import EmailUseCases
 
 router = APIRouter()
-
 
 def get_auth_controller(session: AsyncSession = Depends(get_session)) -> AuthController:
     repo = UserRepository(session)
@@ -37,6 +40,7 @@ async def register_servidor(dados: RegisterServidorDTO, session: AsyncSession = 
     return ResponseHandler.created(data=response_data.model_dump(mode='json'))
 
 
+    
 @router.post("/register/aluno")
 async def register_aluno(dados: RegisterAlunoDTO, session: AsyncSession = Depends(get_session)):
     repo = UserRepository(session)
@@ -61,7 +65,6 @@ async def login(
 ):
     result = await controller.login(dados)
     return ResponseHandler.ok(data=result)
-
 
 @router.post("/recover/password")
 async def recover_password(email: str, controller: AuthController = Depends(get_auth_controller)):

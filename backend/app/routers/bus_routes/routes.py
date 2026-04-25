@@ -1,3 +1,4 @@
+from app.middleware import require_admin
 import uuid
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,7 +7,10 @@ from app.database.db import get_session
 from app.repositories.route_repository import RouteRepository
 from app.DTOs.routes.dtos import CreateRouteDTO, UpdateRouteDTO
 
-router = APIRouter(prefix="/routes", tags=["Routes"])
+router = APIRouter(
+    prefix="/routes", tags=["Routes"],
+    dependencies=[Depends(require_admin)]    
+)
 
 # CREATE 
 @router.post("/create")

@@ -1,3 +1,4 @@
+from app.middleware import require_admin
 from fastapi import Body
 from app.DTOs.fleet.dtos import BusCreateBatchDTO
 from app.DTOs.fleet.dtos import BusCreateDTO
@@ -10,7 +11,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.repositories.bus_repository import BusRepository
 from fastapi import APIRouter
 
-router = APIRouter()
+router = APIRouter(
+    dependencies=[Depends(require_admin)]
+)
 
 @router.get("/health")
 async def health_check():
