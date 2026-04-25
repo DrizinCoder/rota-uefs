@@ -1,4 +1,5 @@
 from app.core.exceptions import InternalServerException
+from logging import exception
 from app.models.models import Admin
 from app.DTOs.auth.dtos import RegisterAdminDTO
 import random

@@ -10,7 +10,7 @@ from app.core.exceptions import UnauthorizedException
 security = HTTPBearer()
 
 class TokenData(BaseModel):
-    id: str  
+    sub: str  
     registration_id: str
     email: str
     profile: str
@@ -34,8 +34,9 @@ def get_current_user(
             algorithms=[settings.ALGORITHM]
         )
    
-        user_id = payload.get("id")
+        user_id = payload.get("sub")
         profile = payload.get("profile")
+
         
         if not user_id or not profile:
             raise UnauthorizedException("Token inválido: dados do usuário ausentes")
