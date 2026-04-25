@@ -51,11 +51,14 @@ class AuthController:
         return token_data
     
     async def reset_password(self, token: str, data: ResetPasswordDTO) -> None:
-
-        jwt_data = jwt.decode(token, settings.SECRET_KEY) # No processo de decode já é realizada a validação.
-        print(jwt_data)
-        user = await self.repository.get_by_id(jwt_data["sub"])
-
+        
+        try:
+            jwt_data = jwt.decode(token, settings.SECRET_KEY) # No processo de decode já é realizada a validação.
+            user = await self.repository.get_by_id(jwt_data["sub"])
+        
+        except Exception as e:
+            raise UnauthorizedException("Token invalidado: Sessão expirou")
+        
         if not user:
             raise NotFoundException("Usuário não encontrado")
         
