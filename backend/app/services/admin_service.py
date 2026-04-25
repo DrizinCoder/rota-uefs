@@ -139,6 +139,7 @@ class AdminService:
             "full_name": admin.user.full_name,
             "email": admin.user.email,
             "phone": admin.user.phone,
+            "registration_id": admin.user.registration_id,
             "access_level": admin.access_level.value,
             "registration_status": admin.user.registration_status.value
         }

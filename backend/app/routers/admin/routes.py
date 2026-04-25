@@ -20,14 +20,6 @@ async def get_admin_controller(session: AsyncSession = Depends(get_session)) -> 
     admin_service = AdminService(user_repo)
     return AdminController(admin_service)
 
-@router.post("/")
-async def create_admin(
-    dados: RegisterAdminDTO,
-    controller: AdminController = Depends(get_admin_controller)
-):
-    result = await controller.create(dados)
-    return ResponseHandler.created(result, "Administrador criado com sucesso")
-
 
 @router.get("/")
 async def list_admins(

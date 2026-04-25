@@ -1,3 +1,6 @@
+from app.routers.admin.routes import get_admin_controller
+from app.controllers.admin_controller import AdminController
+from app.DTOs.auth.dtos import RegisterAdminDTO
 from app.DTOs.auth.dtos import AlunoRegisterResponseDTO
 from app.DTOs.auth.dtos import ServidorRegisterResponseDTO
 from app.core.responses import ResponseHandler
@@ -57,6 +60,13 @@ async def login(
     result = await controller.login(dados)
     return ResponseHandler.ok(data=result)
 
+@router.post("/register/admin")
+async def create_admin(
+    dados: RegisterAdminDTO,
+    controller: AdminController = Depends(get_admin_controller)
+):
+    result = await controller.create(dados)
+    return ResponseHandler.created(result, "Administrador criado com sucesso")
 
 @router.post("/recover/password")
 async def recover_password(email: str):
