@@ -28,6 +28,14 @@ interface MotoristaFormState {
 
 export default function CadastroEdicaoMotoristaPage() {
   const router = useRouter();
+  const [erros, setErros] = useState({
+    nome: "",
+    matricula: "",
+    telefone: "",
+    email: "",
+    senha: "",
+    geral: "",
+  });
 
   const [formData, setFormData] = useState<MotoristaFormState>({
     nome: "",
@@ -45,13 +53,57 @@ export default function CadastroEdicaoMotoristaPage() {
       ...atual,
       [campo]: valor,
     }));
+    if (erros[campo as keyof typeof erros]) {
+      setErros((atual) => ({ ...atual, [campo]: "", geral: "" }));
+    }
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setErros({ nome: "", matricula: "", telefone: "", email: "", senha: "", geral: "" });
+    const nome = formData.nome.trim();
+    const matricula = formData.matricula.trim();
+    const telefoneNumeros = formData.telefone.replace(/\D/g, "");
+    const email = formData.email.trim().toLowerCase();
+    const senha = formData.senha || "";
+    const novosErros = {
+      nome: "",
+      matricula: "",
+      telefone: "",
+      email: "",
+      senha: "",
+      geral: "",
+    };
+    let temErro = false;
 
-    if (!formData.nome.trim() || !formData.matricula.trim() || !formData.telefone.trim()) {
-      window.alert("Preencha ao menos Nome, Guia de matrícula e Telefone.");
+    if (nome.length < 3) {
+      novosErros.nome = "Nome completo deve ter pelo menos 3 caracteres.";
+      temErro = true;
+    }
+
+    if (!/^[A-Za-z0-9-]{4,20}$/.test(matricula)) {
+      novosErros.matricula = "Guia de matrícula inválido (4 a 20 caracteres alfanuméricos).";
+      temErro = true;
+    }
+
+    if (telefoneNumeros.length < 10 || telefoneNumeros.length > 11) {
+      novosErros.telefone = "Telefone inválido. Informe DDD + número com 10 ou 11 dígitos.";
+      temErro = true;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      novosErros.email = "E-mail inválido.";
+      temErro = true;
+    }
+
+    if (senha.length < 8) {
+      novosErros.senha = "A senha deve ter pelo menos 8 caracteres.";
+      temErro = true;
+    }
+
+    if (temErro) {
+      novosErros.geral = "Corrija os campos destacados para continuar.";
+      setErros(novosErros);
       return;
     }
 
@@ -97,6 +149,11 @@ export default function CadastroEdicaoMotoristaPage() {
                   Dados do Condutor
                 </CardTitle>
               </CardHeader>
+              {erros.geral && (
+                <div className="mx-6 mt-6 bg-red-50 text-red-600 text-sm font-bold p-3 rounded-xl border border-red-100">
+                  {erros.geral}
+                </div>
+              )}
               <CardContent className="p-6 grid sm:grid-cols-2 gap-4">
                 
                 <div className="sm:col-span-2 space-y-2">
@@ -108,9 +165,12 @@ export default function CadastroEdicaoMotoristaPage() {
                     value={formData.nome}
                     onChange={(event) => atualizarCampo("nome", event.target.value)}
                     placeholder="Ex: João Silva"
-                    className="h-11 border-[#73AABF]/30 focus:border-[#103173] focus:ring-[#103173]"
+                    className={`h-11 focus:border-[#103173] focus:ring-[#103173] ${
+                      erros.nome ? "border-red-300 bg-red-50" : "border-[#73AABF]/30"
+                    }`}
                     required
                   />
+                  {erros.nome && <p className="text-xs text-red-500 font-medium">{erros.nome}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -123,9 +183,12 @@ export default function CadastroEdicaoMotoristaPage() {
                     value={formData.email}
                     onChange={(event) => atualizarCampo("email", event.target.value)}
                     placeholder="nome@uefs.br"
-                    className="h-11 border-[#73AABF]/30 focus:border-[#103173] focus:ring-[#103173]"
+                    className={`h-11 focus:border-[#103173] focus:ring-[#103173] ${
+                      erros.email ? "border-red-300 bg-red-50" : "border-[#73AABF]/30"
+                    }`}
                     required
                   />
+                  {erros.email && <p className="text-xs text-red-500 font-medium">{erros.email}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -135,11 +198,14 @@ export default function CadastroEdicaoMotoristaPage() {
                   <Input
                     id="telefone"
                     value={formData.telefone}
-                    onChange={(event) => atualizarCampo("telefone", event.target.value)}
+                    onChange={(event) => atualizarCampo("telefone", event.target.value.replace(/[^\d()\-\s+]/g, ""))}
                     placeholder="(75) 99999-9999"
-                    className="h-11 border-[#73AABF]/30 focus:border-[#103173] focus:ring-[#103173]"
+                    className={`h-11 focus:border-[#103173] focus:ring-[#103173] ${
+                      erros.telefone ? "border-red-300 bg-red-50" : "border-[#73AABF]/30"
+                    }`}
                     required
                   />
+                  {erros.telefone && <p className="text-xs text-red-500 font-medium">{erros.telefone}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -149,11 +215,14 @@ export default function CadastroEdicaoMotoristaPage() {
                   <Input
                     id="matricula"
                     value={formData.matricula}
-                    onChange={(event) => atualizarCampo("matricula", event.target.value)}
+                    onChange={(event) => atualizarCampo("matricula", event.target.value.toUpperCase().replace(/\s/g, ""))}
                     placeholder="Ex: 2021001"
-                    className="h-11 border-[#73AABF]/30 focus:border-[#103173] focus:ring-[#103173]"
+                    className={`h-11 focus:border-[#103173] focus:ring-[#103173] ${
+                      erros.matricula ? "border-red-300 bg-red-50" : "border-[#73AABF]/30"
+                    }`}
                     required
                   />
+                  {erros.matricula && <p className="text-xs text-red-500 font-medium">{erros.matricula}</p>}
                 </div>
                 
                 <div className="space-y-2">
@@ -166,9 +235,12 @@ export default function CadastroEdicaoMotoristaPage() {
                     value={formData.senha}
                     onChange={(event) => atualizarCampo("senha", event.target.value)}
                     placeholder="Sua senha secreta"
-                    className="h-11 border-[#73AABF]/30 focus:border-[#103173] focus:ring-[#103173]"
+                    className={`h-11 focus:border-[#103173] focus:ring-[#103173] ${
+                      erros.senha ? "border-red-300 bg-red-50" : "border-[#73AABF]/30"
+                    }`}
                     required
                   />
+                  {erros.senha && <p className="text-xs text-red-500 font-medium">{erros.senha}</p>}
                 </div>
 
               </CardContent>

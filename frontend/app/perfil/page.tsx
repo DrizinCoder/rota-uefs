@@ -45,6 +45,7 @@ function PerfilContent() {
   const [senhaAtual, setSenhaAtual] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
   const [salvando, setSalvando] = useState(false);
+  const [erro, setErro] = useState("");
 
   // Estados para o Modal de Excluir Conta
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -93,6 +94,35 @@ function PerfilContent() {
   }, [tipoUsuario, dadosAtuais]);
 
   const handleSalvar = () => {
+    setErro("");
+    const telefoneNumeros = telefone.replace(/\D/g, "");
+    const emailNormalizado = email.trim().toLowerCase();
+
+    if (!isAdmin && (telefoneNumeros.length < 10 || telefoneNumeros.length > 11)) {
+      setErro("Telefone inválido. Informe DDD + número com 10 ou 11 dígitos.");
+      return;
+    }
+
+    if (isProfessor && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailNormalizado)) {
+      setErro("E-mail inválido.");
+      return;
+    }
+
+    if (novaSenha) {
+      if (!senhaAtual) {
+        setErro("Informe sua senha atual para definir uma nova senha.");
+        return;
+      }
+      if (novaSenha.length < 8) {
+        setErro("A nova senha deve ter pelo menos 8 caracteres.");
+        return;
+      }
+      if (novaSenha === senhaAtual) {
+        setErro("A nova senha deve ser diferente da senha atual.");
+        return;
+      }
+    }
+
     setSalvando(true);
     setTimeout(() => {
       setSalvando(false);
@@ -148,6 +178,11 @@ function PerfilContent() {
         </header>
 
         <Card className="border-none shadow-xl bg-white overflow-hidden rounded-3xl">
+          {erro && (
+            <div className="mx-8 mt-8 bg-red-50 text-red-600 text-sm font-bold p-3 rounded-xl border border-red-100">
+              {erro}
+            </div>
+          )}
           <CardHeader className="bg-slate-50 border-b border-slate-100 pb-8 pt-8">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-6 w-full">
               <div className="flex flex-col sm:flex-row items-center gap-6">

@@ -25,9 +25,9 @@ export default function RecuperarSenha() {
   const handleRecuperar = (e: React.FormEvent) => {
     e.preventDefault();
     setErro("");
+    const emailNormalizado = email.trim().toLowerCase();
 
-    // Validação simples de e-mail
-    if (!email || !email.includes("@")) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailNormalizado)) {
       setErro("Por favor, insira um e-mail válido.");
       return;
     }

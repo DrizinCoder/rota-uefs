@@ -80,9 +80,11 @@ function CadastroEdicaoOnibusForm() {
   const [formData, setFormData] = useState<OnibusFormState>(() =>
     montarEstadoInicial(modoNovo ? undefined : onibusSelecionado),
   );
+  const [erros, setErros] = useState({ placa: "", capacidade: "", geral: "" });
 
   useEffect(() => {
     setFormData(montarEstadoInicial(modoNovo ? undefined : onibusSelecionado));
+    setErros({ placa: "", capacidade: "", geral: "" });
   }, [modoNovo, onibusSelecionado]);
 
   const statusBadge = getStatusBadge(formData.status);
@@ -92,13 +94,39 @@ function CadastroEdicaoOnibusForm() {
       ...atual,
       [campo]: valor,
     }));
+    if (campo === "placa" || campo === "capacidade") {
+      setErros((atual) => ({ ...atual, [campo]: "", geral: "" }));
+    }
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setErros({ placa: "", capacidade: "", geral: "" });
+    const placa = formData.placa.trim().toUpperCase();
+    const capacidade = Number.parseInt(formData.capacidade, 10);
+    const regexPlacaAntiga = /^[A-Z]{3}-\d{4}$/;
+    const regexPlacaMercosul = /^[A-Z]{3}\d[A-Z]\d{2}$/;
+    const novosErros = { placa: "", capacidade: "", geral: "" };
+    let temErro = false;
 
-    if (!formData.placa.trim()) {
-      window.alert("Preencha ao menos a Placa.");
+    if (!placa) {
+      novosErros.placa = "Preencha a placa do veículo.";
+      temErro = true;
+    }
+
+    if (placa && !regexPlacaAntiga.test(placa) && !regexPlacaMercosul.test(placa)) {
+      novosErros.placa = "Placa inválida. Use o formato ABC-1234 ou ABC1D23.";
+      temErro = true;
+    }
+
+    if (Number.isNaN(capacidade) || capacidade < 10 || capacidade > 80) {
+      novosErros.capacidade = "Capacidade inválida. Informe um valor entre 10 e 80.";
+      temErro = true;
+    }
+
+    if (temErro) {
+      novosErros.geral = "Corrija os campos destacados para continuar.";
+      setErros(novosErros);
       return;
     }
 
@@ -157,6 +185,11 @@ function CadastroEdicaoOnibusForm() {
             <CardHeader className="pb-4 border-b border-slate-100">
               <CardTitle className="text-[#103173] font-black text-xl">Dados do Veículo</CardTitle>
             </CardHeader>
+            {erros.geral && (
+              <div className="mx-6 mt-6 bg-red-50 text-red-600 text-sm font-bold p-3 rounded-xl border border-red-100">
+                {erros.geral}
+              </div>
+            )}
             <CardContent className="p-6 grid sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-[#103173] font-bold">Código Interno</Label>
@@ -169,11 +202,16 @@ function CadastroEdicaoOnibusForm() {
                 <Input
                   id="placa"
                   value={formData.placa}
-                  onChange={(event) => atualizarCampo("placa", event.target.value.toUpperCase())}
+                  onChange={(event) =>
+                    atualizarCampo("placa", event.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, "").slice(0, 8))
+                  }
                   placeholder="ABC-1234"
-                  className="h-11 border-[#73AABF]/30 focus:border-[#103173] focus:ring-[#103173] font-bold"
+                  className={`h-11 focus:border-[#103173] focus:ring-[#103173] font-bold ${
+                    erros.placa ? "border-red-300 bg-red-50" : "border-[#73AABF]/30"
+                  }`}
                   required
                 />
+                {erros.placa && <p className="text-xs text-red-500 font-medium">{erros.placa}</p>}
               </div>
 
               <div className="space-y-2">
@@ -187,8 +225,11 @@ function CadastroEdicaoOnibusForm() {
                   max={80}
                   value={formData.capacidade}
                   onChange={(event) => atualizarCampo("capacidade", event.target.value)}
-                  className="h-11 border-[#73AABF]/30 focus:border-[#103173] focus:ring-[#103173]"
+                  className={`h-11 focus:border-[#103173] focus:ring-[#103173] ${
+                    erros.capacidade ? "border-red-300 bg-red-50" : "border-[#73AABF]/30"
+                  }`}
                 />
+                {erros.capacidade && <p className="text-xs text-red-500 font-medium">{erros.capacidade}</p>}
               </div>
 
               <div className="space-y-2">

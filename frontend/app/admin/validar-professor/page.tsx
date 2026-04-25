@@ -19,6 +19,12 @@ export default function AdminValidarProfessorPage() {
   const router = useRouter();
   const [solicitacoes, setSolicitacoes] = useState(SOLICITACOES_MOCK);
   const [busca, setBusca] = useState("");
+  const termoBusca = busca.trim().toLowerCase();
+  const sanitizarBusca = (valor: string) =>
+    valor
+      .normalize("NFKC")
+      .replace(/[^\p{L}\p{N}\s-]/gu, "")
+      .replace(/\s{2,}/g, " ");
 
   const handleAprovar = (id: string) => {
     if (confirm("Deseja aprovar o cadastro deste professor?")) {
@@ -35,7 +41,9 @@ export default function AdminValidarProfessorPage() {
   };
 
   const filteredSolicitacoes = solicitacoes.filter(
-    (req) => req.nome.toLowerCase().includes(busca.toLowerCase()) || req.matricula.includes(busca)
+    (req) =>
+      req.nome.toLowerCase().includes(termoBusca) ||
+      req.matricula.toLowerCase().includes(termoBusca)
   );
 
   return (
@@ -68,7 +76,7 @@ export default function AdminValidarProfessorPage() {
             <input 
               type="text" 
               value={busca}
-              onChange={(e) => setBusca(e.target.value)}
+              onChange={(e) => setBusca(sanitizarBusca(e.target.value))}
               placeholder="Buscar por nome ou matrícula..." 
               className="flex-1 bg-transparent border-none focus:outline-none text-[#103173] placeholder:text-slate-400 text-sm py-2"
             />

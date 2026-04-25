@@ -49,3 +49,16 @@ class EmailUseCases:
             raise InternalServerException(
                 message=f"Erro ao enviar email: {str(e)}"
             )
+    def send_email_change_confirmation(self, email: str, link: str):
+        try:
+            html = self.template_service.render(
+                "confirm_email_change.html",
+                {"link": link}
+            )
+            self.email_service.send(
+                subject="Confirme sua alteração de e-mail - Rota UEFS",
+                email_to=email,
+                html_content=html
+            )
+        except Exception as e:
+            raise InternalServerException(message=f"Erro ao enviar confirmação: {str(e)}")
