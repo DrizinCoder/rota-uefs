@@ -1,12 +1,11 @@
 import uuid
-
 from fastapi import APIRouter, BackgroundTasks, Depends, Query, Request
 from fastapi.responses import RedirectResponse
-from app.routers.users.staff import route_staff 
-from app.routers.users.drive import route_drive
+from app.routers.users.staff.route_staff import staff_router
+from app.routers.users.drive.route_drive import drive_router
+from app.routers.users.student.route_student import student_router
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.repositories.user_repository import pwd_context
-from app.routers.users.student.route_student import student_router
 from app.DTOs.users.dtos import PasswordUpdate, PhoneUpdate
 from app.core.exceptions import BadRequestException, NotFoundException, UnprocessableEntityException
 from app.database.db import get_session
@@ -20,8 +19,8 @@ from app.core.responses import ResponseHandler
 
 user_router = APIRouter()
 
-user_router.include_router(route_staff, prefix="/staff")
-user_router.include_router(route_drive, prefix="/driver")
+user_router.include_router(staff_router, prefix="/staff")
+user_router.include_router(drive_router, prefix="/driver")
 user_router.include_router(student_router, prefix="/student")
 
 

@@ -1,9 +1,6 @@
-from app.middleware import require_admin
 import uuid
-
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.DTOs.auth.dtos import RegisterAdminDTO, MotoristaRegisterResponseDTO, RegisterMotoristaDTO
 from app.core.responses import ResponseHandler
 from app.core.exceptions import ConflictException, NotFoundException
@@ -11,7 +8,6 @@ from app.database.db import get_session
 from app.repositories.user_repository import UserRepository
 from app.services.admin_service import AdminService
 from app.controllers.admin_controller import AdminController
-
 from app.DTOs.auth.dtos import RegisterAdminDTO
 from app.services.admin_service import AdminService
 from app.repositories.user_repository import UserRepository
@@ -19,7 +15,8 @@ from app.controllers.admin_controller import AdminController
 from app.database.db import get_session
 from app.core.responses import ResponseHandler
 from app.core.exceptions import NotFoundException
-from backend.app.middleware.auth_middleware import TokenData
+from app.middleware import require_admin
+from app.middleware.auth_middleware import TokenData
 
 router = APIRouter(
     dependencies=[Depends(require_admin)]
