@@ -1,3 +1,8 @@
+from app.DTOs.users.dtos import PasswordUpdate
+from app.DTOs.users.dtos import PhoneUpdate
+from app.middleware import require_profile
+from app.repositories.user_repository import pwd_context
+from app.core.exceptions import UnprocessableEntityException
 from app.middleware import require_admin
 import uuid
 from app.DTOs.auth.dtos import RegisterServidorDTO
@@ -100,19 +105,6 @@ async def delete_account(
 
     return {"Message": "User Deleted", "User": deleted_user} 
 
-@router.post("/create/simple_user")
-async def create_simple_user(
-    dados: CreateSimpleUserDTO, session: AsyncSession = Depends(get_session),
-    
-):
-    repo = UserRepository(session)
-    user = await repo.create_simple_user(dados)
-
-    if not user:
-        raise BadRequestException("Erro ao criar usuário")
-
-    return ResponseHandler.created(user, "Usuário criado com sucesso")
-
 # Funcionalidades [Estudante, Servidor, Motorista]
 
 @router.post("/register/reserva")
@@ -170,3 +162,50 @@ async def get_user(id: uuid.UUID, session: AsyncSession = Depends(get_session)):
         raise HTTPException(status_code=404, detail="User not found")
 
     return {"Message": "User Found", "User": user}
+
+# ----------- Funcionalidades de Alteração de Dados ------------
+
+@router.patch("/update/password/{id}")
+async def update_password(
+    id: uuid.UUID, dados: PasswordUpdate, 
+    session: AsyncSession = Depends(get_session),
+    current_user: TokenData = Depends(require_profile("ADMIN", "STAFF", "STUDENT"))
+):
+    repo = UserRepository(session)
+
+    # Isso deveria ser em um service!
+    user = await repo.get_by_id(id)
+
+    if not user:
+        raise NotFoundException("Usuário não encontrado!")
+
+    hashed_password = pwd_context.hash(dados.password)
+
+    if pwd_context.verify(dados.password, user.password):
+        raise UnprocessableEntityException("A senha fornecida é a mesma senha atual!")
+
+    if dados.password != dados.confirm_password:
+        raise BadRequestException("As senhas não coincidem!")
+
+    dados.password = hashed_password
+
+    updated_user = await repo.patch(id, dados)
+
+    if not updated_user:
+        raise NotFoundException("Erro ao atualizar senha!")
+
+    return {"Message": "Password Updated", "User": updated_user}
+
+@router.patch("/update/phone/{id}")
+async def update_profile(
+    id: uuid.UUID, dados: 
+    PhoneUpdate, session: AsyncSession = Depends(get_session),
+    current_user: TokenData = Depends(require_profile("DRIVER", "STUDENT"))
+):
+    repo = UserRepository(session)
+    updated_user = await repo.patch(id, dados)
+
+    if not updated_user:
+        raise HTTPException(status_code=404, detail="Driver not found")
+
+    return {"Message": "Phone Updated", "User": updated_user}
