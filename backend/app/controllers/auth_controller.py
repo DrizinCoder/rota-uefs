@@ -46,7 +46,7 @@ class AuthController:
         token_data = self.auth_service.create_token_recovery_password(user)
 
         #enviar email      
-        #EmailUseCases().send_recover_password(email, user.full_name, token_data["access_token"])
+        EmailUseCases().send_recover_password(email, user.full_name, token_data["access_token"])
 
         return token_data
     
@@ -65,6 +65,7 @@ class AuthController:
         if data.password != data.password_confirmation:
             raise ForbiddenException("Valor diferente de senhas")
         
-        #update senha
-        
+        user.password = data.password
+        await self.repository.update(user)
+
         return
