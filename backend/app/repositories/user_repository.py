@@ -1,11 +1,11 @@
+import random
 from app.core.exceptions import InternalServerException
 from logging import exception
 from app.models.models import Admin
-from app.DTOs.auth.dtos import RegisterAdminDTO
-import random
-from app.DTOs.auth.dtos import RegisterMotoristaDTO
-from app.DTOs.auth.dtos import RegisterAlunoDTO
-from app.DTOs.auth.dtos import RegisterServidorDTO
+from app.DTOs.auth import RegisterAdminDTO
+from app.DTOs.auth import RegisterMotoristaDTO
+from app.DTOs.auth import RegisterAlunoDTO
+from app.DTOs.auth import RegisterServidorDTO
 from sqlmodel import SQLModel
 import uuid
 from sqlalchemy.ext.asyncio import AsyncSession

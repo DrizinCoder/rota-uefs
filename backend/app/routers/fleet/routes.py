@@ -1,10 +1,6 @@
 from app.middleware import require_admin
 from fastapi import Body
-from app.DTOs.fleet.dtos import BusCreateBatchDTO
-from app.DTOs.fleet.dtos import BusCreateDTO
-from app.DTOs.fleet.dtos import BusUpdateBatchDTO
-from app.DTOs.fleet.dtos import BusUpdateDTO
-from app.DTOs.fleet.dtos import BusBatchDeleteDTO
+from app.DTOs.fleet import BusCreateBatchDTO, BusCreateDTO, BusUpdateBatchDTO, BusUpdateDTO, BusBatchDeleteDTO
 from fastapi import Depends
 from app.database.db import get_session
 from sqlalchemy.ext.asyncio import AsyncSession

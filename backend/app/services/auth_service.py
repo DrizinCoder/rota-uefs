@@ -11,7 +11,7 @@ from app.models.models import User
 from app.enums.enums import UserProfile
 from app.repositories.user_repository import UserRepository
 from app.services.email.use_cases import EmailUseCases
-from app.DTOs.auth.dtos import RegisterAlunoDTO
+from app.DTOs.auth import RegisterAlunoDTO
 from app.core.exceptions import ConflictException
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

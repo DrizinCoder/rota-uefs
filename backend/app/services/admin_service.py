@@ -3,7 +3,7 @@ from typing import Optional, List, Dict, Any
 from sqlalchemy.exc import IntegrityError
 from passlib.context import CryptContext
 
-from app.DTOs.users.dtos import CreateAdminDTO
+from app.DTOs.users import CreateAdminDTO
 from app.enums.enums import UserProfile, AccessLevel, RegistrationStatus
 from app.models.models import User, Admin
 from app.repositories.user_repository import UserRepository

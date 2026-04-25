@@ -1,6 +1,6 @@
 from jose import jwt
 from app.core.config import settings
-from app.DTOs.auth.dtos import AlunoRegisterResponseDTO, LoginUserDTO, ResetPasswordDTO
+from app.DTOs.auth import AlunoRegisterResponseDTO, LoginUserDTO, ResetPasswordDTO
 from app.services.auth_service import AuthService
 from app.repositories.user_repository import UserRepository
 from app.core.exceptions import ForbiddenException, UnauthorizedException, NotFoundException

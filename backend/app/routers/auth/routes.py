@@ -1,23 +1,16 @@
-from app.routers.admin.routes import get_admin_controller
-from app.controllers.admin_controller import AdminController
-from app.DTOs.auth.dtos import RegisterAdminDTO
-from app.DTOs.auth.dtos import AlunoRegisterResponseDTO
-from jose import jwt
-from app.DTOs.auth.dtos import AlunoRegisterResponseDTO, ResetPasswordDTO
-from app.DTOs.auth.dtos import ServidorRegisterResponseDTO
+from app.DTOs.auth import ResetPasswordDTO
+from app.DTOs.auth import ServidorRegisterResponseDTO
 from app.core.responses import ResponseHandler
 from app.core.exceptions import ConflictException
 from app.database.db import get_session
 from fastapi import BackgroundTasks, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.repositories.user_repository import UserRepository
-from app.DTOs.auth.dtos import RegisterAlunoDTO
+from app.DTOs.auth import RegisterAlunoDTO
 from fastapi import APIRouter
-from app.DTOs.auth.dtos import RegisterServidorDTO, LoginUserDTO
+from app.DTOs.auth import RegisterServidorDTO, LoginUserDTO
 from app.controllers.auth_controller import AuthController
 from app.services.auth_service import AuthService
-from app.services.email.use_cases import EmailUseCases
-from app.middleware.auth_middleware import TokenData, require_student
 
 router = APIRouter()
 

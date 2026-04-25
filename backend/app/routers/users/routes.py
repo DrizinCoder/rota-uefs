@@ -6,12 +6,12 @@ from app.routers.users.drive.route_drive import drive_router
 from app.routers.users.student.route_student import student_router
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.repositories.user_repository import pwd_context
-from app.DTOs.users.dtos import PasswordUpdate, PhoneUpdate
+from app.DTOs.users import PasswordUpdate, PhoneUpdate
 from app.core.exceptions import BadRequestException, NotFoundException, UnprocessableEntityException
 from app.database.db import get_session
 from app.middleware.auth_middleware import TokenData, get_current_user, require_profile
 from app.repositories.user_repository import UserRepository
-from app.DTOs.users.email_dtos import RequestEmailChangeDTO
+from app.DTOs.email_dtos import RequestEmailChangeDTO
 from app.controllers.user_controller import UserController
 from app.core.config import settings
 from app.core.responses import ResponseHandler

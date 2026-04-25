@@ -1,14 +1,14 @@
 import uuid
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.DTOs.auth.dtos import RegisterAdminDTO, MotoristaRegisterResponseDTO, RegisterMotoristaDTO
+from app.DTOs.auth import RegisterAdminDTO, MotoristaRegisterResponseDTO, RegisterMotoristaDTO
+from app.DTOs.auth import RegisterAdminDTO
 from app.core.responses import ResponseHandler
 from app.core.exceptions import ConflictException, NotFoundException
 from app.database.db import get_session
 from app.repositories.user_repository import UserRepository
 from app.services.admin_service import AdminService
 from app.controllers.admin_controller import AdminController
-from app.DTOs.auth.dtos import RegisterAdminDTO
 from app.services.admin_service import AdminService
 from app.repositories.user_repository import UserRepository
 from app.controllers.admin_controller import AdminController
