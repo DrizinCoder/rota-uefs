@@ -1,5 +1,5 @@
 "use client";
-
+import { authService, LoginUserDTO } from '@/services/authService';
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -9,37 +9,49 @@ import { BusFront, Lock, User, ShieldCheck } from "lucide-react";
 import { AuthPageShell } from "@/components/auth/auth-page-shell";
 import { LabeledIconInput } from "@/components/auth/labeled-icon-input";
 
-export default function TelaLogin() {
+export default function LoginPage() {
+  // Hooks
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [erro, setErro] = useState("");
-  const [formData, setFormData] = useState({
-    matricula: "",
-    senha: "",
+
+  // Criando o state com os campos vazios
+  const [formData, setFormData] = useState<LoginUserDTO>({
+    matricula: '',
+    senha: '',
   });
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
+const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  let { name, value } = e.target;
+
+  /* 
+  if (name === "registration_id") {
+    value = value.replace(/\D/g, "").slice(0, 8);
+  }*/
+  
+  setFormData(estadoAnterior => ({
+    ...estadoAnterior,
+    [name]: value      
+  }));
+};
+
+const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault(); // MUITO IMPORTANTE: Evita que a página recarregue do nada
+    setIsLoading(true);
     setErro("");
 
-    const matricula = formData.matricula.trim();
-    const senha = formData.senha;
+    try {
+      
+      const resposta = await authService.login(formData);
+      console.log("Resposta do login:", resposta.data.user.profile);
+    
 
-    if (!/^\d{8}$/.test(matricula)) {
-      setErro("Informe uma matrícula válida com 8 dígitos.");
-      return;
+    } catch (error) {
+
+      alert("Erro ao cadastrar. Olhe o terminal/console.");
+    } finally {
+      setIsLoading(false);
     }
-
-    if (senha.length < 8) {
-      setErro("A senha deve ter pelo menos 8 caracteres.");
-      return;
-    }
-
-    setIsLoading(true);
-
-    setTimeout(() => {
-      router.push("/passageiro");
-    }, 1000);
   };
 
   return (
@@ -64,20 +76,17 @@ export default function TelaLogin() {
           )}
         </CardHeader>
 
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <LabeledIconInput
               id="matricula"
+              name="matricula"
               label="Matrícula"
               icon={User}
               placeholder="23121111"
               value={formData.matricula}
-              onChange={(e) =>
-                setFormData((atual) => ({
-                  ...atual,
-                  matricula: e.target.value.replace(/\D/g, "").slice(0, 8),
-                }))
-              }
+              onChange={handleChange}
+    
               maxLength={8}
               required
             />
@@ -95,17 +104,13 @@ export default function TelaLogin() {
               </div>
               <LabeledIconInput
                 id="pass"
+                name="senha"
                 label=""
                 icon={Lock}
                 type="password"
                 placeholder="••••••••"
                 value={formData.senha}
-                onChange={(e) =>
-                  setFormData((atual) => ({
-                    ...atual,
-                    senha: e.target.value,
-                  }))
-                }
+                onChange={handleChange} 
                 containerClassName="space-y-0"
                 labelClassName="hidden"
                 required
