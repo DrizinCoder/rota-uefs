@@ -12,7 +12,7 @@ security = HTTPBearer()
 class TokenData(BaseModel):
     sub: str  
     registration_id: str
-    email: str
+    email: str | None = None
     profile: str
     full_name: str
     access_level: str | None = None
