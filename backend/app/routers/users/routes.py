@@ -90,6 +90,22 @@ async def get_estudante_by_registration_id(
     return {"Message": "Student Found", "User": user}
 '''
 
+# --- Rota utilizada para se deletar ---    
+@router.delete("/delete/account/me")
+async def delete_account(
+    session: AsyncSession = Depends(get_session),
+    current_user: TokenData = Depends(get_current_user)
+):
+    repo = UserRepository(session)
+
+    deleted_user = await repo.anonymize(current_user.sub)
+
+    if not deleted_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return {"Message": "User Deleted", "User": deleted_user} 
+
+
 # --- Essa rota pode ser usada para um admin deletar qualquer usuário ---
 @router.delete("/delete/account/{id}")
 async def delete_account(
@@ -100,21 +116,6 @@ async def delete_account(
     repo = UserRepository(session)
 
     deleted_user = await repo.anonymize(id)
-
-    if not deleted_user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    return {"Message": "User Deleted", "User": deleted_user} 
-
-# --- Rota utilizada para se deletar ---
-@router.delete("/delete/account/me")
-async def delete_account(
-    session: AsyncSession = Depends(get_session),
-    current_user: TokenData = Depends(get_current_user)
-):
-    repo = UserRepository(session)
-
-    deleted_user = await repo.anonymize(current_user.sub)
 
     if not deleted_user:
         raise HTTPException(status_code=404, detail="User not found")
