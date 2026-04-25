@@ -46,27 +46,28 @@ const REDIRECT_MAP: Record<string, string> = {
 
 
 const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); // MUITO IMPORTANTE: Evita que a página recarregue do nada
-    setIsLoading(true);
-    setErro("");
+  e.preventDefault();
+  setIsLoading(true);
+  setErro("");
 
-    try {
-      
-      const resposta = await authService.login(formData);
-      const profile = resposta.data.user.profile;
-      const destino = REDIRECT_MAP[profile] || "/login";
-      //console.log("Resposta do login:", resposta.data.user.profile);
+  try {
+    const resposta = await authService.login(formData);
+    const profile = resposta.data.user.profile;
+    const destino = REDIRECT_MAP[profile] || "/login";
 
-      localStorage.setItem('token', resposta.data.access_token);
-      router.push(destino);
+    // Salva o token no localStorage (como antes)
+    localStorage.setItem("token", resposta.data.access_token);
 
-    } catch (error) {
+    // ✅ NOVO: Salva o perfil em um cookie acessível pelo middleware
+    document.cookie = `user_profile=${profile}; path=/; max-age=86400; SameSite=Lax`;
 
-      alert("Erro ao cadastrar. Olhe o terminal/console.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    router.push(destino);
+  } catch (error) {
+    setErro("Matrícula ou senha incorretos.");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <AuthPageShell>
