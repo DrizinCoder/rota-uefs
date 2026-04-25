@@ -1,0 +1,100 @@
+<!doctype html>
+
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ativação de Conta</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        margin: 0;
+        padding: 0;
+        color: #333333;
+      }
+      .container {
+        max-width: 600px;
+        margin: 40px auto;
+        background-color: #ffffff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        background-color: #0056b3;
+        padding: 30px 20px;
+        text-align: center;
+        color: #ffffff;
+      }
+      .header h1 {
+        margin: 0;
+        font-size: 24px;
+        letter-spacing: 1px;
+      }
+      .content {
+        padding: 40px 30px;
+        text-align: center;
+      }
+      .content p {
+        font-size: 16px;
+        line-height: 1.6;
+        margin-bottom: 25px;
+      }
+      .button {
+        display: inline-block;
+        padding: 14px 35px;
+        background-color: #007bff;
+        color: #ffffff !important;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: bold;
+      }
+      .footer {
+        background-color: #f8f9fa;
+        padding: 20px;
+        text-align: center;
+        font-size: 12px;
+        color: #888888;
+        border-top: 1px solid #eeeeee;
+      }
+      .warning {
+        font-size: 13px;
+        color: #999;
+        margin-top: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Rota UEFS</h1>
+      </div>
+      <div class="content">
+        <h2>Ative sua conta</h2>
+
+        <p>Olá, <strong>{{ first_name }}</strong>,</p>
+
+        <p>Obrigado por se cadastrar no <strong>Rota UEFS</strong>.</p>
+
+        <p>
+          Para começar a usar sua conta, é necessário confirmar seu e-mail
+          clicando no botão abaixo:
+        </p>
+
+        <a href="{{ link }}" class="button">Ativar Conta</a>
+
+        <p class="warning">Este link é válido por apenas 30 minutos.</p>
+        <p class="warning">
+          Se você não criou essa conta, pode ignorar este e-mail.
+        </p>
+      </div>
+
+      <div class="footer">
+        <p>&copy; 2026 Equipe Rota UEFS. Todos os direitos reservados.</p>
+        <p>Universidade Estadual de Feira de Santana</p>
+      </div>
+    </div>
+  </body>
+</html>
