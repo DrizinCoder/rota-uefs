@@ -35,5 +35,9 @@ export const authService = {
         const response = await api.post('/auth/register/aluno', dados);
         return response.data;
     },
+    cadastroServidor: async (dados: RegisterServidorDTO) => {
+        const response = await api.post('/auth/register/servidor', dados);
+        return response.data;
+    },
     
 };
