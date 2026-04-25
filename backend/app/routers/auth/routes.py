@@ -18,6 +18,7 @@ from app.controllers.auth_controller import AuthController
 from app.services.user_service import UserService
 from app.services.auth_service import AuthService
 from app.services.email.use_cases import EmailUseCases
+from app.services.user_service import UserService
 
 router = APIRouter()
 
