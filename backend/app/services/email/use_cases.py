@@ -29,6 +29,26 @@ class EmailUseCases:
                 message=f"Erro ao enviar email: {str(e)}"
             )
         
+    def send_recover_password(self, email: str, name: str, token: str):
+        try:
+            html = self.template_service.render(
+                "recover_password.html",
+                {
+                    "name": name,
+                    "link": f"https://rota-uefs/reset/password?token={token}"
+                }
+            )
+
+            self.email_service.send(
+                subject="Recuperação de Senha - Rota UEFS 🚍",
+                email_to=email,
+                html_content=html
+            )
+
+        except Exception as e:
+            raise InternalServerException(
+                message=f"Erro ao enviar email: {str(e)}"
+            )
     def send_email_change_confirmation(self, email: str, link: str):
         try:
             html = self.template_service.render(

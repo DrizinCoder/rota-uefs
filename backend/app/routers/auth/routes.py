@@ -1,4 +1,5 @@
-from app.DTOs.auth.dtos import AlunoRegisterResponseDTO
+from jose import jwt
+from app.DTOs.auth.dtos import AlunoRegisterResponseDTO, ResetPasswordDTO
 from app.DTOs.auth.dtos import ServidorRegisterResponseDTO
 from app.core.responses import ResponseHandler
 from app.core.exceptions import ConflictException
@@ -10,6 +11,8 @@ from app.DTOs.auth.dtos import RegisterAlunoDTO
 from fastapi import APIRouter
 from app.DTOs.auth.dtos import RegisterServidorDTO, LoginUserDTO
 from app.controllers.auth_controller import AuthController
+from app.services.auth_service import AuthService
+from app.services.email.use_cases import EmailUseCases
 
 router = APIRouter()
 
@@ -61,5 +64,13 @@ async def login(
 
 
 @router.post("/recover/password")
-async def recover_password(email: str):
-    return {"message": "olá! bem-vindo a recup de senha"}
+async def recover_password(email: str, controller: AuthController = Depends(get_auth_controller)):
+    
+    token = await controller.recover_password(email)
+    return ResponseHandler.ok(token)
+
+@router.post("/reset/password")
+async def reset_password(data: ResetPasswordDTO, token: str, controller: AuthController = Depends(get_auth_controller)):
+
+    await controller.reset_password(token, data)
+    return ResponseHandler.no_content()
