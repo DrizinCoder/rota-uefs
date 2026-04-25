@@ -49,6 +49,7 @@ class EmailUseCases:
             raise InternalServerException(
                 message=f"Erro ao enviar email: {str(e)}"
             )
+
     def send_email_change_confirmation(self, email: str, link: str):
         try:
             html = self.template_service.render(
