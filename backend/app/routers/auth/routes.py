@@ -39,24 +39,6 @@ async def register_servidor(dados: RegisterServidorDTO, session: AsyncSession = 
 
     return ResponseHandler.created(data=response_data.model_dump(mode='json'))
 
-
-    
-@router.post("/register/aluno")
-async def register_aluno(dados: RegisterAlunoDTO, session: AsyncSession = Depends(get_session)):
-    repo = UserRepository(session)
-
-    student = await repo.get_by_email(dados.email)
-    
-    if student:
-       raise ConflictException("Usuário já cadastrado")
-
-    student_created = await repo.create_student(dados)
-
-    response_data = AlunoRegisterResponseDTO.model_validate(student_created)
-
-    return ResponseHandler.created(data=response_data.model_dump(mode='json'))
-    
-
 # Rota unificada de login [Admin, Motorista, Servidor, Aluno]
 @router.post("/login")
 async def login(
@@ -68,7 +50,7 @@ async def login(
 
 @router.post("/recover/password")
 async def recover_password(email: str, controller: AuthController = Depends(get_auth_controller)):
-    
+
     token = await controller.recover_password(email)
     return ResponseHandler.ok(token)
 
@@ -77,3 +59,31 @@ async def reset_password(data: ResetPasswordDTO, token: str, controller: AuthCon
 
     await controller.reset_password(token, data)
     return ResponseHandler.no_content()
+
+
+
+
+
+@router.post("/register/aluno")
+async def register_aluno(
+    dados: RegisterAlunoDTO,
+    session: AsyncSession = Depends(get_session)
+):
+    service = UserService(UserRepository(session))
+
+    user = await service.register_student(dados)
+
+    response_data = AlunoRegisterResponseDTO.model_validate(user)
+
+    return ResponseHandler.created(
+        data=response_data.model_dump(mode="json")
+    )
+
+@router.get("/activate")
+async def activate_account(
+    token: str,
+    session: AsyncSession = Depends(get_session)
+):
+    service = UserService(UserRepository(session))
+
+    return await service.activate_account(token)
