@@ -72,3 +72,18 @@ class AuthService:
                 "registration_status": user.registration_status.value
             }
         }
+    
+    @staticmethod
+    def create_token_recovery_password(user: User) -> dict:
+        token_data = {
+            "sub": str(user.user_id),
+            "email": user.email
+        }
+        
+        access_token = AuthService.create_access_token(token_data, expires_delta=timedelta(minutes=15))
+
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user": token_data
+        }
