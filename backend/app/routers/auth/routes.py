@@ -62,14 +62,6 @@ async def login(
     result = await controller.login(dados)
     return ResponseHandler.ok(data=result)
 
-@router.post("/register/admin")
-async def create_admin(
-    dados: RegisterAdminDTO,
-    controller: AdminController = Depends(get_admin_controller)
-):
-    result = await controller.create(dados)
-    return ResponseHandler.created(result, "Administrador criado com sucesso")
-
 @router.post("/recover/password")
 async def recover_password(email: str):
     return {"message": "olá! bem-vindo a recup de senha"}
