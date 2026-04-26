@@ -36,7 +36,7 @@ async def test_student_only(current_user: TokenData = Depends(require_student)):
         "success": True,
         "message": "Acesso permitido! Você é um aluno.",
         "data": {
-            "sub": current_user.id,
+            "sub": current_user.sub,
             "profile": current_user.profile,
             "student_id": current_user.student_id
         }
