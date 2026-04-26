@@ -1,3 +1,4 @@
+from datetime import date
 import uuid
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,6 +18,9 @@ from app.core.responses import ResponseHandler
 from app.core.exceptions import NotFoundException
 from app.middleware import require_admin
 from app.middleware.auth_middleware import TokenData
+from app.controllers.dashboard_controller import DashboardController
+from app.services.dashboard_service import DashboardService
+from app.repositories.dashboard_repository import DashboardRepository
 
 router = APIRouter(
     dependencies=[Depends(require_admin)]
@@ -25,7 +29,14 @@ router = APIRouter(
 async def get_admin_controller(session: AsyncSession = Depends(get_session)) -> AdminController:
     user_repo = UserRepository(session)
     admin_service = AdminService(user_repo)
+    
     return AdminController(admin_service)
+
+async def get_dashboard_controller(session: AsyncSession = Depends(get_session)) -> DashboardController:
+    dashboard_repo = DashboardRepository(session)
+    dashboard_service = DashboardService(dashboard_repo)
+    
+    return DashboardController(dashboard_service)
 
 @router.post("/register/motorista")
 async def register_motorista(
@@ -56,6 +67,18 @@ async def list_admins(
         return ResponseHandler.ok([], "Nenhum administrador encontrado")
     
     return ResponseHandler.ok(result, "Administradores encontrados")
+
+@router.get("/home_info")
+async def get_home_info(
+    today: date,
+    controller: DashboardController = Depends(get_dashboard_controller)
+):
+    result = await controller.get_home_info(today)
+
+    if not result:
+        return ResponseHandler.ok([], "Nenhum dado encontrado")
+    
+    return ResponseHandler.ok(result, "Dados da home page")
 
 
 @router.get("/{admin_id}")

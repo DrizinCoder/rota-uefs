@@ -1,0 +1,73 @@
+from calendar import calendar
+from datetime import timedelta
+from app.enums.enums import TripRecurrence
+import uuid
+from datetime import date
+from app.core.exceptions import NotFoundException
+from app.repositories.trip_repository import TripRepository
+from app.DTOs.trip import CreateTripDTO, UpdateTripDTO
+
+class TripService:
+    def __init__(self, trip_repository: TripRepository):
+        self.trip_repository = trip_repository
+
+    async def create(self, data: CreateTripDTO):
+        dates = self._generate_dates(data.trip_date, data.recurrence)
+        
+        trips = []
+        for trip_date in dates:
+            trip_data = data.model_copy(update={"trip_date": trip_date})
+            trip = await self.trip_repository.create(trip_data)
+            trips.append(trip)
+        
+        return [trip.model_dump(mode='json') for trip in trips]
+
+    async def get_all(self):
+        trips = await self.trip_repository.get_all()
+        return [trip.model_dump(mode='json') for trip in trips]
+
+    async def get_by_id(self, trip_id: uuid.UUID):
+        trip = await self.trip_repository.get_by_id(trip_id)
+        if not trip:
+            raise NotFoundException("Viagem não encontrada")
+        return trip.model_dump(mode='json')
+
+    async def get_by_date(self, trip_date: date):
+        trips = await self.trip_repository.get_by_date(trip_date)
+        return [trip.model_dump(mode='json') for trip in trips]
+
+    async def patch(self, trip_id: uuid.UUID, data: UpdateTripDTO):
+        trip = await self.trip_repository.patch(trip_id, data)
+        if not trip:
+            raise NotFoundException("Viagem não encontrada")
+        return trip.model_dump(mode='json')
+
+    async def delete(self, trip_id: uuid.UUID):
+        trip = await self.trip_repository.delete(trip_id)
+        if not trip:
+            raise NotFoundException("Viagem não encontrada")
+        return trip.model_dump(mode='json')
+    
+    def _generate_dates(self, start_date: date, recurrence: TripRecurrence) -> list[date]:
+        if recurrence == TripRecurrence.SINGLE:
+            return [start_date]
+
+        if recurrence == TripRecurrence.WEEKLY:
+            # da data até sexta da mesma semana
+            dates = []
+            current = start_date
+            while current.weekday() < 5:  # 0=seg, 4=sex, 5=sab
+                dates.append(current)
+                current += timedelta(days=1)
+            return dates
+
+        if recurrence == TripRecurrence.MONTHLY:
+            # da data até o último dia útil do mês
+            dates = []
+            last_day = calendar.monthrange(start_date.year, start_date.month)[1]
+            current = start_date
+            while current.day <= last_day:
+                if current.weekday() < 5:  # ignora sab e dom
+                    dates.append(current)
+                current += timedelta(days=1)
+            return dates

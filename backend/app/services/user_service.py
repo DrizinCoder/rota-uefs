@@ -1,7 +1,4 @@
-from datetime import date
 import uuid
-
-from app.core.config import settings
 from app.repositories.user_repository import pwd_context
 from app.core.exceptions import BadRequestException, ConflictException, NotFoundException, UnprocessableEntityException
 from app.repositories.user_repository import UserRepository
@@ -11,6 +8,14 @@ from app.DTOs.users import PasswordUpdate, PhoneUpdate
 class UserService:
     def __init__(self, repository: UserRepository):
         self.repository = repository
+
+    async def get_by_id_without_password(self, id: str):
+        user = await self.repository.get_by_id_without_password(id)
+
+        if not user:
+            raise NotFoundException("Usuário não encontrado.")
+        
+        return user
 
     async def check_email_available(self, email: str):
         existing = await self.repository.get_by_email(email)
