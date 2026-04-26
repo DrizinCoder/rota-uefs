@@ -16,13 +16,13 @@ user_router.include_router(staff_router, prefix="/staff")
 user_router.include_router(drive_router, prefix="/driver")
 user_router.include_router(student_router, prefix="/student")
 
-@user_router.get("/{id}")
+@user_router.get("/me")
 async def get_user(
-    id: uuid.UUID, 
     service: UserService = Depends(get_user_service),
-    _: TokenData = Depends(get_current_user)
+    current_user: TokenData = Depends(get_current_user)
 ):
-    user = await service.get_user_by_id(id)
+    user = await service.get_user_by_id(current_user.sub)
+
     return ResponseHandler.ok(data={"user": user})
 
 @user_router.delete("/delete/account/me")
