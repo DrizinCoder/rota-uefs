@@ -162,6 +162,11 @@ class AdminService:
         user = await self.user_repository.update_status_staff(user_id, status)
         if not user:
             raise NotFoundException("Usuário não encontrado")
+        
+        if status == False:
+            await self.user_repository.anonymize(user_id)
+            return True
+        
         return user
 
     def _serialize_admin(self, admin: Admin) -> Dict[str, Any]:
