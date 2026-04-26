@@ -1,3 +1,4 @@
+from app.enums.enums import TripRecurrence
 import uuid
 from datetime import date, time
 from typing import Optional
@@ -10,6 +11,7 @@ class CreateTripDTO(SQLModel):
     route_id: uuid.UUID
     trip_date: date
     departure_time: time
+    recurrence: TripRecurrence = TripRecurrence.SINGLE
 
 class UpdateTripDTO(SQLModel):
     bus_license_plate: Optional[str] = None
