@@ -1,3 +1,5 @@
+from app.core.responses import ResponseHandler
+from backend.app.services.route_service import RouteService
 from app.middleware import require_admin
 import uuid
 from fastapi import APIRouter, Depends, HTTPException
@@ -8,67 +10,40 @@ from app.DTOs.routes import CreateRouteDTO, UpdateRouteDTO
 
 router = APIRouter(
     prefix="/routes", tags=["Routes"],
-    dependencies=[Depends(require_admin)]    
+    dependencies=[Depends(require_admin)]
 )
 
-# CREATE 
+async def get_route_service(session: AsyncSession = Depends(get_session)) -> RouteService:
+    repo = RouteRepository(session)
+    return RouteService(repo)
+
+
 @router.post("/create")
-async def create_route(dados: CreateRouteDTO, session: AsyncSession = Depends(get_session)):
-    repo = RouteRepository(session)
-    route = await repo.create(dados)
-    return {"Message": "Route Created", "Route": route}
+async def create_route(dados: CreateRouteDTO, service: RouteService = Depends(get_route_service)):
+    result = await service.create(dados)
+    return ResponseHandler.created(result)
 
-# READ (GET Todos)
 @router.get("/")
-async def get_all_routes(session: AsyncSession = Depends(get_session)):
-    repo = RouteRepository(session)
-    routes = await repo.get_all()
+async def get_all_routes(service: RouteService = Depends(get_route_service)):
+    result = await service.get_all()
+    return ResponseHandler.ok(result)
 
-    if not routes:
-        raise HTTPException(status_code=404, detail="Routes not found")
-
-    return {"Message": "Routes Found", "Routes": routes}
-
-# READ (GET Único)
 @router.get("/{id}")
-async def get_route(id: uuid.UUID, session: AsyncSession = Depends(get_session)):
-    repo = RouteRepository(session)
-    route = await repo.get_by_id(id)
+async def get_route(id: uuid.UUID, service: RouteService = Depends(get_route_service)):
+    result = await service.get_by_id(id)
+    return ResponseHandler.ok(result)
 
-    if not route:
-        raise HTTPException(status_code=404, detail="Route not found")
-
-    return {"Message": "Route Found", "Route": route}
-
-# UPDATE PARCIAL 
 @router.patch("/update/{id}")
-async def patch_route(id: uuid.UUID, dados: UpdateRouteDTO, session: AsyncSession = Depends(get_session)):
-    repo = RouteRepository(session)
-    updated_route = await repo.patch(id, dados)
+async def patch_route(id: uuid.UUID, dados: UpdateRouteDTO, service: RouteService = Depends(get_route_service)):
+    result = await service.patch(id, dados)
+    return ResponseHandler.ok(result)
 
-    if not updated_route:
-        raise HTTPException(status_code=404, detail="Route not found")
-
-    return {"Message": "Route Patched", "Route": updated_route}
-
-# UPDATE COMPLETO
 @router.put("/update/{id}")
-async def put_route(id: uuid.UUID, dados: CreateRouteDTO, session: AsyncSession = Depends(get_session)):
-    repo = RouteRepository(session)
-    updated_route = await repo.update_full(id, dados)
+async def put_route(id: uuid.UUID, dados: CreateRouteDTO, service: RouteService = Depends(get_route_service)):
+    result = await service.update_full(id, dados)
+    return ResponseHandler.ok(result)
 
-    if not updated_route:
-        raise HTTPException(status_code=404, detail="Route not found")
-
-    return {"Message": "Route Updated", "Route": updated_route}
-
-# DELETE
 @router.delete("/delete/{id}")
-async def delete_route(id: uuid.UUID, session: AsyncSession = Depends(get_session)):
-    repo = RouteRepository(session)
-    deleted_route = await repo.delete(id)
-
-    if not deleted_route:
-        raise HTTPException(status_code=404, detail="Route not found")
-
-    return {"Message": "Route Deleted", "Route": deleted_route}
+async def delete_route(id: uuid.UUID, service: RouteService = Depends(get_route_service)):
+    result = await service.delete(id)
+    return ResponseHandler.ok(result)
