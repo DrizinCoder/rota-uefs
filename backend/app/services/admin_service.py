@@ -154,6 +154,9 @@ class AdminService:
     async def list_staff_status_pending(self):
         return await self.user_repository.list_all_staff_status_peding()
 
+    async def get_driver(self, driver_id: uuid.UUID):
+        return await self.user_repository.get_by_id(driver_id)
+
     def _serialize_admin(self, admin: Admin) -> Dict[str, Any]:
         return {
             "admin_id": str(admin.admin_id),

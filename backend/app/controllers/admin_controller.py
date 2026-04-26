@@ -29,6 +29,9 @@ class AdminController:
             return []
         return self.service.serialize_admin_list(admins)
 
+    async def get_driver(self, driver_id: uuid.UUID):
+        return await self.service.get_driver(driver_id)
+
     async def get_by_id(self, admin_id: uuid.UUID):
         admin = await self.service.get_admin_by_id(admin_id)
         if not admin:
