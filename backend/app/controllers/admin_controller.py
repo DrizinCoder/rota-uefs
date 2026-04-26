@@ -1,3 +1,4 @@
+from app.DTOs.auth import MotoristaRegisterResponseDTO,RegisterMotoristaDTO
 import uuid
 from app.DTOs.auth import RegisterAdminDTO
 from app.DTOs.users import CreateAdminDTO
@@ -42,3 +43,14 @@ class AdminController:
 
     async def delete(self, admin_id: uuid.UUID):
         return await self.service.delete_admin(admin_id)
+
+    async def register_motorista(self, dados: RegisterMotoristaDTO):
+        driver, temp_password = await self.service.register_motorista(dados)
+        
+        response = MotoristaRegisterResponseDTO.model_validate(driver)
+        response_dict = response.model_dump(mode='json')
+        response_dict["temp_password"] = temp_password
+        return response_dict
+
+    async def delete_account(self, user_id: uuid.UUID):
+        return await self.service.delete_account(user_id)

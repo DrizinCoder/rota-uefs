@@ -35,21 +35,12 @@ async def get_admin_controller(session: AsyncSession = Depends(get_session)) -> 
 
 
 @router.post("/register/motorista")
-async def register_motorista(dados: RegisterMotoristaDTO, session: AsyncSession = Depends(get_session)):
-    repo = UserRepository(session)
-
-    driver = await repo.get_by_registration_id(dados.registration_id)
-    if driver:
-        raise ConflictException("Motorista já cadastrado")
-
-    driver_created, temp_password = await repo.create_driver(dados)
-
-    response_data = MotoristaRegisterResponseDTO.model_validate(driver_created)
-
-    response_dict = response_data.model_dump(mode='json')
-    response_dict["temp_password"] = temp_password
-
-    return ResponseHandler.created(data=response_dict)
+async def register_motorista(
+    dados: RegisterMotoristaDTO,
+    controller: AdminController = Depends(get_admin_controller)
+):
+    result = await controller.register_motorista(dados)
+    return ResponseHandler.created(data=result)
 
 # ============ Rotas do CRUD ============
 
@@ -115,14 +106,10 @@ async def delete_admin(
 
 @router.delete("/delete/account/{id}")
 async def delete_account(
-    id: uuid.UUID, 
-    session: AsyncSession = Depends(get_session)
+    id: uuid.UUID,
+    controller: AdminController = Depends(get_admin_controller)
 ):
-    repo = UserRepository(session)
-
-    deleted_user = await repo.anonymize(id)
-
-    if not deleted_user:
+    result = await controller.delete_account(id)
+    if not result:
         raise NotFoundException("User not found")
-
     return ResponseHandler.ok("User account has been anonymized successfully")

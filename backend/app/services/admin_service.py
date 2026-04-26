@@ -1,3 +1,4 @@
+from app.DTOs.auth import RegisterMotoristaDTO
 import uuid
 from typing import Optional, List, Dict, Any
 from sqlalchemy.exc import IntegrityError
@@ -132,7 +133,21 @@ class AdminService:
             return False
 
         return await self.user_repository.anonymize(admin_id)
-    
+
+    async def register_motorista(self, dados: RegisterMotoristaDTO):
+        driver = await self.user_repository.get_by_registration_id(dados.registration_id)
+        if driver:
+            raise ConflictException("Motorista já cadastrado")
+        
+        driver_created, temp_password = await self.user_repository.create_driver(dados)
+        return driver_created, temp_password
+
+    async def delete_account(self, user_id: uuid.UUID):
+        deleted_user = await self.user_repository.anonymize(user_id)
+        if not deleted_user:
+            return None
+        return deleted_user
+
     def _serialize_admin(self, admin: Admin) -> Dict[str, Any]:
         return {
             "admin_id": str(admin.admin_id),
