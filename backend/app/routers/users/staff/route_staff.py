@@ -24,6 +24,22 @@ async def get_all_servidores(
     result = await controller.list_staff_status_pending()
     return ResponseHandler.ok(result)
 
+@staff_router.patch("accept/{id}")
+async def confirm_access(
+    controller: AdminController = Depends(get_admin_controller),
+    _: TokenData = Depends(require_admin)
+):
+    result = await controller.update_status_staff(id, True)
+    return ResponseHandler.ok(result)
+
+@staff_router.patch("reject/{id}")
+async def reject_access(
+    controller: AdminController = Depends(get_admin_controller),
+    _: TokenData = Depends(require_admin)
+):
+    result = await controller.update_status_staff(id, False)
+    return ResponseHandler.ok(result)
+
 @staff_router.post("/email-change/request")
 async def request_email_change(
     request: Request,

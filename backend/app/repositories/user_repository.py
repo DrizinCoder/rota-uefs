@@ -1,3 +1,4 @@
+from app.enums.enums import RegistrationStatus
 import random
 from app.core.exceptions import InternalServerException
 from logging import exception
@@ -300,4 +301,15 @@ class UserRepository:
         
         self.session.add(db_user)
         await self.session.commit()
+        return db_user
+
+    async def update_status_staff(self, user_id: uuid.UUID, status: bool):
+        db_user = await self.get_by_id(user_id)
+        if not db_user:
+            return None
+        
+        db_user.registration_status = RegistrationStatus.ACTIVE if status else RegistrationStatus.PENDING
+        self.session.add(db_user)
+        await self.session.commit()
+        await self.session.refresh(db_user)
         return db_user

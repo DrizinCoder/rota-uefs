@@ -63,3 +63,6 @@ class AdminController:
 
     async def list_staff_status_pending(self):
         return await self.service.list_staff_status_pending()
+
+    async def update_status_staff(self, user_id: uuid.UUID, status: bool):
+        return await self.service.update_status_staff(user_id, status)

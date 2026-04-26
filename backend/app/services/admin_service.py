@@ -1,3 +1,4 @@
+from app.core.exceptions import NotFoundException
 from app.DTOs.auth import RegisterMotoristaDTO
 import uuid
 from typing import Optional, List, Dict, Any
@@ -156,6 +157,12 @@ class AdminService:
 
     async def get_driver(self, driver_id: uuid.UUID):
         return await self.user_repository.get_by_id(driver_id)
+
+    async def update_status_staff(self, user_id: uuid.UUID, status: bool):
+        user = await self.user_repository.update_status_staff(user_id, status)
+        if not user:
+            raise NotFoundException("Usuário não encontrado")
+        return user
 
     def _serialize_admin(self, admin: Admin) -> Dict[str, Any]:
         return {
