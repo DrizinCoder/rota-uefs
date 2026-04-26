@@ -279,6 +279,20 @@ class UserRepository:
         await self.session.refresh(user)
         return user
     
+    async def update_driver(self, db_obj: User, update_data: SQLModel):
+        update_dict = update_data.model_dump(exclude_unset=True)
+
+        db_obj.sqlmodel_update(update_dict)
+
+        self.session.add(db_obj)
+        await self.session.commit()
+        await self.session.refresh(db_obj)
+        
+        if hasattr(db_obj, "password"):
+            delattr(db_obj, "password")
+            
+        return db_obj
+    
     async def patch(self, user_id: uuid.UUID, update_data: SQLModel):
         db_user = await self.get_by_id(user_id)
         if not db_user:

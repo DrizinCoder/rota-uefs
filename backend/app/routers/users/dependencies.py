@@ -7,6 +7,12 @@ from app.services.auth_service import AuthService
 from app.services.email.use_cases import EmailUseCases
 from app.controllers.user_controller import UserController
 
+from app.services.driver_service import DriverService 
+
+async def get_driver_service(session: AsyncSession = Depends(get_session)) -> DriverService:
+    repo = UserRepository(session)
+    return DriverService(repo)
+
 async def get_user_service(session: AsyncSession = Depends(get_session)) -> UserService:
     repo = UserRepository(session)
     return UserService(repo)

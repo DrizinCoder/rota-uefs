@@ -1,7 +1,4 @@
-from datetime import date
 import uuid
-
-from app.core.config import settings
 from app.repositories.user_repository import pwd_context
 from app.core.exceptions import BadRequestException, ConflictException, NotFoundException, UnprocessableEntityException
 from app.repositories.user_repository import UserRepository

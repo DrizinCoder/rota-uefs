@@ -25,6 +25,7 @@ router = APIRouter(
 async def get_admin_controller(session: AsyncSession = Depends(get_session)) -> AdminController:
     user_repo = UserRepository(session)
     admin_service = AdminService(user_repo)
+    
     return AdminController(admin_service)
 
 @router.post("/register/motorista")
