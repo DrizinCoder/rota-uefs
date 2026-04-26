@@ -8,34 +8,35 @@ class RouteService:
         self.repository = repository
 
     async def create(self, dados: CreateRouteDTO):
-        return await self.repository.create(dados)
+        route =  await self.repository.create(dados)
+        return route.model_dump(mode='json')
 
     async def get_all(self):
         routes = await self.repository.get_all()
         if not routes:
             raise NotFoundException("Routes not found")
-        return routes
+        return [route.model_dump(mode='json') for route in routes]
 
     async def get_by_id(self, id: uuid.UUID):
         route = await self.repository.get_by_id(id)
         if not route:
             raise NotFoundException("Route not found")
-        return route
+        return route.model_dump(mode='json')
 
     async def patch(self, id: uuid.UUID, dados: UpdateRouteDTO):
         route = await self.repository.patch(id, dados)
         if not route:
             raise NotFoundException("Route not found")
-        return route
+        return route.model_dump(mode='json')
 
     async def update_full(self, id: uuid.UUID, dados: CreateRouteDTO):
         route = await self.repository.update_full(id, dados)
         if not route:
             raise NotFoundException("Route not found")
-        return route
+        return route.model_dump(mode='json')
 
     async def delete(self, id: uuid.UUID):
         route = await self.repository.delete(id)
         if not route:
             raise NotFoundException("Route not found")
-        return route
+        return route.model_dump(mode='json')

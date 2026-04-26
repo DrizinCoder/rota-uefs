@@ -13,19 +13,6 @@ router = APIRouter(
     dependencies=[Depends(require_admin)]
 )
 
-from app.middleware import require_admin
-from app.DTOs.fleet import BusCreateBatchDTO, BusCreateDTO, BusUpdateBatchDTO, BusUpdateDTO, BusBatchDeleteDTO
-from fastapi import Depends, Body, APIRouter
-from app.database.db import get_session
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.repositories.bus_repository import BusRepository
-from app.services.bus_service import BusService
-from app.core.responses import ResponseHandler
-
-router = APIRouter(
-    dependencies=[Depends(require_admin)]
-)
-
 async def get_bus_service(session: AsyncSession = Depends(get_session)) -> BusService:
     repo = BusRepository(session)
     return BusService(repo)
