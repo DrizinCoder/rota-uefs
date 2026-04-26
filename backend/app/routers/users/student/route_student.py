@@ -11,22 +11,19 @@ from app.core.responses import ResponseHandler
 
 student_router = APIRouter()
 
-async def get_user_controller(session: AsyncSession = Depends(get_session)) -> UserController:
-    user_repo = UserRepository(session)
-    user_service = UserService(user_repo)
-    return UserController(user_service) 
+async def get_user_service(session: AsyncSession = Depends(get_session)) -> UserService:
+    repo = UserRepository(session)
+    return UserService(repo)
 
 @student_router.get("/")
-async def get_all_estudantes(
-    controller: UserController = Depends(get_user_controller)
-):
-    result = await controller.list_students()
+async def get_all_estudantes(service: UserService = Depends(get_user_service)):
+    result = await service.list_students()
     return ResponseHandler.ok(result)
 
 @student_router.get("/matricula/{registration_id}/")
 async def get_estudante_by_registration_id(
     registration_id: str,
-    controller: UserController = Depends(get_user_controller)
+    service: UserService = Depends(get_user_service)
 ):
-    result = await controller.get_student_by_registration(registration_id)
+    result = await service.get_student_by_registration(registration_id)
     return ResponseHandler.ok(result)

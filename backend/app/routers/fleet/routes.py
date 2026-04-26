@@ -1,3 +1,5 @@
+from app.core.responses import ResponseHandler
+from app.services.bus_service import BusService
 from app.middleware import require_admin
 from fastapi import Body
 from app.DTOs.fleet import BusCreateBatchDTO, BusCreateDTO, BusUpdateBatchDTO, BusUpdateDTO, BusBatchDeleteDTO
@@ -11,78 +13,60 @@ router = APIRouter(
     dependencies=[Depends(require_admin)]
 )
 
-@router.get("/health")
-async def health_check():
-    return {"message": "Fleet router is running"}
+from app.middleware import require_admin
+from app.DTOs.fleet import BusCreateBatchDTO, BusCreateDTO, BusUpdateBatchDTO, BusUpdateDTO, BusBatchDeleteDTO
+from fastapi import Depends, Body, APIRouter
+from app.database.db import get_session
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.repositories.bus_repository import BusRepository
+from app.services.bus_service import BusService
+from app.core.responses import ResponseHandler
+
+router = APIRouter(
+    dependencies=[Depends(require_admin)]
+)
+
+async def get_bus_service(session: AsyncSession = Depends(get_session)) -> BusService:
+    repo = BusRepository(session)
+    return BusService(repo)
+
 
 @router.get("/")
-async def get_all(session: AsyncSession = Depends(get_session)):
-    repo = BusRepository(session)
-    buses = await repo.get_all()
-
-    return {"message": "Get all fleets endpoint", "buses": buses}
+async def get_all(service: BusService = Depends(get_bus_service)):
+    result = await service.get_all()
+    return ResponseHandler.ok(result)
 
 @router.get("/{plate}")
-async def get_by_id(plate: str, session: AsyncSession = Depends(get_session)):
-    repo = BusRepository(session)
-
-    bus = await repo.get_by_plate(plate)
-
-    if not bus:
-        return {"message": "Bus not found"}
-    
-    return {"message": f"Get fleet with plate: {plate} endpoint", "bus": bus}
+async def get_by_plate(plate: str, service: BusService = Depends(get_bus_service)):
+    result = await service.get_by_plate(plate)
+    return ResponseHandler.ok(result)
 
 @router.post("/")
-async def create_bus(dados: BusCreateDTO, session: AsyncSession = Depends(get_session)):
-    repo = BusRepository(session)
-
-    bus = await repo.create(dados)
-
-    return {"message": f"Create bus with plate: {bus.bus_plate} endpoint", "bus": bus}
-
-@router.patch("/{plate}")
-async def update_bus(plate: str, data: BusUpdateDTO, session: AsyncSession = Depends(get_session)):
-    repo = BusRepository(session)
-    
-    bus = await repo.patch(plate, data)
-
-    if not bus:
-        return {"message": "Bus not found"}
-
-    return {"message": f"Update bus with plate: {plate} endpoint", "bus": bus}
+async def create_bus(dados: BusCreateDTO, service: BusService = Depends(get_bus_service)):
+    result = await service.create(dados)
+    return ResponseHandler.created(result)
 
 @router.post("/batch")
-async def create_buses_batch(dados: BusCreateBatchDTO, session: AsyncSession = Depends(get_session)):
-    repo = BusRepository(session)
+async def create_buses_batch(dados: BusCreateBatchDTO, service: BusService = Depends(get_bus_service)):
+    result = await service.create_batch(dados)
+    return ResponseHandler.created(result)
 
-    buses = await repo.create_batch(dados)
-
-    return {"message": f"Create {buses} buses"}
+@router.patch("/{plate}")
+async def update_bus(plate: str, data: BusUpdateDTO, service: BusService = Depends(get_bus_service)):
+    result = await service.update(plate, data)
+    return ResponseHandler.ok(result)
 
 @router.patch("/update/batch")
-async def update_buses_batch(dados: BusUpdateBatchDTO = Body(...), session: AsyncSession = Depends(get_session)):
-    repo = BusRepository(session)
-
-    updated_buses = await repo.patch_batch(dados)
-
-    return {"message": f"Updated buses: {updated_buses}"}
+async def update_buses_batch(dados: BusUpdateBatchDTO = Body(...), service: BusService = Depends(get_bus_service)):
+    result = await service.update_batch(dados)
+    return ResponseHandler.ok(result)
 
 @router.delete("/{plate}")
-async def delete_bus(plate: str, session: AsyncSession = Depends(get_session)):
-    repo = BusRepository(session)
-
-    bus = await repo.delete(plate)
-
-    if not bus:
-        return {"message": "Bus not found"}
-
-    return {"message": f"deletes {bus.plate}"}
+async def delete_bus(plate: str, service: BusService = Depends(get_bus_service)):
+    result = await service.delete(plate)
+    return ResponseHandler.ok(result)
 
 @router.delete("/delete/batch")
-async def delete_buses_batch(dados: BusBatchDeleteDTO, session: AsyncSession = Depends(get_session)):
-    repo = BusRepository(session)
-
-    await repo.delete_batch(dados.bus_plates)
-
-    return {"message": f"Deleted {len(dados.bus_plates)} buses"}
+async def delete_buses_batch(dados: BusBatchDeleteDTO, service: BusService = Depends(get_bus_service)):
+    result = await service.delete_batch(dados)
+    return ResponseHandler.ok(result)

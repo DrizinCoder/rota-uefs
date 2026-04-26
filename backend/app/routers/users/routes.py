@@ -1,3 +1,6 @@
+from app.services.email.use_cases import EmailUseCases
+from app.services.auth_service import AuthService
+from app.services.user_service import UserService
 import uuid
 from fastapi import APIRouter, BackgroundTasks, Depends, Query, Request
 from fastapi.responses import RedirectResponse
@@ -24,11 +27,12 @@ user_router.include_router(drive_router, prefix="/driver")
 user_router.include_router(student_router, prefix="/student")
 
 
-def get_user_controller(
-    session: AsyncSession = Depends(get_session),
-) -> UserController:
+async def get_user_controller(session: AsyncSession = Depends(get_session)) -> UserController:
     repo = UserRepository(session)
-    return UserController(repo)
+    user_service = UserService(repo)
+    auth_service = AuthService()
+    email_use_cases = EmailUseCases()
+    return UserController(user_service, auth_service, email_use_cases)
 
 @user_router.get("/{id}")
 async def get_user(
