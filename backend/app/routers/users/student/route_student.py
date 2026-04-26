@@ -1,3 +1,5 @@
+from app.services.user_service import UserService
+from app.controllers.user_controller import UserController
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database.db import get_session
@@ -9,26 +11,22 @@ from app.core.responses import ResponseHandler
 
 student_router = APIRouter()
 
+async def get_user_controller(session: AsyncSession = Depends(get_session)) -> UserController:
+    user_repo = UserRepository(session)
+    user_service = UserService(user_repo)
+    return UserController(user_service) 
+
 @student_router.get("/")
 async def get_all_estudantes(
-    session: AsyncSession = Depends(get_session)  
+    controller: UserController = Depends(get_user_controller)
 ):
-    repo = UserRepository(session)
-
-    users = await repo.list_all_students()
-
-    return ResponseHandler.ok(users)
+    result = await controller.list_students()
+    return ResponseHandler.ok(result)
 
 @student_router.get("/matricula/{registration_id}/")
 async def get_estudante_by_registration_id(
-    registration_id: str, session: AsyncSession = Depends(get_session)
+    registration_id: str,
+    controller: UserController = Depends(get_user_controller)
 ):
-    repo = UserRepository(session)
-    
-    user = repo.get_by_registration_id(registration_id)
-
-    if not user:
-        raise NotFoundException("Estudante não encontrado!")
-    
-  
-    return ResponseHandler.ok(user)
+    result = await controller.get_student_by_registration(registration_id)
+    return ResponseHandler.ok(result)

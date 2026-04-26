@@ -1,62 +1,18 @@
 import uuid
-from datetime import timedelta
-from jose import jwt, JWTError
-
-from app.core.config import settings
-from app.core.exceptions import ConflictException, BadRequestException, NotFoundException
-from app.repositories.user_repository import UserRepository
-from app.services.auth_service import AuthService
-from app.services.email.use_cases import EmailUseCases
-from fastapi.responses import RedirectResponse
+from app.services.user_service import UserService
 
 class UserController:
-    def __init__(self, repository: UserRepository):
-        self.repository = repository
-        self.auth_service = AuthService()
-        self.email_use_cases = EmailUseCases()
+    def __init__(self, user_service: UserService):
+        self.user_service = user_service
 
-    async def request_email_change(self, user_id: uuid.UUID, new_email: str, base_url: str) -> dict:
-        existing_user = await self.repository.get_by_email(new_email)
-        if existing_user:
-            raise ConflictException("Este e-mail já está em uso por outro usuário.")
+    async def list_students(self):
+        return await self.user_service.list_students()
 
-        token_data = {
-            "sub": str(user_id),
-            "new_email": new_email,
-            "type": "email_change"
-        }
-        
-        token = self.auth_service.create_access_token(
-            data=token_data, 
-            expires_delta=timedelta(minutes=30)
-        )
+    async def get_student_by_registration(self, registration_id: str):
+        return await self.user_service.get_student_by_registration(registration_id)
 
-        confirmation_link = f"{base_url}/users/email-change/confirm?token={token}"
+    async def request_email_change(self, user_id: uuid.UUID, new_email: str, base_url: str):
+        return await self.user_service.request_email_change(user_id, new_email, base_url)
 
-        self.email_use_cases.send_email_change_confirmation(new_email, confirmation_link)
-
-        return {"message": "E-mail de confirmação enviado com sucesso."}
-
-    async def confirm_email_change(self, token: str) -> dict:
-        try:
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-            user_id_str = payload.get("sub")
-            new_email = payload.get("new_email")
-            token_type = payload.get("type")
-
-            if not user_id_str or not new_email or token_type != "email_change":
-                return RedirectResponse(url=f"{settings.BASE_URL_FRONTEND}/email-change/confirm", status_code=400)
-            
-            user_id = uuid.UUID(user_id_str)
-
-        except JWTError:
-            raise BadRequestException("Token inválido ou expirado.")
-        
-        user = await self.repository.get_by_id(user_id)
-        if not user:
-            raise NotFoundException("Usuário não encontrado.")
-
-        user.email = new_email
-        await self.repository.update(user)
-
-        return {"message": "E-mail alterado com sucesso."}
+    async def confirm_email_change(self, token: str):
+        return await self.user_service.confirm_email_change(token)
