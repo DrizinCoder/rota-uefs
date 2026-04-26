@@ -12,6 +12,14 @@ class UserService:
     def __init__(self, repository: UserRepository):
         self.repository = repository
 
+    async def get_by_id_without_password(self, id: str):
+        user = await self.repository.get_by_id_without_password(id)
+
+        if not user:
+            raise NotFoundException("Usuário não encontrado.")
+        
+        return user
+
     async def check_email_available(self, email: str):
         existing = await self.repository.get_by_email(email)
         if existing:

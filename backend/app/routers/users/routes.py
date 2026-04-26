@@ -21,9 +21,9 @@ async def get_user(
     service: UserService = Depends(get_user_service),
     current_user: TokenData = Depends(get_current_user)
 ):
-    user = await service.get_user_by_id(current_user.sub)
+    user = await service.get_by_id_without_password(current_user.sub)
 
-    return ResponseHandler.ok(data={"user": user})
+    return ResponseHandler.ok(data={"user": user.model_dump(mode="json")})
 
 @user_router.delete("/delete/account/me")
 async def delete_account(

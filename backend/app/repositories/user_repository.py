@@ -1,7 +1,7 @@
 from app.enums.enums import RegistrationStatus
 import random
 from app.core.exceptions import InternalServerException
-from logging import exception
+from sqlmodel import select
 from app.models.models import Admin
 from app.DTOs.auth import RegisterAdminDTO
 from app.DTOs.auth import RegisterMotoristaDTO
@@ -11,7 +11,7 @@ from sqlmodel import SQLModel
 import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import and_, select 
-from sqlalchemy.orm import joinedload 
+from sqlalchemy.orm import defer 
 from passlib.context import CryptContext
 from app.models.models import User
 from app.models.models import Staff
@@ -243,6 +243,12 @@ class UserRepository:
         statement = select(User).where(User.user_id == user_id)
         result = await self.session.execute(statement)
         return result.scalars().first()
+
+    async def get_by_id_without_password(self, user_id: uuid.UUID):
+        statement = select(User).where(User.user_id == user_id).options(defer(User.password))
+        
+        result = await self.session.execute(statement)
+        return result.scalars().first() 
 
     async def get_by_registration_id(self, user_id: str):
         statement = select(User).where(User.registration_id == user_id)
