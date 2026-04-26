@@ -7,9 +7,13 @@ from app.services.auth_service import AuthService
 from app.services.email.use_cases import EmailUseCases
 from app.controllers.user_controller import UserController
 
-async def get_user_controller(session: AsyncSession = Depends(get_session)) -> UserController:
+async def get_user_service(session: AsyncSession = Depends(get_session)) -> UserService:
     repo = UserRepository(session)
-    user_service = UserService(repo)
+    return UserService(repo)
+
+async def get_user_controller(
+    user_service: UserService = Depends(get_user_service)
+) -> UserController:
     auth_service = AuthService()
     email_use_cases = EmailUseCases()
 
