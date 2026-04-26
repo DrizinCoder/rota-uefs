@@ -15,7 +15,7 @@ async def test_verify_token(current_user: TokenData = Depends(get_current_user))
         "success": True,
         "message": "Token válido!",
         "data": {
-            "sub": current_user.id,
+            "sub": current_user.sub,
             "registration_id": current_user.registration_id,
             "email": current_user.email,
             "profile": current_user.profile,
@@ -36,7 +36,7 @@ async def test_student_only(current_user: TokenData = Depends(require_student)):
         "success": True,
         "message": "Acesso permitido! Você é um aluno.",
         "data": {
-            "sub": current_user.id,
+            "sub": current_user.sub,
             "profile": current_user.profile,
             "student_id": current_user.student_id
         }

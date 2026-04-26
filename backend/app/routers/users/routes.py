@@ -1,245 +1,54 @@
-from app.core.exceptions import ForbiddenException
-from app.DTOs.users.dtos import PasswordUpdate
-from app.DTOs.users.dtos import PhoneUpdate
-from app.middleware import require_profile
-from app.repositories.user_repository import pwd_context
-from app.core.exceptions import UnprocessableEntityException
-from app.middleware import require_admin
-from app.core.exceptions import UnprocessableEntityException
-from app.repositories.user_repository import pwd_context
-from http.client import NOT_FOUND
-from http.client import UNAUTHORIZED
-from app.enums.enums import UserProfile
-from app.DTOs.users.dtos import PasswordUpdate
-from app.DTOs.users.dtos import PhoneUpdate
 import uuid
-from app.DTOs.auth.dtos import RegisterServidorDTO
-from app.DTOs.users.dtos import CreateSimpleUserDTO
-from fastapi import HTTPException
-from app.repositories.user_repository import UserRepository
-from fastapi import Depends
-from app.database.db import get_session
-from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter
-from app.core.exceptions import NotFoundException, BadRequestException
+from fastapi import APIRouter, Depends
+
+from app.routers.users.staff.route_staff import staff_router
+from app.routers.users.drive.route_drive import drive_router
+from app.routers.users.student.route_student import student_router
+from app.DTOs.users import PasswordUpdate, PhoneUpdate
+from app.middleware.auth_middleware import TokenData, get_current_user, require_profile
 from app.core.responses import ResponseHandler
-from app.DTOs.users.dtos import UpdateProfileUserDTO, UpdateProfileServidorDTO
-from app.DTOs.operational.dtos import CreateReservaDTO, DeleteReservaDTO
-from app.DTOs.users.email_dtos import RequestEmailChangeDTO, ConfirmEmailChangeDTO
-from app.controllers.user_controller import UserController
-from app.middleware.auth_middleware import TokenData, get_current_user
-from fastapi import Request, Query
-from fastapi.responses import RedirectResponse
-from app.core.config import settings
-from fastapi import BackgroundTasks
+from app.routers.users.dependencies import get_user_service
+from app.services.user_service import UserService
 
-router = APIRouter()
+user_router = APIRouter()
 
-# Perfil do servidor
+user_router.include_router(staff_router, prefix="/staff")
+user_router.include_router(drive_router, prefix="/driver")
+user_router.include_router(student_router, prefix="/student")
 
-@router.get("/servidores")
-async def get_all_servidores(
-    session: AsyncSession = Depends(get_session),
-    current_user: TokenData = Depends(require_admin)
+@user_router.get("/{id}")
+async def get_user(
+    id: uuid.UUID, 
+    service: UserService = Depends(get_user_service),
+    _: TokenData = Depends(get_current_user)
 ):
-    repo = UserRepository(session)
+    user = await service.get_user_by_id(id)
+    return ResponseHandler.ok(data={"user": user})
 
-    users = await repo.list_all_staff() # Aqui tem que retornar só servidores que tem status false em Register_status
-
-    if not users:
-        raise HTTPException(status_code=404, detail="Staff not found")
-    
-    return {"Message": "Staff Found", "Users": users}
-
-#  -------- Perfil do motorista ----------------
-
-@router.get("/drivers")
-async def get_all_drivers(
-    session: AsyncSession = Depends(get_session),
-    current_user: TokenData = Depends(require_admin)
-):
-    repo = UserRepository(session)
-
-    users = await repo.list_all_drivers()
-
-    if not users:
-        raise HTTPException(status_code=404, detail="Drivers not found")
-
-    return {"Message": "Drivers Found", "Users": users}
-
-
-@router.patch("/update/phone/{id}")
-async def update_profile(id: uuid.UUID, dados: PhoneUpdate, session: AsyncSession = Depends(get_session)):
-    repo = UserRepository(session)
-    updated_user = await repo.patch(id, dados)
-
-    if not updated_user:
-        raise HTTPException(status_code=404, detail="Driver not found")
-
-    return {"Message": "Phone Updated", "User": updated_user}
-
-# ----------- Perfil do estudante ------------
-'''
-@router.get("/estudantes")
-async def get_all_estudantes(
-    session: AsyncSession = Depends(get_session)  
-):
-    repo = UserRepository(session)
-
-    users = await repo.list_all_students()
-
-    if not users:
-        raise HTTPException(status_code=404, detail="Students not found")
-
-    return {"Message": "Students Found", "Users": users}
-
-@router.get("/matricula/{registration_id}/")
-async def get_estudante_by_registration_id(
-    registration_id: str, session: AsyncSession = Depends(get_session)
-):
-    repo = UserRepository(session)
-    
-    user = repo.get_by_registration_id(registration_id)
-
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    return {"Message": "Student Found", "User": user}
-'''
-
-# --- Rota utilizada para se deletar ---    
-@router.delete("/delete/account/me")
+@user_router.delete("/delete/account/me")
 async def delete_account(
-    session: AsyncSession = Depends(get_session),
+    service: UserService = Depends(get_user_service),
     current_user: TokenData = Depends(get_current_user)
 ):
-    repo = UserRepository(session)
+    await service.delete_account(current_user.sub)
+    return ResponseHandler.no_content()
 
-    deleted_user = await repo.anonymize(current_user.sub)
-
-    if not deleted_user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    return {"Message": "User Deleted", "User": deleted_user} 
-
-
-# --- Essa rota pode ser usada para um admin deletar qualquer usuário ---
-@router.delete("/delete/account/{id}")
-async def delete_account(
-    id: uuid.UUID, 
-    session: AsyncSession = Depends(get_session),
-    current_user: TokenData = Depends(require_admin)
-):
-    repo = UserRepository(session)
-
-    deleted_user = await repo.anonymize(id)
-
-    if not deleted_user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    return {"Message": "User Deleted", "User": deleted_user} 
-
-# Funcionalidades [Estudante, Servidor, Motorista]
-
-@router.post("/register/reserva")
-def update_profile(dados: CreateReservaDTO):
-    return {"message": "olá! bem-vindo a create reserva"}
-
-
-@router.delete("/delete/reserva")
-def update_profile(dados: DeleteReservaDTO):
-    return {"message": "olá! bem-vindo a delete reserva"}
-
-
-# ----------- Funcionalidades de E-mail ------------
-
-def get_user_controller(
-    session: AsyncSession = Depends(get_session),
-) -> UserController:
-    repo = UserRepository(session)
-    return UserController(repo)
-
-@router.post("/email-change/request")
-async def request_email_change(
-    request: Request,
-    dados: RequestEmailChangeDTO,
-    background_tasks: BackgroundTasks,
-    current_user: TokenData = Depends(get_current_user),
-    controller: UserController = Depends(get_user_controller)
-):
-    # Passamos o host atual para gerar o link (ex: http://localhost:8000)
-    base_url = str(request.base_url).rstrip('/')
-    
-    # current_user.id guarda o UUID do usuário logado que extraímos do Token de Login dele
-    user_id = uuid.UUID(current_user.sub)
-
-    background_tasks.add_task(controller.request_email_change, user_id=user_id, new_email=dados.new_email, base_url=base_url)
-    
-
-    return ResponseHandler.ok(data={"message": "E-mail de confirmação será enviado em breve."})
-
-@router.get("/email-change/confirm")
-async def confirm_email_change(
-    token: str = Query(..., description="Token de confirmação de mudança de email"),
-    controller: UserController = Depends(get_user_controller)
-):
-    result = await controller.confirm_email_change(token=token)
-    return RedirectResponse(url=f"{settings.BASE_URL_FRONTEND}/email-change/confirm", status_code=302)
-
-@router.get("/{id}")
-async def get_user(id: uuid.UUID, session: AsyncSession = Depends(get_session)):
-    repo = UserRepository(session)
-
-    user = repo.get_by_id(id)
-
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    return {"Message": "User Found", "User": user}
-
-# ----------- Funcionalidades de Alteração de Dados ------------
-
-@router.patch("/update/password/{id}")
+@user_router.patch("/update/password/{id}")
 async def update_password(
-    id: uuid.UUID, dados: PasswordUpdate, 
-    session: AsyncSession = Depends(get_session),
-    current_user: TokenData = Depends(require_profile("ADMIN", "STAFF", "STUDENT"))
+    id: uuid.UUID, 
+    data: PasswordUpdate, 
+    service: UserService = Depends(get_user_service),
+    _: TokenData = Depends(require_profile("ADMIN", "STAFF", "STUDENT"))
 ):
-    repo = UserRepository(session)
+    await service.update_password(id, data)
+    return ResponseHandler.ok(message="Senha atualizada com sucesso!")
 
-    # Isso deveria ser em um service!
-    user = await repo.get_by_id(id)
-
-    if not user:
-        raise NotFoundException("Usuário não encontrado!")
-
-    hashed_password = pwd_context.hash(dados.password)
-
-    if pwd_context.verify(dados.password, user.password):
-        raise UnprocessableEntityException("A senha fornecida é a mesma senha atual!")
-
-    if dados.password != dados.confirm_password:
-        raise BadRequestException("As senhas não coincidem!")
-
-    dados.password = hashed_password
-
-    updated_user = await repo.patch(id, dados)
-
-    if not updated_user:
-        raise NotFoundException("Erro ao atualizar senha!")
-
-    return {"Message": "Password Updated", "User": updated_user}
-
-@router.patch("/update/phone/{id}")
-async def update_profile(
-    id: uuid.UUID, dados: 
-    PhoneUpdate, session: AsyncSession = Depends(get_session),
-    current_user: TokenData = Depends(require_profile("DRIVER", "STUDENT"))
+@user_router.patch("/update/phone/{id}")
+async def update_phone(
+    id: uuid.UUID, 
+    data: PhoneUpdate, 
+    service: UserService = Depends(get_user_service),
+    _: TokenData = Depends(require_profile("DRIVER", "STUDENT"))
 ):
-    repo = UserRepository(session)
-    updated_user = await repo.patch(id, dados)
-
-    if not updated_user:
-        raise HTTPException(status_code=404, detail="Driver not found")
-
-    return {"Message": "Phone Updated", "User": updated_user}
+    await service.update_phone(id, data)
+    return ResponseHandler.ok(message="Telefone atualizado!")

@@ -1,24 +1,22 @@
-from app.middleware import require_admin
 import uuid
-
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.DTOs.auth.dtos import RegisterAdminDTO, MotoristaRegisterResponseDTO, RegisterMotoristaDTO
+from app.DTOs.auth import RegisterAdminDTO, MotoristaRegisterResponseDTO, RegisterMotoristaDTO
+from app.DTOs.auth import RegisterAdminDTO
 from app.core.responses import ResponseHandler
 from app.core.exceptions import ConflictException, NotFoundException
 from app.database.db import get_session
 from app.repositories.user_repository import UserRepository
 from app.services.admin_service import AdminService
 from app.controllers.admin_controller import AdminController
-
-from app.DTOs.auth.dtos import RegisterAdminDTO
 from app.services.admin_service import AdminService
 from app.repositories.user_repository import UserRepository
 from app.controllers.admin_controller import AdminController
 from app.database.db import get_session
 from app.core.responses import ResponseHandler
 from app.core.exceptions import NotFoundException
+from app.middleware import require_admin
+from app.middleware.auth_middleware import TokenData
 
 router = APIRouter(
     dependencies=[Depends(require_admin)]
@@ -29,29 +27,13 @@ async def get_admin_controller(session: AsyncSession = Depends(get_session)) -> 
     admin_service = AdminService(user_repo)
     return AdminController(admin_service)
 
-
-async def get_admin_controller(session: AsyncSession = Depends(get_session)) -> AdminController:
-    user_repo = UserRepository(session)
-    admin_service = AdminService(user_repo)
-    return AdminController(admin_service)
-
-
 @router.post("/register/motorista")
-async def register_motorista(dados: RegisterMotoristaDTO, session: AsyncSession = Depends(get_session)):
-    repo = UserRepository(session)
-
-    driver = await repo.get_by_registration_id(dados.registration_id)
-    if driver:
-        raise ConflictException("Motorista já cadastrado")
-
-    driver_created, temp_password = await repo.create_driver(dados)
-
-    response_data = MotoristaRegisterResponseDTO.model_validate(driver_created)
-
-    response_dict = response_data.model_dump(mode='json')
-    response_dict["temp_password"] = temp_password
-
-    return ResponseHandler.created(data=response_dict)
+async def register_motorista(
+    dados: RegisterMotoristaDTO,
+    controller: AdminController = Depends(get_admin_controller)
+):
+    result = await controller.register_motorista(dados)
+    return ResponseHandler.created(data=result)
 
 # ============ Rotas do CRUD ============
 
@@ -115,3 +97,12 @@ async def delete_admin(
     
     return ResponseHandler.ok({"deleted": True}, "Administrador removido com sucesso")
 
+@router.delete("/delete/account/{id}")
+async def delete_account(
+    id: uuid.UUID,
+    controller: AdminController = Depends(get_admin_controller)
+):
+    result = await controller.delete_account(id)
+    if not result:
+        raise NotFoundException("User not found")
+    return ResponseHandler.ok("User account has been anonymized successfully")

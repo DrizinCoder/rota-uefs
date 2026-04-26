@@ -1,9 +1,10 @@
+from app.DTOs.auth import RegisterMotoristaDTO
 import uuid
 from typing import Optional, List, Dict, Any
 from sqlalchemy.exc import IntegrityError
 from passlib.context import CryptContext
 
-from app.DTOs.users.dtos import CreateAdminDTO
+from app.DTOs.users import CreateAdminDTO
 from app.enums.enums import UserProfile, AccessLevel, RegistrationStatus
 from app.models.models import User, Admin
 from app.repositories.user_repository import UserRepository
@@ -132,7 +133,27 @@ class AdminService:
             return False
 
         return await self.user_repository.anonymize(admin_id)
-    
+
+    async def register_motorista(self, dados: RegisterMotoristaDTO):
+        driver = await self.user_repository.get_by_registration_id(dados.registration_id)
+        if driver:
+            raise ConflictException("Motorista já cadastrado")
+        
+        driver_created, temp_password = await self.user_repository.create_driver(dados)
+        return driver_created, temp_password
+
+    async def delete_account(self, user_id: uuid.UUID):
+        deleted_user = await self.user_repository.anonymize(user_id)
+        if not deleted_user:
+            return None
+        return deleted_user
+
+    async def list_drivers(self):
+        return await self.user_repository.list_all_drivers()
+
+    async def list_staff_status_pending(self):
+        return await self.user_repository.list_all_staff_status_peding()
+
     def _serialize_admin(self, admin: Admin) -> Dict[str, Any]:
         return {
             "admin_id": str(admin.admin_id),
