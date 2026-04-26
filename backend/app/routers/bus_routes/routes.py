@@ -1,5 +1,5 @@
 from app.core.responses import ResponseHandler
-from backend.app.services.route_service import RouteService
+from app.services.route_service import RouteService
 from app.middleware import require_admin
 import uuid
 from fastapi import APIRouter, Depends, HTTPException
