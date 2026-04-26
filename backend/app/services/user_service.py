@@ -1,13 +1,12 @@
+from datetime import date
 import uuid
-from datetime import timedelta
-from jose import jwt, JWTError
 
 from app.core.config import settings
-from app.core.exceptions import ConflictException, BadRequestException, NotFoundException
+from app.repositories.user_repository import pwd_context
+from app.core.exceptions import BadRequestException, ConflictException, NotFoundException, UnprocessableEntityException
 from app.repositories.user_repository import UserRepository
-from app.services.auth_service import AuthService
-from app.services.email.use_cases import EmailUseCases
-from fastapi.responses import RedirectResponse
+
+from app.DTOs.users import PasswordUpdate, PhoneUpdate
 
 class UserService:
     def __init__(self, repository: UserRepository):
@@ -25,6 +24,37 @@ class UserService:
         user.email = new_email
         await self.repository.update(user)
 
+    async def update_password(self, user_id: uuid.UUID, data: PasswordUpdate):
+        user = await self.repository.get_by_id(user_id)
+        if not user:
+            raise NotFoundException("Usuário não encontrado!")
+
+        if data.password != data.confirm_password:
+            raise BadRequestException("As senhas não coincidem!")
+
+        if pwd_context.verify(data.password, user.password):
+            raise UnprocessableEntityException("A nova senha não pode ser igual à senha atual!")
+
+        data.password = pwd_context.hash(data.password)
+
+        updated_user = await self.repository.patch(user_id, data)
+        if not updated_user:
+            raise NotFoundException("Erro ao atualizar senha!")
+        
+        return updated_user
+    
+    async def update_phone(self, user_id: uuid.UUID, data: PhoneUpdate):
+        updated_user = await self.repository.patch(user_id, data)
+        if not updated_user:
+            raise NotFoundException("Usuário não encontrado!")
+        return updated_user
+
+    async def delete_account(self, user_id: str):
+        deleted_user = await self.repository.anonymize(user_id)
+        if not deleted_user:
+            raise NotFoundException("Usuário não encontrado!")
+        return deleted_user
+
     async def list_students(self):
         return await self.repository.list_all_students()
 
@@ -33,3 +63,4 @@ class UserService:
         if not user:
             raise NotFoundException("Estudante não encontrado!")
         return user
+    

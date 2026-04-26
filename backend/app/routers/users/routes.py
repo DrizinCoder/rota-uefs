@@ -1,16 +1,14 @@
 import uuid
 from fastapi import APIRouter, Depends
+
 from app.routers.users.staff.route_staff import staff_router
 from app.routers.users.drive.route_drive import drive_router
 from app.routers.users.student.route_student import student_router
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.repositories.user_repository import pwd_context
 from app.DTOs.users import PasswordUpdate, PhoneUpdate
-from app.core.exceptions import BadRequestException, NotFoundException, UnprocessableEntityException
-from app.database.db import get_session
 from app.middleware.auth_middleware import TokenData, get_current_user, require_profile
-from app.repositories.user_repository import UserRepository
 from app.core.responses import ResponseHandler
+from app.routers.users.dependencies import get_user_service
+from app.services.user_service import UserService
 
 user_router = APIRouter()
 
@@ -21,75 +19,36 @@ user_router.include_router(student_router, prefix="/student")
 @user_router.get("/{id}")
 async def get_user(
     id: uuid.UUID, 
-    session: AsyncSession = Depends(get_session),
+    service: UserService = Depends(get_user_service),
     _: TokenData = Depends(get_current_user)
 ):
-    repo = UserRepository(session)
-
-    user = repo.get_by_id(id)
-
-    if not user:
-        raise NotFoundException("Usuário não encontrado!")
-
+    user = await service.get_user_by_id(id)
     return ResponseHandler.ok(data={"user": user})
 
-# --- Rota utilizada para se deletar ---    
 @user_router.delete("/delete/account/me")
 async def delete_account(
-    session: AsyncSession = Depends(get_session),
+    service: UserService = Depends(get_user_service),
     current_user: TokenData = Depends(get_current_user)
 ):
-    repo = UserRepository(session)
-
-    deleted_user = await repo.anonymize(current_user.sub)
-
-    if not deleted_user:
-        raise NotFoundException("Usuário não encontrado!")
-
+    await service.delete_account(current_user.sub)
     return ResponseHandler.no_content()
 
-# ----------- Funcionalidades de Alteração de Dados ------------
 @user_router.patch("/update/password/{id}")
 async def update_password(
-    id: uuid.UUID, data: PasswordUpdate, 
-    session: AsyncSession = Depends(get_session),
+    id: uuid.UUID, 
+    data: PasswordUpdate, 
+    service: UserService = Depends(get_user_service),
     _: TokenData = Depends(require_profile("ADMIN", "STAFF", "STUDENT"))
 ):
-    repo = UserRepository(session)
-
-    user = await repo.get_by_id(id)
-
-    if not user:
-        raise NotFoundException("Usuário não encontrado!")
-
-    hashed_password = pwd_context.hash(data.password)
-
-    if pwd_context.verify(data.password, user.password):
-        raise UnprocessableEntityException("A senha fornecida é a mesma senha atual!")
-
-    if data.password != data.confirm_password:
-        raise BadRequestException("As senhas não coincidem!")
-
-    data.password = hashed_password
-
-    updated_user = await repo.patch(id, data)
-
-    if not updated_user:
-        raise NotFoundException("Erro ao atualizar senha!")
-
-    return {"Message": "Password Updated", "User": updated_user}
+    await service.update_password(id, data)
+    return ResponseHandler.ok(message="Senha atualizada com sucesso!")
 
 @user_router.patch("/update/phone/{id}")
-async def update_profile(
+async def update_phone(
     id: uuid.UUID, 
     data: PhoneUpdate, 
-    session: AsyncSession = Depends(get_session),
+    service: UserService = Depends(get_user_service),
     _: TokenData = Depends(require_profile("DRIVER", "STUDENT"))
 ):
-    repo = UserRepository(session)
-    updated_user = await repo.patch(id, data)
-
-    if not updated_user:
-        raise NotFoundException("Motorista não encontrado!")
-
-    return ResponseHandler.ok("Telefone atualizado!")
+    await service.update_phone(id, data)
+    return ResponseHandler.ok(message="Telefone atualizado!")
