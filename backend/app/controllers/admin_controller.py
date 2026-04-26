@@ -54,3 +54,9 @@ class AdminController:
 
     async def delete_account(self, user_id: uuid.UUID):
         return await self.service.delete_account(user_id)
+
+    async def list_drivers(self):
+        return await self.service.list_drivers()
+
+    async def list_staff_status_pending(self):
+        return await self.service.list_staff_status_pending()

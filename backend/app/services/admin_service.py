@@ -148,6 +148,12 @@ class AdminService:
             return None
         return deleted_user
 
+    async def list_drivers(self):
+        return await self.user_repository.list_all_drivers()
+
+    async def list_staff_status_pending(self):
+        return await self.user_repository.list_all_staff_status_peding()
+
     def _serialize_admin(self, admin: Admin) -> Dict[str, Any]:
         return {
             "admin_id": str(admin.admin_id),

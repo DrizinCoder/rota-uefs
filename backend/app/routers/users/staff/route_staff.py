@@ -1,8 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.database.db import get_session
+from app.routers.admin.routes import get_admin_controller
+from app.controllers.admin_controller import AdminController
+from fastapi import APIRouter, Depends
 from app.middleware.auth_middleware import TokenData, require_admin
-from app.repositories.user_repository import UserRepository 
 from fastapi import APIRouter
 
 staff_router = APIRouter()
@@ -11,11 +10,8 @@ from app.core.responses import ResponseHandler
 
 @staff_router.get("/")
 async def get_all_servidores(
-    session: AsyncSession = Depends(get_session),
+    controller: AdminController = Depends(get_admin_controller),
     _: TokenData = Depends(require_admin)
 ):
-    repo = UserRepository(session)
-
-    users = await repo.list_all_staff() # Aqui tem que retornar só servidores que tem status false em Register_status
-    
-    return ResponseHandler.ok(users)
+    result = await controller.list_staff_status_pending()
+    return ResponseHandler.ok(result)
