@@ -1,12 +1,9 @@
 from app.services.user_service import UserService
-from app.controllers.user_controller import UserController
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database.db import get_session
-from app.middleware.auth_middleware import TokenData, require_admin
 from app.repositories.user_repository import UserRepository 
 from fastapi import APIRouter
-from app.core.exceptions import NotFoundException
 from app.core.responses import ResponseHandler
 
 student_router = APIRouter()
