@@ -1,3 +1,6 @@
+from app.DTOs.auth import ServidorRegisterResponseDTO
+from app.core.exceptions import ConflictException
+from app.DTOs.auth import RegisterServidorDTO
 from jose import jwt
 from app.core.config import settings
 from app.DTOs.auth import AlunoRegisterResponseDTO, LoginUserDTO, ResetPasswordDTO
@@ -82,3 +85,7 @@ class AuthController:
         await self.repository.update(user)
 
         return
+
+    async def register_staff(self, dados: RegisterServidorDTO):
+        staff = await self.auth_service.register_staff(dados)
+        return ServidorRegisterResponseDTO.model_validate(staff)

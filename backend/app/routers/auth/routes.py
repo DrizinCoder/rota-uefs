@@ -21,19 +21,13 @@ def get_auth_controller(session: AsyncSession = Depends(get_session)) -> AuthCon
 @router.post("/register/staff")
 async def register_servidor(
     data: RegisterServidorDTO, 
-    session: AsyncSession = Depends(get_session)
+    controller: AuthController = Depends(get_auth_controller)
 ):
-    repo = UserRepository(session)
+    result = await controller.register_staff(data)
 
-    staff = await repo.get_by_email(data.email)
-    
-    if staff:
-       raise ConflictException("Usuário já cadastrado")
-
-    user_created = await repo.create_staff(data)
-    response_data = ServidorRegisterResponseDTO.model_validate(user_created)
-
-    return ResponseHandler.created(data=response_data.model_dump(mode='json'))
+    return ResponseHandler.created(
+        data=result.model_dump(mode='json')
+    )
 
 # Rota unificada de login [Admin, Motorista, Servidor, Aluno]
 @router.post("/login")
@@ -72,8 +66,8 @@ async def register_student(
 @router.get("/activate/account/student")
 async def activate_account(
     token: str,
-    session: AsyncSession = Depends(get_session)
+    controller: AuthController = Depends(get_auth_controller)
 ):
-    service = AuthService(UserRepository(session))
+    result = await controller.activate_account(token)
 
-    return await service.activate_account(token)
+    return ResponseHandler.ok(data=result.model_dump(mode='json'))

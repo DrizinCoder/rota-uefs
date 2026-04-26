@@ -1,3 +1,4 @@
+from app.DTOs.auth import RegisterServidorDTO
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 import uuid
@@ -124,11 +125,19 @@ class AuthService:
             self.email_use_cases.send_account_confirmation,
             email=user.email,
             first_name=first_name,
-            link=link)
+            link=link)  
 
         
         return user
     
+    async def register_staff(self, dados: RegisterServidorDTO):
+        existing = await self.repository.get_by_email(dados.email)
+        if existing:
+            raise ConflictException("Usuário já cadastrado")
+        
+        user = await self.repository.create_staff(dados)
+        return user
+        
     async def activate_account(self, token: str):
         try:
             payload = jwt.decode(
