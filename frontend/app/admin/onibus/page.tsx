@@ -71,9 +71,9 @@ function CadastroEdicaoOnibusForm() {
     adminService.buscarOnibus(id)
       .then((onibus) => {
         setFormData({
-          bus_plate: onibus.plate,
-          capacity: String(onibus.capacity),
-          bus_status: onibus.status,
+          bus_plate: onibus.bus_plate ?? "",
+          capacity: String(onibus.capacity ?? 46),
+          bus_status: onibus.bus_status ?? "Active",
         });
       })
       .catch(() => {
@@ -215,7 +215,7 @@ function CadastroEdicaoOnibusForm() {
                   onChange={(event) =>
                     atualizarCampo("bus_plate", event.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, "").slice(0, 8))
                   }
-                  placeholder="ABC-1234"
+                  placeholder={emEdicao ? "" : "ABC-1234"}
                   className={`h-11 focus:border-[#103173] focus:ring-[#103173] font-bold ${
                     erros.bus_plate ? "border-red-300 bg-red-50" : "border-[#73AABF]/30"
                   } ${emEdicao ? "bg-slate-50 cursor-not-allowed" : ""}`}

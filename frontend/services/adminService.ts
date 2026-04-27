@@ -31,6 +31,12 @@ export interface BusHomeAdmin {
   trips_today: number;
 }
 
+export interface BusAdmin {
+  bus_plate: string;
+  capacity: number;
+  bus_status: string;
+}
+
 export interface CadastroOnibusPayload {
   bus_plate: string;
   capacity: number;
@@ -56,13 +62,13 @@ export const adminService = {
     const response = await api.get(`/admin/home_info?today=${hoje}`);
     return response.data.data;
   },
-  
+
   async cadastrarOnibus(payload: CadastroOnibusPayload) {
     const response = await api.post("/fleet/", payload);
     return response.data.data;
   },
   
-  async buscarOnibus(plate: string): Promise<BusHomeAdmin> {
+  async buscarOnibus(plate: string): Promise<BusAdmin> {
     const response = await api.get(`/fleet/${plate}`);
     return response.data.data;
   },

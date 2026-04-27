@@ -16,7 +16,7 @@ import { adminService, type HomeAdmin, type BusHomeAdmin } from "@/services/admi
 export default function PaginaAdmin() {
   const router = useRouter();
   const [homeData, setHomeData] = useState<HomeAdmin | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const [busca, setBusca] = useState("");
   const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>("todos");
@@ -93,14 +93,6 @@ export default function PaginaAdmin() {
     window.alert(`Erro ao remover o ônibus ${onibus.plate}. Tente novamente.`);
   }
 };
-
-  if (loading) {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50">
-      <p className="text-slate-500 text-sm">Carregando dados...</p>
-    </div>
-  );
-  }
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 font-sans pb-24 text-slate-900">
