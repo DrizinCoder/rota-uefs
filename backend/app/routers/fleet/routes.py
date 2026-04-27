@@ -28,7 +28,8 @@ async def get_all(service: BusService = Depends(get_bus_service)):
 @router.get("/{plate}")
 async def get_by_plate(plate: str, service: BusService = Depends(get_bus_service)):
     result = await service.get_by_plate(plate)
-    return ResponseHandler.ok(result)
+    serialized = jsonable_encoder(result)
+    return ResponseHandler.ok(serialized)
 
 @router.post("/")
 async def create_bus(dados: BusCreateDTO, service: BusService = Depends(get_bus_service)):
@@ -44,7 +45,8 @@ async def create_buses_batch(dados: BusCreateBatchDTO, service: BusService = Dep
 @router.patch("/{plate}")
 async def update_bus(plate: str, data: BusUpdateDTO, service: BusService = Depends(get_bus_service)):
     result = await service.update(plate, data)
-    return ResponseHandler.ok(result)
+    serialized = jsonable_encoder(result)
+    return ResponseHandler.ok(serialized)
 
 @router.patch("/update/batch")
 async def update_buses_batch(dados: BusUpdateBatchDTO = Body(...), service: BusService = Depends(get_bus_service)):

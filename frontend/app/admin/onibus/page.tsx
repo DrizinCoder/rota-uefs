@@ -67,9 +67,23 @@ function CadastroEdicaoOnibusForm() {
   const [erros, setErros] = useState({ bus_plate: "", capacity: "", geral: "" });
 
   useEffect(() => {
+  if (emEdicao && id) {
+    adminService.buscarOnibus(id)
+      .then((onibus) => {
+        setFormData({
+          bus_plate: onibus.plate,
+          capacity: String(onibus.capacity),
+          bus_status: onibus.status,
+        });
+      })
+      .catch(() => {
+        setErros((e) => ({ ...e, geral: "Erro ao carregar dados do ônibus." }));
+      });
+  } else {
     setFormData(montarEstadoInicial());
     setErros({ bus_plate: "", capacity: "", geral: "" });
-  }, [modoNovo]);
+  }
+}, [emEdicao, id]);
 
   const statusBadge = getStatusBadge(formData.bus_status);
 
@@ -115,14 +129,21 @@ function CadastroEdicaoOnibusForm() {
     }
 
     try {
-      await adminService.cadastrarOnibus({
-        bus_plate: placa,
-        capacity: capacidade,
-        bus_status: formData.bus_status,
-      });
+      if (emEdicao && id) {
+        await adminService.atualizarOnibus(id, {
+          capacity: capacidade,
+          bus_status: formData.bus_status,
+        });
+      } else {
+        await adminService.cadastrarOnibus({
+          bus_plate: placa,
+          capacity: capacidade,
+          bus_status: formData.bus_status,
+        });
+      }
       router.push("/admin");
     } catch (err) {
-      setErros((atual) => ({ ...atual, geral: "Erro ao cadastrar ônibus. Tente novamente." }));
+      setErros((atual) => ({ ...atual, geral: "Erro ao salvar ônibus. Tente novamente." }));
     }
   };
 
@@ -190,13 +211,14 @@ function CadastroEdicaoOnibusForm() {
                 <Input
                   id="placa"
                   value={formData.bus_plate}
+                  disabled={emEdicao}
                   onChange={(event) =>
                     atualizarCampo("bus_plate", event.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, "").slice(0, 8))
                   }
                   placeholder="ABC-1234"
                   className={`h-11 focus:border-[#103173] focus:ring-[#103173] font-bold ${
                     erros.bus_plate ? "border-red-300 bg-red-50" : "border-[#73AABF]/30"
-                  }`}
+                  } ${emEdicao ? "bg-slate-50 cursor-not-allowed" : ""}`}
                   required
                 />
                 {erros.bus_plate && <p className="text-xs text-red-500 font-medium">{erros.bus_plate}</p>}

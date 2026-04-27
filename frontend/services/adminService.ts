@@ -37,6 +37,11 @@ export interface CadastroOnibusPayload {
   bus_status: string;
 }
 
+export interface AtualizarOnibusPayload {
+  capacity?: number;
+  bus_status?: string;
+}
+
 export interface HomeAdmin {
   summary: {
     total_buses: number;
@@ -51,10 +56,22 @@ export const adminService = {
     const response = await api.get(`/admin/home_info?today=${hoje}`);
     return response.data.data;
   },
+  
   async cadastrarOnibus(payload: CadastroOnibusPayload) {
     const response = await api.post("/fleet/", payload);
     return response.data.data;
   },
+  
+  async buscarOnibus(plate: string): Promise<BusHomeAdmin> {
+    const response = await api.get(`/fleet/${plate}`);
+    return response.data.data;
+  },
+
+  async atualizarOnibus(plate: string, payload: AtualizarOnibusPayload) {
+    const response = await api.patch(`/fleet/${plate}`, payload);
+    return response.data.data;
+  },
+
   async deleteOnibus(plate: string) {
     const response = await api.delete(`/fleet/${plate}`);
     return response.data.data;
