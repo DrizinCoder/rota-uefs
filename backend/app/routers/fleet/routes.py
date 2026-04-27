@@ -54,7 +54,8 @@ async def update_buses_batch(dados: BusUpdateBatchDTO = Body(...), service: BusS
 @router.delete("/{plate}")
 async def delete_bus(plate: str, service: BusService = Depends(get_bus_service)):
     result = await service.delete(plate)
-    return ResponseHandler.ok(result)
+    serialized = jsonable_encoder(result)
+    return ResponseHandler.ok(serialized)
 
 @router.delete("/delete/batch")
 async def delete_buses_batch(dados: BusBatchDeleteDTO, service: BusService = Depends(get_bus_service)):

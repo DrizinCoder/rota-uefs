@@ -62,19 +62,37 @@ export default function PaginaAdmin() {
     router.push(`/admin/onibus?id=${onibus.plate}`);
   };
 
-  const handleRemover = (onibus: BusHomeAdmin) => {
-    if (onibus.status === "Active" && onibus.trips_today > 0) {
-      window.alert(
-        `O ônibus ${onibus.plate} está com viagens em andamento/programadas hoje. Realoque as rotas antes de remover.`,
-      );
-      return;
-    }
+  const handleRemover = async (onibus: BusHomeAdmin) => {
+  if (onibus.status === "Active" && onibus.trips_today > 0) {
+    window.alert(
+      `O ônibus ${onibus.plate} está com viagens em andamento/programadas hoje. Realoque as rotas antes de remover.`,
+    );
+    return;
+  }
 
-    const confirmado = window.confirm(`Remover o ônibus ${onibus.plate} do sistema?`);
-    if (!confirmado) return;
+  const confirmado = window.confirm(`Remover o ônibus ${onibus.plate} do sistema?`);
+  if (!confirmado) return;
 
-    setFrota((atual) => atual.filter((item) => item.id !== onibus.id));
-  };
+  try {
+    await adminService.deleteOnibus(onibus.plate);
+    setHomeData((atual) => {
+      if (!atual) return atual;
+      return {
+        ...atual,
+        summary: {
+          ...atual.summary,
+          total_buses: atual.summary.total_buses - 1,
+          active_buses: onibus.status === "Active"
+            ? atual.summary.active_buses - 1
+            : atual.summary.active_buses,
+        },
+        buses: atual.buses.filter((item) => item.plate !== onibus.plate),
+      };
+    });
+  } catch (err) {
+    window.alert(`Erro ao remover o ônibus ${onibus.plate}. Tente novamente.`);
+  }
+};
 
   if (loading) {
   return (

@@ -55,6 +55,11 @@ export const adminService = {
     const response = await api.post("/fleet/", payload);
     return response.data.data;
   },
+  async deleteOnibus(plate: string) {
+    const response = await api.delete(`/fleet/${plate}`);
+    return response.data.data;
+  },
+
   async listarMotoristas(): Promise<Motorista[]> {
     const response = await api.get("/users/driver/");
     return response.data.data;
