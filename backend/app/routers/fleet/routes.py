@@ -8,6 +8,7 @@ from app.database.db import get_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.repositories.bus_repository import BusRepository
 from fastapi import APIRouter
+from fastapi.encoders import jsonable_encoder
 
 router = APIRouter(
     dependencies=[Depends(require_admin)]
@@ -21,7 +22,8 @@ async def get_bus_service(session: AsyncSession = Depends(get_session)) -> BusSe
 @router.get("/")
 async def get_all(service: BusService = Depends(get_bus_service)):
     result = await service.get_all()
-    return ResponseHandler.ok(result)
+    serialized = jsonable_encoder(result)
+    return ResponseHandler.ok(serialized)
 
 @router.get("/{plate}")
 async def get_by_plate(plate: str, service: BusService = Depends(get_bus_service)):
@@ -31,7 +33,8 @@ async def get_by_plate(plate: str, service: BusService = Depends(get_bus_service
 @router.post("/")
 async def create_bus(dados: BusCreateDTO, service: BusService = Depends(get_bus_service)):
     result = await service.create(dados)
-    return ResponseHandler.created(result)
+    serialized = jsonable_encoder(result)
+    return ResponseHandler.created(serialized)
 
 @router.post("/batch")
 async def create_buses_batch(dados: BusCreateBatchDTO, service: BusService = Depends(get_bus_service)):

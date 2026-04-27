@@ -24,7 +24,27 @@ export interface AtualizarMotoristaPayload {
   registration_id: string;
 }
 
+export interface BusHomeAdmin {
+  plate: string;
+  capacity: number;
+  status: string;
+  trips_today: number;
+}
+
+export interface HomeAdmin {
+  summary: {
+    total_buses: number;
+    active_buses: number;
+    total_trips_today: number;
+  };
+  buses: BusHomeAdmin[];
+}
 export const adminService = {
+  async getHomeAdmin(): Promise<HomeAdmin> {
+    const hoje = new Date().toISOString().split("T")[0];
+    const response = await api.get(`/admin/home_info?today=${hoje}`);
+    return response.data.data;
+  },
   async listarMotoristas(): Promise<Motorista[]> {
     const response = await api.get("/users/driver/");
     return response.data.data;
