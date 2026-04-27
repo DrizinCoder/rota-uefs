@@ -65,12 +65,12 @@ export default function PaginaAdmin() {
   const handleRemover = (onibus: BusHomeAdmin) => {
     if (onibus.status === "Active" && onibus.trips_today > 0) {
       window.alert(
-        `O ônibus ${onibus.placa} está com viagens em andamento/programadas hoje. Realoque as rotas antes de remover.`,
+        `O ônibus ${onibus.plate} está com viagens em andamento/programadas hoje. Realoque as rotas antes de remover.`,
       );
       return;
     }
 
-    const confirmado = window.confirm(`Remover o ônibus ${onibus.placa} do sistema?`);
+    const confirmado = window.confirm(`Remover o ônibus ${onibus.plate} do sistema?`);
     if (!confirmado) return;
 
     setFrota((atual) => atual.filter((item) => item.id !== onibus.id));

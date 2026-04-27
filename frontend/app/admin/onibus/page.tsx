@@ -10,12 +10,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import {
-  FROTA_MOCK,
-  gerarProximoIdOnibus,
-  type OnibusFrota,
-  type StatusOnibus,
-} from "@/lib/mock/frota";
-import {
   ArrowLeft,
   Bus,
   Plus,
@@ -23,37 +17,34 @@ import {
   ShieldAlert,
   UserCircle,
 } from "lucide-react";
+import { adminService, type CadastroOnibusPayload } from "@/services/adminService";
 
 interface OnibusFormState {
-  id: string;
-  placa: string;
-  capacidade: string;
-  status: StatusOnibus;
+  bus_plate: string;
+  capacity: string;
+  bus_status: string;
 }
 
-function montarEstadoInicial(onibus?: OnibusFrota): OnibusFormState {
-  if (!onibus) {
-    return {
-      id: gerarProximoIdOnibus(),
-      placa: "",
-      capacidade: "46",
-      status: "ativo",
-    };
-  }
-
+function montarEstadoInicial(): OnibusFormState {
   return {
-    id: onibus.id,
-    placa: onibus.placa,
-    capacidade: String(onibus.capacidade || 46),
-    status: onibus.status,
+    bus_plate: "",
+    capacity: "46",
+    bus_status: "Active",
   };
 }
 
-function getStatusBadge(status: StatusOnibus) {
-  if (status === "ativo") {
+function getStatusBadge(status: string) {
+  if (status === "Active") {
     return {
       label: "ATIVO",
       className: "bg-[#23B99A] text-white font-bold",
+    };
+  }
+
+  if (status === "Maintenance") {
+    return {
+      label: "MANUTENÇÃO",
+      className: "bg-amber-400 text-white font-bold",
     };
   }
 
@@ -68,59 +59,52 @@ function CadastroEdicaoOnibusForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const modoNovo = searchParams.get("modo") === "novo";
-  const id = searchParams.get("id");
+  const id = searchParams.get("id"); // agora é a bus_plate
 
-  const onibusSelecionado = useMemo(
-    () => (id ? FROTA_MOCK.find((item) => item.id === id) : undefined),
-    [id],
-  );
-  const emEdicao = Boolean(onibusSelecionado) && !modoNovo;
-  const referenciaInvalida = Boolean(id) && !onibusSelecionado && !modoNovo;
+  const emEdicao = Boolean(id) && !modoNovo;
 
-  const [formData, setFormData] = useState<OnibusFormState>(() =>
-    montarEstadoInicial(modoNovo ? undefined : onibusSelecionado),
-  );
-  const [erros, setErros] = useState({ placa: "", capacidade: "", geral: "" });
+  const [formData, setFormData] = useState<OnibusFormState>(() => montarEstadoInicial());
+  const [erros, setErros] = useState({ bus_plate: "", capacity: "", geral: "" });
 
   useEffect(() => {
-    setFormData(montarEstadoInicial(modoNovo ? undefined : onibusSelecionado));
-    setErros({ placa: "", capacidade: "", geral: "" });
-  }, [modoNovo, onibusSelecionado]);
+    setFormData(montarEstadoInicial());
+    setErros({ bus_plate: "", capacity: "", geral: "" });
+  }, [modoNovo]);
 
-  const statusBadge = getStatusBadge(formData.status);
+  const statusBadge = getStatusBadge(formData.bus_status);
 
   const atualizarCampo = <K extends keyof OnibusFormState>(campo: K, valor: OnibusFormState[K]) => {
     setFormData((atual) => ({
       ...atual,
       [campo]: valor,
     }));
-    if (campo === "placa" || campo === "capacidade") {
+    if (campo === "bus_plate" || campo === "capacity") {
       setErros((atual) => ({ ...atual, [campo]: "", geral: "" }));
     }
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setErros({ placa: "", capacidade: "", geral: "" });
-    const placa = formData.placa.trim().toUpperCase();
-    const capacidade = Number.parseInt(formData.capacidade, 10);
+    setErros({ bus_plate: "", capacity: "", geral: "" });
+    const placa = formData.bus_plate.trim().toUpperCase();
+    const capacidade = Number.parseInt(formData.capacity, 10);
     const regexPlacaAntiga = /^[A-Z]{3}-\d{4}$/;
     const regexPlacaMercosul = /^[A-Z]{3}\d[A-Z]\d{2}$/;
-    const novosErros = { placa: "", capacidade: "", geral: "" };
+    const novosErros = { bus_plate: "", capacity: "", geral: "" };
     let temErro = false;
 
     if (!placa) {
-      novosErros.placa = "Preencha a placa do veículo.";
+      novosErros.bus_plate = "Preencha a placa do veículo.";
       temErro = true;
     }
 
     if (placa && !regexPlacaAntiga.test(placa) && !regexPlacaMercosul.test(placa)) {
-      novosErros.placa = "Placa inválida. Use o formato ABC-1234 ou ABC1D23.";
+      novosErros.bus_plate = "Placa inválida. Use o formato ABC-1234 ou ABC1D23.";
       temErro = true;
     }
 
     if (Number.isNaN(capacidade) || capacidade < 10 || capacidade > 80) {
-      novosErros.capacidade = "Capacidade inválida. Informe um valor entre 10 e 80.";
+      novosErros.capacity = "Capacidade inválida. Informe um valor entre 10 e 80.";
       temErro = true;
     }
 
@@ -130,12 +114,16 @@ function CadastroEdicaoOnibusForm() {
       return;
     }
 
-    const mensagem = emEdicao
-      ? `Protótipo: ônibus ${formData.placa} atualizado com sucesso.`
-      : `Protótipo: ônibus ${formData.placa || formData.id} cadastrado com sucesso.`;
-
-    window.alert(mensagem);
-    router.push("/admin");
+    try {
+      await adminService.cadastrarOnibus({
+        bus_plate: placa,
+        capacity: capacidade,
+        bus_status: formData.bus_status,
+      });
+      router.push("/admin");
+    } catch (err) {
+      setErros((atual) => ({ ...atual, geral: "Erro ao cadastrar ônibus. Tente novamente." }));
+    }
   };
 
   return (
@@ -170,7 +158,7 @@ function CadastroEdicaoOnibusForm() {
           </Badge>
         </header>
 
-        {referenciaInvalida ? (
+        {/* {referenciaInvalida ? (
           <Card className="border-none shadow-md bg-amber-50 border border-amber-100">
             <CardContent className="p-4">
               <p className="text-sm font-bold text-amber-800">
@@ -178,7 +166,7 @@ function CadastroEdicaoOnibusForm() {
               </p>
             </CardContent>
           </Card>
-        ) : null}
+        ) : null} */}
 
         <form className="space-y-6" onSubmit={handleSubmit}>
           <Card className="border-none shadow-lg bg-white">
@@ -191,27 +179,27 @@ function CadastroEdicaoOnibusForm() {
               </div>
             )}
             <CardContent className="p-6 grid sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label className="text-[#103173] font-bold">Código Interno</Label>
-                <Input value={formData.id} disabled className="h-11 bg-slate-50 border-slate-200 font-bold" />
-              </div>
+                <Input value={formData.bus_plate} disabled className="h-11 bg-slate-50 border-slate-200 font-bold" />
+              </div> */}
               <div className="space-y-2">
                 <Label htmlFor="placa" className="text-[#103173] font-bold">
                   Placa
                 </Label>
                 <Input
                   id="placa"
-                  value={formData.placa}
+                  value={formData.bus_plate}
                   onChange={(event) =>
-                    atualizarCampo("placa", event.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, "").slice(0, 8))
+                    atualizarCampo("bus_plate", event.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, "").slice(0, 8))
                   }
                   placeholder="ABC-1234"
                   className={`h-11 focus:border-[#103173] focus:ring-[#103173] font-bold ${
-                    erros.placa ? "border-red-300 bg-red-50" : "border-[#73AABF]/30"
+                    erros.bus_plate ? "border-red-300 bg-red-50" : "border-[#73AABF]/30"
                   }`}
                   required
                 />
-                {erros.placa && <p className="text-xs text-red-500 font-medium">{erros.placa}</p>}
+                {erros.bus_plate && <p className="text-xs text-red-500 font-medium">{erros.bus_plate}</p>}
               </div>
 
               <div className="space-y-2">
@@ -223,13 +211,13 @@ function CadastroEdicaoOnibusForm() {
                   type="number"
                   min={10}
                   max={80}
-                  value={formData.capacidade}
-                  onChange={(event) => atualizarCampo("capacidade", event.target.value)}
+                  value={formData.capacity}
+                  onChange={(event) => atualizarCampo("capacity", event.target.value)}
                   className={`h-11 focus:border-[#103173] focus:ring-[#103173] ${
-                    erros.capacidade ? "border-red-300 bg-red-50" : "border-[#73AABF]/30"
+                    erros.capacity ? "border-red-300 bg-red-50" : "border-[#73AABF]/30"
                   }`}
                 />
-                {erros.capacidade && <p className="text-xs text-red-500 font-medium">{erros.capacidade}</p>}
+                {erros.capacity && <p className="text-xs text-red-500 font-medium">{erros.capacity}</p>}
               </div>
 
               <div className="space-y-2">
@@ -238,12 +226,13 @@ function CadastroEdicaoOnibusForm() {
                 </Label>
                 <select
                   id="status"
-                  value={formData.status}
-                  onChange={(event) => atualizarCampo("status", event.target.value as StatusOnibus)}
+                  value={formData.bus_status}
+                  onChange={(event) => atualizarCampo("bus_status", event.target.value as string)}
                   className="h-11 w-full rounded-md border border-[#73AABF]/30 bg-white px-3 text-sm text-[#103173] font-bold focus:outline-none focus:ring-2 focus:ring-[#103173]/40"
                 >
-                  <option value="ativo">Ativo</option>
-                  <option value="inativo">Inativo</option>
+                  <option value="Active">Ativo</option>
+                  <option value="Inactive">Inativo</option>
+                  <option value="Maintenance">Manutenção</option>
                 </select>
               </div>
             </CardContent>

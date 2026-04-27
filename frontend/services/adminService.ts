@@ -31,6 +31,12 @@ export interface BusHomeAdmin {
   trips_today: number;
 }
 
+export interface CadastroOnibusPayload {
+  bus_plate: string;
+  capacity: number;
+  bus_status: string;
+}
+
 export interface HomeAdmin {
   summary: {
     total_buses: number;
@@ -43,6 +49,10 @@ export const adminService = {
   async getHomeAdmin(): Promise<HomeAdmin> {
     const hoje = new Date().toISOString().split("T")[0];
     const response = await api.get(`/admin/home_info?today=${hoje}`);
+    return response.data.data;
+  },
+  async cadastrarOnibus(payload: CadastroOnibusPayload) {
+    const response = await api.post("/fleet/", payload);
     return response.data.data;
   },
   async listarMotoristas(): Promise<Motorista[]> {
