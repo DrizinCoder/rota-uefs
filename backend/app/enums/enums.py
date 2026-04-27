@@ -40,3 +40,8 @@ class BoardingStatus(str, Enum):
     BOARDED = "Boarded"
     NOT_BOARDED = "Not Boarded"
     CANCELLED = "Cancelled"
+
+class TripRecurrence(str, Enum):
+    SINGLE = "Single"
+    WEEKLY = "Weekly"
+    MONTHLY = "Monthly"

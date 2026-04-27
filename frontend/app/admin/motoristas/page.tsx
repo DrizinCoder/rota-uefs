@@ -1,20 +1,30 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
-import { Users, Plus, ChevronRight, UserCircle, ShieldAlert, Bus, Search, ArrowLeft } from "lucide-react";
+import { Plus, ChevronRight, UserCircle, Search, ArrowLeft } from "lucide-react";
 import { FooterSection } from "@/components/landing/footer-section";
 import Link from "next/link";
-
-// Dados simulados baseados na estrutura que você já tem
-const MOTORISTAS = [
-  { id: "MOT-001", nome: "Carlos Silva", status: "Ativo", viagens: 12 },
-  { id: "MOT-002", nome: "Ana Souza", status: "Em Viagem", viagens: 8 },
-  { id: "MOT-003", nome: "Roberto Oliveira", status: "Inativo", viagens: 0 },
-];
+import { adminService, type Motorista } from "@/services/adminService";
 
 export default function AdminMotoristasPage() {
   const router = useRouter();
+  const [motoristas, setMotoristas] = useState<Motorista[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [busca, setBusca] = useState("");
+
+  useEffect(() => {
+    adminService.listarMotoristas()
+      .then(setMotoristas)
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  const motoristasFiltrados = motoristas.filter((m) =>
+    m.full_name.toLowerCase().includes(busca.toLowerCase()) ||
+    m.registration_id.toLowerCase().includes(busca.toLowerCase())
+  );
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f0f4f8]">
@@ -29,7 +39,6 @@ export default function AdminMotoristasPage() {
           VOLTAR PARA ADMIN
         </button>
 
-        {/* Cabeçalho no padrão do Dashboard Admin */}
         <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <h1 className="text-3xl font-extrabold text-[#103173] tracking-tight">
@@ -49,23 +58,31 @@ export default function AdminMotoristasPage() {
           </Link>
         </header>
 
-        {/* Barra de Pesquisa / Filtro rápida */}
         <div className="bg-white p-2 rounded-2xl shadow-sm border border-slate-100 flex items-center mb-6">
           <Search className="h-5 w-5 text-slate-400 ml-3 mr-2" />
           <input
             type="text"
-            placeholder="Buscar por nome ou ID..."
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            placeholder="Buscar por nome ou matrícula..."
             className="flex-1 bg-transparent border-none focus:outline-none text-[#103173] placeholder:text-slate-400 text-sm py-2"
           />
         </div>
 
-        {/* Lista de Motoristas */}
         <div className="grid gap-4">
-          {MOTORISTAS.map((motorista) => (
+          {loading && (
+            <p className="text-center text-slate-400 text-sm py-10">Carregando motoristas...</p>
+          )}
+
+          {!loading && motoristasFiltrados.length === 0 && (
+            <p className="text-center text-slate-400 text-sm py-10">Nenhum motorista encontrado.</p>
+          )}
+
+          {motoristasFiltrados.map((motorista) => (
             <div
-              key={motorista.id}
+              key={motorista.user_id}
               className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:shadow-md transition-shadow group cursor-pointer"
-              onClick={() => router.push(`/admin/motoristas/${motorista.id}`)}
+              onClick={() => router.push(`/admin/motoristas/${motorista.user_id}`)}
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-[#103173]/5 flex items-center justify-center shrink-0">
@@ -73,24 +90,25 @@ export default function AdminMotoristasPage() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-0.5">
-                    <p className="text-lg font-bold text-[#103173]">{motorista.nome}</p>
-                    <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full tracking-wider ${motorista.status === 'Ativo' ? 'bg-[#23B99A]/10 text-[#23B99A]' :
-                        motorista.status === 'Em Viagem' ? 'bg-[#F2D022]/20 text-[#b8960a]' :
-                          'bg-slate-100 text-slate-500'
-                      }`}>
-                      {motorista.status}
+                    <p className="text-lg font-bold text-[#103173]">{motorista.full_name}</p>
+                    <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full tracking-wider ${
+                      motorista.registration_status === "ACTIVE"
+                        ? "bg-[#23B99A]/10 text-[#23B99A]"
+                        : "bg-slate-100 text-slate-500"
+                    }`}>
+                      {motorista.registration_status === "ACTIVE" ? "Ativo" : "Inativo"}
                     </span>
                   </div>
                   <div className="flex items-center gap-3 text-sm text-slate-500 font-medium">
-                    <span>ID: {motorista.id}</span>
+                    <span>Matrícula: {motorista.registration_id}</span>
+                    <span>·</span>
+                    <span>{motorista.email}</span>
                   </div>
                 </div>
               </div>
 
               <div className="flex items-center gap-4 md:gap-6 border-t md:border-t-0 md:border-l border-slate-100 pt-4 md:pt-0 md:pl-6">
-                <div className="flex flex-col">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Editar</span>
-                </div>
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Editar</span>
                 <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-[#103173] group-hover:text-white transition-colors ml-auto md:ml-0">
                   <ChevronRight className="h-5 w-5" />
                 </div>

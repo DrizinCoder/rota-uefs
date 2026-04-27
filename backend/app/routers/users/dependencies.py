@@ -1,0 +1,32 @@
+from app.services.trip_service import TripService
+from app.repositories.trip_repository import TripRepository
+from fastapi import Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.database.db import get_session
+from app.repositories.user_repository import UserRepository
+from app.services.user_service import UserService
+from app.services.auth_service import AuthService
+from app.services.email.use_cases import EmailUseCases
+from app.controllers.user_controller import UserController
+
+from app.services.driver_service import DriverService 
+
+async def get_driver_service(session: AsyncSession = Depends(get_session)) -> DriverService:
+    repo = UserRepository(session)
+    return DriverService(repo)
+
+async def get_user_service(session: AsyncSession = Depends(get_session)) -> UserService:
+    repo = UserRepository(session)
+    return UserService(repo)
+
+async def get_user_controller(
+    user_service: UserService = Depends(get_user_service)
+) -> UserController:
+    auth_service = AuthService()
+    email_use_cases = EmailUseCases()
+
+    return UserController(user_service, auth_service, email_use_cases)
+
+async def get_trip_service(session: AsyncSession = Depends(get_session)) -> TripService:
+    repo = TripRepository(session)
+    return TripService(repo)

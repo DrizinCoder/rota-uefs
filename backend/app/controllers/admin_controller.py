@@ -1,14 +1,13 @@
+from app.DTOs.auth import MotoristaRegisterResponseDTO,RegisterMotoristaDTO
 import uuid
-
-from app.DTOs.auth.dtos import RegisterAdminDTO
-from app.DTOs.users.dtos import CreateAdminDTO
+from app.DTOs.auth import RegisterAdminDTO
+from app.DTOs.users import CreateAdminDTO
 from app.services.admin_service import AdminService
-
 
 class AdminController:
     def __init__(self, service: AdminService):
         self.service = service
-
+            
     async def create(self, dados: RegisterAdminDTO):
         admin_data = CreateAdminDTO(
             full_name=dados.full_name,
@@ -22,12 +21,15 @@ class AdminController:
         
         admin = await self.service.create_admin(admin_data)
         return self.service.serialize_admin_response(admin)
-
+    
     async def list_all(self):
         admins = await self.service.get_alls_admins()
         if not admins:
             return []
         return self.service.serialize_admin_list(admins)
+
+    async def get_driver(self, driver_id: uuid.UUID):
+        return await self.service.get_driver(driver_id)
 
     async def get_by_id(self, admin_id: uuid.UUID):
         admin = await self.service.get_admin_by_id(admin_id)
@@ -43,3 +45,23 @@ class AdminController:
 
     async def delete(self, admin_id: uuid.UUID):
         return await self.service.delete_admin(admin_id)
+
+    async def register_motorista(self, dados: RegisterMotoristaDTO):
+        driver, temp_password = await self.service.register_motorista(dados)
+        
+        response = MotoristaRegisterResponseDTO.model_validate(driver)
+        response_dict = response.model_dump(mode='json')
+        response_dict["temp_password"] = temp_password
+        return response_dict
+
+    async def delete_account(self, user_id: uuid.UUID):
+        return await self.service.delete_account(user_id)
+
+    async def list_drivers(self):
+        return await self.service.list_drivers()
+
+    async def list_staff_status_pending(self):
+        return await self.service.list_staff_status_pending()
+
+    async def update_status_staff(self, user_id: uuid.UUID, status: bool):
+        return await self.service.update_status_staff(user_id, status)

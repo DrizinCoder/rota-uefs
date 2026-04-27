@@ -22,8 +22,8 @@ export interface RegisterServidorDTO {
 
 // 3. DTO de Login
 export interface LoginUserDTO {
-  matricula: string;
-  senha: string;
+  registration_id: string; 
+  password: string;          
 }
 
 export const authService = {
@@ -32,11 +32,11 @@ export const authService = {
         return response.data;
         },
     cadastroAluno: async (dados: RegisterAlunoDTO) => {
-        const response = await api.post('/auth/register/aluno', dados);
+        const response = await api.post('/auth/register/student', dados);
         return response.data;
     },
     cadastroServidor: async (dados: RegisterServidorDTO) => {
-        const response = await api.post('/auth/register/servidor', dados);
+        const response = await api.post('/auth/register/staff', dados);
         return response.data;
     },
     

@@ -10,9 +10,9 @@ from app.core.exceptions import UnauthorizedException
 security = HTTPBearer()
 
 class TokenData(BaseModel):
-    id: str  
+    sub: str  
     registration_id: str
-    email: str
+    email: str | None = None
     profile: str
     full_name: str
     access_level: str | None = None
@@ -34,8 +34,9 @@ def get_current_user(
             algorithms=[settings.ALGORITHM]
         )
    
-        user_id = payload.get("id")
+        user_id = payload.get("sub")
         profile = payload.get("profile")
+
         
         if not user_id or not profile:
             raise UnauthorizedException("Token inválido: dados do usuário ausentes")
@@ -49,10 +50,7 @@ def get_current_user(
 def require_profile(*allowed_profiles: str):
     def profile_checker(current_user: TokenData = Depends(get_current_user)) -> TokenData:
         if current_user.profile not in allowed_profiles:
-            raise HTTPException(
-                status_code=403, 
-                detail=f"Acesso negado. Perfis permitidos: {', '.join(allowed_profiles)}"
-            )
+            raise UnauthorizedException(f"Acesso negado. Perfis permitidos: {', '.join(allowed_profiles)}")
         return current_user
     
     return profile_checker
@@ -60,35 +58,23 @@ def require_profile(*allowed_profiles: str):
 
 def require_admin(current_user: TokenData = Depends(get_current_user)) -> TokenData:
     if current_user.profile != UserProfile.ADMIN:
-        raise HTTPException(
-            status_code=403, 
-            detail="Acesso restrito a administradores"
-        )
+        raise UnauthorizedException("Acesso restrito a adminstradores")
     return current_user
 
 
 def require_driver(current_user: TokenData = Depends(get_current_user)) -> TokenData:
     if current_user.profile != UserProfile.DRIVER:
-        raise HTTPException(
-            status_code=403, 
-            detail="Acesso restrito a motoristas"
-        )
+        raise UnauthorizedException("Acesso restrito a motorista")
     return current_user
 
 
 def require_staff(current_user: TokenData = Depends(get_current_user)) -> TokenData:
     if current_user.profile != UserProfile.STAFF:
-        raise HTTPException(
-            status_code=403, 
-            detail="Acesso restrito a servidores"
-        )
+        raise UnauthorizedException("Acesso restrito a servidores")
     return current_user
 
 
 def require_student(current_user: TokenData = Depends(get_current_user)) -> TokenData:
     if current_user.profile != UserProfile.STUDENT:
-        raise HTTPException(
-            status_code=403, 
-            detail="Acesso restrito a alunos"
-        )
+        raise UnauthorizedException("Acesso restrito a alunos")
     return current_user

@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 
 // Mapa de rotas → perfis permitidos
 const ROUTE_PERMISSIONS: Record<string, string[]> = {
-  "/admin":      ["Admin"],
+  //"/admin":      ["Admin"],
   "/motorista":  ["Driver"],
   "/passageiro": ["Student"],
   "/professor":  ["Staff", "Faculty"],

@@ -17,8 +17,8 @@ export default function LoginPage() {
 
   // Criando o state com os campos vazios
   const [formData, setFormData] = useState<LoginUserDTO>({
-    matricula: '',
-    senha: '',
+    registration_id: '',
+    password: '',
   });
 
 const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,8 +58,8 @@ const handleSubmit = async (e: React.FormEvent) => {
     // Salva o token no localStorage (como antes)
     localStorage.setItem("token", resposta.data.access_token);
 
-    // ✅ NOVO: Salva o perfil em um cookie acessível pelo middleware
-    document.cookie = `user_profile=${profile}; path=/; max-age=86400; SameSite=Lax`;
+    //  Salva o perfil em um cookie acessível pelo middleware
+    //document.cookie = `user_profile=${profile}; path=/; max-age=86400; SameSite=Lax`;
 
     router.push(destino);
   } catch (error) {
@@ -94,12 +94,12 @@ const handleSubmit = async (e: React.FormEvent) => {
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <LabeledIconInput
-              id="matricula"
-              name="matricula"
+              id="registration_id"
+              name="registration_id"
               label="Matrícula"
               icon={User}
               placeholder="23121111"
-              value={formData.matricula}
+              value={formData.registration_id}
               onChange={handleChange}
     
               maxLength={8}
@@ -118,13 +118,13 @@ const handleSubmit = async (e: React.FormEvent) => {
                 </button>
               </div>
               <LabeledIconInput
-                id="pass"
-                name="senha"
-                label=""
+                id="password"
+                name="password"
+                label="senha"
                 icon={Lock}
                 type="password"
                 placeholder="••••••••"
-                value={formData.senha}
+                value={formData.password}
                 onChange={handleChange} 
                 containerClassName="space-y-0"
                 labelClassName="hidden"

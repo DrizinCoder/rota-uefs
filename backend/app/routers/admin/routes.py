@@ -1,19 +1,52 @@
+from datetime import date
 import uuid
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.DTOs.auth.dtos import RegisterAdminDTO
+from app.DTOs.auth import RegisterAdminDTO, MotoristaRegisterResponseDTO, RegisterMotoristaDTO
+from app.DTOs.auth import RegisterAdminDTO
+from app.core.responses import ResponseHandler
+from app.core.exceptions import ConflictException, NotFoundException
+from app.database.db import get_session
+from app.repositories.user_repository import UserRepository
+from app.services.admin_service import AdminService
+from app.controllers.admin_controller import AdminController
 from app.services.admin_service import AdminService
 from app.repositories.user_repository import UserRepository
 from app.controllers.admin_controller import AdminController
 from app.database.db import get_session
 from app.core.responses import ResponseHandler
 from app.core.exceptions import NotFoundException
-router = APIRouter()
+from app.middleware import require_admin
+from app.middleware.auth_middleware import TokenData
+from app.controllers.dashboard_controller import DashboardController
+from app.services.dashboard_service import DashboardService
+from app.repositories.dashboard_repository import DashboardRepository
+
+router = APIRouter(
+    dependencies=[Depends(require_admin)]
+)
+
 async def get_admin_controller(session: AsyncSession = Depends(get_session)) -> AdminController:
     user_repo = UserRepository(session)
     admin_service = AdminService(user_repo)
+    
     return AdminController(admin_service)
+
+async def get_dashboard_controller(session: AsyncSession = Depends(get_session)) -> DashboardController:
+    dashboard_repo = DashboardRepository(session)
+    dashboard_service = DashboardService(dashboard_repo)
+    
+    return DashboardController(dashboard_service)
+
+@router.post("/register/motorista")
+async def register_motorista(
+    dados: RegisterMotoristaDTO,
+    controller: AdminController = Depends(get_admin_controller)
+):
+    result = await controller.register_motorista(dados)
+    return ResponseHandler.created(data=result)
+
+# ============ Rotas do CRUD ============
 
 @router.post("/")
 async def create_admin(
@@ -34,6 +67,18 @@ async def list_admins(
         return ResponseHandler.ok([], "Nenhum administrador encontrado")
     
     return ResponseHandler.ok(result, "Administradores encontrados")
+
+@router.get("/home_info")
+async def get_home_info(
+    today: date,
+    controller: DashboardController = Depends(get_dashboard_controller)
+):
+    result = await controller.get_home_info(today)
+
+    if not result:
+        return ResponseHandler.ok([], "Nenhum dado encontrado")
+    
+    return ResponseHandler.ok(result, "Dados da home page")
 
 
 @router.get("/{admin_id}")
@@ -74,3 +119,13 @@ async def delete_admin(
         raise NotFoundException("Administrador não encontrado")
     
     return ResponseHandler.ok({"deleted": True}, "Administrador removido com sucesso")
+
+@router.delete("/delete/account/{id}")
+async def delete_account(
+    id: uuid.UUID,
+    controller: AdminController = Depends(get_admin_controller)
+):
+    result = await controller.delete_account(id)
+    if not result:
+        raise NotFoundException("User not found")
+    return ResponseHandler.ok("User account has been anonymized successfully")

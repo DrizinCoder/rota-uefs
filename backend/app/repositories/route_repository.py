@@ -2,7 +2,7 @@ import uuid
 from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.models import Route
-from app.DTOs.routes.dtos import CreateRouteDTO, UpdateRouteDTO
+from app.DTOs.routes import CreateRouteDTO, UpdateRouteDTO
 
 class RouteRepository:
     def __init__(self, session: AsyncSession):

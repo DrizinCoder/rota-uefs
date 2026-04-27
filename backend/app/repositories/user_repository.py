@@ -1,16 +1,17 @@
-from app.core.exceptions import InternalServerException
-from app.models.models import Admin
-from app.DTOs.auth.dtos import RegisterAdminDTO
+from app.enums.enums import RegistrationStatus
 import random
-from app.DTOs.auth.dtos import RegisterMotoristaDTO
-from app.DTOs.auth.dtos import RegisterAlunoDTO
-from app.DTOs.auth.dtos import RegisterServidorDTO
+from app.core.exceptions import InternalServerException
+from sqlmodel import select
+from app.models.models import Admin
+from app.DTOs.auth import RegisterAdminDTO
+from app.DTOs.auth import RegisterMotoristaDTO
+from app.DTOs.auth import RegisterAlunoDTO
+from app.DTOs.auth import RegisterServidorDTO
 from sqlmodel import SQLModel
-from app.DTOs.users.dtos import CreateSimpleUserDTO
 import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import and_, select 
-from sqlalchemy.orm import joinedload 
+from sqlalchemy.orm import defer 
 from passlib.context import CryptContext
 from app.models.models import User
 from app.models.models import Staff
@@ -161,6 +162,31 @@ class UserRepository:
         )
         result = await self.session.execute(statement)
         return result.mappings().all()
+    
+    async def list_all_staff_status_peding(self):
+        statement = (
+            select(
+                User.user_id,
+                User.full_name,
+                User.registration_id,
+                User.phone,
+                User.email,
+                User.profile,
+                User.registration_status, 
+                Staff.department,
+                Staff.employment_type
+            )
+            .join(Staff, User.user_id == Staff.staff_id)
+            .where(
+                and_(
+                    User.profile == UserProfile.STAFF,
+                    User.is_anonymized == False,
+                    User.registration_status == "PENDING"
+                )
+            )
+        )
+        result = await self.session.execute(statement)
+        return result.mappings().all()
 
     async def list_all_drivers(self):
         statemente = select(User).where(
@@ -218,6 +244,12 @@ class UserRepository:
         result = await self.session.execute(statement)
         return result.scalars().first()
 
+    async def get_by_id_without_password(self, user_id: uuid.UUID):
+        statement = select(User).where(User.user_id == user_id).options(defer(User.password))
+        
+        result = await self.session.execute(statement)
+        return result.scalars().first() 
+
     async def get_by_registration_id(self, user_id: str):
         statement = select(User).where(User.registration_id == user_id)
         result = await self.session.execute(statement)
@@ -240,19 +272,26 @@ class UserRepository:
         )
         result = await self.session.execute(statement)
         return result.scalars().first()
-
-    async def create_simple_user(self, user_dto: CreateSimpleUserDTO):
-        user_model = User.model_validate(user_dto)
-        self.session.add(user_model)
-        await self.session.commit()
-        await self.session.refresh(user_model)
-        return user_model
     
     async def update(self, user: User):
         self.session.add(user)
         await self.session.commit()
         await self.session.refresh(user)
         return user
+    
+    async def update_driver(self, db_obj: User, update_data: SQLModel):
+        update_dict = update_data.model_dump(exclude_unset=True)
+
+        db_obj.sqlmodel_update(update_dict)
+
+        self.session.add(db_obj)
+        await self.session.commit()
+        await self.session.refresh(db_obj)
+        
+        if hasattr(db_obj, "password"):
+            delattr(db_obj, "password")
+            
+        return db_obj
     
     async def patch(self, user_id: uuid.UUID, update_data: SQLModel):
         db_user = await self.get_by_id(user_id)
@@ -282,4 +321,15 @@ class UserRepository:
         
         self.session.add(db_user)
         await self.session.commit()
+        return db_user
+
+    async def update_status_staff(self, user_id: uuid.UUID, status: bool):
+        db_user = await self.get_by_id(user_id)
+        if not db_user:
+            return None
+        
+        db_user.registration_status = RegistrationStatus.ACTIVE if status else RegistrationStatus.PENDING
+        self.session.add(db_user)
+        await self.session.commit()
+        await self.session.refresh(db_user)
         return db_user

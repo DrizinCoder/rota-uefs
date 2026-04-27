@@ -1,9 +1,9 @@
 import uuid
 from sqlmodel import col
-from app.DTOs.fleet.dtos import BusCreateBatchDTO
-from app.DTOs.fleet.dtos import BusCreateDTO
-from app.DTOs.fleet.dtos import BusUpdateBatchDTO
-from app.DTOs.fleet.dtos import BusUpdateDTO
+from app.DTOs.fleet import BusCreateBatchDTO
+from app.DTOs.fleet import BusCreateDTO
+from app.DTOs.fleet import BusUpdateBatchDTO
+from app.DTOs.fleet import BusUpdateDTO
 from typing import List
 from sqlalchemy import select, delete
 from app.models.models import Bus

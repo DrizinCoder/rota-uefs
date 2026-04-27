@@ -1,9 +1,11 @@
+from app.core.exceptions import NotFoundException
+from app.DTOs.auth import RegisterMotoristaDTO
 import uuid
 from typing import Optional, List, Dict, Any
 from sqlalchemy.exc import IntegrityError
 from passlib.context import CryptContext
 
-from app.DTOs.users.dtos import CreateAdminDTO
+from app.DTOs.users import CreateAdminDTO
 from app.enums.enums import UserProfile, AccessLevel, RegistrationStatus
 from app.models.models import User, Admin
 from app.repositories.user_repository import UserRepository
@@ -132,13 +134,48 @@ class AdminService:
             return False
 
         return await self.user_repository.anonymize(admin_id)
-    
+
+    async def register_motorista(self, dados: RegisterMotoristaDTO):
+        driver = await self.user_repository.get_by_registration_id(dados.registration_id)
+        if driver:
+            raise ConflictException("Motorista já cadastrado")
+        
+        driver_created, temp_password = await self.user_repository.create_driver(dados)
+        return driver_created, temp_password
+
+    async def delete_account(self, user_id: uuid.UUID):
+        deleted_user = await self.user_repository.anonymize(user_id)
+        if not deleted_user:
+            return None
+        return deleted_user
+
+    async def list_drivers(self):
+        return await self.user_repository.list_all_drivers()
+
+    async def list_staff_status_pending(self):
+        return await self.user_repository.list_all_staff_status_peding()
+
+    async def get_driver(self, driver_id: uuid.UUID):
+        return await self.user_repository.get_by_id(driver_id)
+
+    async def update_status_staff(self, user_id: uuid.UUID, status: bool):
+        user = await self.user_repository.update_status_staff(user_id, status)
+        if not user:
+            raise NotFoundException("Usuário não encontrado")
+        
+        if status == False:
+            await self.user_repository.anonymize(user_id)
+            return True
+        
+        return user
+
     def _serialize_admin(self, admin: Admin) -> Dict[str, Any]:
         return {
             "admin_id": str(admin.admin_id),
             "full_name": admin.user.full_name,
             "email": admin.user.email,
             "phone": admin.user.phone,
+            "registration_id": admin.user.registration_id,
             "access_level": admin.access_level.value,
             "registration_status": admin.user.registration_status.value
         }
