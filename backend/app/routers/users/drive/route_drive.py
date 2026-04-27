@@ -17,7 +17,11 @@ async def get_all_drivers(
     _: TokenData = Depends(require_admin)
 ):
     result = await controller.list_drivers()
-    return ResponseHandler.ok(data=result)
+
+    data = [driver.model_dump(mode="json") for driver in result]
+
+    return ResponseHandler.ok(data=data, message="Todos os motoristas")
+
 
 @drive_router.get("/{id}")
 async def get_driver(

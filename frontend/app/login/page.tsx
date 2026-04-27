@@ -58,8 +58,8 @@ const handleSubmit = async (e: React.FormEvent) => {
     // Salva o token no localStorage (como antes)
     localStorage.setItem("token", resposta.data.access_token);
 
-    //  Salva o perfil em um cookie acessível pelo middleware
-    //document.cookie = `user_profile=${profile}; path=/; max-age=86400; SameSite=Lax`;
+    // Salva o perfil em um cookie acessível pelo middleware
+    document.cookie = `user_profile=${profile}; path=/; max-age=86400; SameSite=Lax`;
 
     router.push(destino);
   } catch (error) {
