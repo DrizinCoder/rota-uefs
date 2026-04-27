@@ -45,8 +45,8 @@ export function AdminFleetList({
           <Tabs value={filtroStatus} onValueChange={(value) => setFiltroStatus(value as FiltroStatus)} className="w-full sm:w-auto">
             <TabsList className="h-9 bg-slate-100 p-1 w-full grid grid-cols-3">
               <TabsTrigger value="todos" className="text-xs font-semibold">Todos</TabsTrigger>
-              <TabsTrigger value="ativo" className="text-xs font-semibold">Ativos</TabsTrigger>
-              <TabsTrigger value="inativo" className="text-xs font-semibold">Inativos</TabsTrigger>
+              <TabsTrigger value="Active" className="text-xs font-semibold">Ativos</TabsTrigger>
+              <TabsTrigger value="Inactive" className="text-xs font-semibold">Inativos</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
