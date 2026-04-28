@@ -99,6 +99,8 @@ class Trip(SQLModel, table=True):
     status: TripStatus = Field(default=TripStatus.PENDING)
 
     reservations: list["Reservation"] = Relationship(back_populates="trip")
+    driver: Optional["User"] = Relationship()
+    route: Optional["Route"] = Relationship()
 
 class Reservation(SQLModel, table=True):
     reservation_id: uuid.UUID = Field(
