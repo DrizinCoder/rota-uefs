@@ -1,76 +1,128 @@
 "use client";
-import { authService, LoginUserDTO } from '@/services/authService';
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+
+import { authService, LoginUserDTO } from "@/services/authService";
+import { useEffect, useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { BusFront, Lock, User, ShieldCheck } from "lucide-react";
 import { AuthPageShell } from "@/components/auth/auth-page-shell";
 import { LabeledIconInput } from "@/components/auth/labeled-icon-input";
+import { toast } from "react-toastify";
+
+/**
+ * Componente que escuta os parâmetros da URL para disparar Toasts de feedback
+ */
+function LoginLogic() {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const error = searchParams.get("error");
+    const activated = searchParams.get("activated");
+    const status = searchParams.get("status");
+    const messageCode = searchParams.get("message");
+
+    // 1. Prioridade para o novo formato (status + message)
+    if (status && messageCode) {
+      const messages: Record<string, string> = {
+        token_invalido: "O link de ativação é inválido ou já foi utilizado.",
+        usuario_nao_encontrado:
+          "Usuário não encontrado em nossa base de dados.",
+        conta_ja_ativada: "Esta conta já está ativa! Você já pode entrar.",
+        ativacao_sucesso: "Conta ativada com sucesso! Bem-vindo ao Rota UEFS.",
+        token_expirado:
+          "Este link expirou. Por favor, solicite uma nova ativação.",
+      };
+
+      const texto = messages[messageCode] || "Ocorreu um erro inesperado.";
+
+      if (status === "success") toast.success(texto);
+      else if (status === "error") toast.error(texto);
+      else if (status === "warning") toast.warning(texto);
+
+      return;
+    }
+
+    // 2. Lógica legada para compatibilidade
+    if (activated === "true") {
+      toast.success("Conta ativada com sucesso! Faça seu login.");
+    }
+
+    if (error) {
+      const errorMessages: Record<string, string> = {
+        invalid_token:
+          "Link de ativação inválido. Verifique se copiou o link completo.",
+        user_not_found: "Usuário não encontrado.",
+        expired_or_invalid:
+          "O link expirou ou é inválido. Tente solicitar novamente.",
+      };
+      toast.error(errorMessages[error] || "Ocorreu um erro na ativação.");
+    }
+  }, [searchParams]);
+
+  return null;
+}
 
 export default function LoginPage() {
-  // Hooks
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [erro, setErro] = useState("");
 
-  // Criando o state com os campos vazios
   const [formData, setFormData] = useState<LoginUserDTO>({
-    registration_id: '',
-    password: '',
+    registration_id: "",
+    password: "",
   });
 
-const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  let { name, value } = e.target;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
-  /* 
-  if (name === "registration_id") {
-    value = value.replace(/\D/g, "").slice(0, 8);
-  }*/
-  
-  setFormData(estadoAnterior => ({
-    ...estadoAnterior,
-    [name]: value      
-  }));
-};
+  const REDIRECT_MAP: Record<string, string> = {
+    Student: "/passageiro",
+    Staff: "/professor",
+    Faculty: "/professor",
+    Driver: "/motorista",
+    Admin: "/admin",
+  };
 
-const REDIRECT_MAP: Record<string, string> = {
-  "Student": "/passageiro",
-  "Staff": "/professor",
-  "Faculty": "/professor",
-  "Driver": "/motorista",
-  "Admin": "/admin",
-};
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setErro("");
 
+    try {
+      const resposta = await authService.login(formData);
+      const profile = resposta.data.user.profile;
+      const destino = REDIRECT_MAP[profile] || "/login";
 
-
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setIsLoading(true);
-  setErro("");
-
-  try {
-    const resposta = await authService.login(formData);
-    const profile = resposta.data.user.profile;
-    const destino = REDIRECT_MAP[profile] || "/login";
-
-    // Salva o token no localStorage (como antes)
-    localStorage.setItem("token", resposta.data.access_token);
-
-    //  Salva o perfil em um cookie acessível pelo middleware
-    //document.cookie = `user_profile=${profile}; path=/; max-age=86400; SameSite=Lax`;
-
-    router.push(destino);
-  } catch (error) {
-    setErro("Matrícula ou senha incorretos.");
-  } finally {
-    setIsLoading(false);
-  }
-};
+      localStorage.setItem("token", resposta.data.access_token);
+      router.push(destino);
+    } catch (error: any) {
+      setErro("Matrícula ou senha incorretos.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <AuthPageShell>
+      {/* O Suspense é obrigatório ao usar useSearchParams no App Router */}
+      <Suspense fallback={null}>
+        <LoginLogic />
+      </Suspense>
+
       <Card className="w-full max-w-md border-none shadow-2xl bg-white/80 backdrop-blur-md z-10">
         <CardHeader className="space-y-4 pb-8 text-center">
           <div className="mx-auto bg-[#103173] p-4 rounded-2xl w-fit shadow-lg shadow-[#103173]/20">
@@ -98,19 +150,20 @@ const handleSubmit = async (e: React.FormEvent) => {
               name="registration_id"
               label="Matrícula"
               icon={User}
-              placeholder="23121111"
+              placeholder="Ex: 23121111"
               value={formData.registration_id}
               onChange={handleChange}
-    
-              maxLength={8}
+              maxLength={15}
               required
             />
 
             <div className="space-y-2">
               <div className="flex justify-between items-center ml-1">
-                <Label htmlFor="pass" className="text-[#103173] font-bold">Senha</Label>
-                <button 
-                  type="button" 
+                <Label htmlFor="password" className="text-[#103173] font-bold">
+                  Senha
+                </Label>
+                <button
+                  type="button"
                   onClick={() => router.push("/recuperar-senha")}
                   className="text-xs font-bold text-[#73AABF] hover:text-[#103173]"
                 >
@@ -120,12 +173,12 @@ const handleSubmit = async (e: React.FormEvent) => {
               <LabeledIconInput
                 id="password"
                 name="password"
-                label="senha"
+                label="Senha"
                 icon={Lock}
                 type="password"
                 placeholder="••••••••"
                 value={formData.password}
-                onChange={handleChange} 
+                onChange={handleChange}
                 containerClassName="space-y-0"
                 labelClassName="hidden"
                 required
@@ -169,11 +222,32 @@ const handleSubmit = async (e: React.FormEvent) => {
         </form>
       </Card>
 
-      {/* Atalhos rápidos para você testar as páginas novas enquanto desenvolve */}
+      {/* Atalhos para desenvolvimento */}
       <div className="absolute bottom-4 flex gap-4 opacity-40 hover:opacity-100 transition-opacity">
-        <Button variant="ghost" size="sm" onClick={() => router.push("/passageiro")} className="text-[#103173] font-bold">Ir para Passageiro</Button>
-        <Button variant="ghost" size="sm" onClick={() => router.push("/motorista")} className="text-[#103173] font-bold">Ir para Motorista</Button>
-        <Button variant="ghost" size="sm" onClick={() => router.push("/admin")} className="text-[#103173] font-bold">Ir para Admin</Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.push("/passageiro")}
+          className="text-[#103173] font-bold"
+        >
+          Ir para Passageiro
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.push("/motorista")}
+          className="text-[#103173] font-bold"
+        >
+          Ir para Motorista
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.push("/admin")}
+          className="text-[#103173] font-bold"
+        >
+          Ir para Admin
+        </Button>
       </div>
     </AuthPageShell>
   );
