@@ -9,6 +9,7 @@ from app.database.db import init_db, engine
 from app.core.handlers import register_exception_handlers
 from app.core.config import settings
 logger = logging.getLogger("uvicorn")
+from fastapi.middleware.cors import CORSMiddleware
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -21,6 +22,17 @@ async def lifespan(app: FastAPI):
     logger.info("🛑 Aplicação encerrada...")
 
 app = FastAPI(lifespan=lifespan)
+
+# CORS - Cross-Origin Resource Sharing 
+# Trecho para permitir que o front-end se comunique com o back-end
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"], 
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 register_exception_handlers(app)
 

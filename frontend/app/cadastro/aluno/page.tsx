@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,101 +8,109 @@ import { GraduationCap, Lock, Mail, Phone, User, ArrowLeft, KeyRound, BadgeCheck
 import { AuthPageShell } from "@/components/auth/auth-page-shell";
 import { LabeledIconInput } from "@/components/auth/labeled-icon-input";
 
-export default function CadastroAluno() {
+// Bloco de código referente à integração com o backend (authService)
+
+import { useState } from "react";
+import { authService, RegisterAlunoDTO } from '@/services/authService';
+
+export default function CadastroAlunoPage() {
+  // Hooks
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [etapa, setEtapa] = useState<1 | 2>(1); // 1: Dados, 2: Validação de Código
   const [erro, setErro] = useState("");
-  
-  const [formData, setFormData] = useState({
-    nome: "",
-    matricula: "",
-    telefone: "",
-    email: "",
-    senha: "",
-    codigo: ""
+  const [etapa, setEtapa] = useState<1 | 2>(1);
+
+  // Criando o state com os campos vazios
+  const [formData, setFormData] = useState<RegisterAlunoDTO>({
+    full_name: '',
+    password: '',
+    registration_id: '',
+    phone: '',
+    email: ''
   });
 
-  const validarFormulario = () => {
-    const nome = formData.nome.trim();
-    const matricula = formData.matricula.trim();
-    const telefoneNumeros = formData.telefone.replace(/\D/g, "");
-    const email = formData.email.trim().toLowerCase();
-    const senha = formData.senha;
+const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  let { name, value } = e.target;
+  
+  // Máscara para matrícula (apenas números, máximo 8 caracteres)
+  if (name === "registration_id") {
+    value = value.replace(/\D/g, "").slice(0, 8);
+  }
 
-    if (nome.length < 3) {
-      return "Nome completo deve ter pelo menos 3 caracteres.";
-    }
+  setFormData(estadoAnterior => ({
+    ...estadoAnterior,
+    [name]: value      
+  }));
+};
 
-    if (!/^\d{8}$/.test(matricula)) {
-      return "Matrícula inválida. Informe 8 dígitos numéricos.";
-    }
-
-    const anoMatricula = Number.parseInt(matricula.slice(0, 2), 10);
-    const semestreMatricula = matricula.slice(2, 3);
-    const anoAtualDoCurso = new Date().getFullYear() - 2000;
-
-    if (anoMatricula > anoAtualDoCurso || !["1", "2"].includes(semestreMatricula)) {
-      return "Matrícula inválida. Verifique ano e semestre.";
-    }
-
-    if (telefoneNumeros.length < 10 || telefoneNumeros.length > 11) {
-      return "Telefone inválido. Informe DDD + número com 10 ou 11 dígitos.";
-    }
-
-    const emailEsperado = `${matricula}@discente.uefs.br`;
-    if (email !== emailEsperado) {
-      return `E-mail institucional inválido. Use ${emailEsperado}.`;
-    }
-
-    if (senha.length < 8) {
-      return "A senha deve ter pelo menos 8 caracteres.";
-    }
-
-    return null;
-  };
-
-  const handleCadastrar = (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault(); // MUITO IMPORTANTE: Evita que a página recarregue do nada
+    setIsLoading(true);
     setErro("");
 
-    const erroValidacao = validarFormulario();
-    if (erroValidacao) {
-      setErro(erroValidacao);
-      return;
-    }
-
-    setIsLoading(true);
-    
-    // Simula envio de email e avanço de etapa
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      
+      const resposta = await authService.cadastroAluno(formData);
+      
       setEtapa(2);
-    }, 1500);
-  };
 
-  const handleValidarCodigo = (e: React.FormEvent) => {
-    e.preventDefault();
-    setErro("");
+    } catch (error) {
 
-    if (formData.codigo.length < 6) {
-      setErro("O código deve ter 6 dígitos.");
-      return;
-    }
-
-    setIsLoading(true);
-
-    // Simula verificação do código
-    setTimeout(() => {
+      alert("Erro ao cadastrar. Olhe o terminal/console.");
+    } finally {
       setIsLoading(false);
-      if (formData.codigo === "123456") { // Código mockado para sucesso
-        window.alert("Cadastro realizado com sucesso! Bem-vindo ao sistema.");
-        router.push("/");
-      } else {
-        setErro("Código incorreto ou expirado. Tente novamente.");
-      }
-    }, 1500);
+    }
   };
+
+  // ADICIONAR INTEGRAÇÃO DA VALIDAÇÃO DO CÓDIGO
+  
+
+// Fim do bloco integração
+
+
+
+
+  // const validarFormulario = () => {
+  //   const nome = formData.nome.trim();
+  //   const matricula = formData.matricula.trim();
+  //   const telefoneNumeros = formData.telefone.replace(/\D/g, "");
+  //   const email = formData.email.trim().toLowerCase();
+  //   const senha = formData.senha;
+
+  //   if (nome.length < 3) {
+  //     return "Nome completo deve ter pelo menos 3 caracteres.";
+  //   }
+
+  //   if (!/^\d{8}$/.test(matricula)) {
+  //     return "Matrícula inválida. Informe 8 dígitos numéricos.";
+  //   }
+
+  //   const anoMatricula = Number.parseInt(matricula.slice(0, 2), 10);
+  //   const semestreMatricula = matricula.slice(2, 3);
+  //   const anoAtualDoCurso = new Date().getFullYear() - 2000;
+
+  //   if (anoMatricula > anoAtualDoCurso || !["1", "2"].includes(semestreMatricula)) {
+  //     return "Matrícula inválida. Verifique ano e semestre.";
+  //   }
+
+  //   if (telefoneNumeros.length < 10 || telefoneNumeros.length > 11) {
+  //     return "Telefone inválido. Informe DDD + número com 10 ou 11 dígitos.";
+  //   }
+
+  //   const emailEsperado = `${matricula}@discente.uefs.br`;
+  //   if (email !== emailEsperado) {
+  //     return `E-mail institucional inválido. Use ${emailEsperado}.`;
+  //   }
+
+  //   if (senha.length < 8) {
+  //     return "A senha deve ter pelo menos 8 caracteres.";
+  //   }
+
+  //   return null;
+  // };
+
+
+
 
   return (
     <AuthPageShell className="py-10">
@@ -139,14 +147,15 @@ export default function CadastroAluno() {
         </CardHeader>
 
         {etapa === 1 ? (
-          <form onSubmit={handleCadastrar}>
+          <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
               <LabeledIconInput
                 id="nome"
+                name="full_name"
                 label="Nome Completo"
                 icon={User}
-                value={formData.nome}
-                onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                value={formData.full_name}
+                onChange={handleChange}
                 placeholder="João da Silva"
                 required
               />
@@ -154,24 +163,21 @@ export default function CadastroAluno() {
               <LabeledIconInput
                 id="telefone"
                 label="Telefone"
+                name="phone"
                 icon={Phone}
-                value={formData.telefone}
-                onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
+                value={formData.phone}
+                onChange={handleChange}
                 placeholder="(75) 90000-0000"
                 required
               />
 
               <LabeledIconInput
                 id="matricula"
+                name="registration_id"
                 label="Matrícula"
                 icon={BadgeCheck}
-                value={formData.matricula}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    matricula: e.target.value.replace(/\D/g, "").slice(0, 8),
-                  })
-                }
+                value={formData.registration_id}
+                onChange={handleChange}
                 placeholder="23121111"
                 maxLength={8}
                 required
@@ -179,22 +185,24 @@ export default function CadastroAluno() {
 
               <LabeledIconInput
                 id="email"
+                name="email"
                 label="E-mail Institucional"
                 icon={Mail}
                 type="email"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={handleChange}
                 placeholder="23121111@discente.uefs.br"
                 required
               />
 
               <LabeledIconInput
                 id="senha"
+                name="password"
                 label="Senha"
                 icon={Lock}
                 type="password"
-                value={formData.senha}
-                onChange={(e) => setFormData({ ...formData, senha: e.target.value })}
+                value={formData.password}
+                onChange={handleChange}
                 placeholder="Crie uma senha forte"
                 required
               />

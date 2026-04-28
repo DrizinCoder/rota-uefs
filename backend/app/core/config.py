@@ -42,4 +42,3 @@ def setup_logging():
     root_logger.addHandler(console_handler)
     
     root_logger.setLevel(logging.INFO)
-

@@ -1,5 +1,5 @@
 "use client";
-
+import { authService, LoginUserDTO } from '@/services/authService';
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -9,38 +9,65 @@ import { BusFront, Lock, User, ShieldCheck } from "lucide-react";
 import { AuthPageShell } from "@/components/auth/auth-page-shell";
 import { LabeledIconInput } from "@/components/auth/labeled-icon-input";
 
-export default function TelaLogin() {
+export default function LoginPage() {
+  // Hooks
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [erro, setErro] = useState("");
-  const [formData, setFormData] = useState({
-    matricula: "",
-    senha: "",
+
+  // Criando o state com os campos vazios
+  const [formData, setFormData] = useState<LoginUserDTO>({
+    registration_id: '',
+    password: '',
   });
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    setErro("");
+const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  let { name, value } = e.target;
 
-    const matricula = formData.matricula.trim();
-    const senha = formData.senha;
+  /* 
+  if (name === "registration_id") {
+    value = value.replace(/\D/g, "").slice(0, 8);
+  }*/
+  
+  setFormData(estadoAnterior => ({
+    ...estadoAnterior,
+    [name]: value      
+  }));
+};
 
-    if (!/^\d{8}$/.test(matricula)) {
-      setErro("Informe uma matrícula válida com 8 dígitos.");
-      return;
-    }
+const REDIRECT_MAP: Record<string, string> = {
+  "Student": "/passageiro",
+  "Staff": "/professor",
+  "Faculty": "/professor",
+  "Driver": "/motorista",
+  "Admin": "/admin",
+};
 
-    if (senha.length < 8) {
-      setErro("A senha deve ter pelo menos 8 caracteres.");
-      return;
-    }
 
-    setIsLoading(true);
 
-    setTimeout(() => {
-      router.push("/passageiro");
-    }, 1000);
-  };
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsLoading(true);
+  setErro("");
+
+  try {
+    const resposta = await authService.login(formData);
+    const profile = resposta.data.user.profile;
+    const destino = REDIRECT_MAP[profile] || "/login";
+
+    // Salva o token no localStorage (como antes)
+    localStorage.setItem("token", resposta.data.access_token);
+
+    //  Salva o perfil em um cookie acessível pelo middleware
+    //document.cookie = `user_profile=${profile}; path=/; max-age=86400; SameSite=Lax`;
+
+    router.push(destino);
+  } catch (error) {
+    setErro("Matrícula ou senha incorretos.");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <AuthPageShell>
@@ -64,20 +91,17 @@ export default function TelaLogin() {
           )}
         </CardHeader>
 
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <LabeledIconInput
-              id="matricula"
+              id="registration_id"
+              name="registration_id"
               label="Matrícula"
               icon={User}
               placeholder="23121111"
-              value={formData.matricula}
-              onChange={(e) =>
-                setFormData((atual) => ({
-                  ...atual,
-                  matricula: e.target.value.replace(/\D/g, "").slice(0, 8),
-                }))
-              }
+              value={formData.registration_id}
+              onChange={handleChange}
+    
               maxLength={8}
               required
             />
@@ -94,18 +118,14 @@ export default function TelaLogin() {
                 </button>
               </div>
               <LabeledIconInput
-                id="pass"
-                label=""
+                id="password"
+                name="password"
+                label="senha"
                 icon={Lock}
                 type="password"
                 placeholder="••••••••"
-                value={formData.senha}
-                onChange={(e) =>
-                  setFormData((atual) => ({
-                    ...atual,
-                    senha: e.target.value,
-                  }))
-                }
+                value={formData.password}
+                onChange={handleChange} 
                 containerClassName="space-y-0"
                 labelClassName="hidden"
                 required
