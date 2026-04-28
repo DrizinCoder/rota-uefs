@@ -1,17 +1,33 @@
 "use client";
 
-
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { GraduationCap, Lock, Mail, Phone, User, ArrowLeft, KeyRound, BadgeCheck } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  GraduationCap,
+  Lock,
+  Mail,
+  Phone,
+  User,
+  ArrowLeft,
+  KeyRound,
+  BadgeCheck,
+} from "lucide-react";
 import { AuthPageShell } from "@/components/auth/auth-page-shell";
 import { LabeledIconInput } from "@/components/auth/labeled-icon-input";
 
 // Bloco de código referente à integração com o backend (authService)
 
 import { useState } from "react";
-import { authService, RegisterAlunoDTO } from '@/services/authService';
+import { authService, RegisterAlunoDTO } from "@/services/authService";
+import { toast } from "react-toastify";
 
 export default function CadastroAlunoPage() {
   // Hooks
@@ -22,40 +38,41 @@ export default function CadastroAlunoPage() {
 
   // Criando o state com os campos vazios
   const [formData, setFormData] = useState<RegisterAlunoDTO>({
-    full_name: '',
-    password: '',
-    registration_id: '',
-    phone: '',
-    email: ''
+    full_name: "",
+    password: "",
+    registration_id: "",
+    phone: "",
+    email: "",
   });
 
-const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  let { name, value } = e.target;
-  
-  // Máscara para matrícula (apenas números, máximo 8 caracteres)
-  if (name === "registration_id") {
-    value = value.replace(/\D/g, "").slice(0, 8);
-  }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let { name, value } = e.target;
 
-  setFormData(estadoAnterior => ({
-    ...estadoAnterior,
-    [name]: value      
-  }));
-};
+    // Máscara para matrícula (apenas números, máximo 8 caracteres)
+    if (name === "registration_id") {
+      value = value.replace(/\D/g, "").slice(0, 8);
+    }
 
-const handleSubmit = async (e: React.FormEvent) => {
+    setFormData((estadoAnterior) => ({
+      ...estadoAnterior,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); // MUITO IMPORTANTE: Evita que a página recarregue do nada
     setIsLoading(true);
     setErro("");
 
     try {
-      
-      const resposta = await authService.cadastroAluno(formData);
-      
-      setEtapa(2);
+      await authService.cadastroAluno(formData);
 
+      toast.success("Cadastro realizado com sucesso!");
+      toast.success("Link de ativação de conta no e-mail");
+
+      router.push("/login");
     } catch (error) {
-
+      toast.warning("Erro ao realizar cadastro");
       alert("Erro ao cadastrar. Olhe o terminal/console.");
     } finally {
       setIsLoading(false);
@@ -63,12 +80,8 @@ const handleSubmit = async (e: React.FormEvent) => {
   };
 
   // ADICIONAR INTEGRAÇÃO DA VALIDAÇÃO DO CÓDIGO
-  
 
-// Fim do bloco integração
-
-
-
+  // Fim do bloco integração
 
   // const validarFormulario = () => {
   //   const nome = formData.nome.trim();
@@ -109,18 +122,15 @@ const handleSubmit = async (e: React.FormEvent) => {
   //   return null;
   // };
 
-
-
-
   return (
     <AuthPageShell className="py-10">
       <Card className="w-full max-w-md border-none shadow-2xl bg-white/80 backdrop-blur-md z-10">
         <CardHeader className="space-y-4 pb-6 text-center relative">
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             className="absolute left-4 top-4 text-[#73AABF] hover:text-[#103173] hover:bg-[#103173]/10"
-            onClick={() => etapa === 2 ? setEtapa(1) : router.push("/")}
+            onClick={() => (etapa === 2 ? setEtapa(1) : router.push("/"))}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
@@ -133,12 +143,12 @@ const handleSubmit = async (e: React.FormEvent) => {
               {etapa === 1 ? "Cadastro Aluno" : "Validar E-mail"}
             </CardTitle>
             <CardDescription className="text-[#73AABF] font-bold">
-              {etapa === 1 
-                ? "Crie sua conta para acessar os roteiros" 
-                : `Enviamos um código para ${formData.email || 'seu e-mail'}`}
+              {etapa === 1
+                ? "Crie sua conta para acessar os roteiros"
+                : `Enviamos um código para ${formData.email || "seu e-mail"}`}
             </CardDescription>
           </div>
-          
+
           {erro && (
             <div className="bg-red-50 text-red-600 text-sm font-bold p-3 rounded-xl border border-red-100">
               {erro}
@@ -209,8 +219,9 @@ const handleSubmit = async (e: React.FormEvent) => {
             </CardContent>
 
             <CardFooter className="flex flex-col gap-4 pt-4">
-              <Button 
-                type="submit" disabled={isLoading}
+              <Button
+                type="submit"
+                disabled={isLoading}
                 className="w-full h-14 bg-[#103173] hover:bg-[#103B73] text-white font-black text-lg rounded-xl shadow-lg transition-all active:scale-95"
               >
                 {isLoading ? "PROCESSANDO..." : "CADASTRAR"}
@@ -226,7 +237,9 @@ const handleSubmit = async (e: React.FormEvent) => {
                   label="Código de Validação"
                   icon={KeyRound}
                   value={formData.codigo}
-                  onChange={(e) => setFormData({ ...formData, codigo: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, codigo: e.target.value })
+                  }
                   placeholder="Ex: 123456"
                   maxLength={6}
                   inputClassName="font-black tracking-widest text-center text-lg"
@@ -239,13 +252,17 @@ const handleSubmit = async (e: React.FormEvent) => {
             </CardContent>
 
             <CardFooter className="flex flex-col gap-4 pt-4">
-              <Button 
-                type="submit" disabled={isLoading}
+              <Button
+                type="submit"
+                disabled={isLoading}
                 className="w-full h-14 bg-[#23B99A] hover:bg-[#1d957c] text-white font-black text-lg rounded-xl shadow-lg transition-all active:scale-95"
               >
                 {isLoading ? "VALIDANDO..." : "CONFIRMAR CADASTRO"}
               </Button>
-              <button type="button" className="text-xs font-bold text-[#73AABF] hover:text-[#103173] mt-2">
+              <button
+                type="button"
+                className="text-xs font-bold text-[#73AABF] hover:text-[#103173] mt-2"
+              >
                 Não recebeu o código? Reenviar.
               </button>
             </CardFooter>
