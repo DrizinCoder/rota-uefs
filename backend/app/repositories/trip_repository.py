@@ -1,3 +1,4 @@
+from sqlalchemy.orm import selectinload
 import uuid
 from datetime import date
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -25,9 +26,25 @@ class TripRepository:
         return trip
 
     async def get_all(self):
-        statement = select(Trip)
+        statement = (
+            select(Trip)
+            .options(
+                selectinload(Trip.driver),
+                selectinload(Trip.route)
+            )
+        )
+
         result = await self.session.execute(statement)
-        return result.scalars().all()
+        trips = result.scalars().all()
+
+        return [
+            {
+                **trip.model_dump(mode='json'),
+                "driver_name": trip.driver.full_name if trip.driver else None,
+                "route_name": trip.route.name if trip.route else None,
+            }
+            for trip in trips
+        ]
 
     async def get_by_id(self, trip_id: uuid.UUID):
         statement = select(Trip).where(Trip.trip_id == trip_id)
