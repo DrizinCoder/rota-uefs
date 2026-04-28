@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
 import { FooterSection } from "@/components/landing/footer-section";
@@ -11,6 +11,8 @@ import {
   PencilLine, Trash2, ArrowLeft
 } from "lucide-react";
 import Link from "next/link";
+
+import { adminService, type ViagemAdmin } from "@/services/adminService";
 
 // Dados simulados com informações operacionais detalhadas
 const VIAGENS_MOCK = [
@@ -42,15 +44,80 @@ const VIAGENS_MOCK = [
   }
 ];
 
+interface ViagemTela extends ViagemAdmin {
+  reservasAlunos: number;
+  reservasProfessores: number;
+  checkIns: number;
+}
+
+const tradutorStatus: Record<string, string> = {
+  "Pending": "Pendente",
+  "Confirmed": "Confirmada",
+  "Cancelled": "Cancelada",
+  "Completed": "Concluída"
+};
+
 export default function AdminViagensPage() {
   const router = useRouter();
-  const [viagens, setViagens] = useState(VIAGENS_MOCK);
+  const [viagens, setViagens] = useState<ViagemTela[]>([]);
+  
+  const [loading, setLoading] = useState(true);
+  // const [viagens, setViagens] = useState(VIAGENS_MOCK);
+
+  const [busca, setBusca] = useState("");
 
   const handleExcluir = (id: string) => {
-    if (window.confirm("Tem certeza que deseja excluir esta viagem?")) {
-      setViagens((prev) => prev.filter((v) => v.id !== id));
+    const confirmado = window.confirm("Tem certeza que deseja excluir esta viagem?");
+    if (!confirmado) return;
+
+    try {
+      // Futuro: await adminService.deleteViagem(id);
+      setViagens((atual) => atual.filter((v) => v.trip_id !== id));
+    } catch (err) {
+      window.alert("Erro ao remover a viagem. Tente novamente.");
     }
   };
+
+  useEffect(() => {
+    async function carregarDados() {
+      try {
+        setLoading(true);
+        const data = await adminService.listarViagens();
+        
+        // Mapeia os dados pra injetar o mock de reservas e check-ins
+        const viagensMapeadas = data.map((viagem) => ({
+          ...viagem, // Puxa tudo que veio do banco (id, rota, onibus, etc)
+          status: tradutorStatus[viagem.status] || viagem.status,
+          // 👇 Injeta os dados mockados temporários
+          reservasAlunos: Math.floor(Math.random() * 30) + 10,
+          reservasProfessores: Math.floor(Math.random() * 3),
+          checkIns: Math.floor(Math.random() * 20),
+        }));
+
+        setViagens(viagensMapeadas);
+      } catch (err) {
+        console.error("Erro ao carregar viagens:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    carregarDados();
+  }, []);
+
+  const viagensFiltradas = useMemo(() => {
+    const termo = busca.trim().toLowerCase();
+    
+    if (termo.length === 0) return viagens;
+
+    return viagens.filter((viagem) => {
+      return (
+        viagem.bus_license_plate.toLowerCase().includes(termo) ||
+        viagem.driver_name.toLowerCase().includes(termo) ||
+        viagem.route_name.toLowerCase().includes(termo) ||
+        viagem.trip_id.toLowerCase().includes(termo)
+      );
+    });
+  }, [viagens, busca]);
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f0f4f8]">
@@ -104,14 +171,14 @@ export default function AdminViagensPage() {
 
               return (
                 <div 
-                  key={viagem.id} 
+                  key={viagem.trip_id} 
                   className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow"
                 >
                   {/* HEADER DO CARTÃO: Rota e Status */}
                   <div className="p-5 md:p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50">
                     <div className="flex flex-wrap items-center gap-3">
                       <span className="text-xs font-black text-[#103173] uppercase tracking-wider bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm">
-                        {viagem.id}
+                        {viagem.trip_id}
                       </span>
                       <span className={`text-xs font-black uppercase px-3 py-1.5 rounded-lg ${
                         viagem.status === 'Confirmada' ? 'bg-[#23B99A]/10 text-[#23B99A]' : 'bg-[#F2D022]/20 text-[#b8960a]'
@@ -120,7 +187,7 @@ export default function AdminViagensPage() {
                       </span>
                     </div>
                     <div className="flex items-center gap-3 text-[#103173] font-extrabold text-xl md:text-2xl">
-                      {viagem.origem} <ArrowRight className="h-6 w-6 text-[#F2D022]" /> {viagem.destino}
+                      {viagem.route_name} <ArrowRight className="h-6 w-6 text-[#F2D022]" /> {viagem.route_name}
                     </div>
                   </div>
 
@@ -137,28 +204,30 @@ export default function AdminViagensPage() {
                           <div className="p-2.5 bg-[#103173]/5 rounded-xl shrink-0"><Calendar className="h-5 w-5 text-[#103173]"/></div>
                           <div>
                             <p className="text-[10px] font-bold text-slate-400 uppercase">Data</p>
-                            <p className="text-sm font-extrabold text-[#103173] mt-0.5">{viagem.data}</p>
+                            <p className="text-sm font-extrabold text-[#103173] mt-0.5">{viagem.trip_date}</p>
                           </div>
                         </div>
                         <div className="flex items-start gap-3">
                           <div className="p-2.5 bg-[#103173]/5 rounded-xl shrink-0"><Clock className="h-5 w-5 text-[#103173]"/></div>
                           <div>
                             <p className="text-[10px] font-bold text-slate-400 uppercase">Horário</p>
-                            <p className="text-sm font-extrabold text-[#103173] mt-0.5">{viagem.horario}</p>
+                            <p className="text-sm font-extrabold text-[#103173] mt-0.5">
+                              {viagem.departure_time.slice(0, 5)}
+                            </p>
                           </div>
                         </div>
                         <div className="flex items-start gap-3">
                           <div className="p-2.5 bg-[#103173]/5 rounded-xl shrink-0"><Bus className="h-5 w-5 text-[#103173]"/></div>
                           <div>
                             <p className="text-[10px] font-bold text-slate-400 uppercase">Veículo</p>
-                            <p className="text-sm font-extrabold text-[#103173] mt-0.5 line-clamp-2">{viagem.onibus}</p>
+                            <p className="text-sm font-extrabold text-[#103173] mt-0.5 line-clamp-2">{viagem.bus_license_plate}</p>
                           </div>
                         </div>
                         <div className="flex items-start gap-3">
                           <div className="p-2.5 bg-[#103173]/5 rounded-xl shrink-0"><UserCheck className="h-5 w-5 text-[#103173]"/></div>
                           <div>
                             <p className="text-[10px] font-bold text-slate-400 uppercase">Motorista</p>
-                            <p className="text-sm font-extrabold text-[#103173] mt-0.5 line-clamp-2">{viagem.motorista}</p>
+                            <p className="text-sm font-extrabold text-[#103173] mt-0.5 line-clamp-2">{viagem.driver_name}</p>
                           </div>
                         </div>
                       </div>
@@ -223,14 +292,14 @@ export default function AdminViagensPage() {
                   {/* AÇÕES DA VIAGEM */}
                   <div className="px-5 md:px-6 py-4 bg-white border-t border-slate-100 flex flex-col sm:flex-row gap-3 sm:justify-end">
                     <button 
-                      onClick={() => router.push(`/admin/viagens/cadastro?id=${viagem.id}`)}
+                      onClick={() => router.push(`/admin/viagens/cadastro?id=${viagem.trip_id}`)}
                       className="px-4 py-2 text-sm font-bold text-[#103173] bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"
                     >
                       <PencilLine className="h-4 w-4" />
                       Editar Viagem
                     </button>
                     <button 
-                      onClick={() => handleExcluir(viagem.id)}
+                      onClick={() => handleExcluir(viagem.trip_id)}
                       className="px-4 py-2 text-sm font-bold text-red-600 bg-red-50 border border-red-100 rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
                     >
                       <Trash2 className="h-4 w-4" />

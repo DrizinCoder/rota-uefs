@@ -56,7 +56,25 @@ export interface HomeAdmin {
   };
   buses: BusHomeAdmin[];
 }
+
+export interface ViagemAdmin {
+  trip_id: string;
+  route_id: string;
+  trip_date: string;
+  status: string;
+  bus_license_plate: string;
+  driver_id: string;
+  departure_time: string;
+  driver_name: string;
+  route_name: string;
+}
+
 export const adminService = {
+  async listarViagens(): Promise<ViagemAdmin[]> {
+    const response = await api.get("/trip/");
+    return response.data.data;
+  },
+
   async getHomeAdmin(): Promise<HomeAdmin> {
     const hoje = new Date().toISOString().split("T")[0];
     const response = await api.get(`/admin/home_info?today=${hoje}`);

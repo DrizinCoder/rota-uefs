@@ -23,8 +23,7 @@ class TripService:
         return [trip.model_dump(mode='json') for trip in trips]
 
     async def get_all(self):
-        trips = await self.trip_repository.get_all()
-        return [trip.model_dump(mode='json') for trip in trips]
+        return await self.trip_repository.get_all()
 
     async def get_by_id(self, trip_id: uuid.UUID):
         trip = await self.trip_repository.get_by_id(trip_id)
