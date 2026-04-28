@@ -1,7 +1,7 @@
 from app.DTOs.auth import ServidorRegisterResponseDTO
 from app.core.exceptions import ConflictException
 from app.DTOs.auth import RegisterServidorDTO
-from jose import jwt
+from jose import JWTError, jwt
 from app.core.config import settings
 from app.DTOs.auth import AlunoRegisterResponseDTO, LoginUserDTO, ResetPasswordDTO
 from app.services.auth_service import AuthService
@@ -53,8 +53,7 @@ class AuthController:
             raise UnauthorizedException("Usuário bloqueado. Entre em contato com o administrador.")
         
         token_data = self.auth_service.create_token_recovery_password(user)
-
-        #enviar email      
+          
         BackgroundTasks().add_task(EmailUseCases().send_recover_password,
             email, 
             user.full_name, 
@@ -66,7 +65,7 @@ class AuthController:
     async def reset_password(self, token: str, data: ResetPasswordDTO) -> None:
         
         try:
-            jwt_data = jwt.decode(token, settings.SECRET_KEY) # No processo de decode já é realizada a validação.
+            jwt_data = jwt.decode(token, settings.SECRET_KEY) 
             user = await self.repository.get_by_id(jwt_data["sub"])
         
         except Exception as e:
@@ -89,3 +88,29 @@ class AuthController:
     async def register_staff(self, dados: RegisterServidorDTO):
         staff = await self.auth_service.register_staff(dados)
         return ServidorRegisterResponseDTO.model_validate(staff)
+
+
+    async def refresh_session(self, refresh_token: str):
+        try:
+            payload = self.token_service.decode_token(refresh_token)
+            
+            if payload.get("type") != "refresh":
+                raise UnauthorizedException("Token inválido para refresh")
+
+            user_id = payload.get("sub")
+            user = await self.user_service.get_by_id(user_id)
+            
+            if not user or not user.is_active:
+                raise UnauthorizedException("Usuário inválido ou inativo")
+
+            new_access_token = self.token_service.create_access_token({"sub": str(user.id)})
+            new_refresh_token = self.token_service.create_refresh_token({"sub": str(user.id)})
+
+            return {
+                "access_token": new_access_token,
+                "refresh_token": new_refresh_token,
+                "user": user
+            }
+
+        except JWTError:
+            raise UnauthorizedException("Sessão expirada. Faça login novamente.")

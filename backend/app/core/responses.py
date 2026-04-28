@@ -1,50 +1,56 @@
 from fastapi.responses import JSONResponse
 from fastapi import status, Response
+from fastapi.encoders import jsonable_encoder
+from typing import Any, Optional
 
 class ResponseHandler:
     @staticmethod
-    def ok(data=None, message="OK"):
-        return JSONResponse(
+    def _build_response(status_code: int, success: bool, message: str, data: Any = None) -> JSONResponse:
+        content = {
+            "success": success,
+            "message": message,
+        }
+        
+        if data is not None:
+            content["data"] = jsonable_encoder(data)
+            
+        return JSONResponse(status_code=status_code, content=content)
+
+    @staticmethod
+    def ok(data: Any = None, message: str = "OK") -> JSONResponse:
+        return ResponseHandler._build_response(
             status_code=status.HTTP_200_OK,
-            content={
-                "success": True,
-                "message": message,
-                "data": data
-            }
+            success=True,
+            message=message,
+            data=data
         )
 
     @staticmethod
-    def created(data=None, message="Created"):
-        return JSONResponse(
+    def created(data: Any = None, message: str = "Created") -> JSONResponse:
+        return ResponseHandler._build_response(
             status_code=status.HTTP_201_CREATED,
-            content={
-                "success": True,
-                "message": message,
-                "data": data
-            }
+            success=True,
+            message=message,
+            data=data
         )
 
     @staticmethod
-    def accepted(message="Accepted"):
-        return JSONResponse(
+    def accepted(message: str = "Accepted") -> JSONResponse:
+        return ResponseHandler._build_response(
             status_code=status.HTTP_202_ACCEPTED,
-            content={
-                "success": True,
-                "message": message
-            }
+            success=True,
+            message=message
         )
 
     @staticmethod
-    def no_content():
+    def no_content() -> Response:
         return Response(status_code=status.HTTP_204_NO_CONTENT)
 
     @staticmethod
-    def custom(status_code: int, data=None, message=""):
-        return JSONResponse(
+    def custom(status_code: int, data: Any = None, message: str = "") -> JSONResponse:
+        return ResponseHandler._build_response(
             status_code=status_code,
-            content={
-                "success": True,
-                "message": message,
-                "data": data
-            }
+            success=True,
+            message=message,
+            data=data
         )

@@ -9,11 +9,11 @@ from passlib.context import CryptContext
 
 from app.core.config import settings
 from app.models.models import User
-from app.enums.enums import UserProfile
+from app.enums.enums import RegistrationStatus, UserProfile
 from app.repositories.user_repository import UserRepository
 from app.services.email.use_cases import EmailUseCases
 from app.DTOs.auth import RegisterAlunoDTO
-from app.core.exceptions import ConflictException
+from app.core.exceptions import ConflictException, NotFoundException, UnauthorizedException
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -45,6 +45,13 @@ class AuthService:
         return encoded_jwt
 
     @staticmethod
+    def create_refresh_token(data: dict) -> str:
+        to_encode = data.copy()
+        expire = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+        to_encode.update({"exp": expire, "type": "refresh"})
+        return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
+    @staticmethod
     def create_token_for_user(user: User) -> dict:
         token_data = {
             "sub": str(user.user_id),
@@ -70,11 +77,13 @@ class AuthService:
             token_data["student_id"] = str(user.user_id)
         
         access_token = AuthService.create_access_token(token_data)
+        refresh_token = AuthService.create_refresh_token({"sub": str(user.user_id)})
         
         return {
             "access_token": access_token,
-            "token_type": "bearer",
+            "refresh_token": refresh_token,
             "user": {
+                
                 "sub": str(user.user_id),
                 "full_name": user.full_name,
                 "registration_id": user.registration_id,

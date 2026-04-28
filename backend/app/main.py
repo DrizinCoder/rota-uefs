@@ -2,7 +2,7 @@ import logging
 
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from app.routers.routes import router
 from app.database.db import init_db, engine
@@ -23,13 +23,10 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-# CORS - Cross-Origin Resource Sharing 
-# Trecho para permitir que o front-end se comunique com o back-end
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"], 
-    allow_credentials=True,
+    allow_credentials=True,                 
     allow_methods=["*"],
     allow_headers=["*"],
 )
