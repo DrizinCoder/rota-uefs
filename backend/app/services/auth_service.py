@@ -124,9 +124,9 @@ class AuthService:
             expires_delta=timedelta(minutes=30)
         )
 
-        base_url = "http://localhost:8000"
+        base_url = "http://localhost:3000"
 
-        link = f"{base_url}/auth/activate/account/student?token={token}"
+        link = f"{base_url}/activate/account?token={token}"
 
         first_name = user.full_name.split()[0]
 
@@ -146,10 +146,8 @@ class AuthService:
         
         user = await self.repository.create_staff(dados)
         return user
-        
-    async def activate_account(self, token: str):
-        login_url = f"{settings.BASE_URL_FRONTEND}/login"
 
+    async def activate_account(self, token: str):
         try:
             payload = jwt.decode(
                 token,
@@ -161,30 +159,18 @@ class AuthService:
             token_type = payload.get("type")
 
             if token_type != "account_activation":
-                return RedirectResponse(
-                    url=f"{login_url}?status=error&message=token_invalido"
-                )
+                raise UnauthorizedException("Token inválido para ativação.")
 
             user = await self.repository.get_by_id(uuid.UUID(user_id))
 
             if not user:
-                return RedirectResponse(
-                    url=f"{login_url}?status=error&message=usuario_nao_encontrado"
-                )
+                raise NotFoundException("Usuário não encontrado.")
 
-            if user.registration_status == "ACTIVE":
-                return RedirectResponse(
-                    url=f"{login_url}?status=warning&message=conta_ja_ativada"
-                )
+            if user.registration_status != RegistrationStatus.ACTIVE:
+                user.registration_status = RegistrationStatus.ACTIVE
+                await self.repository.update(user)
 
-            user.registration_status = "ACTIVE"
-            await self.repository.update(user)
-
-            return RedirectResponse(
-                url=f"{login_url}?status=success&message=ativacao_sucesso"
-            )
+            return self.create_token_for_user(user)
 
         except JWTError:
-            return RedirectResponse(
-                url=f"{login_url}?status=error&message=token_expirado"
-            )
+            raise UnauthorizedException("Sessão de ativação expirada.")

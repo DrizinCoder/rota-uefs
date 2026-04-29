@@ -6,8 +6,8 @@ const ROUTE_PERMISSIONS: Record<string, string[]> = {
   "/admin":      ["Admin"],
   "/motorista":  ["Driver"],
   "/passageiro": ["Student"],
-  "/professor":  ["Staff", "Faculty"],
-  "/perfil":     ["Student", "Staff", "Faculty", "Driver", "Admin"],
+  "/professor": ["Staff", "Faculty"],
+  "/perfil": ["Student", "Staff", "Faculty", "Driver", "Admin"],
   "/minhas-viagens": ["Student", "Staff", "Faculty"],
 };
 
@@ -16,7 +16,7 @@ export function middleware(request: NextRequest) {
 
   // Descobre qual rota protegida está sendo acessada
   const rotaProtegida = Object.keys(ROUTE_PERMISSIONS).find((rota) =>
-    pathname.startsWith(rota)
+    pathname.startsWith(rota),
   );
 
   // Se não é uma rota protegida deixa passar
@@ -35,10 +35,10 @@ export function middleware(request: NextRequest) {
   if (!perfisPermitidos.includes(profile)) {
     const REDIRECT_MAP: Record<string, string> = {
       Student: "/",
-      Staff:   "/",
+      Staff: "/",
       Faculty: "/",
-      Driver:  "/",
-      Admin:   "/",
+      Driver: "/",
+      Admin: "/",
     };
     const destino = REDIRECT_MAP[profile] || "/login";
     return NextResponse.redirect(new URL(destino, request.url));

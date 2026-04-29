@@ -85,11 +85,15 @@ async def register_student(
         data=result.model_dump(mode="json")
     )
 
-@router.get("/activate/account/student")
+
+@router.post("/activate/account/student")
 async def activate_account(
     token: str,
     controller: AuthController = Depends(get_auth_controller)
 ):
     result = await controller.activate_account(token)
 
-    return ResponseHandler.ok(data=result.model_dump(mode='json'))
+    return ResponseHandler.ok(
+        data=result, 
+        message="Conta ativada com sucesso. Bem-vindo!"
+    )
