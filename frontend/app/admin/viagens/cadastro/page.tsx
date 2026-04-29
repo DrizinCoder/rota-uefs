@@ -83,8 +83,6 @@ useEffect(() => {
       recurrence: recorrencia,
     };
 
-    console.log("🚀 ENVIANDO PAYLOAD:", JSON.stringify(payload, null, 2));
-
     try {
       setLoading(true);
       await adminService.cadastrarViagem(payload);
