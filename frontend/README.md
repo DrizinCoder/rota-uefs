@@ -1,4 +1,4 @@
-<h1 align="center">ROTA UEFS - FrontEnd</h1>
+<h1 align="center">ROTA UEFS - Front End</h1>
 
 <div align="center">
 
