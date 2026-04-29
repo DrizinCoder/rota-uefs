@@ -21,56 +21,6 @@ import { toast } from "react-toastify";
 /**
  * Componente que escuta os parâmetros da URL para disparar Toasts de feedback
  */
-function LoginLogic() {
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    const error = searchParams.get("error");
-    const activated = searchParams.get("activated");
-    const status = searchParams.get("status");
-    const messageCode = searchParams.get("message");
-
-    // 1. Prioridade para o novo formato (status + message)
-    if (status && messageCode) {
-      const messages: Record<string, string> = {
-        token_invalido: "O link de ativação é inválido ou já foi utilizado.",
-        usuario_nao_encontrado:
-          "Usuário não encontrado em nossa base de dados.",
-        conta_ja_ativada: "Esta conta já está ativa! Você já pode entrar.",
-        ativacao_sucesso: "Conta ativada com sucesso! Bem-vindo ao Rota UEFS.",
-        token_expirado:
-          "Este link expirou. Por favor, solicite uma nova ativação.",
-      };
-
-      const texto = messages[messageCode] || "Ocorreu um erro inesperado.";
-
-      if (status === "success") toast.success(texto);
-      else if (status === "error") toast.error(texto);
-      else if (status === "warning") toast.warning(texto);
-
-      return;
-    }
-
-    // 2. Lógica legada para compatibilidade
-    if (activated === "true") {
-      toast.success("Conta ativada com sucesso! Faça seu login.");
-    }
-
-    if (error) {
-      const errorMessages: Record<string, string> = {
-        invalid_token:
-          "Link de ativação inválido. Verifique se copiou o link completo.",
-        user_not_found: "Usuário não encontrado.",
-        expired_or_invalid:
-          "O link expirou ou é inválido. Tente solicitar novamente.",
-      };
-      toast.error(errorMessages[error] || "Ocorreu um erro na ativação.");
-    }
-  }, [searchParams]);
-
-  return null;
-}
-
 export default function LoginPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -108,6 +58,7 @@ export default function LoginPage() {
       const destino = REDIRECT_MAP[profile] || "/login";
 
       localStorage.setItem("token", resposta.data.access_token);
+      document.cookie = `user_profile=${profile}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
       router.push(destino);
     } catch (error: any) {
       setErro("Matrícula ou senha incorretos.");
@@ -118,11 +69,6 @@ export default function LoginPage() {
 
   return (
     <AuthPageShell>
-      {/* O Suspense é obrigatório ao usar useSearchParams no App Router */}
-      <Suspense fallback={null}>
-        <LoginLogic />
-      </Suspense>
-
       <Card className="w-full max-w-md border-none shadow-2xl bg-white/80 backdrop-blur-md z-10">
         <CardHeader className="space-y-4 pb-8 text-center">
           <div className="mx-auto bg-[#103173] p-4 rounded-2xl w-fit shadow-lg shadow-[#103173]/20">

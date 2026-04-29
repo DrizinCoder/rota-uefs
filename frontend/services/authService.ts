@@ -17,27 +17,35 @@ export interface RegisterServidorDTO {
   phone: string;
   email: string;
   department: string;
-  employment: string; 
+  employment: string;
 }
 
 // 3. DTO de Login
 export interface LoginUserDTO {
-  registration_id: string; 
-  password: string;          
+  registration_id: string;
+  password: string;
 }
 
 export const authService = {
-    login: async (dados: LoginUserDTO) => {
-        const response = await api.post('/auth/login', dados);
-        return response.data;
-        },
-    cadastroAluno: async (dados: RegisterAlunoDTO) => {
-        const response = await api.post('/auth/register/student', dados);
-        return response.data;
-    },
-    cadastroServidor: async (dados: RegisterServidorDTO) => {
-        const response = await api.post('/auth/register/staff', dados);
-        return response.data;
-    },
-    
+  login: async (dados: LoginUserDTO) => {
+    const response = await api.post("/auth/login", dados);
+    return response.data;
+  },
+
+  cadastroAluno: async (dados: RegisterAlunoDTO) => {
+    const response = await api.post("/auth/register/student", dados);
+    return response.data;
+  },
+
+  cadastroServidor: async (dados: RegisterServidorDTO) => {
+    const response = await api.post("/auth/register/staff", dados);
+    return response.data;
+  },
+
+  activateAccount: async (token: string) => {
+    const response = await api.post(`/auth/activate/account/student`, null, {
+      params: { token },
+    });
+    return response.data;
+  },
 };
