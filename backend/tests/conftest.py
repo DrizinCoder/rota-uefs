@@ -1,7 +1,14 @@
+import sys
+from pathlib import Path
+
 import pytest
 from contextlib import asynccontextmanager
 from fastapi.testclient import TestClient
 from unittest.mock import AsyncMock, MagicMock
+
+ROOT_DIR = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT_DIR))
+
 from app.main import app
 from app.database.db import get_session
 
@@ -19,7 +26,7 @@ async def override_get_session():
     mock_session.execute.return_value = mock_result
     mock_result.scalars.return_value = mock_scalars
     
-    # Pode retornar None ou um Fake User para simular que o usuário foi achado
+    # Pode retornar None ou um Fake User para simular que o usuï¿½rio foi achado
     mock_scalars.first.return_value = None 
     mock_scalars.all.return_value = []
     

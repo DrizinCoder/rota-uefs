@@ -1,8 +1,15 @@
-def test_api_root_responde_200(client):
-    response = client.get("/")
-    assert response.status_code == 200
+from app.core.config import settings
 
 
-def test_api_root_retorna_json(client):
-    response = client.get("/")
-    assert isinstance(response.json(), dict)
+def test_api_root_retornou_redirecionamento_para_frontend(client):
+    response = client.get("/", follow_redirects=False)
+
+    assert response.status_code == 307
+    assert response.headers["location"] == settings.BASE_URL_FRONTEND
+
+
+def test_api_root_redireciona_para_url_frontend_valida(client):
+    response = client.get("/", follow_redirects=False)
+
+    assert "location" in response.headers
+    assert response.headers["location"].startswith("http")
