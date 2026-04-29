@@ -23,7 +23,7 @@ from app.services.dashboard_service import DashboardService
 from app.repositories.dashboard_repository import DashboardRepository
 
 router = APIRouter(
-#    dependencies=[Depends(require_admin)]
+    # dependencies=[Depends(require_admin)]
 )
 
 async def get_admin_controller(session: AsyncSession = Depends(get_session)) -> AdminController:

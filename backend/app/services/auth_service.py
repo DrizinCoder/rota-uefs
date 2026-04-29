@@ -147,37 +147,44 @@ class AuthService:
         user = await self.repository.create_staff(dados)
         return user
         
-    async def activate_account(self, token: str):
-        try:
-            payload = jwt.decode(
-                token,
-                settings.SECRET_KEY,
-                algorithms=[settings.ALGORITHM]
-            )
+async def activate_account(self, token: str):
+    login_url = f"{settings.BASE_URL_FRONTEND}/login"
 
-            user_id = payload.get("sub")
-            token_type = payload.get("type")
+    try:
+        payload = jwt.decode(
+            token,
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM]
+        )
 
-            if token_type != "account_activation":
-                return RedirectResponse(
-                    url=f"{settings.BASE_URL_FRONTEND}/login?error=invalid_token"
-                )
+        user_id = payload.get("sub")
+        token_type = payload.get("type")
 
-            user = await self.repository.get_by_id(uuid.UUID(user_id))
-
-            if not user:
-                return RedirectResponse(
-                    url=f"{settings.BASE_URL_FRONTEND}/login?error=user_not_found"
-                )
-
-            user.registration_status = "ACTIVE"
-            await self.repository.update(user)
-
+        if token_type != "account_activation":
             return RedirectResponse(
-                url=f"{settings.BASE_URL_FRONTEND}/login?activated=true"
+                url=f"{login_url}?status=error&message=token_invalido"
             )
 
-        except JWTError:
+        user = await self.repository.get_by_id(uuid.UUID(user_id))
+
+        if not user:
             return RedirectResponse(
-                url=f"{settings.BASE_URL_FRONTEND}/login?error=expired_or_invalid"
+                url=f"{login_url}?status=error&message=usuario_nao_encontrado"
             )
+
+        if user.registration_status == "ACTIVE":
+            return RedirectResponse(
+                url=f"{login_url}?status=warning&message=conta_ja_ativada"
+            )
+
+        user.registration_status = "ACTIVE"
+        await self.repository.update(user)
+
+        return RedirectResponse(
+            url=f"{login_url}?status=success&message=ativacao_sucesso"
+        )
+
+    except JWTError:
+        return RedirectResponse(
+            url=f"{login_url}?status=error&message=token_expirado"
+        )

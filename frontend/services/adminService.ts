@@ -11,6 +11,18 @@ export interface Motorista {
   registration_status: string;
 }
 
+export interface MotoristaViagem {
+  registration_id: string;
+  phone: string;
+  profile: string;
+  is_anonymized: boolean;
+  user_id: string;
+  full_name: string;
+  password: string;
+  email: string;
+  registration_status: string;
+}
+
 export interface CadastroMotoristaPayload {
   full_name: string;
   registration_id: string;
@@ -52,6 +64,15 @@ export interface AtualizarOnibusPayload {
   bus_status?: string;
 }
 
+export interface CadastroViagemPayload {
+  bus_license_plate: string;
+  driver_id: string;
+  route_id: string;
+  trip_date: string;
+  departure_time: string;
+  recurrence: string;
+}
+
 export interface HomeAdmin {
   summary: {
     total_buses: number;
@@ -71,6 +92,15 @@ export interface ViagemAdmin {
   departure_time: string;
   driver_name: string;
   route_name: string;
+}
+
+// ── Rotas ─────────────────────────────────────────────
+
+export interface Rota {
+  name: string;
+  route_id: string;
+  boarding_point: string;
+  drop_off_point: string;
 }
 
 // ── Administrador ─────────────────────────────────────
@@ -98,6 +128,11 @@ export interface CadastroAdminPayload {
 
 export const adminService = {
   // Viagens
+  async cadastrarViagem(payload: CadastroViagemPayload) {
+    const response = await api.post("/trip/", payload);
+    return response.data.data;
+  },
+
   async listarViagens(): Promise<ViagemAdmin[]> {
     const response = await api.get("/trip/");
     return response.data.data;
@@ -130,6 +165,11 @@ export const adminService = {
     return response.data.data;
   },
 
+  async listarOnibus(): Promise<BusAdmin[]> {
+    const response = await api.get("/fleet/");
+    return response.data.data;
+  },
+
   // Motoristas
   async listarMotoristas(): Promise<Motorista[]> {
     const response = await api.get("/users/driver/");
@@ -152,6 +192,12 @@ export const adminService = {
 
   async atualizarMotorista(id: string, payload: AtualizarMotoristaPayload) {
     const response = await api.patch(`/users/driver/${id}`, payload);
+    return response.data.data;
+  },
+
+  // Rotas
+  async listarRotas(): Promise<Rota[]> {
+    const response = await api.get("/routes/routes/");
     return response.data.data;
   },
 
