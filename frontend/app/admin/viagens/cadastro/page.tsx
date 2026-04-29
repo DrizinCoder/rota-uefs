@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
 import { FooterSection } from "@/components/landing/footer-section";
@@ -8,91 +8,84 @@ import {
   ArrowLeft, Save, MapPin, Calendar, Clock, Bus, 
   UserCircle, Users, Repeat, ArrowRightLeft, AlertTriangle, CheckCircle2 
 } from "lucide-react";
+import { adminService, type CadastroViagemPayload, type Rota,type Motorista,type BusAdmin } from "@/services/adminService";
 
 export default function CadastroViagemPage() {
   const router = useRouter();
 
-  // Estados do formulário
-  const [tipoViagem, setTipoViagem] = useState("ida");
-  const [recorrencia, setRecorrencia] = useState("individual");
-  const [origem, setOrigem] = useState("");
-  const [destino, setDestino] = useState("");
+  const [motoristas, setMotoristas] = useState<Motorista[]>([]);
+  const [rotas, setRotas] = useState<Rota[]>([]);
+  const [onibus, setOnibus] = useState<BusAdmin[]>([]);
+  
+  const [rotaSelecionada, setRotaSelecionada] = useState("");
+  const [veiculoSelecionado, setVeiculoSelecionado] = useState("");
+  const [motoristaId, setMotoristaId] = useState("");
   const [data, setData] = useState("");
   const [horario, setHorario] = useState("");
-  const [onibus, setOnibus] = useState("");
-  const [motorista, setMotorista] = useState("");
-  const [quorum, setQuorum] = useState("");
-  const [vagas, setVagas] = useState("46");
+  const [recorrencia, setRecorrencia] = useState("Single");
+  const [tipoViagem, setTipoViagem] = useState("ida");
 
-  // Estados de feedback
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSalvar = (e: React.FormEvent) => {
+  useEffect(() => {
+    const buscarDados = async () => {
+      try {
+        const [listaMotoristas, listaRotas, listaOnibus] = await Promise.all([
+          adminService.listarMotoristas(),
+          adminService.listarRotas(),
+          adminService.listarOnibus(),
+        ]);
+        setMotoristas(listaMotoristas);
+        setRotas(listaRotas);
+        setOnibus(listaOnibus);
+      } catch {
+        setErro("Erro ao carregar dados. Tente recarregar a página.");
+      }
+    };
+    buscarDados();
+  }, []);
+
+  const handleSalvar = async (e: React.FormEvent) => {
     e.preventDefault();
     setErro("");
     setSucesso(false);
-    const origemNormalizada = origem.trim();
-    const destinoNormalizado = destino.trim();
-    const quorumNumero = Number.parseInt(quorum, 10);
-    const vagasNumero = Number.parseInt(vagas, 10);
 
-    if (!origemNormalizada || !destinoNormalizado || !data || !horario || !onibus || !motorista || !quorum || !vagas) {
-      setErro("Inconsistência de preenchimento: Todos os campos são obrigatórios.");
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Validação básica
+    if (!rotaSelecionada || !veiculoSelecionado || !motoristaId || !data || !horario) {
+      setErro("Preencha todos os campos obrigatórios.");
       return;
     }
-
-    if (origemNormalizada.toLowerCase() === destinoNormalizado.toLowerCase()) {
-      setErro("Origem e destino não podem ser iguais.");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
-
-    if (Number.isNaN(quorumNumero) || Number.isNaN(vagasNumero)) {
-      setErro("Quórum e vagas devem ser números inteiros válidos.");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
-
-    if (quorumNumero < 1 || vagasNumero < 1) {
-      setErro("Quórum e vagas devem ser maiores que zero.");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
-
-    if (vagasNumero > 46) {
-      setErro("A capacidade máxima permitida é de 46 vagas por veículo.");
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
-
-    if (quorumNumero > vagasNumero) {
-      setErro("O quórum mínimo não pode ser maior que o número de vagas.");
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
-
-    const agora = new Date();
-    const dataHoraViagem = new Date(`${data}T${horario}:00`);
-    if (Number.isNaN(dataHoraViagem.getTime()) || dataHoraViagem < agora) {
-      setErro("Data e horário de saída devem estar no futuro.");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
-
-    // Simulação de Sucesso
-    setSucesso(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
     
-    // Redireciona após 2 segundos
-    setTimeout(() => {
-      router.push("/admin/viagens");
-    }, 2000);
+    const horarioFormatado = horario.length === 5 ? `${horario}:00` : horario;
+
+    const payload: CadastroViagemPayload = {
+      bus_license_plate: veiculoSelecionado,
+      driver_id: motoristaId,
+      route_id: rotaSelecionada,
+      trip_date: data,
+      departure_time: horarioFormatado,
+      recurrence: recorrencia,
+    };
+
+    console.log("🚀 ENVIANDO PAYLOAD:", JSON.stringify(payload, null, 2));
+
+    try {
+      setLoading(true);
+      await adminService.cadastrarViagem(payload);
+      setSucesso(true);
+      setTimeout(() => router.back(), 2000);
+    } catch (err: any) {
+      setErro(err?.response?.data?.message ?? "Erro ao cadastrar viagem.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f0f4f8]">
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Carregando...</div>}>
+      <div className="flex flex-col min-h-screen bg-[#f0f4f8]">
       <Navigation tipoUsuario="admin" />
 
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 pt-6 pb-32">
@@ -158,34 +151,41 @@ export default function CadastroViagemPage() {
                   </label>
                 </div>
               </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Recorrência</label>
-                <select 
-                  value={recorrencia} onChange={(e) => setRecorrencia(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#103173] focus:outline-none"
-                >
-                  <option value="individual">Viagem Única (Individual)</option>
-                  <option value="semanal">Escala Semanal Fixa</option>
-                  <option value="mensal">Escala Mensal Fixa</option>
-                </select>
-              </div>
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
+              {/* SELECT DE RECORRÊNCIA */}
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Origem</label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                  <input type="text" value={origem} onChange={(e) => setOrigem(e.target.value)} placeholder="Ex: Salvador (Iguatemi)" className="w-full pl-9 p-2.5 rounded-xl border border-slate-200 text-sm focus:border-[#103173] focus:outline-none" />
-                </div>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Recorrência</label>
+                <select 
+                  value={recorrencia} 
+                  onChange={(e) => setRecorrencia(e.target.value)}
+                  className="w-full p-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#103173] focus:outline-none"
+                >
+                  <option value="Single">Viagem Única (Individual)</option>
+                  <option value="Weekly">Escala Semanal Fixa</option>
+                  <option value="Monthly">Escala Mensal Fixa</option>
+                </select>
               </div>
+
+              {/* SELECT DE ROTA (DINÂMICO) */}
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Destino</label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                  <input type="text" value={destino} onChange={(e) => setDestino(e.target.value)} placeholder="Ex: Feira de Santana (UEFS)" className="w-full pl-9 p-2.5 rounded-xl border border-slate-200 text-sm focus:border-[#103173] focus:outline-none" />
-                </div>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Rota</label>
+                <select 
+                  value={rotaSelecionada} 
+                  onChange={(e) => setRotaSelecionada(e.target.value)}
+                  disabled={rotas.length === 0}
+                  className="w-full p-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#103173] focus:outline-none disabled:bg-slate-100 disabled:text-slate-400">
+                  <option value="" disabled>
+                    {rotas.length === 0 ? "Carregando rotas..." : "Selecione a rota"}
+                  </option>
+                  
+                  {rotas.map((rota) => (
+                    <option key={rota.route_id} value={rota.route_id}>
+                      {rota.name}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>
@@ -223,30 +223,50 @@ export default function CadastroViagemPage() {
             
             <div className="grid md:grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Veículo Escalado</label>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Veículo</label>
                 <div className="relative">
                   <Bus className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                  <select value={onibus} onChange={(e) => setOnibus(e.target.value)} className="w-full pl-9 p-2.5 rounded-xl border border-slate-200 text-sm focus:border-[#103173] focus:outline-none bg-white">
-                    <option value="" disabled>Selecione o ônibus...</option>
-                    <option value="volare-01">Volare Fly 10 (ABC-1234) - 30 vagas</option>
-                    <option value="marcopolo-02">Marcopolo Paradiso (XYZ-9876) - 46 vagas</option>
+                  <select 
+                    value={veiculoSelecionado} 
+                    onChange={(e) => setVeiculoSelecionado(e.target.value)}
+                    disabled={onibus.length === 0}
+                    className="w-full pl-8 p-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#103173] focus:outline-none disabled:bg-slate-100 disabled:text-slate-400">
+                    <option value="" disabled>
+                      {onibus.length === 0 ? "Carregando veículos..." : "Selecione o Veículo"}
+                    </option>
+                    
+                    {onibus.map((onibus) => (
+                      <option key={onibus.bus_plate} value={onibus.bus_plate}>
+                        {onibus.bus_plate} | {onibus.capacity}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Motorista</label>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Motorista</label>
                 <div className="relative">
                   <UserCircle className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                  <select value={motorista} onChange={(e) => setMotorista(e.target.value)} className="w-full pl-9 p-2.5 rounded-xl border border-slate-200 text-sm focus:border-[#103173] focus:outline-none bg-white">
-                    <option value="" disabled>Selecione o motorista...</option>
-                    <option value="mot-01">Carlos Silva (MOT-001)</option>
-                    <option value="mot-02">Ana Souza (MOT-002)</option>
+                  <select 
+                    value={motoristaId} 
+                    onChange={(e) => setMotoristaId(e.target.value)}
+                    disabled={motoristas.length === 0}
+                    className="w-full pl-8 p-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#103173] focus:outline-none disabled:bg-slate-100 disabled:text-slate-400">
+                    <option value="" disabled>
+                      {motoristas.length === 0 ? "Carregando motoristas..." : "Selecione o motorista"}
+                    </option>
+                    
+                    {motoristas.map((motorista) => (
+                      <option key={motorista.user_id} value={motorista.user_id}>
+                        {motorista.full_name}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
+            {/* <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Quórum Mínimo</label>
                 <div className="relative">
@@ -263,7 +283,7 @@ export default function CadastroViagemPage() {
                 </div>
                 <p className="text-[10px] text-slate-400 mt-1">Limite do sistema e do veículo</p>
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Ações */}
@@ -285,8 +305,8 @@ export default function CadastroViagemPage() {
           </div>
         </form>
       </main>
-
       <FooterSection />
     </div>
+    </Suspense>
   );
 }
