@@ -15,10 +15,19 @@ export default function AdminMotoristasPage() {
   const [busca, setBusca] = useState("");
 
   useEffect(() => {
-    adminService.listarMotoristas()
-      .then(setMotoristas)
-      .catch(console.error)
-      .finally(() => setLoading(false));
+    const fetchMotoristas = async () => {
+      try {
+        const data = await adminService.listarMotoristas();
+        console.log(data);
+        setMotoristas(data);
+      } catch (error) {
+        console.error("Erro ao listar motoristas:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMotoristas();
   }, []);
 
   const motoristasFiltrados = motoristas.filter((m) =>

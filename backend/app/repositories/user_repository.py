@@ -181,7 +181,7 @@ class UserRepository:
                 and_(
                     User.profile == UserProfile.STAFF,
                     User.is_anonymized == False,
-                    User.registration_status == "PENDING"
+                    User.registration_status == "Pending"
                 )
             )
         )

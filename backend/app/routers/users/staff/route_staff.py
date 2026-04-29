@@ -11,10 +11,12 @@ from app.DTOs.email import RequestEmailChangeDTO
 from app.controllers.user_controller import UserController
 from app.routers.users.dependencies import get_user_controller
 from app.core.config import settings
+from fastapi.encoders import jsonable_encoder
 
 staff_router = APIRouter()
 
 from app.core.responses import ResponseHandler
+
 
 @staff_router.get("/")
 async def get_all_servidores(
@@ -22,23 +24,29 @@ async def get_all_servidores(
     _: TokenData = Depends(require_admin)
 ):
     result = await controller.list_staff_status_pending()
-    return ResponseHandler.ok(result)
+    serialized = jsonable_encoder(result)   
 
-@staff_router.patch("accept/{id}")
+    return ResponseHandler.ok(serialized)
+
+@staff_router.patch("/accept/{id}")
 async def confirm_access(
+    id: uuid.UUID,
     controller: AdminController = Depends(get_admin_controller),
     _: TokenData = Depends(require_admin)
 ):
     result = await controller.update_status_staff(id, True)
-    return ResponseHandler.ok(result)
+    serialized = jsonable_encoder(result)
+    return ResponseHandler.ok(serialized)
 
-@staff_router.patch("reject/{id}")
+@staff_router.patch("/reject/{id}")
 async def reject_access(
+    id: uuid.UUID,
     controller: AdminController = Depends(get_admin_controller),
     _: TokenData = Depends(require_admin)
 ):
     result = await controller.update_status_staff(id, False)
-    return ResponseHandler.ok(result)
+    serialized = jsonable_encoder(result)
+    return ResponseHandler.ok(serialized)
 
 @staff_router.post("/email-change/request")
 async def request_email_change(

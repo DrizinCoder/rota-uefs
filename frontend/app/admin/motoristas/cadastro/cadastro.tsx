@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { adminService } from "@/services/adminService";
 import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
 import { FooterSection } from "@/components/landing/footer-section";
@@ -58,44 +59,34 @@ export default function CadastroEdicaoMotoristaPage() {
     }
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setErros({ nome: "", matricula: "", telefone: "", email: "", senha: "", geral: "" });
+
     const nome = formData.nome.trim();
     const matricula = formData.matricula.trim();
     const telefoneNumeros = formData.telefone.replace(/\D/g, "");
     const email = formData.email.trim().toLowerCase();
     const senha = formData.senha || "";
-    const novosErros = {
-      nome: "",
-      matricula: "",
-      telefone: "",
-      email: "",
-      senha: "",
-      geral: "",
-    };
+    const novosErros = { nome: "", matricula: "", telefone: "", email: "", senha: "", geral: "" };
     let temErro = false;
 
     if (nome.length < 3) {
       novosErros.nome = "Nome completo deve ter pelo menos 3 caracteres.";
       temErro = true;
     }
-
     if (!/^[A-Za-z0-9-]{4,20}$/.test(matricula)) {
       novosErros.matricula = "Guia de matrícula inválido (4 a 20 caracteres alfanuméricos).";
       temErro = true;
     }
-
     if (telefoneNumeros.length < 10 || telefoneNumeros.length > 11) {
       novosErros.telefone = "Telefone inválido. Informe DDD + número com 10 ou 11 dígitos.";
       temErro = true;
     }
-
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       novosErros.email = "E-mail inválido.";
       temErro = true;
     }
-
     if (senha.length < 8) {
       novosErros.senha = "A senha deve ter pelo menos 8 caracteres.";
       temErro = true;
@@ -107,10 +98,19 @@ export default function CadastroEdicaoMotoristaPage() {
       return;
     }
 
-    const mensagem = `Protótipo: motorista ${formData.nome} cadastrado com sucesso.`;
-
-    window.alert(mensagem);
-    router.push("/admin/motoristas");
+    try {
+      await adminService.cadastrarMotorista({
+        full_name: nome,
+        registration_id: matricula,
+        phone: telefoneNumeros,
+        email: email,
+        password: senha,
+      });
+      router.push("/admin/motoristas");
+    } catch (error: any) {
+      const msg = error?.response?.data?.message || "Erro ao cadastrar motorista. Tente novamente.";
+      setErros((atual) => ({ ...atual, geral: msg }));
+    }
   };
 
   return (
