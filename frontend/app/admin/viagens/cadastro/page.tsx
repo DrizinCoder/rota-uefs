@@ -29,23 +29,37 @@ export default function CadastroViagemPage() {
   const [sucesso, setSucesso] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const buscarDados = async () => {
-      try {
-        const [listaMotoristas, listaRotas, listaOnibus] = await Promise.all([
-          adminService.listarMotoristas(),
-          adminService.listarRotas(),
-          adminService.listarOnibus(),
-        ]);
-        setMotoristas(listaMotoristas);
-        setRotas(listaRotas);
-        setOnibus(listaOnibus);
-      } catch {
-        setErro("Erro ao carregar dados. Tente recarregar a página.");
+useEffect(() => {
+  const buscarDados = async () => {
+    try {
+      const resultados = await Promise.allSettled([
+        adminService.listarMotoristas(),
+        adminService.listarRotas(),
+        adminService.listarOnibus(),
+      ]);
+
+      // Tratamos cada resultado individualmente
+      if (resultados[0].status === "fulfilled") {
+        setMotoristas(resultados[0].value);
       }
-    };
-    buscarDados();
-  }, []);
+      
+      if (resultados[1].status === "fulfilled") {
+        setRotas(resultados[1].value);
+      } else {
+        // Se a rota falhar setamos array vazio
+        setRotas([]);
+      }
+
+      if (resultados[2].status === "fulfilled") {
+        setOnibus(resultados[2].value);
+      }
+
+    } catch (err) {
+      setErro("Erro inesperado ao carregar dados.");
+    }
+  };
+  buscarDados();
+}, []);
 
   const handleSalvar = async (e: React.FormEvent) => {
     e.preventDefault();
