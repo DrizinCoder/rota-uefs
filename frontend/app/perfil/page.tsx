@@ -98,7 +98,7 @@ function PerfilContent() {
       .then((data) => setUsuario(data))
       .catch(() => router.push("/login"))
       .finally(() => setCarregando(false));
-  }, []);
+  }, [router]);
 
   if (carregando) {
     return (
