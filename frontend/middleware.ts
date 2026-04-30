@@ -24,7 +24,8 @@ export function middleware(request: NextRequest) {
 
   // Lê o perfil do cookie
   const profile = request.cookies.get("user_profile")?.value;
-
+  console.log(`Middleware: Acessando ${pathname} com perfil ${profile}`);
+  
   // Se não tem cookie (não está logado) vai para o login
   if (!profile) {
     return NextResponse.redirect(new URL("/login", request.url));
