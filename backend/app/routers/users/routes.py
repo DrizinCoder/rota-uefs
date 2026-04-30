@@ -9,6 +9,7 @@ from app.middleware.auth_middleware import TokenData, get_current_user, require_
 from app.core.responses import ResponseHandler
 from app.routers.users.dependencies import get_user_service
 from app.services.user_service import UserService
+from app.enums.enums import UserProfile
 
 user_router = APIRouter()
 
@@ -23,7 +24,7 @@ async def get_user(
 ):
     user = await service.get_by_id_without_password(current_user.sub)
 
-    return ResponseHandler.ok(data={"user": user.model_dump(mode="json")})
+    return ResponseHandler.ok(data=user)
 
 @user_router.delete("/delete/account/me")
 async def delete_account(
@@ -38,7 +39,7 @@ async def update_password(
     id: uuid.UUID, 
     data: PasswordUpdate, 
     service: UserService = Depends(get_user_service),
-    _: TokenData = Depends(require_profile("ADMIN", "STAFF", "STUDENT"))
+    _: TokenData = Depends(require_profile(UserProfile.ADMIN, UserProfile.STAFF, UserProfile.STUDENT))
 ):
     await service.update_password(id, data)
     return ResponseHandler.ok(message="Senha atualizada com sucesso!")
@@ -48,7 +49,7 @@ async def update_phone(
     id: uuid.UUID, 
     data: PhoneUpdate, 
     service: UserService = Depends(get_user_service),
-    _: TokenData = Depends(require_profile("DRIVER", "STUDENT"))
+    _: TokenData = Depends(require_profile(UserProfile.DRIVER, UserProfile.STUDENT))
 ):
     await service.update_phone(id, data)
     return ResponseHandler.ok(message="Telefone atualizado!")
