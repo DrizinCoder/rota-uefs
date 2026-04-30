@@ -9,11 +9,11 @@ from passlib.context import CryptContext
 
 from app.core.config import settings
 from app.models.models import User
-from app.enums.enums import UserProfile
+from app.enums.enums import RegistrationStatus, UserProfile
 from app.repositories.user_repository import UserRepository
 from app.services.email.use_cases import EmailUseCases
 from app.DTOs.auth import RegisterAlunoDTO
-from app.core.exceptions import ConflictException
+from app.core.exceptions import ConflictException, NotFoundException, UnauthorizedException
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -45,6 +45,13 @@ class AuthService:
         return encoded_jwt
 
     @staticmethod
+    def create_refresh_token(data: dict) -> str:
+        to_encode = data.copy()
+        expire = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+        to_encode.update({"exp": expire, "type": "refresh"})
+        return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
+    @staticmethod
     def create_token_for_user(user: User) -> dict:
         token_data = {
             "sub": str(user.user_id),
@@ -70,11 +77,13 @@ class AuthService:
             token_data["student_id"] = str(user.user_id)
         
         access_token = AuthService.create_access_token(token_data)
+        refresh_token = AuthService.create_refresh_token({"sub": str(user.user_id)})
         
         return {
             "access_token": access_token,
-            "token_type": "bearer",
+            "refresh_token": refresh_token,
             "user": {
+                
                 "sub": str(user.user_id),
                 "full_name": user.full_name,
                 "registration_id": user.registration_id,
@@ -115,9 +124,9 @@ class AuthService:
             expires_delta=timedelta(minutes=30)
         )
 
-        base_url = "http://localhost:8000"
+        base_url = "http://localhost:3000"
 
-        link = f"{base_url}/auth/activate/account/student?token={token}"
+        link = f"{base_url}/activate/account?token={token}"
 
         first_name = user.full_name.split()[0]
 
@@ -137,7 +146,7 @@ class AuthService:
         
         user = await self.repository.create_staff(dados)
         return user
-        
+
     async def activate_account(self, token: str):
         try:
             payload = jwt.decode(
@@ -150,25 +159,18 @@ class AuthService:
             token_type = payload.get("type")
 
             if token_type != "account_activation":
-                return RedirectResponse(
-                    url=f"{settings.BASE_URL_FRONTEND}/login?error=invalid_token"
-                )
+                raise UnauthorizedException("Token inválido para ativação.")
 
             user = await self.repository.get_by_id(uuid.UUID(user_id))
 
             if not user:
-                return RedirectResponse(
-                    url=f"{settings.BASE_URL_FRONTEND}/login?error=user_not_found"
-                )
+                raise NotFoundException("Usuário não encontrado.")
 
-            user.registration_status = "ACTIVE"
-            await self.repository.update(user)
+            if user.registration_status != RegistrationStatus.ACTIVE:
+                user.registration_status = RegistrationStatus.ACTIVE
+                await self.repository.update(user)
 
-            return RedirectResponse(
-                url=f"{settings.BASE_URL_FRONTEND}/login?activated=true"
-            )
+            return self.create_token_for_user(user)
 
         except JWTError:
-            return RedirectResponse(
-                url=f"{settings.BASE_URL_FRONTEND}/login?error=expired_or_invalid"
-            )
+            raise UnauthorizedException("Sessão de ativação expirada.")

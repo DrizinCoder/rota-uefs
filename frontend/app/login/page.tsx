@@ -1,45 +1,70 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { authService, LoginUserDTO } from "@/services/authService";
+import { useEffect, useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { BusFront, Lock, User, ShieldCheck } from "lucide-react";
 import { AuthPageShell } from "@/components/auth/auth-page-shell";
 import { LabeledIconInput } from "@/components/auth/labeled-icon-input";
+import { toast } from "react-toastify";
 
-export default function TelaLogin() {
+/**
+ * Componente que escuta os parâmetros da URL para disparar Toasts de feedback
+ */
+export default function LoginPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [erro, setErro] = useState("");
-  const [formData, setFormData] = useState({
-    matricula: "",
-    senha: "",
+
+  const [formData, setFormData] = useState<LoginUserDTO>({
+    registration_id: "",
+    password: "",
   });
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const REDIRECT_MAP: Record<string, string> = {
+    Student: "/passageiro",
+    Staff: "/professor",
+    Faculty: "/professor",
+    Driver: "/motorista",
+    Admin: "/admin",
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     setErro("");
 
-    const matricula = formData.matricula.trim();
-    const senha = formData.senha;
+    try {
+      const resposta = await authService.login(formData);
+      const profile = resposta.data.user.profile;
+      const destino = REDIRECT_MAP[profile] || "/login";
 
-    if (!/^\d{8}$/.test(matricula)) {
-      setErro("Informe uma matrícula válida com 8 dígitos.");
-      return;
+      localStorage.setItem("token", resposta.data.access_token);
+      document.cookie = `user_profile=${profile}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+      router.push(destino);
+    } catch (error: any) {
+      setErro("Matrícula ou senha incorretos.");
+    } finally {
+      setIsLoading(false);
     }
-
-    if (senha.length < 8) {
-      setErro("A senha deve ter pelo menos 8 caracteres.");
-      return;
-    }
-
-    setIsLoading(true);
-
-    setTimeout(() => {
-      router.push("/passageiro");
-    }, 1000);
   };
 
   return (
@@ -64,29 +89,27 @@ export default function TelaLogin() {
           )}
         </CardHeader>
 
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <LabeledIconInput
-              id="matricula"
+              id="registration_id"
+              name="registration_id"
               label="Matrícula"
               icon={User}
-              placeholder="23121111"
-              value={formData.matricula}
-              onChange={(e) =>
-                setFormData((atual) => ({
-                  ...atual,
-                  matricula: e.target.value.replace(/\D/g, "").slice(0, 8),
-                }))
-              }
-              maxLength={8}
+              placeholder="Ex: 23121111"
+              value={formData.registration_id}
+              onChange={handleChange}
+              maxLength={15}
               required
             />
 
             <div className="space-y-2">
               <div className="flex justify-between items-center ml-1">
-                <Label htmlFor="pass" className="text-[#103173] font-bold">Senha</Label>
-                <button 
-                  type="button" 
+                <Label htmlFor="password" className="text-[#103173] font-bold">
+                  Senha
+                </Label>
+                <button
+                  type="button"
                   onClick={() => router.push("/recuperar-senha")}
                   className="text-xs font-bold text-[#73AABF] hover:text-[#103173]"
                 >
@@ -94,18 +117,14 @@ export default function TelaLogin() {
                 </button>
               </div>
               <LabeledIconInput
-                id="pass"
-                label=""
+                id="password"
+                name="password"
+                label="Senha"
                 icon={Lock}
                 type="password"
                 placeholder="••••••••"
-                value={formData.senha}
-                onChange={(e) =>
-                  setFormData((atual) => ({
-                    ...atual,
-                    senha: e.target.value,
-                  }))
-                }
+                value={formData.password}
+                onChange={handleChange}
                 containerClassName="space-y-0"
                 labelClassName="hidden"
                 required
@@ -149,11 +168,32 @@ export default function TelaLogin() {
         </form>
       </Card>
 
-      {/* Atalhos rápidos para você testar as páginas novas enquanto desenvolve */}
+      {/* Atalhos para desenvolvimento */}
       <div className="absolute bottom-4 flex gap-4 opacity-40 hover:opacity-100 transition-opacity">
-        <Button variant="ghost" size="sm" onClick={() => router.push("/passageiro")} className="text-[#103173] font-bold">Ir para Passageiro</Button>
-        <Button variant="ghost" size="sm" onClick={() => router.push("/motorista")} className="text-[#103173] font-bold">Ir para Motorista</Button>
-        <Button variant="ghost" size="sm" onClick={() => router.push("/admin")} className="text-[#103173] font-bold">Ir para Admin</Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.push("/passageiro")}
+          className="text-[#103173] font-bold"
+        >
+          Ir para Passageiro
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.push("/motorista")}
+          className="text-[#103173] font-bold"
+        >
+          Ir para Motorista
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.push("/admin")}
+          className="text-[#103173] font-bold"
+        >
+          Ir para Admin
+        </Button>
       </div>
     </AuthPageShell>
   );

@@ -8,6 +8,7 @@ from app.core.responses import ResponseHandler
 from app.DTOs.driver import DriverPatchDTO
 from app.services.driver_service import DriverService
 from app.routers.users.dependencies import get_driver_service
+from fastapi.encoders import jsonable_encoder
 
 drive_router = APIRouter()
 
@@ -17,7 +18,8 @@ async def get_all_drivers(
     _: TokenData = Depends(require_admin)
 ):
     result = await controller.list_drivers()
-    return ResponseHandler.ok(data=result)
+    serialized = jsonable_encoder(result)
+    return ResponseHandler.ok(data=serialized)
 
 @drive_router.get("/{id}")
 async def get_driver(

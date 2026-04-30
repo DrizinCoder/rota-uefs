@@ -93,7 +93,6 @@ class ServidorRegisterResponseDTO(SQLModel):
     department: str = Field(validation_alias=AliasPath("staff_member", "department"))
     employment: str = Field(validation_alias=AliasPath("staff_member", "employment_type"))
 
-
 class MotoristaRegisterResponseDTO(SQLModel):
     user_id: uuid.UUID
     full_name: str

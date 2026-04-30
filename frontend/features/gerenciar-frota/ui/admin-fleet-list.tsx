@@ -3,18 +3,18 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { OnibusFrota, StatusOnibus } from "@/lib/mock/frota";
+import type { BusHomeAdmin } from "@/services/adminService";
 
-export type FiltroStatus = "todos" | StatusOnibus;
+export type FiltroStatus = "todos" | "Active" | "Inactive" | "Maintenance";
 
 interface AdminFleetListProps {
-  frota: OnibusFrota[];
+  frota: BusHomeAdmin[];
   busca: string;
   setBusca: (valor: string) => void;
   filtroStatus: FiltroStatus;
   setFiltroStatus: (valor: FiltroStatus) => void;
-  onEditar: (onibus: OnibusFrota) => void;
-  onRemover: (onibus: OnibusFrota) => void;
+  onEditar: (onibus: BusHomeAdmin) => void;
+  onRemover: (onibus: BusHomeAdmin) => void;
 }
 
 export function AdminFleetList({
@@ -45,8 +45,8 @@ export function AdminFleetList({
           <Tabs value={filtroStatus} onValueChange={(value) => setFiltroStatus(value as FiltroStatus)} className="w-full sm:w-auto">
             <TabsList className="h-9 bg-slate-100 p-1 w-full grid grid-cols-3">
               <TabsTrigger value="todos" className="text-xs font-semibold">Todos</TabsTrigger>
-              <TabsTrigger value="ativo" className="text-xs font-semibold">Ativos</TabsTrigger>
-              <TabsTrigger value="inativo" className="text-xs font-semibold">Inativos</TabsTrigger>
+              <TabsTrigger value="Active" className="text-xs font-semibold">Ativos</TabsTrigger>
+              <TabsTrigger value="Inactive" className="text-xs font-semibold">Inativos</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -66,15 +66,15 @@ export function AdminFleetList({
             const statusInfo = getStatusInfo(onibus.status);
 
             return (
-              <div key={onibus.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 hover:bg-slate-50/80 transition-colors gap-4">
+              <div key={onibus.plate} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 hover:bg-slate-50/80 transition-colors gap-4">
                 <div className="flex items-center gap-4">
-                  <div className={`h-10 w-10 rounded-lg flex items-center justify-center border ${onibus.status === 'ativo' ? 'bg-cyan-50 border-cyan-200/50' : 'bg-slate-100 border-slate-200'}`}>
-                    <Bus className={`h-5 w-5 ${onibus.status === 'ativo' ? 'text-cyan-600' : 'text-slate-400'}`} />
+                  <div className={`h-10 w-10 rounded-lg flex items-center justify-center border ${onibus.status === 'Active' ? 'bg-cyan-50 border-cyan-200/50' : 'bg-slate-100 border-slate-200'}`}>
+                    <Bus className={`h-5 w-5 ${onibus.status === 'Active' ? 'text-cyan-600' : 'text-slate-400'}`} />
                   </div>
                   <div>
-                    <p className="font-bold text-slate-800 text-base leading-none mb-1.5">{onibus.placa}</p>
+                    <p className="font-bold text-slate-800 text-base leading-none mb-1.5">{onibus.plate}</p>
                     <p className="text-xs font-medium text-slate-500">
-                      {onibus.viagensHoje} {onibus.viagensHoje === 1 ? 'viagem registrada' : 'viagens registradas'} hoje
+                      {onibus.trips_today} {onibus.trips_today === 1 ? 'viagem registrada' : 'viagens registradas'} hoje
                     </p>
                   </div>
                 </div>
@@ -114,11 +114,18 @@ export function AdminFleetList({
   );
 }
 
-function getStatusInfo(status: StatusOnibus) {
-  if (status === "ativo") {
+function getStatusInfo(status: string) {
+  if (status === "Active") {
     return {
       label: "ATIVO",
       className: "bg-emerald-100 text-emerald-700 hover:bg-emerald-100",
+    };
+  }
+
+  if (status === "Maintenance") {
+    return {
+      label: "MANUTENÇÃO",
+      className: "bg-amber-100 text-amber-700 hover:bg-amber-100",
     };
   }
 
