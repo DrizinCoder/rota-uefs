@@ -42,6 +42,8 @@ class TripRepository:
                 **trip.model_dump(mode='json'),
                 "driver_name": trip.driver.full_name if trip.driver else None,
                 "route_name": trip.route.name if trip.route else None,
+                "boarding_point": trip.route.boarding_point if trip.route else None,
+                "drop_off_point": trip.route.drop_off_point if trip.route else None,
             }
             for trip in trips
         ]

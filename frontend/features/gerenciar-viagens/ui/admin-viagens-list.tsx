@@ -68,7 +68,7 @@ export function AdminViagensList({
                     </span>
                   </div>
                   <div className="flex items-center gap-3 text-[#103173] font-extrabold text-xl md:text-2xl">
-                    {viagem.route_name} <ArrowRight className="h-6 w-6 text-[#F2D022]" /> {viagem.route_name}
+                    {viagem.boarding_point} <ArrowRight className="h-6 w-6 text-[#F2D022]" /> {viagem.drop_off_point}
                   </div>
                 </div>
 

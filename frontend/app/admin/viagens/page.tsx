@@ -54,7 +54,7 @@ export default function AdminViagensPage() {
           reservasProfessores: Math.floor(Math.random() * 3),
           checkIns: Math.floor(Math.random() * 20),
         }));
-
+        
         setViagens(viagensMapeadas);
       } catch (err) {
         console.error("Erro ao carregar viagens:", err);

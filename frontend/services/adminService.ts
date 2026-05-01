@@ -92,6 +92,8 @@ export interface ViagemAdmin {
   departure_time: string;
   driver_name: string;
   route_name: string;
+  boarding_point: string;
+  drop_off_point: string;
 }
 
 // ── Rotas ─────────────────────────────────────────────
