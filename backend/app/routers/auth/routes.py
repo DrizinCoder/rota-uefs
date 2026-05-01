@@ -3,7 +3,7 @@ from app.DTOs.auth import ServidorRegisterResponseDTO
 from app.core.responses import ResponseHandler
 from app.core.exceptions import ConflictException
 from app.database.db import get_session
-from fastapi import BackgroundTasks, Depends
+from fastapi import BackgroundTasks, Depends, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.repositories.user_repository import UserRepository
 from app.DTOs.auth import RegisterAlunoDTO
@@ -33,11 +33,33 @@ async def register_servidor(
 @router.post("/login")
 async def login(
     data: LoginUserDTO,
+    response: Response,
     controller: AuthController = Depends(get_auth_controller)
 ):
     result = await controller.login(data)
 
-    return ResponseHandler.ok(data=result)
+    response = ResponseHandler.ok(data=result, message="Login realizado com sucesso")
+
+    response.set_cookie(
+        key="access_token",
+        value=result["access_token"],
+        httponly=True,
+        secure=False,  
+        samesite="lax",
+        max_age=3600   
+    )
+
+    response.set_cookie(
+        key="refresh_token",
+        value=result["refresh_token"],
+        httponly=True,
+        secure=False, 
+        samesite="strict",
+        path="/auth/refresh", 
+        max_age=604800 
+    )
+
+    return response
 
 @router.post("/recover/password")
 async def recover_password(email: str, controller: AuthController = Depends(get_auth_controller)):
@@ -63,11 +85,15 @@ async def register_student(
         data=result.model_dump(mode="json")
     )
 
-@router.get("/activate/account/student")
+
+@router.post("/activate/account/student")
 async def activate_account(
     token: str,
     controller: AuthController = Depends(get_auth_controller)
 ):
     result = await controller.activate_account(token)
 
-    return ResponseHandler.ok(data=result.model_dump(mode='json'))
+    return ResponseHandler.ok(
+        data=result, 
+        message="Conta ativada com sucesso. Bem-vindo!"
+    )

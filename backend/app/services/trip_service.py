@@ -1,4 +1,4 @@
-from calendar import calendar
+from calendar import calendar, monthrange
 from datetime import timedelta
 from app.enums.enums import TripRecurrence
 import uuid
@@ -63,10 +63,12 @@ class TripService:
         if recurrence == TripRecurrence.MONTHLY:
             # da data até o último dia útil do mês
             dates = []
-            last_day = calendar.monthrange(start_date.year, start_date.month)[1]
+            _, last_day = monthrange(start_date.year, start_date.month)
             current = start_date
             while current.day <= last_day:
                 if current.weekday() < 5:  # ignora sab e dom
                     dates.append(current)
+                if current.day == last_day:
+                    break
                 current += timedelta(days=1)
             return dates

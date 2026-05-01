@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+from pydantic import BaseModel
 from app.core.exceptions import NotFoundException
 from app.services.email.use_cases import EmailUseCases
 from app.core.responses import ResponseHandler
@@ -8,6 +9,8 @@ from fastapi import BackgroundTasks
 
 router = APIRouter()
 
+class EmailRequest(BaseModel):
+    target_email: str  
 
 @router.get("/verify-token")
 async def test_verify_token(current_user: TokenData = Depends(get_current_user)):
@@ -64,16 +67,20 @@ async def test_error():
 async def test_crash():
     raise Exception("Erro genérico de teste")
 
-
 @router.post("/enviar-email")
-async def testar_envio_email(email_destino: str, background_tasks: BackgroundTasks):
+async def testar_envio_email(
+    request: EmailRequest, 
+    background_tasks: BackgroundTasks
+):
     email_use_case = EmailUseCases()
 
     background_tasks.add_task(
         email_use_case.send_welcome,
-        email_destino,
+        request.target_email,
         "João",
         "https://rota-uefs.com/login"
     )
+
+    print(f"Processando envio para: {request.target_email}")
 
     return ResponseHandler.accepted("Email está sendo enviado em background")

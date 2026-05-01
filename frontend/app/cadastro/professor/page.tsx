@@ -9,83 +9,121 @@ import { Briefcase, Lock, Mail, Phone, User, ArrowLeft, BadgeCheck, ShieldAlert,
 import { AuthPageShell } from "@/components/auth/auth-page-shell";
 import { LabeledIconInput } from "@/components/auth/labeled-icon-input";
 
-export default function CadastroProfessor() {
+// Bloco de código referente à integração com o backend (authService)
+import { authService, RegisterServidorDTO } from '@/services/authService';
+
+
+
+export default function CadastroProfessorPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [isSucesso, setIsSucesso] = useState(false);
+  const [isSucesso, setIsSucesso] = useState(false); // Ver isso
   const [erro, setErro] = useState("");
   
-  const [formData, setFormData] = useState({
-    nome: "",
-    matricula: "",
-    vinculo: "",
-    departamento: "",
-    telefone: "",
-    email: "",
-    senha: ""
+  const [formData, setFormData] = useState<RegisterServidorDTO>({
+    full_name: '',
+    registration_id: '',
+    employment: '',
+    department: '',
+    phone: '',
+    email: '',
+    password: '',
   });
 
-  const validarFormulario = () => {
-    const nome = formData.nome.trim();
-    const matricula = formData.matricula.trim();
-    const departamento = formData.departamento.trim();
-    const telefoneNumeros = formData.telefone.replace(/\D/g, "");
-    const email = formData.email.trim().toLowerCase();
-    const senha = formData.senha;
+const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  let { name, value } = e.target;
 
-    if (nome.length < 3) {
-      return "Nome completo deve ter pelo menos 3 caracteres.";
-    }
+  // Máscara para matrícula (apenas números, máximo 8 caracteres) ATIVAR CASO QUEIRA LIMITAR O TAMANHO DA MATRÍCULA
+  // if (name === "registration_id") {
+  //   value = value.replace(/\D/g, "").slice(0, 8);
+  // }
 
-    if (!/^[A-Za-z0-9-]{4,20}$/.test(matricula)) {
-      return "Matrícula inválida. Use de 4 a 20 caracteres (letras, números e hífen).";
-    }
+  setFormData(estadoAnterior => ({
+    ...estadoAnterior,
+    [name]: value      
+  }));
+};
 
-    if (!formData.vinculo) {
-      return "Selecione um tipo de vínculo válido.";
-    }
-
-    if (departamento.length < 2) {
-      return "Departamento inválido.";
-    }
-
-    if (telefoneNumeros.length < 10 || telefoneNumeros.length > 11) {
-      return "Telefone inválido. Informe DDD + número com 10 ou 11 dígitos.";
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return "Formato de e-mail inválido.";
-    }
-
-    if (!email.endsWith("@uefs.br")) {
-      return "Use um e-mail institucional terminado em @uefs.br.";
-    }
-
-    if (senha.length < 8) {
-      return "A senha deve ter pelo menos 8 caracteres.";
-    }
-
-    return null;
-  };
-
-  const handleCadastrar = (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault(); // MUITO IMPORTANTE: Evita que a página recarregue do nada
+    setIsLoading(true);
     setErro("");
 
-    const erroValidacao = validarFormulario();
-    if (erroValidacao) {
-      setErro(erroValidacao);
-      return;
-    }
+    try {
+      
+      const resposta = await authService.cadastroServidor(formData);
+      
+      setIsSucesso(true);
 
-    setIsLoading(true);
-    
-    // Simula validação e envio para backend
-    setTimeout(() => {
+    } catch (error) {
+
+      alert("Erro ao cadastrar. Olhe o terminal/console.");
+    } finally {
       setIsLoading(false);
-      setIsSucesso(true); // Exibe a tela de pendente de validação
-    }, 1500);
+    }
   };
+
+  // const validarFormulario = () => {
+  //   const nome = formData.nome.trim();
+  //   const matricula = formData.matricula.trim();
+  //   const departamento = formData.departamento.trim();
+  //   const telefoneNumeros = formData.telefone.replace(/\D/g, "");
+  //   const email = formData.email.trim().toLowerCase();
+  //   const senha = formData.senha;
+
+  //   if (nome.length < 3) {
+  //     return "Nome completo deve ter pelo menos 3 caracteres.";
+  //   }
+
+  //   if (!/^[A-Za-z0-9-]{4,20}$/.test(matricula)) {
+  //     return "Matrícula inválida. Use de 4 a 20 caracteres (letras, números e hífen).";
+  //   }
+
+  //   if (!formData.vinculo) {
+  //     return "Selecione um tipo de vínculo válido.";
+  //   }
+
+  //   if (departamento.length < 2) {
+  //     return "Departamento inválido.";
+  //   }
+
+  //   if (telefoneNumeros.length < 10 || telefoneNumeros.length > 11) {
+  //     return "Telefone inválido. Informe DDD + número com 10 ou 11 dígitos.";
+  //   }
+
+  //   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  //     return "Formato de e-mail inválido.";
+  //   }
+
+  //   if (!email.endsWith("@uefs.br")) {
+  //     return "Use um e-mail institucional terminado em @uefs.br.";
+  //   }
+
+  //   if (senha.length < 8) {
+  //     return "A senha deve ter pelo menos 8 caracteres.";
+  //   }
+
+  //   return null;
+  // };
+
+  // const handleCadastrar = (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setErro("");
+
+  //   const erroValidacao = validarFormulario();
+  //   if (erroValidacao) {
+  //     setErro(erroValidacao);
+  //     return;
+  //   }
+
+  //   setIsLoading(true);
+    
+  //   // Simula validação e envio para backend
+  //   setTimeout(() => {
+  //     setIsLoading(false);
+  //     setIsSucesso(true); // Exibe a tela de pendente de validação
+  //   }, 1500);
+  // };
 
   if (isSucesso) {
     return (
@@ -150,14 +188,15 @@ export default function CadastroProfessor() {
           )}
         </CardHeader>
 
-        <form onSubmit={handleCadastrar}>
+        <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <LabeledIconInput
               id="nome"
+              name="full_name"
               label="Nome Completo"
               icon={User}
-              value={formData.nome}
-              onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+              value={formData.full_name}
+              onChange={handleChange}
               placeholder="Seu nome completo"
               required
             />
@@ -166,12 +205,11 @@ export default function CadastroProfessor() {
               <div className="space-y-2">
                 <LabeledIconInput
                   id="matricula"
+                  name="registration_id"
                   label="Matrícula"
                   icon={BadgeCheck}
-                  value={formData.matricula}
-                  onChange={(e) =>
-                    setFormData({ ...formData, matricula: e.target.value.toUpperCase().replace(/\s/g, "") })
-                  }
+                  value={formData.registration_id}
+                  onChange={handleChange}
                   placeholder="2024101"
                   required
                 />
@@ -181,57 +219,62 @@ export default function CadastroProfessor() {
                 <Label htmlFor="vinculo" className="text-[#103173] font-bold ml-1">Vínculo</Label>
                 <select
                   id="vinculo"
-                  value={formData.vinculo}
-                  onChange={(e) => setFormData({...formData, vinculo: e.target.value})}
+                  name="employment"
+                  value={formData.employment}
+                  onChange={handleChange}
                   className="w-full h-12 px-3 border border-[#73AABF]/20 rounded-xl bg-transparent font-medium text-sm text-[#103173] focus:outline-none focus:ring-2 focus:ring-[#103173]"
                   required
                 >
                   <option value="" disabled>Selecione...</option>
-                  <option value="Servidor Técnico">Servidor Técnico</option>
-                  <option value="Docente">Docente</option>
+                  <option value="Staff">Servidor Técnico</option>
+                  <option value="Faculty">Docente</option>
                 </select>
               </div>
               
             </div>
 
             <LabeledIconInput
-              id="telefone"
+              id="departamento"
+              name="department"
               label="Departamento"
               icon={BriefcaseBusiness}
-              value={formData.departamento}
-              onChange={(e) => setFormData({ ...formData, departamento: e.target.value })}
+              value={formData.department}
+              onChange={handleChange}
               placeholder="Ex: DTEC"
               required
             />
 
             <LabeledIconInput
               id="telefone"
+              name="phone"
               label="Telefone"
               icon={Phone}
-              value={formData.telefone}
-              onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
+              value={formData.phone}
+              onChange={handleChange}
               placeholder="(75) 90000-0000"
               required
             />
 
             <LabeledIconInput
               id="email"
+              name="email"
               label="E-mail"
               icon={Mail}
               type="email"
               value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              onChange={handleChange}
               placeholder="Ex: email@uefs.br"
               required
             />
             
             <LabeledIconInput
               id="senha"
+              name="password"
               label="Senha"
               icon={Lock}
               type="password"
-              value={formData.senha}
-              onChange={(e) => setFormData({ ...formData, senha: e.target.value })}
+              value={formData.password}
+              onChange={handleChange}
               placeholder="••••••••"
               required
             />

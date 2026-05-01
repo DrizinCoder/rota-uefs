@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 from pydantic import BaseModel
@@ -23,29 +23,31 @@ class TokenData(BaseModel):
     employment_type: str | None = None
 
 def get_current_user(
+    request: Request,
     credentials: HTTPAuthorizationCredentials = Depends(security)
 ) -> TokenData:
-    token = credentials.credentials
-    
-    try:
-        payload = jwt.decode(
-            token, 
-            settings.SECRET_KEY, 
-            algorithms=[settings.ALGORITHM]
-        )
-   
-        user_id = payload.get("sub")
-        profile = payload.get("profile")
+    token = None
 
+    if credentials:
+        token = credentials.credentials
+    
+    if not token:
+        token = request.cookies.get("access_token")
+
+    if not token:
+        raise UnauthorizedException("Credenciais ausentes (Header ou Cookie)")
+
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         
-        if not user_id or not profile:
-            raise UnauthorizedException("Token inválido: dados do usuário ausentes")
-        
+        user_id = payload.get("sub")
+        if not user_id:
+            raise UnauthorizedException("Token inválido: sub ausente")
+            
         return TokenData(**payload)
     
     except JWTError as e:
-        raise UnauthorizedException(f"Token inválido: {str(e)}")
-
+        raise UnauthorizedException(f"Token inválido ou expirado: {str(e)}")
 
 def require_profile(*allowed_profiles: str):
     def profile_checker(current_user: TokenData = Depends(get_current_user)) -> TokenData:

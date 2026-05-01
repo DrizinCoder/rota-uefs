@@ -7,10 +7,10 @@ import { User } from "lucide-react";
 
 // Aceitamos os tipos de usuários possíveis
 interface NavigationProps {
-  tipoUsuario?: "aluno" | "professor" | "motorista" | "admin";
+  tipoUsuario?: "Student" | "Staff" | "Driver" | "Admin";
 }
 
-export function Navigation({ tipoUsuario = "aluno" }: NavigationProps) {
+export function Navigation({ tipoUsuario = "Student" }: NavigationProps) {
 
   return (
     <nav className="w-full bg-slate-950 shadow-xl border-b border-white/10">
@@ -35,7 +35,7 @@ export function Navigation({ tipoUsuario = "aluno" }: NavigationProps) {
         <div className="flex items-center gap-6 text-sm font-medium">
 
           {/* Minhas Viagens: redireciona para a nova tela dedicada */}
-          {tipoUsuario !== "admin" && tipoUsuario !== "motorista" && (
+          {tipoUsuario !== "Admin" && tipoUsuario !== "Driver" && (
             <Link 
               href={`/minhas-viagens?tipo=${tipoUsuario}`} 
               className="text-white/80 hover:text-cyan-500 font-bold transition-colors"
