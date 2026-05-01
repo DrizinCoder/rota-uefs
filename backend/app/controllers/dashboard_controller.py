@@ -9,4 +9,10 @@ class DashboardController:
         self.service = service
 
     async def get_home_info(self, today: date):
-        return await self.service.get_home_info(today)
+        logger.info(f"Dashboard info requested | Today: {today}")
+
+        result = await self.service.get_home_info(today)
+
+        logger.info(f"Dashboard info retrieved successfully | Trips today: {len(result.get('trips_today', []))}")
+        
+        return result

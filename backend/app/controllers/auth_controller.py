@@ -21,13 +21,24 @@ class AuthController:
         self.auth_service = AuthService(repository)
 
     async def register_student(self, dados, background_tasks):
+        logger.info(f"Student registration requested | Email: {dados.email}")
+
         user = await self.auth_service.register_student(dados, background_tasks)
+
+        logger.info(f"Student registered successfully | User ID: {user.user_id}")
         return AlunoRegisterResponseDTO.model_validate(user)
 
     async def activate_account(self, token: str):
-        return await self.auth_service.activate_account(token)
+        logger.info("Account activation requested")
+
+        result = await self.auth_service.activate_account(token)
+
+        logger.info("Account activated successfully")
+        return result
 
     async def login(self, data: LoginUserDTO) -> dict:
+        logger.info(f"Login requested | Registration: {data.registration_id}")
+
         user = await self.repository.get_by_registration(data.registration_id)
         
         if not user:
@@ -43,10 +54,13 @@ class AuthController:
             raise UnauthorizedException("Credenciais inválidas")
         
         token_data = self.auth_service.create_token_for_user(user)
-        
+
+        logger.info(f"Login successful | User ID: {user.user_id}")
         return token_data
     
     async def recover_password(self, email: str) -> dict:
+        logger.info(f"Password recovery requested | Email: {email}")
+
         user = await self.repository.get_by_email(email)
         
         if not user:
@@ -63,10 +77,12 @@ class AuthController:
             token_data["access_token"]
         )
 
+        logger.info(f"Password recovery email sent successfully | Email: {email}")
         return token_data
     
     async def reset_password(self, token: str, data: ResetPasswordDTO) -> None:
-        
+        logger.info(f"Password reset requested | User ID: {data.user_id}")
+
         try:
             jwt_data = jwt.decode(token, settings.SECRET_KEY) 
             user = await self.repository.get_by_id(jwt_data["sub"])
@@ -86,14 +102,21 @@ class AuthController:
         user.password = data.password
         await self.repository.update(user)
 
+        logger.info(f"Password reset successfully | User ID: {data.user_id}")
         return
 
     async def register_staff(self, dados: RegisterServidorDTO):
+        logger.info(f"Staff registration requested | Email: {dados.email}")
+
         staff = await self.auth_service.register_staff(dados)
+
+        logger.info(f"Staff registered successfully | User ID: {staff.user_id}")
         return ServidorRegisterResponseDTO.model_validate(staff)
 
 
     async def refresh_session(self, refresh_token: str):
+        logger.info("Session refresh requested")
+
         try:
             payload = self.token_service.decode_token(refresh_token)
             
@@ -109,6 +132,7 @@ class AuthController:
             new_access_token = self.token_service.create_access_token({"sub": str(user.id)})
             new_refresh_token = self.token_service.create_refresh_token({"sub": str(user.id)})
 
+            logger.info(f"Session refreshed successfully | User ID: {user_id}")
             return {
                 "access_token": new_access_token,
                 "refresh_token": new_refresh_token,
