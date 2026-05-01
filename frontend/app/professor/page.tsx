@@ -4,13 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
 import { FooterSection } from "@/components/landing/footer-section";
-import { Button } from "@/components/ui/button";
 import { RoleHeader } from "@/components/shared/role-header";
 import { DevModeBar } from "@/components/shared/dev-mode-bar";
 import { WeekDaysMenu } from "@/components/shared/week-days-menu";
 import { CurrentDayHeader } from "@/components/shared/current-day-header";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { TripRouteHeader } from "@/entities/viagem/ui/TripRouteHeader";
 import { PassengerListInfo } from "@/entities/viagem/ui/PassengerListInfo";
 import { GuestSubscribeButton } from "@/features/inscrever-convidado/ui/GuestSubscribeButton";
@@ -20,25 +17,13 @@ import { ManageSubscriptionButton } from "@/features/gerenciar-inscricao/ui/Mana
 import { TripModeToggle } from "@/entities/viagem/ui/TripModeToggle";
 import { SubscribeButton } from "@/features/inscrever-rota/ui/SubscribeButton";
 
-import {
-  MapPin,
-  Bus,
-  User,
-  Ticket,
-  CircleDot,
-  GraduationCap,
-  UserPlus,
-  X,
-  UserCircle,
-  ShieldAlert,
-  Users
-} from "lucide-react";
+import { GraduationCap } from "lucide-react";
 
 const VIAGENS_REQUISITOS = [
   { id: "1", dia: "segunda", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "06:00", horarioFim: "08:00", inscritosAlunos: 15, inscritosProfessores: 3, vagasTotais: 44, jaInscrito: false },
   { id: "2", dia: "segunda", origem: "Feira de Santana", destino: "Salvador", horarioInicio: "18:30", horarioFim: "20:30", inscritosAlunos: 30, inscritosProfessores: 5, vagasTotais: 44, jaInscrito: true },
-  { id: "3", dia: "terca", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "06:00", horarioFim: "08:00", inscritosAlunos: 20, inscritosProfessores: 2, vagasTotais: 44, jaInscrito: false },
-  { id: "4", dia: "terca", origem: "Feira de Santana", destino: "Salvador", horarioInicio: "18:30", horarioFim: "20:30", inscritosAlunos: 35, inscritosProfessores: 5, vagasTotais: 44, jaInscrito: false },
+  { id: "3", dia: "terça", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "06:00", horarioFim: "08:00", inscritosAlunos: 20, inscritosProfessores: 2, vagasTotais: 44, jaInscrito: false },
+  { id: "4", dia: "terça", origem: "Feira de Santana", destino: "Salvador", horarioInicio: "18:30", horarioFim: "20:30", inscritosAlunos: 35, inscritosProfessores: 5, vagasTotais: 44, jaInscrito: false },
   { id: "5", dia: "quarta", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "06:00", horarioFim: "08:00", inscritosAlunos: 12, inscritosProfessores: 3, vagasTotais: 44, jaInscrito: false },
   { id: "6", dia: "quarta", origem: "Feira de Santana", destino: "Salvador", horarioInicio: "18:30", horarioFim: "20:30", inscritosAlunos: 25, inscritosProfessores: 5, vagasTotais: 44, jaInscrito: false },
   { id: "7", dia: "quinta", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "06:00", horarioFim: "08:00", inscritosAlunos: 40, inscritosProfessores: 4, vagasTotais: 44, jaInscrito: true },
@@ -49,7 +34,7 @@ const VIAGENS_REQUISITOS = [
 
 const DIAS_SEMANA = [
   { id: "segunda", label: "Seg", full: "Segunda-feira" },
-  { id: "terca", label: "Ter", full: "Terça-feira" },
+  { id: "terça", label: "Ter", full: "Terça-feira" },
   { id: "quarta", label: "Qua", full: "Quarta-feira" },
   { id: "quinta", label: "Qui", full: "Quinta-feira" },
   { id: "sexta", label: "Sex", full: "Sexta-feira" },
@@ -72,11 +57,11 @@ export default function PaginaProfessor() {
   return (
     <div className="flex min-h-screen flex-col bg-[#f0f4f8]">
       <div className="bg-[#103173] relative overflow-hidden">
-        <Navigation tipoUsuario="professor" />
+        <Navigation tipoUsuario="Staff" />
 
       </div>
 
-      <main className="flex-1 max-w-lg md:max-w-3xl lg:max-w-5xl mx-auto w-full px-4 pt-10 pb-32">
+      <main className="flex-1 max-w-lg md:max-w-3xl lg:max-w-[80vw] mx-auto w-full px-4 pt-10 pb-32">
          <RoleHeader
           icon={<GraduationCap className="h-4 w-4 text-[#103173]" />}
           portalName="Portal do Professor"
@@ -85,9 +70,7 @@ export default function PaginaProfessor() {
           dateRange="(06/04 - 10/04)"
         />
 
-      <div className="sticky top-0 z-20 bg-[#f0f4f8]/95 backdrop-blur-md ">
         <WeekDaysMenu dias={DIAS_SEMANA} diaAtivo={diaAtivo} onDiaChange={setDiaAtivo} />
-      </div>
        
         <CurrentDayHeader dayName={diaAtual?.full} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
