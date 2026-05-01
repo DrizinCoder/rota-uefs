@@ -6,6 +6,10 @@ from datetime import date
 from app.core.exceptions import NotFoundException
 from app.repositories.trip_repository import TripRepository
 from app.DTOs.trip import CreateTripDTO, UpdateTripDTO
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class TripService:
     def __init__(self, trip_repository: TripRepository):

@@ -1,6 +1,10 @@
 from app.core.exceptions import NotFoundException
 from app.repositories.bus_repository import BusRepository
 from app.DTOs.fleet import BusCreateDTO, BusUpdateDTO, BusCreateBatchDTO, BusUpdateBatchDTO, BusBatchDeleteDTO
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class BusService:
     def __init__(self, repository: BusRepository):

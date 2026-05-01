@@ -3,6 +3,9 @@ import uuid
 from app.DTOs.auth import RegisterAdminDTO
 from app.DTOs.users import CreateAdminDTO
 from app.services.admin_service import AdminService
+import logging
+
+logger = logging.getLogger(__name__)
 
 class AdminController:
     def __init__(self, service: AdminService):

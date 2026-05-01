@@ -2,6 +2,10 @@ import uuid
 from app.core.exceptions import NotFoundException
 from app.repositories.route_repository import RouteRepository
 from app.DTOs.routes import CreateRouteDTO, UpdateRouteDTO
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class RouteService:
     def __init__(self, repository: RouteRepository):

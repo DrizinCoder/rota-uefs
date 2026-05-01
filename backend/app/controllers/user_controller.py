@@ -3,6 +3,10 @@ from app.services.email.use_cases import EmailUseCases
 from app.services.auth_service import AuthService
 import uuid
 from app.services.user_service import UserService
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class UserController:
     def __init__(self, user_service: UserService, auth_service: AuthService, email_use_cases: EmailUseCases):

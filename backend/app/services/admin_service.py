@@ -10,8 +10,12 @@ from app.enums.enums import UserProfile, AccessLevel, RegistrationStatus
 from app.models.models import User, Admin
 from app.repositories.user_repository import UserRepository
 from app.core.exceptions import ConflictException
+import logging
 
+logger = logging.getLogger(__name__)
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
 
 class AdminService:
     def __init__(self, user_repository: UserRepository):

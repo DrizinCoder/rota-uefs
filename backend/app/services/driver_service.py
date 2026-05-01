@@ -4,6 +4,10 @@ from app.core.exceptions import  BadRequestException, NotFoundException
 from app.repositories.user_repository import UserRepository
 from app.DTOs.driver import DriverPatchDTO
 from app.enums.enums import UserProfile
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class DriverService:
     def __init__(self, repository: UserRepository):

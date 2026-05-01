@@ -10,6 +10,9 @@ from app.core.exceptions import ForbiddenException, UnauthorizedException, NotFo
 from app.enums.enums import RegistrationStatus
 from app.services.email.use_cases import EmailUseCases
 from fastapi import BackgroundTasks
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class AuthController:

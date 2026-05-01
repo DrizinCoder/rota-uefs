@@ -4,6 +4,10 @@ from app.core.exceptions import BadRequestException, ConflictException, NotFound
 from app.repositories.user_repository import UserRepository
 
 from app.DTOs.users import PasswordUpdate, PhoneUpdate
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class UserService:
     def __init__(self, repository: UserRepository):

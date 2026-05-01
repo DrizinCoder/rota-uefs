@@ -1,6 +1,10 @@
 from app.core.exceptions import NotFoundException
 from datetime import date
 from app.repositories.dashboard_repository import DashboardRepository
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class DashboardService:
     def __init__(self, repository: DashboardRepository):
