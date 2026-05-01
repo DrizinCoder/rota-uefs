@@ -14,7 +14,7 @@ interface WeekDaysMenuProps {
 
 export function WeekDaysMenu({ dias, diaAtivo, onDiaChange }: WeekDaysMenuProps) {
   return (
-    <div className="max-w-lg md:max-w-3xl mt-2.5 lg:max-w-5xl mx-auto px-0 py-0">
+    <div className="max-w-xl md:max-w-3xl mt-2.5 lg:max-w-5xl mr-auto px-0 py-0">
       <div className="flex gap-2">
         {dias.map((dia) => (
           <button
@@ -26,7 +26,7 @@ export function WeekDaysMenu({ dias, diaAtivo, onDiaChange }: WeekDaysMenuProps)
                 : "bg-white text-[#103173]/70"
             }`}
           >
-            {dia.label}
+            {dia.id}
           </button>
         ))}
       </div>

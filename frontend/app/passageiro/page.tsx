@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
 import { FooterSection } from "@/components/landing/footer-section";
-import { Button } from "@/components/ui/button";
 import { RoleHeader } from "@/components/shared/role-header";
 import { DevModeBar } from "@/components/shared/dev-mode-bar";
 import { WeekDaysMenu } from "@/components/shared/week-days-menu";
@@ -16,31 +15,21 @@ import { TripModeToggle } from "@/entities/viagem/ui/TripModeToggle";
 import { ManageSubscriptionButton } from "@/features/gerenciar-inscricao/ui/ManageSubscriptionButton";
 import { SubscribeButton } from "@/features/inscrever-rota/ui/SubscribeButton";
 
-import {
-  MapPin,
-  ArrowRight,
-  Bus,
-  User,
-  UserCircle,
-  ShieldAlert,
-  Ticket,
-  CircleDot,
-  GraduationCap,
-  Users
-} from "lucide-react";
-
+import {GraduationCap} from "lucide-react";
 
 
 // Dados mock atualizados
 const VIAGENS_REQUISITOS = [
   { id: "1", dia: "segunda", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "06:00", horarioFim: "08:00", inscritosAlunos: 15, inscritosProfessores: 3, quorum: 20, vagasTotais: 44, jaInscrito: false },
   { id: "2", dia: "segunda", origem: "Feira de Santana", destino: "Salvador", horarioInicio: "18:30", horarioFim: "20:30", inscritosAlunos: 30, inscritosProfessores: 5, quorum: 20, vagasTotais: 44, jaInscrito: true },
-  { id: "3", dia: "terca", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "07:00", horarioFim: "09:00", inscritosAlunos: 8, inscritosProfessores: 2, quorum: 20, vagasTotais: 44, jaInscrito: false },
+  { id: "3", dia: "segunda", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "15:00", horarioFim: "17:00", inscritosAlunos: 30, inscritosProfessores: 5, quorum: 20, vagasTotais: 44, jaInscrito: false },
+  { id: "4", dia: "segunda", origem: "Feira de Santana", destino: "Salvador", horarioInicio: "23:00", horarioFim: "01:00", inscritosAlunos: 30, inscritosProfessores: 5, quorum: 20, vagasTotais: 44, jaInscrito: false },
+  { id: "5", dia: "terça", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "07:00", horarioFim: "09:00", inscritosAlunos: 8, inscritosProfessores: 2, quorum: 20, vagasTotais: 44, jaInscrito: false },
 ];
 
 const DIAS_SEMANA = [
   { id: "segunda", label: "Seg", full: "Segunda-feira" },
-  { id: "terca", label: "Ter", full: "Terça-feira" },
+  { id: "terça", label: "Ter", full: "Terça-feira" },
   { id: "quarta", label: "Qua", full: "Quarta-feira" },
   { id: "quinta", label: "Qui", full: "Quinta-feira" },
   { id: "sexta", label: "Sex", full: "Sexta-feira" },
@@ -65,10 +54,10 @@ export default function PaginaAluno() {
   return (
     <div className="flex min-h-screen flex-col bg-[#f0f4f8]">
       <div className="bg-[#103173] relative overflow-hidden">
-        <Navigation tipoUsuario="aluno" />
+        <Navigation tipoUsuario="Student" />
       </div>
 
-      <div className="flex-1 max-w-lg md:max-w-3xl lg:max-w-5xl mx-auto w-full px-4 pt-10 pb-32">
+      <div className="flex-1 max-w-lg md:max-w-3xl lg:max-w-[80vw] mx-auto w-full px-4 pt-10 pb-32">
         <RoleHeader
           icon={<GraduationCap className="h-4 w-4 text-[#103173]" />}
           portalName="Portal do Aluno"

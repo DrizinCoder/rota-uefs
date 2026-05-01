@@ -46,9 +46,6 @@ export function StatusViagemScreen() {
           >
             <ArrowLeft className="mr-2 h-4 w-4" /> VOLTAR
           </Button>
-          <Badge className="bg-[#23B99A] text-white px-4 py-1 text-sm font-black">
-            SUA VAGA ESTÁ GARANTIDA
-          </Badge>
         </div>
 
         <div className="space-y-6">
