@@ -11,10 +11,13 @@ class DashboardService:
         self.repository = repository
 
     async def get_home_info(self, today: date):
+        logger.info(f"Dashboard service info requested | Today: {today}")
+
         totals, buses = await self.repository.get_dashboard(today)
         if not totals:
             raise NotFoundException("Nenhuma informação encontrada")
-        
+
+        logger.info(f"Dashboard service info retrieved successfully | Buses: {len(buses)}")
         return {
             "summary": {
                 "total_buses": totals.get("total_buses"),

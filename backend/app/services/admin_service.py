@@ -22,6 +22,8 @@ class AdminService:
         self.user_repository = user_repository
     
     async def create_admin(self, admin_data: CreateAdminDTO) -> Admin:
+        logger.info(f"Admin creation requested | Registration: {admin_data.registration_id}")
+
         existing_user = await self.user_repository.get_by_registration_id(admin_data.registration_id)
         
         if existing_user and not existing_user.is_anonymized:
@@ -51,6 +53,7 @@ class AdminService:
             if existing_admin:
                 existing_admin.access_level = AccessLevel(admin_data.access_level)
                 await self.user_repository.session.commit()
+                logger.info(f"Admin created successfully (reactivated) | Admin ID: {existing_admin.admin_id}")
                 return existing_admin
             
             admin = Admin(
@@ -60,6 +63,7 @@ class AdminService:
             self.user_repository.session.add(admin)
             await self.user_repository.session.commit()
             await self.user_repository.session.refresh(admin)
+            logger.info(f"Admin created successfully (reactivated) | Admin ID: {admin.admin_id}")
             return admin
 
         password_bytes = admin_data.password.encode('utf-8')
@@ -100,15 +104,28 @@ class AdminService:
         self.user_repository.session.add(admin)
         await self.user_repository.session.commit()
 
+        logger.info(f"Admin created successfully | Admin ID: {user.user_id}")
         return await self.get_admin_by_id(user.user_id)
 
     async def get_admin_by_id(self, admin_id: uuid.UUID) -> Optional[Admin]:
-        return await self.user_repository.get_admin_full(admin_id)
+        logger.info(f"Admin lookup requested | Admin ID: {admin_id}")
+
+        result = await self.user_repository.get_admin_full(admin_id)
+
+        logger.info(f"Admin lookup completed | Admin ID: {admin_id} | Found: {result is not None}")
+        return result
 
     async def get_alls_admins(self) -> List[Admin]:
-        return await self.user_repository.list_all_admins_full()
+        logger.info("Admin list requested")
+
+        result = await self.user_repository.list_all_admins_full()
+
+        logger.info(f"Admin list retrieved successfully | Count: {len(result) if result else 0}")
+        return result
 
     async def update_admin(self, admin_id: uuid.UUID, update_data: dict) -> Optional[Admin]:
+        logger.info(f"Admin update requested | Admin ID: {admin_id}")
+
         admin = await self.user_repository.get_admin_full(admin_id)  
         if not admin:
             return None
@@ -127,9 +144,13 @@ class AdminService:
 
         await self.user_repository.session.commit()
         await self.user_repository.session.refresh(admin)
+
+        logger.info(f"Admin updated successfully | Admin ID: {admin_id}")
         return admin
 
     async def delete_admin(self, admin_id: uuid.UUID) -> bool:
+        logger.info(f"Admin deletion requested | Admin ID: {admin_id}")
+
         admin = await self.user_repository.get_admin_full(admin_id)  
         if not admin:
             return False
@@ -137,40 +158,70 @@ class AdminService:
         if admin.user.is_anonymized:
             return False
 
-        return await self.user_repository.anonymize(admin_id)
+        result = await self.user_repository.anonymize(admin_id)
+
+        logger.info(f"Admin deleted successfully | Admin ID: {admin_id}")
+        return result
 
     async def register_motorista(self, dados: RegisterMotoristaDTO):
+        logger.info(f"Driver registration requested | Registration: {dados.registration_id}")
+
         driver = await self.user_repository.get_by_registration_id(dados.registration_id)
         if driver:
             raise ConflictException("Motorista já cadastrado")
         
         driver_created, temp_password = await self.user_repository.create_driver(dados)
+
+        logger.info(f"Driver registered successfully | Registration: {dados.registration_id}")
         return driver_created, temp_password
 
     async def delete_account(self, user_id: uuid.UUID):
+        logger.info(f"Account deletion requested | User ID: {user_id}")
+
         deleted_user = await self.user_repository.anonymize(user_id)
         if not deleted_user:
             return None
+
+        logger.info(f"Account deleted successfully | User ID: {user_id}")
         return deleted_user
 
     async def list_drivers(self):
-        return await self.user_repository.list_all_drivers()
+        logger.info("Drivers list requested")
+
+        result = await self.user_repository.list_all_drivers()
+
+        logger.info(f"Drivers list retrieved successfully | Count: {len(result) if result else 0}")
+        return result
 
     async def list_staff_status_pending(self):
-        return await self.user_repository.list_all_staff_status_peding()
+        logger.info("Pending staff list requested")
+
+        result = await self.user_repository.list_all_staff_status_peding()
+
+        logger.info(f"Pending staff list retrieved successfully | Count: {len(result) if result else 0}")
+        return result
 
     async def get_driver(self, driver_id: uuid.UUID):
-        return await self.user_repository.get_by_id(driver_id)
+        logger.info(f"Driver lookup requested | Driver ID: {driver_id}")
+
+        result = await self.user_repository.get_by_id(driver_id)
+
+        logger.info(f"Driver lookup completed | Driver ID: {driver_id} | Found: {result is not None}")
+        return result
 
     async def update_status_staff(self, user_id: uuid.UUID, status: bool):
+        logger.info(f"Staff status update requested | User ID: {user_id} | Status: {status}")
+
         user = await self.user_repository.update_status_staff(user_id, status)
         if not user:
             raise NotFoundException("Usuário não encontrado")
         
         if status == False:
             await self.user_repository.anonymize(user_id)
+            logger.info(f"Staff status updated and anonymized | User ID: {user_id}")
             return True
-        
+
+        logger.info(f"Staff status updated successfully | User ID: {user_id} | Status: {status}")
         return user
 
     def _serialize_admin(self, admin: Admin) -> Dict[str, Any]:
