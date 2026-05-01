@@ -94,7 +94,6 @@ export default function PaginaAdmin() {
   return (
      <div className="flex h-screen bg-slate-50 font-sans text-slate-800 selection:bg-cyan-100 selection:text-cyan-900">
       
-      {/* SIDEBAR (Componente Extraído) */}
       <AdminSidebar />
 
       {/* MAIN CONTENT */}
