@@ -1,12 +1,14 @@
 "use client";
 
-import { Menu, MessageSquare, Plus, Bus } from "lucide-react";
+import { Menu, Plus, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface AdminTopbarProps {
   title?: string;
   subtitle?: string;
   buttonText?: string;
+  buttonIcon?: LucideIcon;
+  buttonVariant?: "primary" | "secondary" | "outline";
   onAction?: () => void;
   /** @deprecated use onAction instead */
   onNovoOnibus?: () => void;
@@ -16,10 +18,18 @@ export function AdminTopbar({
   title = "GESTÃO DE FROTA", 
   subtitle = "Visão geral e controle operacional.", 
   buttonText = "Novo Ônibus",
+  buttonIcon: Icon = Plus,
+  buttonVariant = "primary",
   onAction,
   onNovoOnibus 
 }: AdminTopbarProps) {
   const handleClick = onAction || onNovoOnibus;
+
+  const variantClasses = {
+    primary: "bg-[#23B99A] hover:bg-[#1d957c] text-white border-transparent",
+    secondary: "bg-slate-100 hover:bg-slate-200 text-slate-700 border-transparent",
+    outline: "bg-white hover:bg-slate-50 text-slate-700 border-slate-200 border"
+  };
   return (
     <header className="h-20 bg-white flex items-center justify-between px-6 shadow-sm z-10 shrink-0 border-b border-slate-200">
       <div className="flex items-center gap-4">
@@ -39,10 +49,10 @@ export function AdminTopbar({
         </div>
         {handleClick && (
           <Button
-            className="h-10 bg-[#23B99A] hover:bg-[#1d957c] text-white font-semibold shadow-sm transition-all rounded-lg"
+            className={`h-10 font-semibold shadow-sm transition-all rounded-lg ${variantClasses[buttonVariant]}`}
             onClick={handleClick}
           >
-            <Plus className="h-4 w-4 mr-2" /> {buttonText}
+            <Icon className="h-4 w-4 mr-2" /> {buttonText}
           </Button>
         )}
       </div>
