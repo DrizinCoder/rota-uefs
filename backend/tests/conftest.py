@@ -1,5 +1,9 @@
+import os
 import sys
 from pathlib import Path
+
+# Ensure required environment variables are available during test import.
+os.environ.setdefault("REFRESH_TOKEN_EXPIRE_DAYS", "30")
 
 import pytest
 from contextlib import asynccontextmanager
