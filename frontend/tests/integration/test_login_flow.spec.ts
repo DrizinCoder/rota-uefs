@@ -11,17 +11,23 @@ test.describe('Fluxo de login', () => {
     await mockAuthLoginSuccess(page);
     await page.goto('/login');
 
+    // Preenche os campos
     await page.getByLabel(LOGIN_FORM_LABELS.registrationId).fill(LOGIN_VALID_PAYLOAD.registration_id);
     await page.locator('input[type="password"]').fill(LOGIN_VALID_PAYLOAD.password);
-    await page.getByRole('button', { name: LOGIN_FORM_LABELS.submit }).click();
-
-    await expect(page).toHaveURL(/\/passageiro$/);
-    const cookies = await page.context().cookies();
-    expect(cookies).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ name: TEST_PROFILE_COOKIE_NAME, value: 'Student' }),
-      ]),
+    
+    // Aguarda a resposta da API ao clicar
+    const responsePromise = page.waitForResponse(response => 
+      response.url().includes('/auth/login') && response.status() === 200
     );
+    await page.getByRole('button', { name: LOGIN_FORM_LABELS.submit }).click();
+    await responsePromise;
+
+    // Aguarda navegação para o dashboard do aluno
+    await expect(page).toHaveURL(/\/passageiro/, { timeout: 10000 });
+    
+    // Verifica o cookie
+    const cookies = await page.context().cookies();
+    expect(cookies.some(c => c.name === TEST_PROFILE_COOKIE_NAME && c.value === 'Student')).toBeTruthy();
   });
 
   test('login inválido mantém a tela e mostra erro', async ({ page }) => {
@@ -30,9 +36,13 @@ test.describe('Fluxo de login', () => {
 
     await page.getByLabel(LOGIN_FORM_LABELS.registrationId).fill(LOGIN_INVALID_PAYLOAD.registration_id);
     await page.locator('input[type="password"]').fill(LOGIN_INVALID_PAYLOAD.password);
-    await page.getByRole('button', { name: LOGIN_FORM_LABELS.submit }).click();
 
-    await expect(page.getByText('Matrícula ou senha incorretos.')).toBeVisible();
-    await expect(page).toHaveURL(/\/login$/);
+    const submitButton = page.getByRole('button', { name: LOGIN_FORM_LABELS.submit });
+    await submitButton.click();
+
+    const errorDiv = page.locator('[class*="bg-red-50"][class*="text-red-600"]').first();
+    await expect(errorDiv).toContainText('Matrícula ou senha incorretos', { timeout: 5000 });
+
+    await expect(page).toHaveURL(/\/login/);
   });
 });

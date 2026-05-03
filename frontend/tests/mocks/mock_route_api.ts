@@ -8,10 +8,16 @@ export async function mockJsonRoute(
   status = 200,
 ) {
   await page.route(urlPattern, async (route) => {
-    await route.fulfill({
-      status,
-      contentType: 'application/json',
-      body: JSON.stringify(body),
-    });
+    const request = route.request();
+    if (request.method() === 'POST' || request.method() === 'GET') {
+      await route.fulfill({
+        status,
+        contentType: 'application/json',
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify(body),
+      });
+    } else {
+      await route.continue();
+    }
   });
 }

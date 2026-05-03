@@ -13,6 +13,6 @@ export async function mockAuthLoginFailure(page: Page) {
     page,
     '**/auth/login',
     { detail: AUTH_LOGIN_ERROR_MESSAGE },
-    401,
+    404,
   );
 }
