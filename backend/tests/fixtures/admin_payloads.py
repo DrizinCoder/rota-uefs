@@ -1,11 +1,25 @@
 ADMIN_CREATE_VALID = {
-    "name": "Admin UEFS",
-    "senha": "Admin@123",
-    "matricula": "ADM0001",
-    "telefone": "75999990005",
-    "e_mail": "admin@uefs.br",
+    "full_name": "Admin UEFS",
+    "registration_id": "ADM0001",
+    "phone": "+5575999990005",
+    "email": "admin@uefs.br",
+    "password": "Admin@123",
+    "profile": "Admin",
+    "access_level": "Operator",
 }
 
 ADMIN_CREATE_INVALID = {
-    "name": "Admin UEFS"
+    "full_name": "Admin UEFS",
+}
+
+ADMIN_UPDATE_VALID = {
+    "full_name": "Admin UEFS Atualizado",
+    "phone": "+5575999990006",
+    "email": "admin_updated@uefs.br",
+    "access_level": "Operator",
+}
+
+ADMIN_UPDATE_INVALID = {
+    "full_name": "",
+    "phone": "123",
 }
