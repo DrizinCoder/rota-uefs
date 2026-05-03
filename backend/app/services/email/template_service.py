@@ -1,5 +1,9 @@
 from jinja2 import Environment, FileSystemLoader
 import os
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class TemplateService:
     def __init__(self):

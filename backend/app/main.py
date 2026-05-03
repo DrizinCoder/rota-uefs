@@ -1,15 +1,18 @@
+from app.middleware.log_middleware import LogMiddleware
 import logging
 
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from app.routers.routes import router
 from app.database.db import init_db, engine
 from app.core.handlers import register_exception_handlers
 from app.core.config import settings
-logger = logging.getLogger("uvicorn")
 from fastapi.middleware.cors import CORSMiddleware
+from app.core.logger_config import setup_app_logging
+
+setup_app_logging()
+logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -30,6 +33,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(LogMiddleware)
 
 register_exception_handlers(app)
 
