@@ -26,7 +26,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Rota UEFS — Transporte Universitário Seguro e Eficiente",
+  title: "Rota UEFS — Transporte Universitário",
   description:
     "Sistema de gestão de transporte universitário entre Salvador e Feira de Santana para alunos e professores da UEFS.",
 };

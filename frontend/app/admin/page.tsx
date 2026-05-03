@@ -2,13 +2,10 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Navigation } from "@/components/landing/navigation";
-import { NavigationAdmin } from "@/components/landing/navigation_admin";
-import { FooterSection } from "@/components/landing/footer-section";
 
 // Importações dos novos componentes extraídos
-import { AdminHeader } from "@/components/admin/admin-header";
-import { DevModeBar } from "@/components/shared/dev-mode-bar";
+import { AdminSidebar } from "@/components/admin/admin-sidebar";
+import { AdminTopbar } from "@/components/admin/admin-topbar";
 import { AdminMetrics } from "@/features/gerenciar-frota/ui/admin-metrics";
 import { AdminFleetList, type FiltroStatus } from "@/features/gerenciar-frota/ui/admin-fleet-list";
 import { adminService, type HomeAdmin, type BusHomeAdmin } from "@/services/adminService";
@@ -95,34 +92,43 @@ export default function PaginaAdmin() {
 };
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50 font-sans pb-24 text-slate-900">
-      <Navigation tipoUsuario="admin"/>
+     <div className="flex h-screen bg-slate-50 font-sans text-slate-800 selection:bg-cyan-100 selection:text-cyan-900">
       
-      <main className="flex-1 w-full max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-8">
-        <AdminHeader onNovoOnibus={() => abrirTelaCadastro()} />
+      <AdminSidebar />
 
-        <AdminMetrics 
-          totalFrota={metricas.totalFrota} 
-          onibusAtivos={metricas.onibusAtivos}  
-          viagensHoje={metricas.viagensHoje} 
-        />
+      {/* MAIN CONTENT */}
+      <main className="flex-1 flex flex-col overflow-hidden">
+        
+        {/* HEADER (Componente Extraído) */}
+        <AdminTopbar onNovoOnibus={() => abrirTelaCadastro()} />
 
-        <NavigationAdmin />
+        {/* DASHBOARD GRID E LISTA */}
+        <div className="flex-1 overflow-auto p-4 sm:p-6 bg-slate-50/50">
+          <div className="max-w-7xl mx-auto space-y-6">
+            
+            {/* GRÁFICOS / MÉTRICAS (Feature Extraída) */}
+            <AdminMetrics 
+              totalFrota={metricas.totalFrota}
+              onibusAtivos={metricas.onibusAtivos}
+              viagensHoje={metricas.viagensHoje}
+            />
 
-        <AdminFleetList 
-          frota={frotaFiltrada}
-          busca={busca}
-          setBusca={setBusca}
-          filtroStatus={filtroStatus}
-          setFiltroStatus={setFiltroStatus}
-          onEditar={abrirTelaCadastro}
-          onRemover={handleRemover}
-        />
+            {/* LISTA DE FROTA (Feature Original) */}
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out mt-8">
+              <AdminFleetList 
+                frota={frotaFiltrada}
+                busca={busca}
+                setBusca={setBusca}
+                filtroStatus={filtroStatus}
+                setFiltroStatus={setFiltroStatus}
+                onEditar={abrirTelaCadastro}
+                onRemover={handleRemover}
+              />
+            </div>
+            
+          </div>
+        </div>
       </main>
-
-      <FooterSection />
-      
-      <DevModeBar />
     </div>
   );
 }
