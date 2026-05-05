@@ -14,6 +14,10 @@ from app.repositories.user_repository import UserRepository
 from app.services.email.use_cases import EmailUseCases
 from app.DTOs.auth import RegisterAlunoDTO
 from app.core.exceptions import ConflictException, NotFoundException, UnauthorizedException
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -109,6 +113,8 @@ class AuthService:
         }
     
     async def register_student(self, dados: RegisterAlunoDTO, background_tasks: BackgroundTasks,):
+        logger.info(f"Student registration requested | Email: {dados.email}")
+
         existing = await self.repository.get_by_email(dados.email)
         if existing:
             raise ConflictException("Usuário já cadastrado")
@@ -136,18 +142,24 @@ class AuthService:
             first_name=first_name,
             link=link)  
 
-        
+        logger.info(f"Student registered successfully | User ID: {user.user_id}")
         return user
     
     async def register_staff(self, dados: RegisterServidorDTO):
+        logger.info(f"Staff registration requested | Email: {dados.email}")
+
         existing = await self.repository.get_by_email(dados.email)
         if existing:
             raise ConflictException("Usuário já cadastrado")
         
         user = await self.repository.create_staff(dados)
+
+        logger.info(f"Staff registered successfully | User ID: {user.user_id}")
         return user
 
     async def activate_account(self, token: str):
+        logger.info("Account activation requested")
+
         try:
             payload = jwt.decode(
                 token,
@@ -170,6 +182,7 @@ class AuthService:
                 user.registration_status = RegistrationStatus.ACTIVE
                 await self.repository.update(user)
 
+            logger.info(f"Account activated successfully | User ID: {user_id}")
             return self.create_token_for_user(user)
 
         except JWTError:

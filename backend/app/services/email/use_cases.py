@@ -1,6 +1,9 @@
 from .email_service import EmailService
 from .template_service import TemplateService
 from app.core.exceptions import InternalServerException
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class EmailUseCases:

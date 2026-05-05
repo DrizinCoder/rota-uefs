@@ -1,3 +1,5 @@
+from app.DTOs.trip import TripDetailFeedItem
+from app.DTOs.trip import TripFeedItem
 from calendar import calendar, monthrange
 from datetime import timedelta
 from app.enums.enums import TripRecurrence
@@ -6,12 +8,18 @@ from datetime import date
 from app.core.exceptions import NotFoundException
 from app.repositories.trip_repository import TripRepository
 from app.DTOs.trip import CreateTripDTO, UpdateTripDTO
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class TripService:
     def __init__(self, trip_repository: TripRepository):
         self.trip_repository = trip_repository
 
     async def create(self, data: CreateTripDTO):
+        logger.info(f"Trip creation requested | Date: {data.trip_date} | Recurrence: {data.recurrence}")
+
         dates = self._generate_dates(data.trip_date, data.recurrence)
         
         trips = []
@@ -19,34 +27,67 @@ class TripService:
             trip_data = data.model_copy(update={"trip_date": trip_date})
             trip = await self.trip_repository.create(trip_data)
             trips.append(trip)
-        
+
+        logger.info(f"Trips created successfully | Count: {len(trips)}")
         return [trip.model_dump(mode='json') for trip in trips]
 
     async def get_all(self):
-        return await self.trip_repository.get_all()
+        logger.info("Trip list requested")
+
+        result = await self.trip_repository.get_all()
+
+        logger.info(f"Trip list retrieved successfully | Count: {len(result) if result else 0}")
+        return result
 
     async def get_by_id(self, trip_id: uuid.UUID):
+        logger.info(f"Trip lookup requested | Trip ID: {trip_id}")
+
         trip = await self.trip_repository.get_by_id(trip_id)
         if not trip:
             raise NotFoundException("Viagem não encontrada")
+
+        logger.info(f"Trip retrieved successfully | Trip ID: {trip_id}")
         return trip.model_dump(mode='json')
 
     async def get_by_date(self, trip_date: date):
+        logger.info(f"Trips by date requested | Date: {trip_date}")
+
         trips = await self.trip_repository.get_by_date(trip_date)
+
+        logger.info(f"Trips by date retrieved successfully | Date: {trip_date} | Count: {len(trips)}")
         return [trip.model_dump(mode='json') for trip in trips]
 
     async def patch(self, trip_id: uuid.UUID, data: UpdateTripDTO):
+        logger.info(f"Trip update requested | Trip ID: {trip_id}")
+
         trip = await self.trip_repository.patch(trip_id, data)
         if not trip:
             raise NotFoundException("Viagem não encontrada")
+
+        logger.info(f"Trip updated successfully | Trip ID: {trip_id}")
         return trip.model_dump(mode='json')
 
     async def delete(self, trip_id: uuid.UUID):
+        logger.info(f"Trip deletion requested | Trip ID: {trip_id}")
+
         trip = await self.trip_repository.delete(trip_id)
         if not trip:
             raise NotFoundException("Viagem não encontrada")
+
+        logger.info(f"Trip deleted successfully | Trip ID: {trip_id}")
         return trip.model_dump(mode='json')
     
+    async def get_trips_for_student_feed(self, date: date) -> list[TripFeedItem]:
+        logger.info(f"Trips for feed requested | Date: {date}")
+
+        trips = await self.trip_repository.get_trips_for_feed_by_date(date)
+
+        if not trips:
+            return []
+
+        logger.info(f"Trips for feed retrieved | Date: {date} | Count: {len(trips)}")
+        return trips    
+
     def _generate_dates(self, start_date: date, recurrence: TripRecurrence) -> list[date]:
         if recurrence == TripRecurrence.SINGLE:
             return [start_date]
@@ -72,3 +113,13 @@ class TripService:
                     break
                 current += timedelta(days=1)
             return dates
+
+    async def get_trip_detail_for_feed(self, trip_id: uuid.UUID) -> TripDetailFeedItem:
+        logger.info(f"Trip detail for feed requested | Trip ID: {trip_id}")
+
+        trip = await self.trip_repository.get_trip_detail_for_feed(trip_id)
+        if not trip:
+            raise NotFoundException("Viagem não encontrada")
+
+        logger.info(f"Trip detail retrieved successfully | Trip ID: {trip_id}")
+        return trip
