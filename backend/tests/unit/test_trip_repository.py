@@ -17,6 +17,8 @@ def test_get_all_returns_driver_and_route_names():
 
     route = MagicMock()
     route.name = "Rota Teste"
+    route.boarding_point = "Ponto de Embarque Teste"
+    route.drop_off_point = "Ponto de Desembarque Teste"
 
     trip = Trip(
         bus_license_plate="ABC1234",
@@ -40,6 +42,8 @@ def test_get_all_returns_driver_and_route_names():
             **trip.model_dump(mode="json"),
             "driver_name": "Motorista Teste",
             "route_name": "Rota Teste",
+            "boarding_point": "Ponto de Embarque Teste",
+            "drop_off_point": "Ponto de Desembarque Teste",
         }
     ]
 
