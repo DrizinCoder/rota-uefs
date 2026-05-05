@@ -1,3 +1,5 @@
+from app.DTOs.trip import TripDetailFeedItem
+import uuid
 from app.DTOs.trip import TripFeedItem
 from datetime import datetime
 from app.routers.users.dependencies import get_trip_service
@@ -43,4 +45,13 @@ async def get_student_trips(
     date: date = Query(...),
 ):
     result = await service.get_trips_for_student_feed(date)
+    return ResponseHandler.ok(result)
+
+@student_router.get("/trips/{trip_id}", response_model=TripDetailFeedItem)
+async def get_trip_detail(
+    trip_id: uuid.UUID,
+    current_user: TokenData = Depends(get_current_user),
+    service: TripService = Depends(get_trip_service),
+):
+    result = await service.get_trip_detail_for_feed(trip_id)
     return ResponseHandler.ok(result)

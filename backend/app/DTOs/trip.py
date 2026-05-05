@@ -30,3 +30,16 @@ class TripFeedItem(BaseModel):
     student_count: int
     staff_count: int
     bus_capacity: int
+
+class TripDetailFeedItem(BaseModel):
+    trip_id: uuid.UUID
+    route_id: uuid.UUID
+    trip_status: TripStatus
+    boarding_point: str
+    drop_off_point: str
+    departure_time: time
+    estimated_arrival: time
+    bus_capacity: int
+    total_enrolled: int
+    driver_name: str
+    bus_plate: str

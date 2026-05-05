@@ -1,3 +1,4 @@
+from app.DTOs.trip import TripDetailFeedItem
 from app.DTOs.trip import TripFeedItem
 from calendar import calendar, monthrange
 from datetime import timedelta
@@ -112,3 +113,13 @@ class TripService:
                     break
                 current += timedelta(days=1)
             return dates
+
+    async def get_trip_detail_for_feed(self, trip_id: uuid.UUID) -> TripDetailFeedItem:
+        logger.info(f"Trip detail for feed requested | Trip ID: {trip_id}")
+
+        trip = await self.trip_repository.get_trip_detail_for_feed(trip_id)
+        if not trip:
+            raise NotFoundException("Viagem não encontrada")
+
+        logger.info(f"Trip detail retrieved successfully | Trip ID: {trip_id}")
+        return trip
