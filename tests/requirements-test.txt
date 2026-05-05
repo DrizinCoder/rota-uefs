@@ -5,4 +5,19 @@ pytest==8.4.0
 pytest-cov==4.1.0
 requests==2.31.0
 
-#Dependencia do Frontend
+# Dependencias do Frontend
+
+# 1) instalar dependências do frontend (apenas se ainda não instalou)
+# cd frontend
+# npm install
+
+# 2) instalar dependências do runner de testes (Playwright) e navegadores
+# cd tests/tests-frontend
+# npm install
+# npx playwright install
+
+# 3) rodar testes (a partir da pasta de testes)
+
+# npm run test:e2e
+# ou a partir da raiz
+# npm --prefix tests/tests-frontend run test:e2e

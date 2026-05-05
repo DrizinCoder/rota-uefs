@@ -4,7 +4,8 @@ import { defineConfig, devices } from '@playwright/test';
 const baseURL = 'http://127.0.0.1:3000';
 
 export default defineConfig({
-  testDir: './tests',
+  // tests are located in this directory
+  testDir: './',
   testMatch: /.*\.spec\.ts/,
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
@@ -16,7 +17,8 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   webServer: {
-    command: 'npm run dev',
+    // start frontend from the frontend directory
+    command: 'npm --prefix ../frontend run dev',
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
