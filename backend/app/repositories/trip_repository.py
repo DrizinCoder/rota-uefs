@@ -1,3 +1,6 @@
+from app.utils.utils import add_ninety_minutes
+from app.DTOs.trip import TripDetailFeedItem
+from typing import Optional
 from sqlalchemy.orm import selectinload
 import uuid
 from datetime import date
@@ -6,6 +9,11 @@ from sqlalchemy import and_, select
 from app.models.models import Trip
 from app.enums.enums import TripStatus
 from app.DTOs.trip import CreateTripDTO, UpdateTripDTO
+from sqlmodel import select, func
+from app.models.models import Trip, Route, Bus, Reservation, User
+from app.enums.enums import UserProfile
+from app.DTOs.trip import TripFeedItem
+from sqlalchemy import case
 
 class TripRepository:
     def __init__(self, session: AsyncSession):
@@ -78,3 +86,96 @@ class TripRepository:
         await self.session.delete(trip)
         await self.session.commit()
         return trip
+
+    async def get_trips_for_feed_by_date(self, target_date: date) -> list[TripFeedItem]:
+
+        
+        student_count_expr = func.sum(
+            case((User.profile == UserProfile.STUDENT, 1), else_=0)
+        ).label("student_count")
+
+        staff_count_expr = func.sum(
+            case((User.profile == UserProfile.STAFF, 1), else_=0)
+        ).label("staff_count")
+
+        statement = (
+            select(
+                Trip.trip_id,
+                Route.boarding_point,
+                Route.drop_off_point,
+                Trip.departure_time,
+                func.coalesce(student_count_expr, 0).label("student_count"),
+                func.coalesce(staff_count_expr, 0).label("staff_count"),
+                Bus.capacity.label("bus_capacity"),
+            )
+            .join(Route, Route.route_id == Trip.route_id)
+            .join(Bus, Bus.bus_plate == Trip.bus_license_plate)
+            .outerjoin(Reservation, Reservation.trip_id == Trip.trip_id)  # um único join
+            .outerjoin(User, User.user_id == Reservation.user_id)
+            .where(Trip.trip_date == target_date)
+            .group_by(Trip.trip_id, Route.boarding_point, Route.drop_off_point, Trip.departure_time, Bus.capacity)
+            .order_by(Trip.departure_time)
+        )
+
+        result = await self.session.execute(statement)
+        rows = result.all()
+
+        return [
+            TripFeedItem(
+                trip_id=row.trip_id,
+                boarding_point=row.boarding_point,
+                drop_off_point=row.drop_off_point,
+                departure_time=row.departure_time,
+                student_count=row.student_count,
+                staff_count=row.staff_count,
+                bus_capacity=row.bus_capacity,
+            )
+            for row in rows
+        ]
+    
+    async def get_trip_detail_for_feed(self, trip_id: uuid.UUID) -> Optional[TripDetailFeedItem]:
+
+        enrolled_sq = (
+            select(func.count(Reservation.reservation_id))
+            .where(Reservation.trip_id == trip_id)
+            .scalar_subquery()
+        )
+
+        statement = (
+            select(
+                Trip.trip_id,
+                Trip.route_id,
+                Trip.status.label("trip_status"),
+                Trip.departure_time,
+                Route.boarding_point,
+                Route.drop_off_point,
+                Bus.capacity.label("bus_capacity"),
+                User.full_name.label("driver_name"),
+                Trip.bus_license_plate.label("bus_plate"),
+                enrolled_sq.label("total_enrolled"),
+            )
+            .join(Route, Route.route_id == Trip.route_id)
+            .join(Bus, Bus.bus_plate == Trip.bus_license_plate)
+            .join(User, User.user_id == Trip.driver_id)
+            .where(Trip.trip_id == trip_id)
+        )
+
+        result = await self.session.execute(statement)
+        row = result.first()
+
+        if not row:
+            return None
+
+        return TripDetailFeedItem(
+            trip_id=row.trip_id,
+            route_id=row.route_id,
+            trip_status=row.trip_status,
+            boarding_point=row.boarding_point,
+            drop_off_point=row.drop_off_point,
+            departure_time=row.departure_time,
+            estimated_arrival=add_ninety_minutes(row.departure_time),
+            bus_capacity=row.bus_capacity,
+            total_enrolled=row.total_enrolled,
+            driver_name=row.driver_name,
+            bus_plate=row.bus_plate,
+        )
