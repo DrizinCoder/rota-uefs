@@ -1,3 +1,4 @@
+from pydantic import BaseModel
 from app.enums.enums import TripRecurrence
 import uuid
 from datetime import date, time
@@ -20,3 +21,12 @@ class UpdateTripDTO(SQLModel):
     trip_date: Optional[date] = None
     departure_time: Optional[time] = None
     status: Optional[TripStatus] = None
+
+class TripFeedItem(BaseModel):
+    trip_id: uuid.UUID
+    boarding_point: str
+    drop_off_point: str
+    departure_time: time
+    student_count: int
+    staff_count: int
+    bus_capacity: int

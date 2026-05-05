@@ -1,3 +1,4 @@
+from app.DTOs.trip import TripFeedItem
 from calendar import calendar, monthrange
 from datetime import timedelta
 from app.enums.enums import TripRecurrence
@@ -75,6 +76,17 @@ class TripService:
         logger.info(f"Trip deleted successfully | Trip ID: {trip_id}")
         return trip.model_dump(mode='json')
     
+    async def get_trips_for_student_feed(self, date: date) -> list[TripFeedItem]:
+        logger.info(f"Trips for feed requested | Date: {date}")
+
+        trips = await self.trip_repository.get_trips_for_feed_by_date(date)
+
+        if not trips:
+            return []
+
+        logger.info(f"Trips for feed retrieved | Date: {date} | Count: {len(trips)}")
+        return trips    
+
     def _generate_dates(self, start_date: date, recurrence: TripRecurrence) -> list[date]:
         if recurrence == TripRecurrence.SINGLE:
             return [start_date]
