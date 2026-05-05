@@ -1,1 +1,0 @@
-# Ver com guilherme se o fluxo de reservas foi implementado porque nao achei os endpoints dela.
