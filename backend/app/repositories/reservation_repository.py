@@ -22,12 +22,16 @@ class ReservationRepository:
 
         return result.scalar_one()
 
-    async def get_by_trip_id(self, trip_ID: str):
+    async def get_by_trip_id(self, trip_ID: str, with_lock: bool = False):
         stmt = (
             select(Reservation)
             .where(Reservation.trip_id == trip_ID)
             .order_by(Reservation.reservation_timestamp)
         )
+
+        if with_lock:
+            # Aplica o Lock Pessimista apenas se solicitado
+            stmt = stmt.with_for_update()
 
         results = await self.session.execute(stmt)
         return results.scalars().all()
