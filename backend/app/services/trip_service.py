@@ -1,3 +1,4 @@
+from app.DTOs.trip import TripFeedResponse
 from app.DTOs.trip import TripDetailFeedItem
 from app.DTOs.trip import TripFeedItem
 from calendar import calendar, monthrange
@@ -77,16 +78,29 @@ class TripService:
         logger.info(f"Trip deleted successfully | Trip ID: {trip_id}")
         return trip.model_dump(mode='json')
     
-    async def get_trips_for_student_feed(self, date: date) -> list[TripFeedItem]:
-        logger.info(f"Trips for feed requested | Date: {date}")
+    async def get_trips_for_student_feed(self) -> TripFeedResponse:
+        today = date.today()
+        weekday = today.weekday()
+        if weekday < 5:  # Segunda a Sexta
+            start_date = today
+            days_until_friday = 4 - weekday
+            end_date = today + timedelta(days=days_until_friday)
+        else:  # Sábado (5) ou Domingo (6)
+            days_until_next_monday = 7 - weekday
+            start_date = today + timedelta(days=days_until_next_monday)
+            end_date = start_date + timedelta(days=4)
 
-        trips = await self.trip_repository.get_trips_for_feed_by_date(date)
+        logger.info(
+            f"Trips for feed requested | Today: {today} | Range: {start_date} → {end_date}"
+        )
 
-        if not trips:
-            return []
+        trips = await self.trip_repository.get_trips_for_feed_by_date_range(
+            start_date, end_date
+        )
 
-        logger.info(f"Trips for feed retrieved | Date: {date} | Count: {len(trips)}")
-        return trips    
+        logger.info(f"Trips for feed retrieved | Count: {len(trips)}")
+
+        return TripFeedResponse(reference_date=today, trips=trips)
 
     def _generate_dates(self, start_date: date, recurrence: TripRecurrence) -> list[date]:
         if recurrence == TripRecurrence.SINGLE:

@@ -46,10 +46,9 @@ async def delete_trip(trip_id: uuid.UUID, service: TripService = Depends(get_tri
 @trip_router.get("/trips", response_model=list[TripFeedItem])
 async def get_student_trips(
     current_user: TokenData = Depends(get_current_user),
-    service: TripService = Depends(get_trip_service),
-    date: date = Query(...),
+    service: TripService = Depends(get_trip_service)
 ):
-    result = await service.get_trips_for_student_feed(date)
+    result = await service.get_trips_for_student_feed()
     return ResponseHandler.ok(result)
 
 @trip_router.get("/trips/{trip_id}", response_model=TripDetailFeedItem)

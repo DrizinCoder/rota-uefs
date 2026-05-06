@@ -87,9 +87,10 @@ class TripRepository:
         await self.session.commit()
         return trip
 
-    async def get_trips_for_feed_by_date(self, target_date: date) -> list[TripFeedItem]:
+    async def get_trips_for_feed_by_date_range(
+        self, start_date: date, end_date: date
+    ) -> list[TripFeedItem]:
 
-        
         student_count_expr = func.sum(
             case((User.profile == UserProfile.STUDENT, 1), else_=0)
         ).label("student_count")
@@ -101,6 +102,7 @@ class TripRepository:
         statement = (
             select(
                 Trip.trip_id,
+                Trip.trip_date,
                 Route.boarding_point,
                 Route.drop_off_point,
                 Trip.departure_time,
@@ -112,9 +114,16 @@ class TripRepository:
             .join(Bus, Bus.bus_plate == Trip.bus_license_plate)
             .outerjoin(Reservation, Reservation.trip_id == Trip.trip_id)
             .outerjoin(User, User.user_id == Reservation.user_id)
-            .where(Trip.trip_date == target_date)
-            .group_by(Trip.trip_id, Route.boarding_point, Route.drop_off_point, Trip.departure_time, Bus.capacity)
-            .order_by(Trip.departure_time)
+            .where(Trip.trip_date.between(start_date, end_date))
+            .group_by(
+                Trip.trip_id,
+                Trip.trip_date,
+                Route.boarding_point,
+                Route.drop_off_point,
+                Trip.departure_time,
+                Bus.capacity,
+            )
+            .order_by(Trip.trip_date, Trip.departure_time)
         )
 
         result = await self.session.execute(statement)
@@ -123,17 +132,18 @@ class TripRepository:
         return [
             TripFeedItem(
                 trip_id=row.trip_id,
+                trip_date=row.trip_date,
                 boarding_point=row.boarding_point,
                 drop_off_point=row.drop_off_point,
                 departure_time=row.departure_time,
                 student_count=row.student_count,
                 staff_count=row.staff_count,
                 bus_capacity=row.bus_capacity,
-                total_enrolled=row.student_count + row.staff_count
+                total_enrolled=row.student_count + row.staff_count,
             )
             for row in rows
         ]
-    
+        
     async def get_trip_detail_for_feed(self, trip_id: uuid.UUID) -> Optional[TripDetailFeedItem]:
 
         enrolled_sq = (

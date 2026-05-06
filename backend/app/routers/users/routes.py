@@ -53,3 +53,9 @@ async def update_phone(
 ):
     await service.update_phone(id, data)
     return ResponseHandler.ok(message="Telefone atualizado!")
+
+@user_router.get("/trips/me")
+async def get_passenger_trips():
+    return "Not implemented"
+
+    
