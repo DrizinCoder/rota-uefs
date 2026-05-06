@@ -3,6 +3,7 @@ from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, insert 
 from app.models.models import Reservation
+from app.enums.enums import BoardingStatus
 
 class ReservationRepository:
     def __init__(self, session: AsyncSession):
@@ -21,7 +22,43 @@ class ReservationRepository:
         result = await self.session.execute(stmt)
 
         return result.scalar_one()
+    
+    async def cancel_reservation(self, user_id: str):
+        stmt = (
+            select(Reservation)
+            .where(Reservation.user_id == user_id)
+        )
 
+        result = await self.session.execute(stmt)
+        reservation = result.scalar_one_or_none()
+
+        if reservation:
+            reservation.status = BoardingStatus.CANCELLED
+            await self.session.commit()
+            return True 
+        
+        return False
+    
+
+    async def activate_reservation(self, reservation_id: str):
+        timestamp = datetime.now()
+
+        stmt = (
+            select(Reservation)
+            .where(Reservation.id == reservation_id)
+        )
+
+        result = await self.session.execute(stmt)
+        reservation = result.scalar_one_or_none()
+
+        if reservation:
+            reservation.status = BoardingStatus.NOT_BOARDED
+            reservation.reservation_timestamp = timestamp
+            await self.session.commit()
+            return True 
+        
+        return False
+    
     async def delete(self, reservation_id: str):
         stmt = (
             select(Reservation)
