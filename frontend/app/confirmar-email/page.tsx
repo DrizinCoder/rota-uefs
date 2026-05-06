@@ -33,7 +33,7 @@ export default function ConfirmarEmailPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-[#E4F2F1]">
+        <div className="flex min-h-screen items-center justify-center bg-white">
           <Spinner className="h-12 w-12 text-[#103173]" />
         </div>
       }
