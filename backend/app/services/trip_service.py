@@ -35,7 +35,16 @@ class TripService:
         return [trip.model_dump(mode='json') for trip in trips]
 
     async def cancel_trip(self, trip_id: str):
-        pass
+        logger.info(f"Trip cancellation requested | Trip: {trip_id}")
+
+        trip = await self.trip_repository.cancel_trip(trip_id)
+
+        if not trip:
+            raise NotFoundException("Viagem não encontrada")
+
+        logger.info(f"Trip cancelled successfully | Trip ID: {trip_id}")
+        
+        return 
     
     async def get_all(self):
         logger.info("Trip list requested")
