@@ -47,5 +47,7 @@ class TripDetailFeedItem(BaseModel):
     estimated_arrival: time
     bus_capacity: int
     total_enrolled: int
+    student_count: int
+    staff_count: int
     driver_name: str
     bus_plate: str

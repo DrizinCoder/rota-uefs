@@ -145,10 +145,23 @@ class TripRepository:
         ]
         
     async def get_trip_detail_for_feed(self, trip_id: uuid.UUID) -> Optional[TripDetailFeedItem]:
-
-        enrolled_sq = (
+        student_count_sq = (
             select(func.count(Reservation.reservation_id))
-            .where(Reservation.trip_id == trip_id)
+            .join(User, User.user_id == Reservation.user_id)
+            .where(
+                Reservation.trip_id == trip_id,
+                User.profile == UserProfile.STUDENT,
+            )
+            .scalar_subquery()
+        )
+
+        staff_count_sq = (
+            select(func.count(Reservation.reservation_id))
+            .join(User, User.user_id == Reservation.user_id)
+            .where(
+                Reservation.trip_id == trip_id,
+                User.profile == UserProfile.STAFF,
+            )
             .scalar_subquery()
         )
 
@@ -163,7 +176,8 @@ class TripRepository:
                 Bus.capacity.label("bus_capacity"),
                 User.full_name.label("driver_name"),
                 Trip.bus_license_plate.label("bus_plate"),
-                enrolled_sq.label("total_enrolled"),
+                student_count_sq.label("student_count"),
+                staff_count_sq.label("staff_count"),
             )
             .join(Route, Route.route_id == Trip.route_id)
             .join(Bus, Bus.bus_plate == Trip.bus_license_plate)
@@ -186,7 +200,9 @@ class TripRepository:
             departure_time=row.departure_time,
             estimated_arrival=add_ninety_minutes(row.departure_time),
             bus_capacity=row.bus_capacity,
-            total_enrolled=row.total_enrolled,
+            total_enrolled=row.student_count + row.staff_count,
+            student_count=row.student_count,
+            staff_count=row.staff_count,
             driver_name=row.driver_name,
             bus_plate=row.bus_plate,
         )
