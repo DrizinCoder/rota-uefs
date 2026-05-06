@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
 import { FooterSection } from "@/components/landing/footer-section";
@@ -12,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 import {
   MapPin,
   Users,
@@ -21,8 +22,6 @@ import {
   ClipboardList,
   Bus,
   CircleDot,
-  UserCircle,
-  ShieldAlert,
   CalendarDays,
   XCircle,
   AlertTriangle,
@@ -91,6 +90,7 @@ const DIAS_SEMANA = [
 
 export function InformacaoScreen() {
   const router = useRouter();
+  const [diaAtivo, setDiaAtivo] = useState("segunda");
 
   const getSortedViagens = (viagens: typeof VIAGENS_ATRIBUIDAS) => {
     const statusWeight = {
@@ -117,7 +117,7 @@ export function InformacaoScreen() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#E4F2F1] pb-24">
+    <div className="flex min-h-screen flex-col bg-[#E4F2F1]">
       <Navigation tipoUsuario="motorista" />
 
       <main className="flex-1 w-full max-w-6xl mx-auto py-10 px-4">
@@ -141,25 +141,43 @@ export function InformacaoScreen() {
           </Badge>
         </header>
 
-        <Tabs defaultValue="segunda" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 bg-[#103B73]/10 p-1 mb-10 rounded-2xl h-16 shadow-inner border border-white/20">
+        <div className="w-full">
+          <div
+            role="tablist"
+            aria-label="Dia da semana"
+            className="grid w-full grid-cols-5 bg-[#103B73]/10 p-1 mb-10 rounded-2xl h-16 shadow-inner border border-white/20 gap-1"
+          >
             {DIAS_SEMANA.map((dia) => (
-              <TabsTrigger
+              <button
                 key={dia.id}
-                value={dia.id}
-                className="font-black text-[10px] md:text-sm uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-[#103173] rounded-xl transition-all"
+                type="button"
+                role="tab"
+                aria-selected={diaAtivo === dia.id}
+                id={`motorista-info-tab-${dia.id}`}
+                aria-controls="motorista-info-painel-dia"
+                tabIndex={diaAtivo === dia.id ? 0 : -1}
+                className={cn(
+                  "font-black text-[10px] md:text-sm uppercase tracking-widest rounded-xl transition-all outline-none focus-visible:ring-2 focus-visible:ring-[#F2D022]/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#E4F2F1]",
+                  diaAtivo === dia.id
+                    ? "bg-white text-[#103173] shadow-sm"
+                    : "text-[#103173]/75 hover:bg-white/15 hover:text-[#103173]",
+                )}
+                onClick={() => setDiaAtivo(dia.id)}
               >
                 {dia.label}
-              </TabsTrigger>
+              </button>
             ))}
-          </TabsList>
+          </div>
 
-          {DIAS_SEMANA.map((dia) => (
-            <TabsContent key={dia.id} value={dia.id}>
-              <div className="grid gap-6">
-                {getSortedViagens(
-                  VIAGENS_ATRIBUIDAS.filter((v) => v.dia === dia.id),
-                ).map((viagem) => {
+          <div
+            id="motorista-info-painel-dia"
+            role="tabpanel"
+            aria-labelledby={`motorista-info-tab-${diaAtivo}`}
+            className="grid gap-6"
+          >
+            {getSortedViagens(
+              VIAGENS_ATRIBUIDAS.filter((v) => v.dia === diaAtivo),
+            ).map((viagem) => {
                   const quorumNaoAtingido =
                     viagem.status === "programada" &&
                     viagem.inscritos < QUORUM_MINIMO;
@@ -329,51 +347,11 @@ export function InformacaoScreen() {
                     </Card>
                   );
                 })}
-              </div>
-            </TabsContent>
-          ))}
-        </Tabs>
+          </div>
+        </div>
       </main>
 
       <FooterSection />
-
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#103173] text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-6 z-50 border-2 border-[#F2D022]/30 backdrop-blur-md">
-        <div className="flex flex-col border-r border-white/20 pr-4">
-          <span className="text-[9px] font-black uppercase text-[#F2D022] tracking-tighter">
-            Modo de Teste
-          </span>
-          <span className="text-xs font-bold">Alternar Perfil</span>
-        </div>
-
-        <div className="flex gap-2">
-          <Button
-            size="sm"
-            variant="ghost"
-            className="hover:bg-white/10 text-white gap-2 font-bold"
-            onClick={() => router.push("/passageiro")}
-          >
-            <UserCircle className="h-4 w-4" /> Passageiro
-          </Button>
-
-          <Button
-            size="sm"
-            variant="ghost"
-            className="bg-[#F2D022] text-[#103173] gap-2 font-bold transition-colors"
-            onClick={() => router.push("/motorista")}
-          >
-            <Bus className="h-4 w-4" /> Motorista
-          </Button>
-
-          <Button
-            size="sm"
-            variant="ghost"
-            className="hover:bg-red-500 hover:text-white text-white gap-2 font-bold transition-colors"
-            onClick={() => router.push("/admin")}
-          >
-            <ShieldAlert className="h-4 w-4" /> Admin
-          </Button>
-        </div>
-      </div>
     </div>
   );
 }

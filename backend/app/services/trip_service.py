@@ -1,5 +1,8 @@
+from app.DTOs.trip import PassengerTripItem
+from app.DTOs.trip import TripFeedResponse
 from app.DTOs.trip import TripDetailFeedItem
 from app.DTOs.trip import TripFeedItem
+from app.DTOs.trip import DriverTripItem
 from calendar import calendar, monthrange
 from datetime import timedelta
 from app.enums.enums import TripRecurrence
@@ -80,16 +83,29 @@ class TripService:
         logger.info(f"Trip deleted successfully | Trip ID: {trip_id}")
         return trip.model_dump(mode='json')
     
-    async def get_trips_for_student_feed(self, date: date) -> list[TripFeedItem]:
-        logger.info(f"Trips for feed requested | Date: {date}")
+    async def get_trips_for_student_feed(self) -> TripFeedResponse:
+        today = date.today()
+        weekday = today.weekday()
+        if weekday < 5:  # Segunda a Sexta
+            start_date = today
+            days_until_friday = 4 - weekday
+            end_date = today + timedelta(days=days_until_friday)
+        else:  # Sábado (5) ou Domingo (6)
+            days_until_next_monday = 7 - weekday
+            start_date = today + timedelta(days=days_until_next_monday)
+            end_date = start_date + timedelta(days=4)
 
-        trips = await self.trip_repository.get_trips_for_feed_by_date(date)
+        logger.info(
+            f"Trips for feed requested | Today: {today} | Range: {start_date} → {end_date}"
+        )
 
-        if not trips:
-            return []
+        trips = await self.trip_repository.get_trips_for_feed_by_date_range(
+            start_date, end_date
+        )
 
-        logger.info(f"Trips for feed retrieved | Date: {date} | Count: {len(trips)}")
-        return trips    
+        logger.info(f"Trips for feed retrieved | Count: {len(trips)}")
+
+        return TripFeedResponse(reference_date=today, trips=trips)
 
     def _generate_dates(self, start_date: date, recurrence: TripRecurrence) -> list[date]:
         if recurrence == TripRecurrence.SINGLE:
@@ -126,3 +142,19 @@ class TripService:
 
         logger.info(f"Trip detail retrieved successfully | Trip ID: {trip_id}")
         return trip
+    
+    async def get_trips_for_passenger(self, user_id: uuid.UUID) -> list[PassengerTripItem]:
+        logger.info(f"Passenger trips requested | User ID: {user_id}")
+
+        trips = await self.trip_repository.get_trips_by_user_id(user_id)
+
+        logger.info(f"Passenger trips retrieved | User ID: {user_id} | Count: {len(trips)}")
+        return trips
+    
+    async def get_trips_for_driver(self, driver_id: uuid.UUID) -> list[DriverTripItem]:
+        logger.info(f"Driver trips requested | Driver ID: {driver_id}")
+
+        trips = await self.trip_repository.get_trips_by_driver_id(driver_id)
+
+        logger.info(f"Driver trips retrieved | Driver ID: {driver_id} | Count: {len(trips)}")
+        return trips

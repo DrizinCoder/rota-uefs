@@ -91,6 +91,34 @@
   html {
     scroll-behavior: smooth;
   }
+
+  button:not(:disabled):not([disabled]),
+  [role='button']:not([aria-disabled='true']):not(:disabled),
+  a[href]:not([aria-disabled='true']),
+  summary {
+    cursor: pointer;
+  }
+
+  input[type='submit']:not(:disabled):not([disabled]),
+  input[type='button']:not(:disabled):not([disabled]),
+  input[type='reset']:not(:disabled):not([disabled]),
+  input[type='checkbox']:not(:disabled):not([disabled]),
+  input[type='radio']:not(:disabled):not([disabled]),
+  select:not(:disabled):not([disabled]) {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  button[disabled],
+  input:disabled,
+  select:disabled,
+  textarea:disabled {
+    cursor: not-allowed;
+  }
+
+  a[href][aria-disabled='true'] {
+    cursor: not-allowed;
+  }
 }
 
 @layer utilities {

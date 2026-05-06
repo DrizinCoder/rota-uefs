@@ -187,7 +187,7 @@ function PerfilContent() {
   // ─── Render ──────────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#E4F2F1] pb-24 relative">
+    <div className="flex min-h-screen flex-col bg-[#E4F2F1] relative">
       <Navigation tipoUsuario={tipoUsuario} />
 
       <main className="flex-1 w-full max-w-3xl mx-auto py-10 px-4">

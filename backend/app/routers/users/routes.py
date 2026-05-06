@@ -1,3 +1,6 @@
+from app.services.trip_service import TripService
+from app.routers.users.dependencies import get_trip_service
+from app.DTOs.trip import PassengerTripItem
 import uuid
 from fastapi import APIRouter, Depends
 
@@ -62,3 +65,11 @@ async def subscribe_user(
     token: TokenData = Depends(require_profile(UserProfile.STAFF, UserProfile.STUDENT))
 ):
     return await controller.subscriber(token.sub, trip_id)
+
+@user_router.get("/trips/me", response_model=list[PassengerTripItem])
+async def get_passenger_trips(
+    current_user: TokenData = Depends(get_current_user),
+    service: TripService = Depends(get_trip_service),
+):
+    result = await service.get_trips_for_passenger(current_user.sub)
+    return ResponseHandler.ok(result)
