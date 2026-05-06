@@ -115,7 +115,7 @@ export function InformacaoScreen() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#E4F2F1] pb-24">
+    <div className="flex min-h-screen flex-col bg-[#E4F2F1]">
       <Navigation tipoUsuario="motorista" />
 
       <main className="flex-1 w-full max-w-6xl mx-auto py-10 px-4">
