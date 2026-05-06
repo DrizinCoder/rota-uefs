@@ -9,9 +9,9 @@ class TripController:
         self.trip_service = trip_service
         self.priority_engine = priority_engine
 
-    async def subscriber(self, user_id: str, trip_id: str):
+    async def subscriber(self, user_id: str, trip_id: str, extra_passenger_name: str = None):
         try:
-            return await self.priority_engine.subscribe_user_to_trip(user_id, trip_id)
+            return await self.priority_engine.subscribe_user_to_trip(user_id, trip_id, extra_passenger_name)
         except Exception as e:
             logger.error(f"Error fetching subscriber for trip {trip_id}: {e}")
             raise

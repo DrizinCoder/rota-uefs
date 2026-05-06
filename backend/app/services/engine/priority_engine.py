@@ -50,7 +50,7 @@ class PriorityEngine:
             return 1
         return 99
 
-    async def subscribe_user_to_trip(self, user_id: str, trip_id: str):
+    async def subscribe_user_to_trip(self, user_id: str, trip_id: str, extra_name: str = None):
         data = await self.verify(trip_id)
 
         max_capacity = data["max_capacity"]
@@ -59,7 +59,7 @@ class PriorityEngine:
         if not user:
             raise NotFoundException("Usuário não encontrado")
 
-        new_res = await self.reservation_repository.create(user_id=user_id, trip_id=trip_id)
+        new_res = await self.reservation_repository.create(user_id=user_id, trip_id=trip_id, extra_name=extra_name)
 
         updated_reservations = await self.reservation_repository.get_by_trip_id(trip_id)
 
