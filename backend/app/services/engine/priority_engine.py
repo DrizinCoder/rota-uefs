@@ -1,14 +1,16 @@
+from fastapi import BackgroundTasks
+
 from app.repositories.user_repository import UserRepository
 from app.repositories.reservation_repository import ReservationRepository
 from app.repositories.trip_repository import TripRepository
 from app.repositories.bus_repository import BusRepository
 from app.core.exceptions import NotFoundException
 from app.enums.enums import UserProfile
-from app.core.responses import ResponseHandler 
+from app.core.responses import ResponseHandler
+from app.services.email.use_cases import EmailUseCases 
 
 class PriorityEngine:
-    def __init__(self, user_repo: UserRepository, trip_repo: TripRepository, 
-                 res_repo: ReservationRepository, bus_repo: BusRepository):
+    def __init__(self, user_repo: UserRepository, trip_repo: TripRepository, res_repo: ReservationRepository, bus_repo: BusRepository):
         self.user_repository = user_repo
         self.trip_repository = trip_repo
         self.reservation_repository = res_repo
@@ -127,7 +129,7 @@ class PriorityEngine:
                     message="Perfil de usuário inválido para inscrição."
                 )
         
-    async def cancel_user_reservation(self, user_id: str, trip_id: str):
+    async def cancel_user_reservation(self, user_id: str, trip_id: str, background_tasks: BackgroundTasks):
         data = await self.verify(trip_id)
 
         reservations = data["reservations"]
@@ -174,9 +176,13 @@ class PriorityEngine:
         promoted_user = promoted[0]
 
         if promoted_user.user.profile == UserProfile.STUDENT:
-            # 📧 TODO: enviar email avisando que saiu da lista de espera
-            # e que pode perder a vaga caso um servidor apareça
-            pass
+              background_tasks.add_task(
+                EmailUseCases().send_waitlist_notification,
+                user.email,
+                user.full_name,
+                data["trip"].name,
+                
+            )
 
         elif promoted_user.user.profile == UserProfile.STAFF:
             pass
@@ -185,16 +191,26 @@ class PriorityEngine:
             message="Reserva cancelada, fila reorganizada e vaga preenchida por prioridade."
         )
     
-    async def alert_cancelled_trip(self, trip_id: str):
+    async def alert_cancelled_trip(self, trip_id: str, background_tasks: BackgroundTasks):
         trip = await self.get_trip_by_id(trip_id)
 
         if not trip:
             raise NotFoundException("Viagem não encontrada")
 
-        reservations = trip.reservations
+        users = await self.user_repository.get_users_by_trip_id(trip_id)
 
-        for res in reservations:  
-            #📧 TODO: enviar email para cada usuário informando sobre o cancelamento da viagem
-            pass
+        if not users:
+            return ResponseHandler.ok(message="Viagem cancelada. Nenhum usuário para notificar.")
 
-        return ResponseHandler.ok(message="Viagem cancelada e usuários notificados por email.")
+        for user in users:
+            background_tasks.add_task(
+                EmailUseCases().send_trip_cancelled,
+                user.email,
+                user.full_name,
+                trip.name,
+                trip.date.strftime("%d/%m/%Y")
+            )
+
+        return ResponseHandler.ok(
+            message="Viagem cancelada e usuários notificados por email."
+        )

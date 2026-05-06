@@ -23,6 +23,15 @@ class ReservationRepository:
 
         return result.scalar_one()
     
+    async def get_all_users_id_by_trip_id(self, trip_id: str):
+        stmt = (
+            select(Reservation.user_id)
+            .where(Reservation.trip_id == trip_id)
+        )
+
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
+    
     async def cancel_reservation(self, user_id: str):
         stmt = (
             select(Reservation)

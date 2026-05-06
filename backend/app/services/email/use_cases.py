@@ -93,7 +93,7 @@ class EmailUseCases:
             html = self.template_service.render(
                 "trip_cancelled.html",
                 {
-                    "name": name,
+                    "name": name.split(" ")[0],
                     "trip_name": trip_name,
                     "trip_date": trip_date
                 }
@@ -110,14 +110,13 @@ class EmailUseCases:
                 message=f"Erro ao enviar email de cancelamento de viagem: {str(e)}"
             )
 
-    def send_waitlist_notification(self, email: str, name: str, trip_name: str, professor_name: str):
+    def send_waitlist_notification(self, email: str, name: str, trip_name: str):
         try:
             html = self.template_service.render(
                 "waitlist_notification.html",
                 {
                     "name": name,
-                    "trip_name": trip_name,
-                    "professor_name": professor_name
+                    "trip_name": trip_name
                 }
             )
 
