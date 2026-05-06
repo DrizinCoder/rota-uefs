@@ -87,3 +87,47 @@ class EmailUseCases:
             raise InternalServerException(
                 message=f"Erro ao enviar email de confirmação de conta: {str(e)}"
             )
+
+    def send_trip_cancelled(self, email: str, name: str, trip_name: str, trip_date: str):
+        try:
+            html = self.template_service.render(
+                "trip_cancelled.html",
+                {
+                    "name": name,
+                    "trip_name": trip_name,
+                    "trip_date": trip_date
+                }
+            )
+
+            self.email_service.send(
+                subject="Viagem cancelada - Rota UEFS 🚍",
+                email_to=email,
+                html_content=html
+            )
+
+        except Exception as e:
+            raise InternalServerException(
+                message=f"Erro ao enviar email de cancelamento de viagem: {str(e)}"
+            )
+
+    def send_waitlist_notification(self, email: str, name: str, trip_name: str, professor_name: str):
+        try:
+            html = self.template_service.render(
+                "waitlist_notification.html",
+                {
+                    "name": name,
+                    "trip_name": trip_name,
+                    "professor_name": professor_name
+                }
+            )
+
+            self.email_service.send(
+                subject="Sua vaga foi ocupada - Lista de espera - Rota UEFS 🚍",
+                email_to=email,
+                html_content=html
+            )
+
+        except Exception as e:
+            raise InternalServerException(
+                message=f"Erro ao enviar notificação de lista de espera: {str(e)}"
+            )
