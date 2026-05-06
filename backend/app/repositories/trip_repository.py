@@ -10,9 +10,9 @@ from sqlalchemy import and_, select
 from app.models.models import Trip
 from app.enums.enums import TripStatus
 from app.DTOs.trip import CreateTripDTO, UpdateTripDTO, DriverTripItem
-from sqlmodel import select, func
+from sqlmodel import select, func, and_
 from app.models.models import Trip, Route, Bus, Reservation, User
-from app.enums.enums import UserProfile
+from app.enums.enums import UserProfile, BoardingStatus
 from app.DTOs.trip import TripFeedItem
 from sqlalchemy import case
 
@@ -255,7 +255,13 @@ class TripRepository:
             )
             .join(Route, Route.route_id == Trip.route_id)
             .join(Bus, Bus.bus_plate == Trip.bus_license_plate)
-            .outerjoin(Reservation, Reservation.trip_id == Trip.trip_id)
+            .outerjoin(
+                Reservation, 
+                and_(
+                    Reservation.trip_id == Trip.trip_id,
+                    Reservation.boarding_confirmation != BoardingStatus.CANCELLED
+                )
+            )
             .where(Trip.driver_id == driver_id)
             .group_by(
                 Trip.trip_id,
