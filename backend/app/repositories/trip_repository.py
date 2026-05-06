@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import and_, select
 from app.models.models import Trip
 from app.enums.enums import TripStatus
-from app.DTOs.trip import CreateTripDTO, UpdateTripDTO
+from app.DTOs.trip import CreateTripDTO, UpdateTripDTO, DriverTripItem
 from sqlmodel import select, func
 from app.models.models import Trip, Route, Bus, Reservation, User
 from app.enums.enums import UserProfile
@@ -236,6 +236,54 @@ class TripRepository:
                 trip_date=row.trip_date,
                 departure_time=row.departure_time,
                 reference_date=today,
+            )
+            for row in rows
+        ]
+    
+    async def get_trips_by_driver_id(self, driver_id: uuid.UUID) -> list[DriverTripItem]:
+        statement = (
+            select(
+                Trip.trip_id,
+                Trip.trip_date,
+                Trip.departure_time,
+                Trip.status,
+                Trip.bus_license_plate,
+                Route.boarding_point,
+                Route.drop_off_point,
+                Bus.capacity.label("bus_capacity"),
+                func.count(Reservation.reservation_id).label("confirmed_passengers")
+            )
+            .join(Route, Route.route_id == Trip.route_id)
+            .join(Bus, Bus.bus_plate == Trip.bus_license_plate)
+            .outerjoin(Reservation, Reservation.trip_id == Trip.trip_id)
+            .where(Trip.driver_id == driver_id)
+            .group_by(
+                Trip.trip_id,
+                Trip.trip_date,
+                Trip.departure_time,
+                Trip.status,
+                Trip.bus_license_plate,
+                Route.boarding_point,
+                Route.drop_off_point,
+                Bus.capacity
+            )
+            .order_by(Trip.trip_date, Trip.departure_time)
+        )
+        
+        result = await self.session.execute(statement)
+        rows = result.all()
+        
+        return [
+            DriverTripItem(
+                trip_id=row.trip_id,
+                trip_date=row.trip_date,
+                departure_time=row.departure_time,
+                status=row.status,
+                bus_license_plate=row.bus_license_plate,
+                boarding_point=row.boarding_point,
+                drop_off_point=row.drop_off_point,
+                bus_capacity=row.bus_capacity,
+                confirmed_passengers=row.confirmed_passengers,
             )
             for row in rows
         ]

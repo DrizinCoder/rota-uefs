@@ -59,3 +59,14 @@ class PassengerTripItem(BaseModel):
     trip_date: date
     departure_time: time
     reference_date: date
+
+class DriverTripItem(BaseModel):
+    trip_id: uuid.UUID
+    trip_date: date
+    departure_time: time
+    status: TripStatus
+    boarding_point: str
+    drop_off_point: str
+    bus_plate: str
+    bus_capacity: int
+    confirmed_passengers: int
