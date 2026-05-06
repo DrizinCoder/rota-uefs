@@ -14,7 +14,6 @@ import {
   useScroll,
   useMotionValueEvent,
 } from "framer-motion";
-
 /** IDs das âncoras da home — mesma ordem que no DOM (hero → trajeto → contato). */
 const LANDING_SECTION_IDS = NAV_LINKS.map((l) => l.href.replace(/^#/, ""));
 
@@ -95,7 +94,6 @@ export function LandingNavbar() {
       window.removeEventListener("hashchange", updateActiveSection);
     };
   }, [pathname]);
-
   useMotionValueEvent(scrollY, "change", (latest) => {
     setVisible(latest > 80);
   });
