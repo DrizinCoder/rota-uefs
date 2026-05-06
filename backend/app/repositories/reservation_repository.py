@@ -22,6 +22,22 @@ class ReservationRepository:
 
         return result.scalar_one()
 
+    async def delete(self, reservation_id: str):
+        stmt = (
+            select(Reservation)
+            .where(Reservation.id == reservation_id)
+        )
+
+        result = await self.session.execute(stmt)
+        reservation = result.scalar_one_or_none()
+
+        if reservation:
+            await self.session.delete(reservation)
+            await self.session.commit()
+            return True
+    
+        return False        
+
     async def get_by_trip_id(self, trip_ID: str):
         stmt = (
             select(Reservation)
