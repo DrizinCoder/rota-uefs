@@ -31,6 +31,9 @@ class TripService:
         logger.info(f"Trips created successfully | Count: {len(trips)}")
         return [trip.model_dump(mode='json') for trip in trips]
 
+    async def cancel_trip(self, trip_id: str):
+        pass
+    
     async def get_all(self):
         logger.info("Trip list requested")
 
