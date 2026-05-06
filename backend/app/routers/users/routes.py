@@ -59,6 +59,6 @@ async def update_phone(
 async def subscribe_user(
     trip_id: str,
     controller: TripController = Depends(get_trip_controller),
-    token: TokenData = Depends(require_profile(UserProfile.ADMIN, UserProfile.STUDENT))
+    token: TokenData = Depends(require_profile(UserProfile.STAFF, UserProfile.STUDENT))
 ):
     return await controller.subscriber(token.sub, trip_id)
