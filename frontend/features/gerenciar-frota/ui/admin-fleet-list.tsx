@@ -1,8 +1,8 @@
 import { Search, Bus, PencilLine, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import type { BusHomeAdmin } from "@/services/adminService";
 
 export type FiltroStatus = "todos" | "Active" | "Inactive" | "Maintenance";
@@ -42,17 +42,47 @@ export function AdminFleetList({
             />
           </div>
 
-          <Tabs value={filtroStatus} onValueChange={(value) => setFiltroStatus(value as FiltroStatus)} className="w-full sm:w-auto">
-            <TabsList className="h-9 bg-slate-100 p-1 w-full grid grid-cols-3">
-              <TabsTrigger value="todos" className="text-xs font-semibold">Todos</TabsTrigger>
-              <TabsTrigger value="Active" className="text-xs font-semibold">Ativos</TabsTrigger>
-              <TabsTrigger value="Inactive" className="text-xs font-semibold">Inativos</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <div
+            role="tablist"
+            aria-label="Filtrar onibus por status"
+            className="h-9 bg-slate-100 p-1 w-full sm:w-auto grid grid-cols-3 rounded-lg gap-0"
+          >
+            {(
+              [
+                { value: "todos" as const, label: "Todos" },
+                { value: "Active" as const, label: "Ativos" },
+                { value: "Inactive" as const, label: "Inativos" },
+              ] as const
+            ).map(({ value, label }) => (
+              <button
+                key={value}
+                type="button"
+                role="tab"
+                aria-selected={filtroStatus === value}
+                id={`frota-filtro-${value}`}
+                aria-controls="frota-filtro-painel"
+                tabIndex={filtroStatus === value ? 0 : -1}
+                className={cn(
+                  "inline-flex h-[calc(100%-1px)] items-center justify-center rounded-md px-2 py-1 text-xs font-semibold whitespace-nowrap transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
+                  filtroStatus === value
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+                onClick={() => setFiltroStatus(value)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
-      <div className="divide-y divide-slate-100">
+      <div
+        id="frota-filtro-painel"
+        role="tabpanel"
+        aria-labelledby={`frota-filtro-${filtroStatus}`}
+        className="divide-y divide-slate-100"
+      >
         {frota.length === 0 ? (
           <div className="py-16 flex flex-col items-center justify-center text-center">
             <div className="bg-slate-100 p-3 rounded-full mb-3">
