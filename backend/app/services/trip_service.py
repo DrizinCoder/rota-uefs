@@ -1,3 +1,4 @@
+from app.DTOs.trip import PassengerTripItem
 from app.DTOs.trip import TripFeedResponse
 from app.DTOs.trip import TripDetailFeedItem
 from app.DTOs.trip import TripFeedItem
@@ -137,3 +138,11 @@ class TripService:
 
         logger.info(f"Trip detail retrieved successfully | Trip ID: {trip_id}")
         return trip
+    
+    async def get_trips_for_passenger(self, user_id: uuid.UUID) -> list[PassengerTripItem]:
+        logger.info(f"Passenger trips requested | User ID: {user_id}")
+
+        trips = await self.trip_repository.get_trips_by_user_id(user_id)
+
+        logger.info(f"Passenger trips retrieved | User ID: {user_id} | Count: {len(trips)}")
+        return trips

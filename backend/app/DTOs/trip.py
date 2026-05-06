@@ -51,3 +51,11 @@ class TripDetailFeedItem(BaseModel):
     staff_count: int
     driver_name: str
     bus_plate: str
+
+class PassengerTripItem(BaseModel):
+    trip_id: uuid.UUID
+    boarding_point: str
+    drop_off_point: str
+    trip_date: date
+    departure_time: time
+    reference_date: date

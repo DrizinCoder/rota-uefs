@@ -1,3 +1,4 @@
+from app.DTOs.trip import PassengerTripItem
 from app.utils.utils import add_ninety_minutes
 from app.DTOs.trip import TripDetailFeedItem
 from typing import Optional
@@ -206,3 +207,35 @@ class TripRepository:
             driver_name=row.driver_name,
             bus_plate=row.bus_plate,
         )
+    
+    async def get_trips_by_user_id(self, user_id: uuid.UUID) -> list[PassengerTripItem]:
+        today = date.today()
+
+        statement = (
+            select(
+                Trip.trip_id,
+                Trip.trip_date,
+                Trip.departure_time,
+                Route.boarding_point,
+                Route.drop_off_point,
+            )
+            .join(Route, Route.route_id == Trip.route_id)
+            .join(Reservation, Reservation.trip_id == Trip.trip_id)
+            .where(Reservation.user_id == user_id)
+            .order_by(Trip.trip_date, Trip.departure_time)
+        )
+
+        result = await self.session.execute(statement)
+        rows = result.all()
+
+        return [
+            PassengerTripItem(
+                trip_id=row.trip_id,
+                boarding_point=row.boarding_point,
+                drop_off_point=row.drop_off_point,
+                trip_date=row.trip_date,
+                departure_time=row.departure_time,
+                reference_date=today,
+            )
+            for row in rows
+        ]
