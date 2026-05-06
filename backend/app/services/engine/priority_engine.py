@@ -59,69 +59,74 @@ class PriorityEngine:
         if not user:
             raise NotFoundException("Usuário não encontrado")
 
-        new_res = await self.reservation_repository.create(user_id=user_id, trip_id=trip_id, extra_name=extra_name)
+        existing_res = next((r for r in data["reservations"] if r.user.id == user_id), None)
+        if existing_res:
+            await self.reservation_repository.activate_reservation(existing_res.id)
+            return ResponseHandler.ok(message="Reserva reativada com sucesso.")
+        else:
+            new_res = await self.reservation_repository.create(user_id=user_id, trip_id=trip_id, extra_name=extra_name)
 
-        updated_reservations = await self.reservation_repository.get_by_trip_id(trip_id)
+            updated_reservations = await self.reservation_repository.get_by_trip_id(trip_id)
 
-        ordered_reservations = sorted(
-            updated_reservations,
-            key=lambda r: (self.get_priority(r.user.profile), r.reservation_timestamp)
-        )
+            ordered_reservations = sorted(
+                updated_reservations,
+                key=lambda r: (self.get_priority(r.user.profile), r.reservation_timestamp)
+            )
 
-        inside_capacity = ordered_reservations[:max_capacity]
-        waiting_list = ordered_reservations[max_capacity:]
+            inside_capacity = ordered_reservations[:max_capacity]
+            waiting_list = ordered_reservations[max_capacity:]
 
-        is_inside = any(r.id == new_res.id for r in inside_capacity)
+            is_inside = any(r.id == new_res.id for r in inside_capacity)
 
 
-        if user.profile == UserProfile.STUDENT:
-            if is_inside:
-                return ResponseHandler.created(new_res, "Inscrição confirmada com sucesso.")
-            else:
-                # 📧 TODO: enviar email informando que está na lista de espera
-                return ResponseHandler.custom(
-                    status_code=201,
-                    data=new_res,
-                    message="Inscrito com sucesso, mas você está na LISTA DE ESPERA (vagas excedidas)."
-                )
-
-        elif user.profile == UserProfile.STAFF:
-            if is_inside:
-                students_inside = [
-                    r for r in ordered_reservations[:max_capacity+1]
-                    if r.user.profile == UserProfile.STUDENT
-                ]
-
-                if len(students_inside) > 0 and new_res in inside_capacity:
-                    displaced_student = next(
-                        (r for r in waiting_list if r.user.profile == UserProfile.STUDENT),
-                        None
+            if user.profile == UserProfile.STUDENT:
+                if is_inside:
+                    return ResponseHandler.created(new_res, "Inscrição confirmada com sucesso.")
+                else:
+                    # 📧 TODO: enviar email informando que está na lista de espera
+                    return ResponseHandler.custom(
+                        status_code=201,
+                        data=new_res,
+                        message="Inscrito com sucesso, mas você está na LISTA DE ESPERA (vagas excedidas)."
                     )
 
-                    if displaced_student:
-                        # 📧 TODO: enviar email avisando que perdeu a vaga
-                        return ResponseHandler.custom(
-                            status_code=201,
-                            data=new_res,
-                            message=f"Vaga garantida por prioridade. O aluno {displaced_student.user.full_name} foi movido para lista de espera."
+            elif user.profile == UserProfile.STAFF:
+                if is_inside:
+                    students_inside = [
+                        r for r in ordered_reservations[:max_capacity+1]
+                        if r.user.profile == UserProfile.STUDENT
+                    ]
+
+                    if len(students_inside) > 0 and new_res in inside_capacity:
+                        displaced_student = next(
+                            (r for r in waiting_list if r.user.profile == UserProfile.STUDENT),
+                            None
                         )
 
-                return ResponseHandler.created(new_res, "Servidor inscrito com sucesso.")
+                        if displaced_student:
+                            # 📧 TODO: enviar email avisando que perdeu a vaga
+                            return ResponseHandler.custom(
+                                status_code=201,
+                                data=new_res,
+                                message=f"Vaga garantida por prioridade. O aluno {displaced_student.user.full_name} foi movido para lista de espera."
+                            )
+
+                    return ResponseHandler.created(new_res, "Servidor inscrito com sucesso.")
+
+                else:
+                    # 📧 TODO: notificar administradores (superlotação de servidores)
+                    return ResponseHandler.custom(
+                        status_code=201,
+                        data=new_res,
+                        message="Inscrito como excedente. Administradores da UNIDRAN notificados (Super lotação de servidores)."
+                    )
 
             else:
-                # 📧 TODO: notificar administradores (superlotação de servidores)
                 return ResponseHandler.custom(
-                    status_code=201,
-                    data=new_res,
-                    message="Inscrito como excedente. Administradores da UNIDRAN notificados (Super lotação de servidores)."
+                    status_code=400,
+                    message="Perfil de usuário inválido para inscrição."
                 )
-
-        else:
-            return ResponseHandler.custom(
-                status_code=400,
-                message="Perfil de usuário inválido para inscrição."
-            )
-    
+        
     async def cancel_user_reservation(self, user_id: str, trip_id: str):
         data = await self.verify(trip_id)
 
@@ -136,7 +141,7 @@ class PriorityEngine:
         if not user_res:
             raise NotFoundException("Reserva não encontrada para este usuário")
 
-        await self.reservation_repository.delete(user_res.id)
+        await self.reservation_repository.cancel_reservation(user_res.id)
 
         updated_reservations = await self.reservation_repository.get_by_trip_id(trip_id)
 
