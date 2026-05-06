@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import {
   User,
   Map,
@@ -24,6 +25,26 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
+import { NavbarRippleCtaLink } from "@/components/shared/navbar-ripple-cta-link";
+import { isNavHrefActive } from "@/components/shared/navbar-route-active";
+
+/** Query string sincronizada sem `useSearchParams` (evita exigir Suspense em toda página). */
+function useSyncedSearchParams(pathname: string): URLSearchParams {
+  const [sp, setSp] = useState(() => new URLSearchParams());
+
+  useEffect(() => {
+    setSp(new URLSearchParams(window.location.search));
+  }, [pathname]);
+
+  useEffect(() => {
+    const sync = () => setSp(new URLSearchParams(window.location.search));
+    window.addEventListener("popstate", sync);
+    return () => window.removeEventListener("popstate", sync);
+  }, []);
+
+  return sp;
+}
 
 /* ------------------------------------------------------------------ */
 /* Tipos                                                                */
@@ -117,15 +138,21 @@ function getPerfilHref(tipo: TipoUsuario): string {
 /* Item de link                                                         */
 /* ------------------------------------------------------------------ */
 
-function NavLink({ item }: { item: NavItem }) {
-  const base =
-    "flex flex-row flex-nowrap items-center gap-2 px-3.5 py-2 text-sm font-bold tracking-wide rounded-full transition-all duration-200 whitespace-nowrap shrink-0";
+function NavLink({ item, isActive }: { item: NavItem; isActive: boolean }) {
+  const underlineDesktop =
+    "relative flex flex-row flex-nowrap items-center gap-2 px-3.5 py-2 text-sm font-bold tracking-wide rounded-full whitespace-nowrap shrink-0 transition-colors duration-200 after:pointer-events-none after:absolute after:bottom-0 after:left-0 after:h-1 after:bg-[#F2D022] after:transition-[width] after:duration-500 after:ease-in-out";
 
   if (item.real) {
     return (
       <Link
         href={item.href}
-        className={`${base} text-white/70 hover:text-cyan-400 hover:bg-white/6`}
+        aria-current={isActive ? "page" : undefined}
+        className={cn(
+          underlineDesktop,
+          isActive
+            ? "text-white after:w-full"
+            : "text-white/38 after:w-0 hover:text-white hover:after:w-full"
+        )}
       >
         <item.icon className="h-4 w-4 shrink-0" />
         {item.label}
@@ -140,7 +167,7 @@ function NavLink({ item }: { item: NavItem }) {
           role="link"
           aria-disabled="true"
           tabIndex={0}
-          className={`${base} text-white/35 cursor-default select-none`}
+          className="flex flex-row flex-nowrap items-center gap-2 px-3.5 py-2 text-sm font-bold tracking-wide rounded-full whitespace-nowrap shrink-0 text-white/35 cursor-default select-none transition-colors duration-200"
         >
           <item.icon className="h-4 w-4 shrink-0" />
           {item.label}
@@ -163,6 +190,8 @@ interface NavigationProps {
 
 export function Navigation({ tipoUsuario = "Student" }: NavigationProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+  const searchParams = useSyncedSearchParams(pathname);
   const { scrollY } = useScroll();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -173,6 +202,7 @@ export function Navigation({ tipoUsuario = "Student" }: NavigationProps) {
 
   const navItems = getNavItems(tipoUsuario);
   const perfilHref = getPerfilHref(tipoUsuario);
+  const perfilActive = isNavHrefActive(pathname, searchParams, perfilHref);
 
   return (
     <>
@@ -222,19 +252,27 @@ export function Navigation({ tipoUsuario = "Student" }: NavigationProps) {
           >
             <div className="flex flex-row flex-nowrap items-center justify-center gap-1 px-1">
               {navItems.map((item) => (
-                <NavLink key={item.label} item={item} />
+                <NavLink
+                  key={item.label}
+                  item={item}
+                  isActive={
+                    item.real &&
+                    isNavHrefActive(pathname, searchParams, item.href)
+                  }
+                />
               ))}
             </div>
           </nav>
 
           <div className="relative z-10 shrink-0 justify-self-end">
-            <Link
+            <NavbarRippleCtaLink
               href={perfilHref}
-              className="flex items-center gap-2 text-sm font-extrabold bg-cyan-500 hover:bg-cyan-400 text-slate-950 px-5 py-2.5 rounded-full transition-all duration-200 hover:shadow-lg hover:shadow-cyan-500/30 active:scale-95 whitespace-nowrap"
+              className="text-sm px-5 py-2.5 rounded-full whitespace-nowrap"
+              isActive={perfilActive}
             >
               <User className="h-4 w-4 shrink-0" />
               Perfil
-            </Link>
+            </NavbarRippleCtaLink>
           </div>
         </motion.div>
 
@@ -288,46 +326,61 @@ export function Navigation({ tipoUsuario = "Student" }: NavigationProps) {
               className="lg:hidden absolute inset-x-3 sm:inset-x-5 top-[calc(4rem+0.75rem)] bg-slate-950 border border-white/10 rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.55)] overflow-hidden z-50"
             >
               <div className="px-5 py-5 flex flex-col gap-1">
-                {navItems.map((item) =>
-                  item.real ? (
+                {navItems.map((item) => {
+                  if (!item.real) {
+                    return (
+                      <Tooltip key={item.label}>
+                        <TooltipTrigger asChild>
+                          <span
+                            role="link"
+                            aria-disabled="true"
+                            tabIndex={0}
+                            className="flex items-center gap-2 text-sm font-bold text-white/30 py-2.5 px-3 rounded-lg cursor-default select-none tracking-wider"
+                          >
+                            <item.icon className="h-4 w-4" />
+                            {item.label}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="right">
+                          <p>Em breve</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    );
+                  }
+                  const routeActive = isNavHrefActive(
+                    pathname,
+                    searchParams,
+                    item.href
+                  );
+                  return (
                     <Link
                       key={item.label}
                       href={item.href}
                       onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-2 text-sm font-bold text-white/65 hover:text-cyan-400 py-2.5 px-3 rounded-lg hover:bg-white/5 tracking-wider transition-all"
+                      aria-current={routeActive ? "page" : undefined}
+                      className={cn(
+                        "relative flex items-center gap-2 text-sm font-bold tracking-wider py-2.5 px-3 rounded-lg transition-colors duration-200 after:pointer-events-none after:absolute after:bottom-2 after:left-3 after:h-1 after:bg-[#F2D022] after:transition-[width] after:duration-500 after:ease-in-out",
+                        routeActive
+                          ? "text-white after:w-[calc(100%-1.5rem)]"
+                          : "text-white/38 after:w-0 hover:bg-white/5 hover:text-white hover:after:w-[calc(100%-1.5rem)]"
+                      )}
                     >
                       <item.icon className="h-4 w-4" />
                       {item.label}
                     </Link>
-                  ) : (
-                    <Tooltip key={item.label}>
-                      <TooltipTrigger asChild>
-                        <span
-                          role="link"
-                          aria-disabled="true"
-                          tabIndex={0}
-                          className="flex items-center gap-2 text-sm font-bold text-white/30 py-2.5 px-3 rounded-lg cursor-default select-none tracking-wider"
-                        >
-                          <item.icon className="h-4 w-4" />
-                          {item.label}
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent side="right">
-                        <p>Em breve</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  )
-                )}
+                  );
+                })}
 
                 <div className="pt-3 mt-2 border-t border-white/[0.08]">
-                  <Link
+                  <NavbarRippleCtaLink
                     href={perfilHref}
                     onClick={() => setMobileOpen(false)}
-                    className="w-full flex items-center justify-center gap-2 text-sm font-extrabold bg-cyan-500 hover:bg-cyan-400 text-slate-950 py-2.5 rounded-xl transition-all active:scale-95"
+                    className="w-full py-2.5 rounded-xl text-sm"
+                    isActive={perfilActive}
                   >
-                    <User className="h-4 w-4" />
+                    <User className="h-4 w-4 shrink-0" />
                     Ver Perfil
-                  </Link>
+                  </NavbarRippleCtaLink>
                 </div>
               </div>
             </motion.div>
