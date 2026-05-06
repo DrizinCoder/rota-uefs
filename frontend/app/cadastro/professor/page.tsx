@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { Typewriter } from "@/components/ui/typewriter";
+import { DotPattern } from "@/components/ui/dot-pattern";
 import { authService, RegisterServidorDTO } from "@/services/authService";
 
 function getPasswordStrength(password: string) {
@@ -55,8 +56,15 @@ const PASSWORD_RULES = [
 function SucessoScreen() {
   const router = useRouter();
   return (
-    <div className="min-h-screen w-full bg-white flex items-center justify-center p-6">
-      <div className="w-full max-w-[400px] flex flex-col items-center text-center">
+    <div className="min-h-screen w-full bg-white relative overflow-hidden flex items-center justify-center p-6">
+      <DotPattern
+        radialFade="edges"
+        width={18}
+        height={18}
+        cr={1}
+        className="text-neutral-400/55"
+      />
+      <div className="relative z-10 w-full max-w-[400px] flex flex-col items-center text-center">
         <div className="bg-amber-50 rounded-full p-5 mb-6">
           <Clock className="h-10 w-10 text-amber-500" />
         </div>
@@ -134,18 +142,25 @@ export default function CadastroProfessorPage() {
   if (isSucesso) return <SucessoScreen />;
 
   return (
-    <div className="min-h-screen w-full bg-white relative">
+    <div className="min-h-screen w-full bg-white relative overflow-hidden">
+      <DotPattern
+        radialFade="edges"
+        width={18}
+        height={18}
+        cr={1}
+        className="text-neutral-400/55"
+      />
       <Button
         type="button"
         variant="outline"
         onClick={() => router.push("/")}
-        className="absolute top-6 left-6 h-10 px-4 text-sm font-medium border-gray-200 text-gray-600 hover:text-[#103173] hover:border-[#103173]/40 hover:bg-[#103173]/5"
+        className="absolute top-6 left-6 z-10 h-10 px-4 text-sm font-medium border-gray-200 text-gray-600 hover:text-[#103173] hover:border-[#103173]/40 hover:bg-[#103173]/5"
       >
         <ArrowLeft className="h-4 w-4" />
         Voltar para Home
       </Button>
 
-      <div className="flex justify-center px-6 py-20 sm:py-16">
+      <div className="relative z-10 flex justify-center px-6 py-20 sm:py-16">
         <div className="w-full max-w-[440px]">
 
           {/* Logo */}

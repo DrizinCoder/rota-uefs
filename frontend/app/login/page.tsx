@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { Typewriter } from "@/components/ui/typewriter";
+import { DotPattern } from "@/components/ui/dot-pattern";
 
 const LOGIN_TITLE_WORDS = ["Entrar", "Suas viagens na palma da mão"];
 
@@ -76,18 +77,25 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-white p-6 relative">
+    <div className="min-h-screen w-full flex items-center justify-center bg-white p-6 relative overflow-hidden">
+      <DotPattern
+        radialFade="edges"
+        width={18}
+        height={18}
+        cr={1}
+        className="text-neutral-400/55"
+      />
       <Button
         type="button"
         variant="outline"
         onClick={() => router.push("/")}
-        className="absolute top-6 left-6 h-10 px-4 text-sm font-medium border-gray-200 text-gray-600 hover:text-[#103173] hover:border-[#103173]/40 hover:bg-[#103173]/5"
+        className="absolute top-6 left-6 z-10 h-10 px-4 text-sm font-medium border-gray-200 text-gray-600 hover:text-[#103173] hover:border-[#103173]/40 hover:bg-[#103173]/5"
       >
         <ArrowLeft className="h-4 w-4" />
         Voltar para Home
       </Button>
 
-      <div className="w-full max-w-[400px]">
+      <div className="relative z-10 w-full max-w-[400px]">
         {/* Logo */}
         <div className="flex flex-col items-center mb-10">
           <Image

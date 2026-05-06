@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { Typewriter } from "@/components/ui/typewriter";
+import { DotPattern } from "@/components/ui/dot-pattern";
 import { authService, RegisterAlunoDTO } from "@/services/authService";
 import { toast } from "react-toastify";
 
@@ -93,18 +94,25 @@ export default function CadastroAlunoPage() {
   const passwordStrength = getPasswordStrength(formData.password);
 
   return (
-    <div className="min-h-screen w-full bg-white relative">
+    <div className="min-h-screen w-full bg-white relative overflow-hidden">
+      <DotPattern
+        radialFade="edges"
+        width={18}
+        height={18}
+        cr={1}
+        className="text-neutral-400/55"
+      />
       <Button
         type="button"
         variant="outline"
         onClick={() => router.push("/")}
-        className="absolute top-6 left-6 h-10 px-4 text-sm font-medium border-gray-200 text-gray-600 hover:text-[#103173] hover:border-[#103173]/40 hover:bg-[#103173]/5"
+        className="absolute top-6 left-6 z-10 h-10 px-4 text-sm font-medium border-gray-200 text-gray-600 hover:text-[#103173] hover:border-[#103173]/40 hover:bg-[#103173]/5"
       >
         <ArrowLeft className="h-4 w-4" />
         Voltar para Home
       </Button>
 
-      <div className="flex justify-center px-6 py-20 sm:py-16">
+      <div className="relative z-10 flex justify-center px-6 py-20 sm:py-16">
         <div className="w-full max-w-[440px]">
 
           {/* Logo */}
