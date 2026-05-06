@@ -163,7 +163,6 @@ export default function LoginPage() {
                 />
               </div>
             </div>
-
             {/* Senha */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">

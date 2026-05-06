@@ -44,7 +44,6 @@ function getPasswordStrength(password: string) {
 }
 
 const CADASTRO_ALUNO_TITLE_WORDS = ["Cadastro de Aluno", "Transporte universitário UEFS"];
-
 const PASSWORD_RULES = [
   { test: (p: string) => p.length >= 8, text: "Mínimo 8 caracteres" },
   { test: (p: string) => /[A-Z]/.test(p), text: "Uma letra maiúscula" },
