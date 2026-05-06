@@ -24,12 +24,18 @@ class UpdateTripDTO(SQLModel):
 
 class TripFeedItem(BaseModel):
     trip_id: uuid.UUID
+    trip_date: date  
     boarding_point: str
     drop_off_point: str
     departure_time: time
     student_count: int
     staff_count: int
     bus_capacity: int
+    total_enrolled: int
+
+class TripFeedResponse(BaseModel):
+    reference_date: date
+    trips: list[TripFeedItem]
 
 class TripDetailFeedItem(BaseModel):
     trip_id: uuid.UUID
@@ -41,5 +47,15 @@ class TripDetailFeedItem(BaseModel):
     estimated_arrival: time
     bus_capacity: int
     total_enrolled: int
+    student_count: int
+    staff_count: int
     driver_name: str
     bus_plate: str
+
+class PassengerTripItem(BaseModel):
+    trip_id: uuid.UUID
+    boarding_point: str
+    drop_off_point: str
+    trip_date: date
+    departure_time: time
+    reference_date: date

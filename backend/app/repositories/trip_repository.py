@@ -1,3 +1,4 @@
+from app.DTOs.trip import PassengerTripItem
 from app.utils.utils import add_ninety_minutes
 from app.DTOs.trip import TripDetailFeedItem
 from typing import Optional
@@ -87,9 +88,10 @@ class TripRepository:
         await self.session.commit()
         return trip
 
-    async def get_trips_for_feed_by_date(self, target_date: date) -> list[TripFeedItem]:
+    async def get_trips_for_feed_by_date_range(
+        self, start_date: date, end_date: date
+    ) -> list[TripFeedItem]:
 
-        
         student_count_expr = func.sum(
             case((User.profile == UserProfile.STUDENT, 1), else_=0)
         ).label("student_count")
@@ -101,6 +103,7 @@ class TripRepository:
         statement = (
             select(
                 Trip.trip_id,
+                Trip.trip_date,
                 Route.boarding_point,
                 Route.drop_off_point,
                 Trip.departure_time,
@@ -110,11 +113,18 @@ class TripRepository:
             )
             .join(Route, Route.route_id == Trip.route_id)
             .join(Bus, Bus.bus_plate == Trip.bus_license_plate)
-            .outerjoin(Reservation, Reservation.trip_id == Trip.trip_id)  # um único join
+            .outerjoin(Reservation, Reservation.trip_id == Trip.trip_id)
             .outerjoin(User, User.user_id == Reservation.user_id)
-            .where(Trip.trip_date == target_date)
-            .group_by(Trip.trip_id, Route.boarding_point, Route.drop_off_point, Trip.departure_time, Bus.capacity)
-            .order_by(Trip.departure_time)
+            .where(Trip.trip_date.between(start_date, end_date))
+            .group_by(
+                Trip.trip_id,
+                Trip.trip_date,
+                Route.boarding_point,
+                Route.drop_off_point,
+                Trip.departure_time,
+                Bus.capacity,
+            )
+            .order_by(Trip.trip_date, Trip.departure_time)
         )
 
         result = await self.session.execute(statement)
@@ -123,21 +133,36 @@ class TripRepository:
         return [
             TripFeedItem(
                 trip_id=row.trip_id,
+                trip_date=row.trip_date,
                 boarding_point=row.boarding_point,
                 drop_off_point=row.drop_off_point,
                 departure_time=row.departure_time,
                 student_count=row.student_count,
                 staff_count=row.staff_count,
                 bus_capacity=row.bus_capacity,
+                total_enrolled=row.student_count + row.staff_count,
             )
             for row in rows
         ]
-    
+        
     async def get_trip_detail_for_feed(self, trip_id: uuid.UUID) -> Optional[TripDetailFeedItem]:
-
-        enrolled_sq = (
+        student_count_sq = (
             select(func.count(Reservation.reservation_id))
-            .where(Reservation.trip_id == trip_id)
+            .join(User, User.user_id == Reservation.user_id)
+            .where(
+                Reservation.trip_id == trip_id,
+                User.profile == UserProfile.STUDENT,
+            )
+            .scalar_subquery()
+        )
+
+        staff_count_sq = (
+            select(func.count(Reservation.reservation_id))
+            .join(User, User.user_id == Reservation.user_id)
+            .where(
+                Reservation.trip_id == trip_id,
+                User.profile == UserProfile.STAFF,
+            )
             .scalar_subquery()
         )
 
@@ -152,7 +177,8 @@ class TripRepository:
                 Bus.capacity.label("bus_capacity"),
                 User.full_name.label("driver_name"),
                 Trip.bus_license_plate.label("bus_plate"),
-                enrolled_sq.label("total_enrolled"),
+                student_count_sq.label("student_count"),
+                staff_count_sq.label("staff_count"),
             )
             .join(Route, Route.route_id == Trip.route_id)
             .join(Bus, Bus.bus_plate == Trip.bus_license_plate)
@@ -175,7 +201,41 @@ class TripRepository:
             departure_time=row.departure_time,
             estimated_arrival=add_ninety_minutes(row.departure_time),
             bus_capacity=row.bus_capacity,
-            total_enrolled=row.total_enrolled,
+            total_enrolled=row.student_count + row.staff_count,
+            student_count=row.student_count,
+            staff_count=row.staff_count,
             driver_name=row.driver_name,
             bus_plate=row.bus_plate,
         )
+    
+    async def get_trips_by_user_id(self, user_id: uuid.UUID) -> list[PassengerTripItem]:
+        today = date.today()
+
+        statement = (
+            select(
+                Trip.trip_id,
+                Trip.trip_date,
+                Trip.departure_time,
+                Route.boarding_point,
+                Route.drop_off_point,
+            )
+            .join(Route, Route.route_id == Trip.route_id)
+            .join(Reservation, Reservation.trip_id == Trip.trip_id)
+            .where(Reservation.user_id == user_id)
+            .order_by(Trip.trip_date, Trip.departure_time)
+        )
+
+        result = await self.session.execute(statement)
+        rows = result.all()
+
+        return [
+            PassengerTripItem(
+                trip_id=row.trip_id,
+                boarding_point=row.boarding_point,
+                drop_off_point=row.drop_off_point,
+                trip_date=row.trip_date,
+                departure_time=row.departure_time,
+                reference_date=today,
+            )
+            for row in rows
+        ]
