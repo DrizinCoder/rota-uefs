@@ -40,6 +40,7 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body
         className={`${instrumentSans.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} font-sans antialiased`}
+        suppressHydrationWarning
       >
         <ToastProvider>
           {children}
