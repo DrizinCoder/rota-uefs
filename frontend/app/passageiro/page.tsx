@@ -1,8 +1,7 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { Navigation } from "@/components/landing/navigation";
-import { FooterSection } from "@/components/landing/footer-section";
 import { RoleHeader } from "@/components/shared/role-header";
 import { WeekDaysMenu } from "@/components/shared/week-days-menu";
 import { CurrentDayHeader } from "@/components/shared/current-day-header";
@@ -12,8 +11,8 @@ import { PassengerListInfo } from "@/entities/viagem/ui/PassengerListInfo";
 import { TripModeToggle } from "@/entities/viagem/ui/TripModeToggle";
 import { ManageSubscriptionButton } from "@/features/gerenciar-inscricao/ui/ManageSubscriptionButton";
 import { SubscribeButton } from "@/features/inscrever-rota/ui/SubscribeButton";
-import {GraduationCap} from "lucide-react";
-import { passengerService , type Home} from "@/services/homeService";
+import { GraduationCap } from "lucide-react";
+import { passengerService, type Home } from "@/services/homeService";
 import { EmptyDayCard } from "@/components/shared/empty-day-card";
 
 const DIAS_SEMANA = [
@@ -35,7 +34,6 @@ export default function PaginaAluno() {
   const [diaAtivo, setDiaAtivo] = useState("Segunda");
   const diaAtual = DIAS_SEMANA.find((d) => d.id === diaAtivo);
 
-  // Busca os dados da home do passageiro
   useEffect(() => {
     const fetchData = async () => {
       const resultado = await passengerService.getHome();
@@ -44,18 +42,15 @@ export default function PaginaAluno() {
     fetchData();
   }, [])
 
-  // Define o dia ativo como o dia atual, quando os dados são carregados
   useEffect(() => {
     if (data?.reference_weekday) {
       setDiaAtivo(data.reference_weekday);
     }
   }, [data])
 
-  // Estado para armazenar a modalidade escolhida para cada card de viagem
   const [modalidades, setModalidades] = useState<Record<string, "ida" | "ida-volta">>({});
 
   const viagensDoDia = (data?.trips || []).filter(viagem => viagem.weekday === diaAtivo);
-  
 
   const selecionarModalidade = (viagemId: string, modalidade: "ida" | "ida-volta") => {
     setModalidades(prev => ({ ...prev, [viagemId]: modalidade }));
@@ -119,7 +114,6 @@ export default function PaginaAluno() {
           <EmptyDayCard diaNome={diaAtual?.full} />
         )}
       </div>
-      <FooterSection />
     </div>
   );
 }

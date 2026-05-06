@@ -1,13 +1,12 @@
-"use client";
+﻿"use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
 import { Bus, MapPin, Calendar, Clock, Ticket, ArrowLeft, ClipboardList } from "lucide-react";
-import { FooterSection } from "@/components/landing/footer-section";
 import { Suspense } from "react";
 import Link from "next/link";
 
-// Dados simulados baseados na visão de cada usuário
+// Dados simulados baseados na visÃ£o de cada usuÃ¡rio
 const VIAGENS_PASSAGEIRO = [
   { id: "VG-0042", origem: "Salvador", destino: "Feira de Santana", data: "15/04/2026", horario: "08:30", status: "Confirmada" },
   { id: "VG-0045", origem: "Feira de Santana", destino: "Salvador", data: "17/04/2026", horario: "14:00", status: "Pendente" },
@@ -24,7 +23,7 @@ function ViagensContent() {
   const tipo = searchParams.get("tipo") || "aluno";
   const isMotorista = tipo === "motorista";
 
-  // Define qual lista mostrar baseando-se no tipo de usuário
+  // Define qual lista mostrar baseando-se no tipo de usuÃ¡rio
   const viagens = isMotorista ? VIAGENS_MOTORISTA : VIAGENS_PASSAGEIRO;
 
   return (
@@ -33,7 +32,7 @@ function ViagensContent() {
 
       <main className="max-w-3xl mx-auto px-4 pt-6 pb-20">
         
-        {/* Barra de Ações Rápidas: Voltar e Visualizar Inscrição */}
+        {/* Barra de AÃ§Ãµes RÃ¡pidas: Voltar e Visualizar InscriÃ§Ã£o */}
         <div className="flex items-center mb-8">
           <button 
             onClick={() => router.back()}
@@ -50,8 +49,8 @@ function ViagensContent() {
           </h1>
           <p className="text-[#73AABF] text-sm font-medium">
             {isMotorista
-              ? "Confira as próximas viagens em que você está escalado para dirigir."
-              : "Acompanhe o status das viagens que você cadastrou para embarcar."}
+              ? "Confira as prÃ³ximas viagens em que vocÃª estÃ¡ escalado para dirigir."
+              : "Acompanhe o status das viagens que vocÃª cadastrou para embarcar."}
           </p>
         </header>
 
@@ -93,14 +92,14 @@ function ViagensContent() {
                 </div>
               </div>
 
-              {/* Botão de visualizar inscrição da viagem para passageiros confirmados */}
+              {/* BotÃ£o de visualizar inscriÃ§Ã£o da viagem para passageiros confirmados */}
               {!isMotorista && viagem.status === "Confirmada" && (
                 <Link 
                   href="/passageiro/status"
                   className="flex items-center justify-center gap-2 text-sm font-bold bg-white text-[#103173] border border-[#103173]/20 px-4 py-2 rounded-xl shadow-sm hover:bg-slate-50 transition-all active:scale-[0.98] whitespace-nowrap mt-2 md:mt-0"
                 >
                   <ClipboardList className="h-4 w-4" />
-                  Visualizar inscrição
+                  Visualizar inscriÃ§Ã£o
                 </Link>
               )}
             </div>
@@ -112,9 +111,7 @@ function ViagensContent() {
             </div>
           )}
         </div>
-      </main>
-      <FooterSection />
-    </div>
+      </main>    </div>
   );
 }
 

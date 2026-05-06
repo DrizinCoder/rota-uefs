@@ -1,8 +1,7 @@
-"use client";
+﻿"use client";
 
 import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
-import { FooterSection } from "@/components/landing/footer-section";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,7 +27,7 @@ export function StatusViagemScreen() {
     inscritos: 19,
     quorum: 1,
     vagasTotais: 44,
-    motorista: "João Silva",
+    motorista: "JoÃ£o Silva",
     placa: "JLS-1020",
     status: "Confirmada",
   };
@@ -86,7 +85,7 @@ export function StatusViagemScreen() {
                 <div className="bg-[#E4F2F1] p-4 rounded-2xl">
                   <div className="flex items-center gap-2 mb-1 text-[#73AABF]">
                     <Clock className="h-4 w-4" />
-                    <span className="text-[10px] font-black uppercase">Horário</span>
+                    <span className="text-[10px] font-black uppercase">HorÃ¡rio</span>
                   </div>
                   <p className="text-xl font-black text-[#103173]">
                     {viagemInscrita.horarioInicio} - {viagemInscrita.horarioFim}
@@ -95,7 +94,7 @@ export function StatusViagemScreen() {
                 <div className="bg-[#E4F2F1] p-4 rounded-2xl">
                   <div className="flex items-center gap-2 mb-1 text-[#73AABF]">
                     <Users className="h-4 w-4" />
-                    <span className="text-[10px] font-black uppercase">Ocupação</span>
+                    <span className="text-[10px] font-black uppercase">OcupaÃ§Ã£o</span>
                   </div>
                   <p className="text-xl font-black text-[#103173]">
                     {viagemInscrita.inscritos}/{viagemInscrita.vagasTotais}
@@ -108,9 +107,9 @@ export function StatusViagemScreen() {
                   <Info className="text-[#103173] h-6 w-6" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-[#73AABF] uppercase italic">Motorista e Veículo</p>
+                  <p className="text-[10px] font-black text-[#73AABF] uppercase italic">Motorista e VeÃ­culo</p>
                   <p className="font-bold text-[#103173]">
-                    {viagemInscrita.motorista} • <span className="text-[#73AABF]">{viagemInscrita.placa}</span>
+                    {viagemInscrita.motorista} â€¢ <span className="text-[#73AABF]">{viagemInscrita.placa}</span>
                   </p>
                 </div>
               </div>
@@ -124,7 +123,7 @@ export function StatusViagemScreen() {
                 className="w-full h-16 bg-[#103173] hover:bg-[#103B73] text-white font-black text-lg rounded-2xl shadow-lg transition-all active:scale-95 flex items-center gap-3"
               >
                 <QrCode className="h-6 w-6 text-[#F2D022]" />
-                VISUALIZAR CÓDIGO
+                VISUALIZAR CÃ“DIGO
               </Button>
 
               <Button
@@ -136,7 +135,7 @@ export function StatusViagemScreen() {
                 }}
                 className="text-red-500 font-bold hover:text-red-600 hover:bg-red-50"
               >
-                CANCELAR MINHA INSCRIÇÃO
+                CANCELAR MINHA INSCRIÃ‡ÃƒO
               </Button>
             </CardFooter>
           </Card>
@@ -144,13 +143,11 @@ export function StatusViagemScreen() {
           <div className="flex items-center gap-3 px-4 py-3 bg-amber-50 rounded-xl border border-amber-100">
             <CheckCircle2 className="h-5 w-5 text-amber-600 shrink-0" />
             <p className="text-xs text-amber-800 font-medium">
-              Apresente-se no ponto de partida com 5 minutos de antecedência. A validação do código é feita diretamente com o motorista no embarque.
+              Apresente-se no ponto de partida com 5 minutos de antecedÃªncia. A validaÃ§Ã£o do cÃ³digo Ã© feita diretamente com o motorista no embarque.
             </p>
           </div>
         </div>
-      </main>
-
-      <FooterSection />
-    </div>
+      </main>    </div>
   );
 }
+

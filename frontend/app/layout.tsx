@@ -7,6 +7,7 @@ import {
   JetBrains_Mono,
 } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { FooterSection } from "@/components/landing/footer-section";
 import "./globals.css";
 
 const instrumentSans = Instrument_Sans({
@@ -49,6 +50,7 @@ export default function RootLayout({
       >
         <ToastProvider>
           {children}
+          <FooterSection />
           <Analytics />
         </ToastProvider>
       </body>

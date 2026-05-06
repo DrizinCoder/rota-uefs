@@ -1,9 +1,8 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
-import { FooterSection } from "@/components/landing/footer-section";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +25,7 @@ const PASSAGEIROS_MOCK = [
   { id: 1, nome: "Ana Beatriz Sousa", matricula: "PROF-202401", status: "embarcou" },
   { id: 2, nome: "Carlos Eduardo Silva", matricula: "PROF-202402", status: "pendente" },
   { id: 3, nome: "Fernanda Lima", matricula: "PROF-202403", status: "embarcou" },
-  { id: 4, nome: "João Pedro Alves", matricula: "PROF-202404", status: "pendente" },
+  { id: 4, nome: "JoÃ£o Pedro Alves", matricula: "PROF-202404", status: "pendente" },
   { id: 5, nome: "Maria Clara Nunes", matricula: "PROF-202405", status: "falta" },
   { id: 6, nome: "Pedro Henrique Santos", matricula: "PROF-202406", status: "pendente" },
   { id: 7, nome: "Rafael Souza Costa", matricula: "PROF-202407", status: "embarcou" },
@@ -72,7 +71,7 @@ export function PassageirosScreen() {
     const proximo = passageiros.find((p) => p.status === "espera");
 
     if (proximo) {
-      alert(`Chamando próximo da lista de espera: ${proximo.nome}\nMatrícula: ${proximo.matricula}`);
+      alert(`Chamando prÃ³ximo da lista de espera: ${proximo.nome}\nMatrÃ­cula: ${proximo.matricula}`);
 
       setPassageiros(
         passageiros.map((p) =>
@@ -80,7 +79,7 @@ export function PassageirosScreen() {
         ),
       );
     } else {
-      alert("Não há mais passageiros na lista de espera.");
+      alert("NÃ£o hÃ¡ mais passageiros na lista de espera.");
     }
   };
 
@@ -126,7 +125,7 @@ export function PassageirosScreen() {
                 <div className="flex items-center flex-wrap justify-center sm:justify-start gap-2 text-sm md:text-base font-bold">
                   <CircleDot className="h-5 w-5 text-[#F2D022]" />
                   <span>Salvador</span>
-                  <span className="text-[#73AABF]">→</span>
+                  <span className="text-[#73AABF]">â†’</span>
                   <MapPin className="h-5 w-5 text-[#73AABF]" />
                   <span>Feira de Santana</span>
                 </div>
@@ -159,7 +158,7 @@ export function PassageirosScreen() {
             </div>
             <Input
               type="text"
-              placeholder="Buscar por nome ou matrícula..."
+              placeholder="Buscar por nome ou matrÃ­cula..."
               value={busca}
               onChange={(e) => setBusca(sanitizarBusca(e.target.value))}
               className="pl-12 h-14 bg-white border-none rounded-2xl text-[#103173] font-bold focus-visible:ring-2 focus-visible:ring-[#F2D022] shadow-sm w-full"
@@ -268,9 +267,7 @@ export function PassageirosScreen() {
             ))
           )}
         </div>
-      </main>
-
-      <FooterSection />
-    </div>
+      </main>    </div>
   );
 }
+
