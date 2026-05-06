@@ -57,6 +57,17 @@ class TripRepository:
             for trip in trips
         ]
 
+    async def cancel_trip(self, trip_id: str):
+        trip = await self.get_by_id(trip_id)
+        if not trip:
+            return None
+        
+        trip.status = TripStatus.CANCELLED
+        self.session.add(trip)
+        await self.session.commit()
+        await self.session.refresh(trip)
+        return trip
+
     async def get_by_id(self, trip_id: uuid.UUID):
         statement = select(Trip).where(Trip.trip_id == trip_id)
         result = await self.session.execute(statement)
