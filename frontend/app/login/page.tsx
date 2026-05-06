@@ -24,6 +24,9 @@ import {
   BookOpen,
 } from "lucide-react";
 import Image from "next/image";
+import { Typewriter } from "@/components/ui/typewriter";
+
+const LOGIN_TITLE_WORDS = ["Entrar", "Suas viagens na palma da mão"];
 
 const REDIRECT_MAP: Record<string, string> = {
   Student: "/passageiro",
@@ -95,8 +98,14 @@ export default function LoginPage() {
             className="w-[300px] sm:w-[360px] h-auto object-contain mb-6"
             priority
           />
-          <h1 className="text-[2rem] font-bold text-gray-900 tracking-tight">
-            Entrar
+          <h1 className="w-full min-w-0 text-[2rem] font-bold text-gray-900 tracking-tight">
+            <Typewriter
+              words={LOGIN_TITLE_WORDS}
+              speed={80}
+              delayBetweenWords={2400}
+              cursor
+              cursorChar="|"
+            />
           </h1>
           <p className="text-sm text-gray-500 text-center mt-2 leading-relaxed">
             Gerencie suas viagens entre Salvador e Feira de Santana

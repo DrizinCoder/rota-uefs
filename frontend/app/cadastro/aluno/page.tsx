@@ -25,6 +25,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import Image from "next/image";
+import { Typewriter } from "@/components/ui/typewriter";
 import { authService, RegisterAlunoDTO } from "@/services/authService";
 import { toast } from "react-toastify";
 
@@ -40,6 +41,8 @@ function getPasswordStrength(password: string) {
   if (score === 3) return { score, label: "Boa", colorClass: "bg-blue-400" };
   return { score, label: "Forte", colorClass: "bg-green-500" };
 }
+
+const CADASTRO_ALUNO_TITLE_WORDS = ["Cadastro de Aluno", "Transporte universitário UEFS"];
 
 const PASSWORD_RULES = [
   { test: (p: string) => p.length >= 8, text: "Mínimo 8 caracteres" },
@@ -114,8 +117,14 @@ export default function CadastroAlunoPage() {
               className="w-[170px] sm:w-[210px] h-auto object-contain mb-5"
               priority
             />
-            <h1 className="text-[1.5rem] font-bold text-gray-900 tracking-tight">
-              Cadastro de Aluno
+            <h1 className="w-full min-w-0 text-[2rem] font-bold text-gray-900 tracking-tight">
+              <Typewriter
+                words={CADASTRO_ALUNO_TITLE_WORDS}
+                speed={80}
+                delayBetweenWords={2600}
+                cursor
+                cursorChar="|"
+              />
             </h1>
             <p className="text-sm text-gray-500 text-center mt-1.5 leading-relaxed">
               Crie sua conta para acessar o sistema de transporte

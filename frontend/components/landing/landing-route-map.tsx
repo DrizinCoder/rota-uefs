@@ -3,7 +3,7 @@ import { ROUTE_STOPS, ROUTE_INFO_ITEMS } from "@/components/shared/landing-const
 
 export function LandingRouteMap() {
   return (
-    <section id="trajeto" className="bg-slate-50 pb-20">
+    <section id="trajeto" className="scroll-mt-24 bg-slate-50 pb-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-10">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Trajeto</span>

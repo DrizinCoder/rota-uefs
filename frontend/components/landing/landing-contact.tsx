@@ -7,7 +7,7 @@ export function LandingContact() {
   const router = useRouter();
 
   return (
-    <section id="contato" className="bg-white py-20">
+    <section id="contato" className="scroll-mt-24 bg-white py-20">
       <div className="max-w-3xl mx-auto px-4 text-center">
         <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Fale Conosco</span>
         <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mt-2 mb-4">

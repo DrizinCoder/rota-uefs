@@ -27,6 +27,7 @@ import {
   Clock,
 } from "lucide-react";
 import Image from "next/image";
+import { Typewriter } from "@/components/ui/typewriter";
 import { authService, RegisterServidorDTO } from "@/services/authService";
 
 function getPasswordStrength(password: string) {
@@ -41,6 +42,8 @@ function getPasswordStrength(password: string) {
   if (score === 3) return { score, label: "Boa", colorClass: "bg-blue-400" };
   return { score, label: "Forte", colorClass: "bg-green-500" };
 }
+
+const CADASTRO_SERVIDOR_TITLE_WORDS = ["Cadastro de Servidor", "Docentes e técnico-administrativos"];
 
 const PASSWORD_RULES = [
   { test: (p: string) => p.length >= 8, text: "Mínimo 8 caracteres" },
@@ -155,8 +158,14 @@ export default function CadastroProfessorPage() {
               className="w-[170px] sm:w-[210px] h-auto object-contain mb-5"
               priority
             />
-            <h1 className="text-[1.5rem] font-bold text-gray-900 tracking-tight">
-              Cadastro de Servidor
+            <h1 className="w-full min-w-0 text-[2rem] font-bold text-gray-900 tracking-tight">
+              <Typewriter
+                words={CADASTRO_SERVIDOR_TITLE_WORDS}
+                speed={80}
+                delayBetweenWords={2600}
+                cursor
+                cursorChar="|"
+              />
             </h1>
             <p className="text-sm text-gray-500 text-center mt-1.5 leading-relaxed">
               Para docentes e servidores técnico-administrativos da UEFS
