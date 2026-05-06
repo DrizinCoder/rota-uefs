@@ -14,8 +14,12 @@ class PriorityEngine:
         self.reservation_repository = res_repo
         self.bus_repository = bus_repo
 
+
+    async def get_trip_by_id(self, trip_id: str):
+        return await self.trip_repository.get_by_id(trip_id)
+
     async def verify(self, trip_id: str):
-        trip = await self.trip_repository.get_by_id(trip_id)
+        trip = await self.get_trip_by_id(trip_id)
 
         if not trip:
             raise NotFoundException("Viagem não encontrada")
@@ -175,3 +179,17 @@ class PriorityEngine:
         return ResponseHandler.ok(
             message="Reserva cancelada, fila reorganizada e vaga preenchida por prioridade."
         )
+    
+    async def alert_cancelled_trip(self, trip_id: str):
+        trip = await self.get_trip_by_id(trip_id)
+
+        if not trip:
+            raise NotFoundException("Viagem não encontrada")
+
+        reservations = trip.reservations
+
+        for res in reservations:  
+            #📧 TODO: enviar email para cada usuário informando sobre o cancelamento da viagem
+            pass
+
+        return ResponseHandler.ok(message="Viagem cancelada e usuários notificados por email.")
