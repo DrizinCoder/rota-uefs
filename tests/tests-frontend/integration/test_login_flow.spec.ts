@@ -6,7 +6,7 @@ import { LOGIN_FORM_LABELS } from '../fixtures/form_payloads';
 import { TEST_PROFILE_COOKIE_NAME } from '../fixtures/profile_payloads';
 import { mockAuthLoginFailure, mockAuthLoginSuccess } from '../mocks/mock_auth_api';
 
-test.describe('Fluxo de login', () => {
+test.describe('Login flow', () => {
   test('login bem-sucedido redireciona para o perfil do aluno', async ({ page }) => {
     await mockAuthLoginSuccess(page);
     await page.goto('/login');
@@ -46,3 +46,4 @@ test.describe('Fluxo de login', () => {
     await expect(page).toHaveURL(/\/login/);
   });
 });
+
