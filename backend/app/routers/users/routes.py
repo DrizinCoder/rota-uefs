@@ -7,9 +7,10 @@ from app.routers.users.student.route_student import student_router
 from app.DTOs.users import PasswordUpdate, PhoneUpdate
 from app.middleware.auth_middleware import TokenData, get_current_user, require_profile
 from app.core.responses import ResponseHandler
-from app.routers.users.dependencies import get_user_service
+from app.routers.users.dependencies import get_trip_controller, get_user_service
 from app.services.user_service import UserService
 from app.enums.enums import UserProfile
+from app.controllers.trip_controller import TripController
 
 user_router = APIRouter()
 
@@ -53,3 +54,11 @@ async def update_phone(
 ):
     await service.update_phone(id, data)
     return ResponseHandler.ok(message="Telefone atualizado!")
+
+@user_router.post("/trip/{trip_id}/subscribe")
+async def subscribe_user(
+    trip_id: str,
+    controller: TripController = Depends(get_trip_controller),
+    token: TokenData = Depends(require_profile(UserProfile.ADMIN, UserProfile.STUDENT))
+):
+    return await controller.subscriber(token.sub, trip_id)
