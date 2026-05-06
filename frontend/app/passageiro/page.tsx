@@ -1,11 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
 import { FooterSection } from "@/components/landing/footer-section";
 import { RoleHeader } from "@/components/shared/role-header";
-import { DevModeBar } from "@/components/shared/dev-mode-bar";
 import { WeekDaysMenu } from "@/components/shared/week-days-menu";
 import { CurrentDayHeader } from "@/components/shared/current-day-header";
 import { TripCard } from "@/entities/viagem/ui/TripCard";
@@ -36,8 +34,6 @@ const DIAS_SEMANA = [
 ];
 
 export default function PaginaAluno() {
-  const router = useRouter();
-  
   const [diaAtivo, setDiaAtivo] = useState("segunda");
   const diaAtual = DIAS_SEMANA.find((d) => d.id === diaAtivo);
 
@@ -110,7 +106,6 @@ export default function PaginaAluno() {
           })}
         </div>
       </div>
-      <DevModeBar />
       <FooterSection />
     </div>
   );

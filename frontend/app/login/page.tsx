@@ -168,33 +168,6 @@ export default function LoginPage() {
         </form>
       </Card>
 
-      {/* Atalhos para desenvolvimento */}
-      <div className="absolute bottom-4 flex gap-4 opacity-40 hover:opacity-100 transition-opacity">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => router.push("/passageiro")}
-          className="text-[#103173] font-bold"
-        >
-          Ir para Passageiro
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => router.push("/motorista")}
-          className="text-[#103173] font-bold"
-        >
-          Ir para Motorista
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => router.push("/admin")}
-          className="text-[#103173] font-bold"
-        >
-          Ir para Admin
-        </Button>
-      </div>
     </AuthPageShell>
   );
 }

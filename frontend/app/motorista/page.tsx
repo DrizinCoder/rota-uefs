@@ -4,9 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
 import { FooterSection } from "@/components/landing/footer-section";
-import { Button } from "@/components/ui/button";
 import { RoleHeader } from "@/components/shared/role-header";
-import { DevModeBar } from "@/components/shared/dev-mode-bar";
 import { WeekDaysMenu } from "@/components/shared/week-days-menu";
 import { CurrentDayHeader } from "@/components/shared/current-day-header";
 import { EmergencyDialog } from "@/features/ajuda-emergencia/ui/EmergencyDialog";
@@ -195,8 +193,6 @@ export default function MotoristaPage() {
       </main>
 
       <FooterSection />
-
-      <DevModeBar />
     </div>
   );
 }

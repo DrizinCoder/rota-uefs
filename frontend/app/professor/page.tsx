@@ -1,11 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
 import { FooterSection } from "@/components/landing/footer-section";
 import { RoleHeader } from "@/components/shared/role-header";
-import { DevModeBar } from "@/components/shared/dev-mode-bar";
 import { WeekDaysMenu } from "@/components/shared/week-days-menu";
 import { CurrentDayHeader } from "@/components/shared/current-day-header";
 import { TripRouteHeader } from "@/entities/viagem/ui/TripRouteHeader";
@@ -41,7 +39,6 @@ const DIAS_SEMANA = [
 ];
 
 export default function PaginaProfessor() {
-  const router = useRouter();
   const [diaAtivo, setDiaAtivo] = useState("segunda");
   const diaAtual = DIAS_SEMANA.find((d) => d.id === diaAtivo);
   const [modalConvidado, setModalConvidado] = useState<string | null>(null);
@@ -109,7 +106,6 @@ export default function PaginaProfessor() {
           onClose={() => setModalConvidado(null)} 
         />
 
-      <DevModeBar />
       <FooterSection />
     </div>
   );
