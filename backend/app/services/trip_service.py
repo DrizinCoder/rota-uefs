@@ -2,6 +2,7 @@ from app.DTOs.trip import PassengerTripItem
 from app.DTOs.trip import TripFeedResponse
 from app.DTOs.trip import TripDetailFeedItem
 from app.DTOs.trip import TripFeedItem
+from app.DTOs.trip import DriverTripItem
 from calendar import calendar, monthrange
 from datetime import timedelta
 from app.enums.enums import TripRecurrence
@@ -145,4 +146,12 @@ class TripService:
         trips = await self.trip_repository.get_trips_by_user_id(user_id)
 
         logger.info(f"Passenger trips retrieved | User ID: {user_id} | Count: {len(trips)}")
+        return trips
+    
+    async def get_trips_for_driver(self, driver_id: uuid.UUID) -> list[DriverTripItem]:
+        logger.info(f"Driver trips requested | Driver ID: {driver_id}")
+
+        trips = await self.trip_repository.get_trips_by_driver_id(driver_id)
+
+        logger.info(f"Driver trips retrieved | Driver ID: {driver_id} | Count: {len(trips)}")
         return trips

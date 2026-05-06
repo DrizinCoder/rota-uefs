@@ -9,6 +9,10 @@ from app.DTOs.driver import DriverPatchDTO
 from app.services.driver_service import DriverService
 from app.routers.users.dependencies import get_driver_service
 from fastapi.encoders import jsonable_encoder
+from app.services.trip_service import TripService
+from app.routers.users.dependencies import get_trip_service
+from app.DTOs.trip import DriverTripItem
+from app.middleware.auth_middleware import require_driver
 
 drive_router = APIRouter()
 
@@ -43,5 +47,13 @@ async def update_driver(
 ):
     result = await service.update_driver(id, data)
     
+    return ResponseHandler.ok(data=result)
+    
+@drive_router.get("/trips/me", response_model=list[DriverTripItem])
+async def get_driver_trips(
+    current_user: TokenData = Depends(require_driver),
+    service: TripService = Depends(get_trip_service)
+):
+    result = await service.get_trips_for_driver(current_user.user_id)
     return ResponseHandler.ok(data=result)
     
