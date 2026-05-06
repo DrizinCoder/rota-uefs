@@ -30,6 +30,7 @@ class TripFeedItem(BaseModel):
     student_count: int
     staff_count: int
     bus_capacity: int
+    total_enrolled: int
 
 class TripDetailFeedItem(BaseModel):
     trip_id: uuid.UUID

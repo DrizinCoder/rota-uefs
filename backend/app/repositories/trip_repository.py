@@ -110,7 +110,7 @@ class TripRepository:
             )
             .join(Route, Route.route_id == Trip.route_id)
             .join(Bus, Bus.bus_plate == Trip.bus_license_plate)
-            .outerjoin(Reservation, Reservation.trip_id == Trip.trip_id)  # um único join
+            .outerjoin(Reservation, Reservation.trip_id == Trip.trip_id)
             .outerjoin(User, User.user_id == Reservation.user_id)
             .where(Trip.trip_date == target_date)
             .group_by(Trip.trip_id, Route.boarding_point, Route.drop_off_point, Trip.departure_time, Bus.capacity)
@@ -129,6 +129,7 @@ class TripRepository:
                 student_count=row.student_count,
                 staff_count=row.staff_count,
                 bus_capacity=row.bus_capacity,
+                total_enrolled=row.student_count + row.staff_count
             )
             for row in rows
         ]
