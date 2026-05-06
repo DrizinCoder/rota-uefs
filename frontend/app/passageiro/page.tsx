@@ -58,9 +58,7 @@ export default function PaginaAluno() {
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f0f4f8]">
-      <div className="bg-[#103173] relative overflow-hidden">
-        <Navigation tipoUsuario="Student" />
-      </div>
+      <Navigation tipoUsuario="Student" />
 
       <div className="flex-1 max-w-lg md:max-w-3xl lg:max-w-[80vw] mx-auto w-full px-4 pt-10 pb-32">
         <RoleHeader
