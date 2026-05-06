@@ -26,9 +26,14 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Rota UEFS — Transporte Universitário",
+  title: "Rota UEFS",
   description:
     "Sistema de gestão de transporte universitário entre Salvador e Feira de Santana para alunos e professores da UEFS.",
+  icons: {
+    icon: "/images/logo_rota_black.png",
+    shortcut: "/images/logo_rota_black.png",
+    apple: "/images/logo_rota_black.png",
+  },
 };
 
 export default function RootLayout({

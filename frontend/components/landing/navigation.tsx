@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { User } from "lucide-react";
+import { Logo } from "./logo";
 
 // Aceitamos os tipos de usuários possíveis
 interface NavigationProps {
@@ -15,21 +15,7 @@ export function Navigation({ tipoUsuario = "Student" }: NavigationProps) {
   return (
     <nav className="w-full bg-slate-950 shadow-xl border-b border-white/10">
       <div className="container max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3 group">
-          <Image
-            src="/images/logo_rota_white.svg"
-            alt="Rota UEFS"
-            width={40}
-            height={40}
-            className="h-20 w-20 object-contain group-hover:scale-110 transition-transform duration-300 drop-shadow-[0_0_8px_rgba(6,182,212,0.3)]"
-            priority
-          />
-          <div className="flex flex-col leading-none">
-            <span className="text-white font-extrabold text-lg tracking-wide group-hover:text-cyan-500 transition-colors duration-300">
-              Rota <span className="text-cyan-500">UEFS</span>
-            </span>
-          </div>
-        </Link>
+        <Logo />
 
 
         <div className="flex items-center gap-6 text-sm font-medium">
