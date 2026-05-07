@@ -45,6 +45,7 @@ class TripFeedItem(BaseModel):
 
 class TripFeedResponse(BaseModel):
     reference_date: date
+    reference_weekday: str
     start_date: date
     end_date: date 
     trips: list[TripFeedItem]
