@@ -5,10 +5,10 @@ interface PassengerListInfoProps {
   vagasTotais: number;
   inscritosAlunos: number;
   inscritosProfessores: number;
+   totalInscritos: number;
 }
 
-export function PassengerListInfo({ userType, vagasTotais, inscritosAlunos, inscritosProfessores }: PassengerListInfoProps) {
-  const totalInscritos = inscritosAlunos + inscritosProfessores;
+export function PassengerListInfo({ userType, vagasTotais, inscritosAlunos, inscritosProfessores,  totalInscritos}: PassengerListInfoProps) {
 
   if (userType === "professor") {
     return (

@@ -93,6 +93,7 @@ export default function PaginaAluno() {
                   vagasTotais={viagem.bus_capacity}
                   inscritosAlunos={viagem.student_count}
                   inscritosProfessores={viagem.staff_count}
+                  totalInscritos={viagem.total_enrolled}
                 />
 
                 {viagem.jaInscrito ? (
