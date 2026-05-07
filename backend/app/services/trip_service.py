@@ -102,7 +102,12 @@ class TripService:
 
         logger.info(f"Trips for feed retrieved | Count: {len(trips)}")
 
-        return TripFeedResponse(reference_date=today, trips=trips)
+        return TripFeedResponse(
+            reference_date=today,
+            start_date=start_date,
+            end_date=end_date, 
+            trips=trips
+        )
 
     def _generate_dates(self, start_date: date, recurrence: TripRecurrence) -> list[date]:
         if recurrence == TripRecurrence.SINGLE:

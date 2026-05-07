@@ -1,3 +1,4 @@
+from app.DTOs.trip import WEEKDAY_PT
 from app.DTOs.trip import PassengerTripItem
 from app.utils.utils import add_ninety_minutes
 from app.DTOs.trip import TripDetailFeedItem
@@ -133,7 +134,7 @@ class TripRepository:
         return [
             TripFeedItem(
                 trip_id=row.trip_id,
-                trip_date=row.trip_date,
+                weekday=WEEKDAY_PT[row.trip_date.weekday()],
                 boarding_point=row.boarding_point,
                 drop_off_point=row.drop_off_point,
                 departure_time=row.departure_time,
