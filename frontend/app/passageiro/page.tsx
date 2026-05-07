@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navigation } from "@/components/landing/navigation";
 import { FooterSection } from "@/components/landing/footer-section";
 import { RoleHeader } from "@/components/shared/role-header";
@@ -13,34 +13,45 @@ import { TripModeToggle } from "@/entities/viagem/ui/TripModeToggle";
 import { ManageSubscriptionButton } from "@/features/gerenciar-inscricao/ui/ManageSubscriptionButton";
 import { SubscribeButton } from "@/features/inscrever-rota/ui/SubscribeButton";
 
+
 import {GraduationCap} from "lucide-react";
-
-
-// Dados mock atualizados
-const VIAGENS_REQUISITOS = [
-  { id: "1", dia: "segunda", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "06:00", horarioFim: "08:00", inscritosAlunos: 15, inscritosProfessores: 3, quorum: 20, vagasTotais: 44, jaInscrito: false },
-  { id: "2", dia: "segunda", origem: "Feira de Santana", destino: "Salvador", horarioInicio: "18:30", horarioFim: "20:30", inscritosAlunos: 30, inscritosProfessores: 5, quorum: 20, vagasTotais: 44, jaInscrito: true },
-  { id: "3", dia: "segunda", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "15:00", horarioFim: "17:00", inscritosAlunos: 30, inscritosProfessores: 5, quorum: 20, vagasTotais: 44, jaInscrito: false },
-  { id: "4", dia: "segunda", origem: "Feira de Santana", destino: "Salvador", horarioInicio: "23:00", horarioFim: "01:00", inscritosAlunos: 30, inscritosProfessores: 5, quorum: 20, vagasTotais: 44, jaInscrito: false },
-  { id: "5", dia: "terça", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "07:00", horarioFim: "09:00", inscritosAlunos: 8, inscritosProfessores: 2, quorum: 20, vagasTotais: 44, jaInscrito: false },
-];
+import { passengerService , type HomePassageiro} from "@/services/passengerService";
 
 const DIAS_SEMANA = [
-  { id: "segunda", label: "Seg", full: "Segunda-feira" },
-  { id: "terça", label: "Ter", full: "Terça-feira" },
-  { id: "quarta", label: "Qua", full: "Quarta-feira" },
-  { id: "quinta", label: "Qui", full: "Quinta-feira" },
-  { id: "sexta", label: "Sex", full: "Sexta-feira" },
+  { id: "Segunda", label: "Seg", full: "Segunda-feira" },
+  { id: "Terça", label: "Ter", full: "Terça-feira" },
+  { id: "Quarta", label: "Qua", full: "Quarta-feira" },
+  { id: "Quinta", label: "Qui", full: "Quinta-feira" },
+  { id: "Sexta", label: "Sex", full: "Sexta-feira" },
 ];
 
+const formatarHorario = (horario: string) => horario.slice(0, 5);
+
 export default function PaginaAluno() {
-  const [diaAtivo, setDiaAtivo] = useState("segunda");
+  const [data, setData] = useState<HomePassageiro | null>(null);
+  const [diaAtivo, setDiaAtivo] = useState("Segunda");
   const diaAtual = DIAS_SEMANA.find((d) => d.id === diaAtivo);
+
+  // Busca os dados da home do passageiro
+  useEffect(() => {
+    const fetchData = async () => {
+      const resultado = await passengerService.getHomePassageiro();
+      setData(resultado);
+    }
+    fetchData();
+  }, [])
+
+  // Define o dia ativo como o dia atual, quando os dados são carregados
+  useEffect(() => {
+    if (data?.reference_weekday) {
+      setDiaAtivo(data.reference_weekday);
+    }
+  }, [data])
 
   // Estado para armazenar a modalidade escolhida para cada card de viagem
   const [modalidades, setModalidades] = useState<Record<string, "ida" | "ida-volta">>({});
 
-  const viagensDoDia = VIAGENS_REQUISITOS.filter((v) => v.dia === diaAtivo);
+  const viagensDoDia = data?.trips || [];
   
 
   const selecionarModalidade = (viagemId: string, modalidade: "ida" | "ida-volta") => {
@@ -70,12 +81,11 @@ export default function PaginaAluno() {
             const modalidadeAtual = modalidades[viagem.id] || "ida";
 
             return (
-              <TripCard key={viagem.id}>
+              <TripCard key={viagem.trip_id}>
                 <TripRouteHeader 
-                  origem={viagem.origem} 
-                  destino={viagem.destino} 
-                  horarioInicio={viagem.horarioInicio} 
-                  horarioFim={viagem.horarioFim} 
+                  origem={viagem.boarding_point} 
+                  destino={viagem.drop_off_point} 
+                  horarioInicio={formatarHorario(viagem.departure_time)} 
                 />
 
                 <PassengerListInfo 
