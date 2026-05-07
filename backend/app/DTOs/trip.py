@@ -22,9 +22,19 @@ class UpdateTripDTO(SQLModel):
     departure_time: Optional[time] = None
     status: Optional[TripStatus] = None
 
+WEEKDAY_PT = {
+    0: "Segunda",
+    1: "Terça",
+    2: "Quarta",
+    3: "Quinta",
+    4: "Sexta",
+    5: "Sábado",
+    6: "Domingo",
+}
+
 class TripFeedItem(BaseModel):
     trip_id: uuid.UUID
-    trip_date: date  
+    weekday: str  
     boarding_point: str
     drop_off_point: str
     departure_time: time
@@ -35,6 +45,8 @@ class TripFeedItem(BaseModel):
 
 class TripFeedResponse(BaseModel):
     reference_date: date
+    start_date: date
+    end_date: date 
     trips: list[TripFeedItem]
 
 class TripDetailFeedItem(BaseModel):
