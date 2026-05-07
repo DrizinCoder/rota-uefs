@@ -51,7 +51,7 @@ export default function PaginaAluno() {
   // Estado para armazenar a modalidade escolhida para cada card de viagem
   const [modalidades, setModalidades] = useState<Record<string, "ida" | "ida-volta">>({});
 
-  const viagensDoDia = data?.trips || [];
+  const viagensDoDia = (data?.trips || []).filter(viagem => viagem.weekday === diaAtivo);
   
 
   const selecionarModalidade = (viagemId: string, modalidade: "ida" | "ida-volta") => {
@@ -78,7 +78,7 @@ export default function PaginaAluno() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {viagensDoDia.map((viagem) => {
-            const modalidadeAtual = modalidades[viagem.id] || "ida";
+            const modalidadeAtual = modalidades[viagem.trip_id] || "ida";
 
             return (
               <TripCard key={viagem.trip_id}>
@@ -90,24 +90,24 @@ export default function PaginaAluno() {
 
                 <PassengerListInfo 
                   userType="aluno"
-                  vagasTotais={viagem.vagasTotais}
-                  inscritosAlunos={viagem.inscritosAlunos}
-                  inscritosProfessores={viagem.inscritosProfessores}
+                  vagasTotais={viagem.bus_capacity}
+                  inscritosAlunos={viagem.student_count}
+                  inscritosProfessores={viagem.staff_count}
                 />
 
                 {viagem.jaInscrito ? (
                   
-                  <ManageSubscriptionButton viagemId={viagem.id} />
+                  <ManageSubscriptionButton viagemId={viagem.trip_id} />
                   
                 ) : (
                   <div className="space-y-3">
                     
                     <TripModeToggle 
                       modalidadeAtual={modalidadeAtual} 
-                      onChange={(nova) => selecionarModalidade(viagem.id, nova)} 
+                      onChange={(nova) => selecionarModalidade(viagem.trip_id, nova)} 
                     />
 
-                    <SubscribeButton viagemId={viagem.id} />
+                    <SubscribeButton viagemId={viagem.trip_id} />
                     
                   </div>
                 )}
