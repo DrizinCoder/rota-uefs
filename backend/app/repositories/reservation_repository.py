@@ -32,6 +32,17 @@ class ReservationRepository:
         result = await self.session.execute(stmt)
         return result.scalars().all()
     
+
+    async def get_reservation_by_user_and_trip_extra_name(self, user_id: str, trip_id: str, extra_name: str):
+        stmt = (select(Reservation)
+                .where(Reservation.user_id == user_id)
+                .where(Reservation.trip_id == trip_id)
+                .where(Reservation.extra_passenger_name == extra_name)
+                )
+        result = await self.session.execute(stmt)
+
+        return result.scalar_one_or_none()      
+    
     async def cancel_reservation(self, user_id: str):
         stmt = (
             select(Reservation)
@@ -88,6 +99,7 @@ class ReservationRepository:
         stmt = (
             select(Reservation)
             .where(Reservation.trip_id == trip_ID)
+            .where(Reservation.boarding_confirmation != BoardingStatus.CANCELLED)
             .order_by(Reservation.reservation_timestamp)
         )
 
