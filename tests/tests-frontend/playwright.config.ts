@@ -18,7 +18,7 @@ export default defineConfig({
   },
   webServer: {
     // start frontend from the frontend directory
-    command: 'npm --prefix ../frontend run dev',
+    command: 'npm --prefix ../../frontend run dev',
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
