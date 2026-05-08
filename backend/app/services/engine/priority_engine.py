@@ -23,20 +23,66 @@ class PriorityEngine:
     async def _get_ordered_reservations(self, trip_id: str):
         reservations = await self.reservation_repository.get_by_trip_id(trip_id)
 
+        print(f"Reservations for trip {trip_id}: {[str(r) for r in reservations]}")  # Debug print
+
         return sorted(
             reservations,
             key=lambda r: (self.get_priority(r.user.profile), r.reservation_timestamp)
         )
     
-    async def subscribe_notifications(self, user: User, trip: Trip, reservation: Reservation):
+    async def subscribe_notifications(self, user: User, trip: Trip, reservation: Reservation, background_tasks: BackgroundTasks):
         if user.profile == UserProfile.STAFF:
             if reservation.extra_passenger_name not in (None, ""):
-                await EmailUseCases().send_subscription_confirmation_staff_for_extra_name(user.email, user.full_name, trip.name, reservation.extra_passenger_name)
+                background_tasks.add_task(
+                    EmailUseCases().send_subscription_confirmation_staff_for_extra_name,
+                    user.email, user.full_name, trip.name, reservation.extra_passenger_name
+                )
             else:
-                await EmailUseCases().send_subscription_confirmation_staff(user.email, user.full_name, trip.name)
+                background_tasks.add_task(
+                    EmailUseCases().send_subscription_confirmation_staff,
+                    user.email, user.full_name, trip.name
+                )
         if user.profile == UserProfile.STUDENT:
-            await EmailUseCases().send_subscription_confirmation_student(user.email, user.full_name, trip.name)
-        
+            background_tasks.add_task(
+                EmailUseCases().send_subscription_confirmation_student,
+                user.email, user.full_name, trip.trip_id
+            )
+
+    async def activate_notifications(self, user: User, trip: Trip, reservation: Reservation, background_tasks: BackgroundTasks):
+        if user.profile == UserProfile.STAFF:
+            if reservation.extra_passenger_name not in (None, ""):
+                background_tasks.add_task(
+                    EmailUseCases().send_reactivation_confirmation_staff_for_extra_name,
+                    user.email, user.full_name, trip.name, reservation.extra_passenger_name
+                )
+            else:
+                background_tasks.add_task(
+                    EmailUseCases().send_reactivation_confirmation_staff,
+                    user.email, user.full_name, trip.name
+                )
+        if user.profile == UserProfile.STUDENT:
+            background_tasks.add_task(
+                EmailUseCases().send_reactivation_confirmation_student,
+                user.email, user.full_name, trip.trip_id
+            )
+    async def cancel_subscription_notifications(self, user: User, trip: Trip, reservation: Reservation, background_tasks: BackgroundTasks):
+        if user.profile == UserProfile.STAFF:
+            if reservation.extra_passenger_name not in (None, ""):
+                background_tasks.add_task(
+                    EmailUseCases().send_cancellation_confirmation_staff_for_extra_name,
+                    user.email, user.full_name, trip.name, reservation.extra_passenger_name
+                )
+            else:
+                background_tasks.add_task(
+                    EmailUseCases().send_cancellation_confirmation_staff,
+                    user.email, user.full_name, trip.name
+                )
+        if user.profile == UserProfile.STUDENT:
+            background_tasks.add_task(
+                EmailUseCases().send_cancellation_confirmation_student,
+                user.email, user.full_name, trip.trip_id
+            )
+
     async def get_all_users_with_reservation_by_trip_id(self, trip_id: str):
         trip = await self.trip_repository.get_by_id(trip_id)
 
@@ -53,7 +99,7 @@ class PriorityEngine:
         waitlist_reservations = []
 
         for index, res in enumerate(ordered_reservations):
-            is_guest = res.extra_passenger_name is not None
+            is_guest = bool(res.extra_passenger_name and res.extra_passenger_name.strip())
             passenger_name = res.extra_passenger_name if is_guest else res.user.full_name
 
             user_data = {
@@ -81,7 +127,7 @@ class PriorityEngine:
             message="Listagem de passageiros."
         )
 
-    async def subscribe_user_to_trip(self, user_id: str, trip_id: str, extra_name: str = None):
+    async def subscribe_user_to_trip(self, user_id: str, trip_id: str, background_tasks: BackgroundTasks, extra_name: str = None):
         trip = await self.trip_repository.get_by_id(trip_id)
         if not trip: raise NotFoundException("Viagem não encontrada")
         
@@ -91,7 +137,10 @@ class PriorityEngine:
         existing_reservation = await self.reservation_repository.get_reservation_by_user_and_trip_extra_name(user_id, trip_id, extra_name)
         
         if existing_reservation:
-            await self.reservation_repository.activate_reservation(existing_reservation.id)
+            await self.reservation_repository.activate_reservation(existing_reservation.reservation_id)
+
+            # TODO: Enviar email de reativação para o usuário
+
             return ResponseHandler.ok(message="Reserva reativada.")
         
         new_res = await self.reservation_repository.create(
@@ -100,7 +149,7 @@ class PriorityEngine:
             extra_name=extra_name
         )
 
-        await self.subscribe_notifications(user, trip, new_res)
+        await self.subscribe_notifications(user, trip, new_res, background_tasks)
         
         return ResponseHandler.created(new_res, "Inscrição realizada com sucesso.")
 
@@ -110,7 +159,9 @@ class PriorityEngine:
         if not user_res:
             raise NotFoundException("Reserva não encontrada")
 
-        await self.reservation_repository.cancel_reservation(user_res.id)
+        await self.reservation_repository.cancel_reservation(user_res.reservation_id)
+
+        # TODO: Enviar email de cancelamento para o usuário
         
         return ResponseHandler.ok(message="Reserva cancelada com sucesso.")
 

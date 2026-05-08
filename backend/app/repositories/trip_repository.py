@@ -2,7 +2,7 @@ from app.DTOs.trip import PassengerTripItem
 from app.utils.utils import add_ninety_minutes
 from app.DTOs.trip import TripDetailFeedItem
 from typing import Optional
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import joinedload, selectinload
 import uuid
 from datetime import date
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,6 +19,11 @@ from sqlalchemy import case
 class TripRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
+
+    async def get_all_reservations(self):
+        stmt = select(Reservation).options(joinedload(Reservation.user))
+        result = await self.session.execute(stmt)
+        return result.scalars().all()   
 
     async def create(self, data: CreateTripDTO):
         trip = Trip(

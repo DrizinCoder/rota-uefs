@@ -2,6 +2,7 @@ from datetime import datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, insert 
+from sqlalchemy.orm import joinedload
 from app.models.models import Reservation
 from app.enums.enums import BoardingStatus
 
@@ -20,8 +21,11 @@ class ReservationRepository:
         ).returning(Reservation)
 
         result = await self.session.execute(stmt)
+        reservation = result.scalar_one()
 
-        return result.scalar_one()
+        await self.session.commit() 
+        
+        return reservation
     
     async def get_all_users_id_by_trip_id(self, trip_id: str):
         stmt = (
@@ -43,42 +47,43 @@ class ReservationRepository:
 
         return result.scalar_one_or_none()      
     
-    async def cancel_reservation(self, user_id: str):
+    async def cancel_reservation(self, reservation_id: str): 
         stmt = (
             select(Reservation)
-            .where(Reservation.user_id == user_id)
+            .where(Reservation.reservation_id == reservation_id)
         )
 
         result = await self.session.execute(stmt)
         reservation = result.scalar_one_or_none()
 
         if reservation:
-            reservation.status = BoardingStatus.CANCELLED
+            reservation.boarding_confirmation = BoardingStatus.CANCELLED            
             await self.session.commit()
             return True 
         
         return False
-    
+        
 
     async def activate_reservation(self, reservation_id: str):
         timestamp = datetime.now()
 
         stmt = (
             select(Reservation)
-            .where(Reservation.id == reservation_id)
+            .where(Reservation.reservation_id == reservation_id)
         )
 
         result = await self.session.execute(stmt)
         reservation = result.scalar_one_or_none()
 
         if reservation:
-            reservation.status = BoardingStatus.NOT_BOARDED
+            reservation.boarding_confirmation = BoardingStatus.NOT_BOARDED
             reservation.reservation_timestamp = timestamp
+            
             await self.session.commit()
             return True 
         
         return False
-    
+        
     async def delete(self, reservation_id: str):
         stmt = (
             select(Reservation)
@@ -101,6 +106,7 @@ class ReservationRepository:
             .where(Reservation.trip_id == trip_ID)
             .where(Reservation.boarding_confirmation != BoardingStatus.CANCELLED)
             .order_by(Reservation.reservation_timestamp)
+            .options(joinedload(Reservation.user)) 
         )
 
         results = await self.session.execute(stmt)
