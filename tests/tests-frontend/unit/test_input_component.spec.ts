@@ -6,6 +6,8 @@ test.describe('Input Component - Unit Tests', () => {
     await page.goto('http://localhost:3000');
   });
 
+  // Testes de renderização de atributos, para determinar comportamento básico dos componentes.
+  
   test('should render input element with placeholder and attributes', async ({ page }) => {
     await page.evaluate(() => {
       const container = document.createElement('div');

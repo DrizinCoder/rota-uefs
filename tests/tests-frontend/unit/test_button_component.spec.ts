@@ -6,6 +6,7 @@ test.describe('Button Component - Unit Tests', () => {
     await page.goto('http://localhost:3000');
   });
 
+  // Teste de renderização de botões e seus tipos de suportes para determinados eventos.
   test('should render button with text content', async ({ page }) => {
     // Create a test button by injecting it into the page
     await page.evaluate(() => {
