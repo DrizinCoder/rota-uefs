@@ -5,7 +5,7 @@ interface PassengerListInfoProps {
   vagasTotais: number;
   inscritosAlunos: number;
   inscritosProfessores: number;
-   totalInscritos: number;
+  totalInscritos: number;
 }
 
 export function PassengerListInfo({ userType, vagasTotais, inscritosAlunos, inscritosProfessores,  totalInscritos}: PassengerListInfoProps) {

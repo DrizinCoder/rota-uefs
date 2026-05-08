@@ -25,7 +25,11 @@ class UserRepository:
 
     async def create_driver(self, data: RegisterMotoristaDTO):
         first_name = data.full_name.split()[0].lower()
-        plain_password = f"{first_name}_pass_{random.randint(1000, 9999)}"
+        if data.password:
+            plain_password = data.password
+        else:
+            plain_password = f"{first_name}_pass_{random.randint(1000, 9999)}"
+        
         hashed_password = pwd_context.hash(plain_password)
             
         user = User(

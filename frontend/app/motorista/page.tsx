@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
 import { FooterSection } from "@/components/landing/footer-section";
@@ -15,7 +15,7 @@ import { PassengerListInfo } from "@/entities/viagem/ui/PassengerListInfo";
 import { CheckinButton } from "@/features/fazer-checkin/ui/CheckinButton";
 import { StartTripButton } from "@/features/iniciar-viagem/ui/StartTripButton";
 import { TripRouteHeader } from "@/entities/viagem/ui/TripRouteHeader";
-
+import { passengerService, type HomePassageiro, type CardViagemFeed} from "@/services/passengerService";
 
 import {
   MapPin,
@@ -31,54 +31,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
-
-// Dados simulados atualizados para testar o filtro de dias
-const VIAGENS = [
-  {
-    id: "VG-0042",
-    origem: "Salvador",
-    destino: "Feira de Santana",
-    horarioPartida: "08:30",
-    horarioChegada: "10:30",
-    passageirosConfirmados: 38,
-    vagasTotais: 44,
-    dia: "Segunda-feira",
-    statusInicial: "pronta",
-  },
-  {
-    id: "VG-0043",
-    origem: "Feira de Santana",
-    destino: "Salvador",
-    horarioPartida: "18:00",
-    horarioChegada: "19:40",
-    passageirosConfirmados: 42,
-    vagasTotais: 44,
-    dia: "Segunda-feira",
-    statusInicial: "bloqueada",
-  },
-  {
-    id: "VG-0044",
-    origem: "Salvador",
-    destino: "Camaçari",
-    horarioPartida: "07:00",
-    horarioChegada: "08:15",
-    passageirosConfirmados: 25,
-    vagasTotais: 44,
-    dia: "Terça-feira",
-    statusInicial: "bloqueada",
-  },
-];
+import { EmptyDayCard } from "@/components/shared/empty-day-card";
 
 // Dias da semana simulados para o filtro (Seg a Sex)
 const DIAS_SEMANA = [
-  { id: "segunda", label: "Seg", full: "Segunda-feira" },
-  { id: "terca", label: "Ter", full: "Terça-feira" },
-  { id: "quarta", label: "Qua", full: "Quarta-feira" },
-  { id: "quinta", label: "Qui", full: "Quinta-feira" },
-  { id: "sexta", label: "Sex", full: "Sexta-feira" },
+  { id: "Segunda", label: "Seg", full: "Segunda-feira" },
+  { id: "Terça", label: "Ter", full: "Terça-feira" },
+  { id: "Quarta", label: "Qua", full: "Quarta-feira" },
+  { id: "Quinta", label: "Qui", full: "Quinta-feira" },
+  { id: "Sexta", label: "Sex", full: "Sexta-feira" },
 ];
 
+const traduzirDia = (weekday: string) =>
+  DIAS_SEMANA.find((d) => d.id === weekday)?.full ?? weekday;
 
 function CentralSuporte() {
   return (
@@ -89,11 +54,9 @@ function CentralSuporte() {
   );
 }
 
-function ViagemCard({ viagem }: { viagem: (typeof VIAGENS)[0] }) {
+function ViagemCard({ viagem }: { viagem: CardViagemFeed }) {
   const router = useRouter();
-  const [statusViagem, setStatusViagem] = useState<
-    "bloqueada" | "pronta" | "em_curso" | "finalizada"
-  >(viagem.statusInicial as any);
+  const [statusViagem, setStatusViagem] = useState <"bloqueada" | "pronta" | "em_curso" | "finalizada">("pronta");
 
   const handleCheckIn = () => {
     router.push("/motorista/embarque");
@@ -111,27 +74,28 @@ function ViagemCard({ viagem }: { viagem: (typeof VIAGENS)[0] }) {
     <TripCard className="p-0 shadow-[0_1px_3px_rgba(16,49,115,0.06),0_8px_24px_rgba(16,49,115,0.04)] mb-6">
       <div className="bg-[#103173]/5 pt-3 px-3">
         <TripIdHeader 
-          id={viagem.id} 
-          diaSemana={viagem.dia} 
+          id={viagem.trip_id} 
+          diaSemana={traduzirDia(viagem.weekday)} 
           status={statusViagem} 
         />
       </div>
 
       <div className="px-5 pt-2 pb-5">
 
-        <TripRouteHeader origem={viagem.origem} destino={viagem.destino} horarioInicio={viagem.horarioPartida} horarioFim={viagem.horarioChegada} />
+        <TripRouteHeader origem={viagem.boarding_point} destino={viagem.drop_off_point} horarioInicio={formatarHorario(viagem.departure_time)} />
 
         <PassengerListInfo 
           userType="motorista" 
-          vagasTotais={viagem.vagasTotais} 
-          inscritosAlunos={viagem.passageirosConfirmados}
-          inscritosProfessores={0} 
+          vagasTotais={viagem.bus_capacity} 
+          inscritosAlunos={viagem.student_count}
+          inscritosProfessores={viagem.staff_count}
+          totalInscritos={viagem.staff_count}
         />
 
         <div className="flex flex-col gap-3">
           {statusViagem !== "finalizada" && (
             <CheckinButton 
-              viagemId={viagem.id} 
+              viagemId={viagem.trip_id} 
               onClick={handleCheckIn} 
               className="py-10 rounded-2xl text-lg font-extrabold"
             />
@@ -147,17 +111,38 @@ function ViagemCard({ viagem }: { viagem: (typeof VIAGENS)[0] }) {
   );
 }
 
+const formatarHorario = (horario: string) => horario.slice(0, 5);
+const formatarData = (data: string) => {
+  const [ano, mes, dia] = data.split("-");
+  return `${dia}/${mes}`;
+};
+
 export default function MotoristaPage() {
-  const router = useRouter();
-  const [diaAtivo, setDiaAtivo] = useState("segunda");
-  const diaAtual = DIAS_SEMANA.find((d) => d.id === diaAtivo);
+  const [data, setData] = useState<HomePassageiro | null>(null);
+    const [diaAtivo, setDiaAtivo] = useState("Segunda");
+    const diaAtual = DIAS_SEMANA.find((d) => d.id === diaAtivo);
+  
+    // Busca os dados da home do passageiro
+    useEffect(() => {
+      const fetchData = async () => {
+        const resultado = await passengerService.getHomePassageiro();
+        setData(resultado);
+      }
+      fetchData();
+    }, [])
+  
+    // Define o dia ativo como o dia atual, quando os dados são carregados
+    useEffect(() => {
+      if (data?.reference_weekday) {
+        setDiaAtivo(data.reference_weekday);
+      }
+    }, [data])
 
-  // Filtra as viagens para mostrar apenas as do dia selecionado
-  const viagensFiltradas = VIAGENS.filter((viagem) => viagem.dia === diaAtual?.full);
-
+    const viagensDoDia = (data?.trips || []).filter(viagem => viagem.weekday === diaAtivo);
+  
   return (
     <div className="flex flex-col min-h-screen bg-[#f0f4f8]">
-      <Navigation tipoUsuario="motorista" />
+      <Navigation tipoUsuario="Driver" />
 
       <main className="flex-1 max-w-lg md:max-w-3xl lg:max-w-5xl mx-auto w-full px-4 pt-10 pb-32">
         <RoleHeader
@@ -165,7 +150,7 @@ export default function MotoristaPage() {
           portalName="Painel do Motorista"
           title="Suas escalas"
           subtitle="Selecione o dia da semana para ver as viagens agendadas."
-          dateRange="(06/04 - 10/04)"
+          dateRange={data ? `(${formatarData(data.start_date)} - ${formatarData(data.end_date)})` : ""}
           rightContent={<CentralSuporte />}
         />
 
@@ -179,16 +164,16 @@ export default function MotoristaPage() {
         <CurrentDayHeader dayName={diaAtual?.full} />
 
         {/* Lista de Viagens do Dia Selecionado */}
-        {viagensFiltradas.length > 0 ? (
-          viagensFiltradas.map((viagem) => (
-            <ViagemCard key={viagem.id} viagem={viagem} />
+        {viagensDoDia.length > 0 ? (
+          viagensDoDia.map((viagem) => (
+            <ViagemCard key={viagem.trip_id} viagem={viagem} />
           ))
         ) : (
-          <div className="flex flex-col items-center justify-center p-10 bg-white rounded-2xl border border-dashed border-slate-300 text-center">
-            <CalendarDays className="h-10 w-10 text-slate-300 mb-3" />
-            <p className="text-[#103173] font-bold">Nenhuma escala para este dia</p>
-            <p className="text-slate-500 text-sm mt-1">Você está livre de viagens na {diaAtual?.full.toLowerCase()}.</p>
-          </div>
+          <EmptyDayCard 
+            diaNome={diaAtual?.full} 
+            titulo="Nenhuma escala para este dia"
+            subtitulo={`Você está livre de viagens na ${diaAtual?.full.toLowerCase()}.`}
+          />
         )}
       </main>
 

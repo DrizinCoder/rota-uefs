@@ -16,6 +16,7 @@ import { SubscribeButton } from "@/features/inscrever-rota/ui/SubscribeButton";
 
 import {GraduationCap} from "lucide-react";
 import { passengerService , type HomePassageiro} from "@/services/passengerService";
+import { EmptyDayCard } from "@/components/shared/empty-day-card";
 
 const DIAS_SEMANA = [
   { id: "Segunda", label: "Seg", full: "Segunda-feira" },
@@ -26,6 +27,10 @@ const DIAS_SEMANA = [
 ];
 
 const formatarHorario = (horario: string) => horario.slice(0, 5);
+const formatarData = (data: string) => {
+  const [ano, mes, dia] = data.split("-");
+  return `${dia}/${mes}`;
+};
 
 export default function PaginaAluno() {
   const [data, setData] = useState<HomePassageiro | null>(null);
@@ -70,7 +75,7 @@ export default function PaginaAluno() {
           portalName="Portal do Aluno"
           title="Inscreva-se na sua rota"
           subtitle="Confira as viagens da semana."
-          dateRange="(06/04 - 10/04)"
+          dateRange={data ? `(${formatarData(data.start_date)} - ${formatarData(data.end_date)})` : ""}
         />
         <WeekDaysMenu dias={DIAS_SEMANA} diaAtivo={diaAtivo} onDiaChange={setDiaAtivo} />
       
@@ -97,25 +102,24 @@ export default function PaginaAluno() {
                 />
 
                 {viagem.jaInscrito ? (
-                  
                   <ManageSubscriptionButton viagemId={viagem.trip_id} />
-                  
                 ) : (
                   <div className="space-y-3">
-                    
                     <TripModeToggle 
                       modalidadeAtual={modalidadeAtual} 
                       onChange={(nova) => selecionarModalidade(viagem.trip_id, nova)} 
                     />
-
                     <SubscribeButton viagemId={viagem.trip_id} />
-                    
                   </div>
                 )}
               </TripCard>
             );
           })}
         </div>
+
+        {viagensDoDia.length === 0 && (
+          <EmptyDayCard diaNome={diaAtual?.full} />
+        )}
       </div>
       <FooterSection />
     </div>

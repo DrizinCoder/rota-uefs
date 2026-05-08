@@ -16,6 +16,7 @@ import { TripModeToggle } from "@/entities/viagem/ui/TripModeToggle";
 import { SubscribeButton } from "@/features/inscrever-rota/ui/SubscribeButton";
 import { passengerService, type HomePassageiro } from "@/services/passengerService";
 import { GraduationCap } from "lucide-react";
+import { EmptyDayCard } from "@/components/shared/empty-day-card";
 
 const DIAS_SEMANA = [
   { id: "Segunda", label: "Seg", full: "Segunda-feira" },
@@ -26,6 +27,10 @@ const DIAS_SEMANA = [
 ];
 
 const formatarHorario = (horario: string) => horario.slice(0, 5);
+const formatarData = (data: string) => {
+  const [ano, mes, dia] = data.split("-");
+  return `${dia}/${mes}`;
+};
 
 export default function PaginaProfessor() {
   const [data, setData] = useState<HomePassageiro | null>(null);
@@ -72,7 +77,7 @@ export default function PaginaProfessor() {
           portalName="Portal do Professor"
           title="Inscreva-se na sua rota"
           subtitle="Confira as viagens da semana."
-          dateRange="(06/04 - 10/04)"
+          dateRange={data ? `(${formatarData(data.start_date)} - ${formatarData(data.end_date)})` : ""}
         />
 
         <WeekDaysMenu dias={DIAS_SEMANA} diaAtivo={diaAtivo} onDiaChange={setDiaAtivo} />
@@ -84,7 +89,6 @@ export default function PaginaProfessor() {
 
             return (
               <TripCard key={viagem.trip_id}>
-                
                 <TripRouteHeader origem={viagem.boarding_point} destino={viagem.drop_off_point} horarioInicio={formatarHorario(viagem.departure_time)} />
 
                 <PassengerListInfo userType="professor" vagasTotais={viagem.bus_capacity} inscritosAlunos={viagem.student_count} inscritosProfessores={viagem.staff_count} totalInscritos={viagem.total_enrolled} />
@@ -107,6 +111,10 @@ export default function PaginaProfessor() {
             );
           })}
         </div>
+
+        {viagensDoDia.length === 0 && (
+          <EmptyDayCard diaNome={diaAtual?.full} />
+        )}
       </main>
 
         <GuestSubscribeModal 
