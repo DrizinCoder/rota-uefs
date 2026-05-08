@@ -60,6 +60,22 @@ def run_frontend_setup() -> None:
     print("Configuração de testes frontend concluída.")
 
 
+from setuptools.command.egg_info import egg_info as _egg_info
+from setuptools.command.build_py import build_py as _build_py
+
+
+class EggInfoCommand(_egg_info):
+    def run(self):
+        run_frontend_setup()
+        super().run()
+
+
+class BuildPyCommand(_build_py):
+    def run(self):
+        run_frontend_setup()
+        super().run()
+
+
 class InstallCommand(_install):
     def run(self):
         super().run()
@@ -75,9 +91,11 @@ class DevelopCommand(_develop):
 setup(
     name="rota-uefs-tests-setup",
     version="0.0.1",
-    install_requires=["nodeenv==1.12.0"],
+    install_requires=["nodeenv==1.10.0"],
     packages=[],
     cmdclass={
+        "egg_info": EggInfoCommand,
+        "build_py": BuildPyCommand,
         "install": InstallCommand,
         "develop": DevelopCommand,
     },
