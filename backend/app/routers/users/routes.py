@@ -2,7 +2,7 @@ from app.services.trip_service import TripService
 from app.routers.users.dependencies import get_trip_service
 from app.DTOs.trip import PassengerTripItem, SubscribeData
 import uuid
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends
 
 from app.routers.users.staff.route_staff import staff_router
 from app.routers.users.drive.route_drive import drive_router
@@ -60,19 +60,24 @@ async def update_phone(
 
 @user_router.post("/trip/{trip_id}/subscribe")
 async def subscribe_user(
-    trip_id: str,
+    trip_id: str, 
     data: SubscribeData, 
-    controller: TripController = Depends(get_trip_controller),
-    token: TokenData = Depends(require_profile(UserProfile.STAFF, UserProfile.STUDENT))
+    background_tasks: BackgroundTasks, 
+    controller: TripController = Depends(get_trip_controller), 
+    token: TokenData = Depends(get_current_user)
 ):
-    return await controller.subscriber(token.sub, trip_id, data.extra_passenger_name)
+    return await controller.subscriber(
+        token.sub, 
+        trip_id, 
+        background_tasks, 
+        data.extra_passenger_name
+    )
 
-
-@user_router.post("/trip/{trip_id}/subscribers")
+@user_router.get("/trip/{trip_id}/subscribers")
 async def get_subscribers(
     trip_id: str,
     controller: TripController = Depends(get_trip_controller),
-    _: TokenData = Depends(require_profile(UserProfile.STAFF, UserProfile.STUDENT))
+    _: TokenData = Depends(get_current_user)
 ):
     return await controller.get_subscribers(trip_id)
 

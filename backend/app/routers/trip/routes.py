@@ -25,6 +25,11 @@ async def get_all_trips(service: TripService = Depends(get_trip_service)):
     result = await service.get_all()
     return ResponseHandler.ok(result)
 
+@trip_router.get("/reservations")
+async def get_all_reservations(service: TripService = Depends(get_trip_service)):
+    result = await service.get_all_reservations()
+    return ResponseHandler.ok(result)
+
 @trip_router.post("/cancel/{trip_id}")
 async def cancel_trip(trip_id: uuid.UUID, controller: TripController = Depends(get_trip_controller)):
     result = await controller.cancel_trip(trip_id)
