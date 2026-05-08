@@ -110,10 +110,10 @@ class EmailUseCases:
                 message=f"Erro ao enviar email de cancelamento de viagem: {str(e)}"
             )
 
-    def send_waitlist_notification(self, email: str, name: str, trip_name: str):
+    def send_subscription_confirmation_staff(self, email: str, name: str, trip_name: str):
         try:
             html = self.template_service.render(
-                "waitlist_notification.html",
+                "subscription_confirmation_staff.html",
                 {
                     "name": name,
                     "trip_name": trip_name
@@ -121,7 +121,28 @@ class EmailUseCases:
             )
 
             self.email_service.send(
-                subject="Sua vaga foi ocupada - Lista de espera - Rota UEFS 🚍",
+                subject="Inscrição confirmada - Rota UEFS 🚍",
+                email_to=email,
+                html_content=html
+            )
+
+        except Exception as e:
+            raise InternalServerException(
+                message=f"Erro ao enviar notificação de lista de espera: {str(e)}"
+            )
+        
+    def send_subscription_confirmation_student(self, email: str, name: str, trip_name: str):
+        try:
+            html = self.template_service.render(
+                "subscription_confirmation_student.html",
+                {
+                    "name": name,
+                    "trip_name": trip_name
+                }
+            )
+
+            self.email_service.send(
+                subject="Inscrição confirmada - Rota UEFS 🚍",
                 email_to=email,
                 html_content=html
             )
