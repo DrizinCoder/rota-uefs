@@ -1,23 +1,24 @@
--r ../requirements.txt
+-r ../backend/requirements.txt
 
-# Dependecia do Backend
+# Dependências do Backend
 pytest==8.4.0
 pytest-cov==4.1.0
 requests==2.31.0
 
-# Dependencias do Frontend
+# Dependências de preparação para os testes do Frontend
+nodeenv==1.10.0
+-e tests
 
-# 1) instalar dependências do frontend (apenas se ainda não instalou)
-# cd frontend
-# npm install
+# Observações
+# - As dependências Python para testes estão listadas acima.
+# - O pacote local de tests executa `tests/setup.py` automaticamente durante a instalação.
 
-# 2) instalar dependências do runner de testes (Playwright) e navegadores
-# cd tests/tests-frontend
-# npm install
-# npx playwright install
+# Como preparar todo o ambiente de testes
+# Execute a partir da raiz do repositório:
+#   pip install -r tests/requirements-test.txt
 
-# 3) rodar testes (a partir da pasta de testes)
+# Depois, rode os testes backend:
+#   pytest
 
-# npm run test:e2e
-# ou a partir da raiz
-# npm --prefix tests/tests-frontend run test:e2e
+# Depois, rode os testes frontend a partir da raiz:
+#   npm --prefix tests/tests-frontend run test:e2e
