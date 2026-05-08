@@ -7,7 +7,7 @@ from app.core.exceptions import NotFoundException
 from app.enums.enums import UserProfile
 from app.core.responses import ResponseHandler
 from app.services.email.use_cases import EmailUseCases
-from app.models.models import Trip, User 
+from app.models.models import Reservation, Trip, User 
 
 class PriorityEngine:
     def __init__(self, user_repo: UserRepository, trip_repo: TripRepository, res_repo: ReservationRepository, bus_repo: BusRepository):
@@ -28,9 +28,12 @@ class PriorityEngine:
             key=lambda r: (self.get_priority(r.user.profile), r.reservation_timestamp)
         )
     
-    async def subscribe_notifications(self, user: User, trip: Trip):
+    async def subscribe_notifications(self, user: User, trip: Trip, reservation: Reservation):
         if user.profile == UserProfile.STAFF:
-            await EmailUseCases().send_subscription_confirmation_staff(user.email, user.full_name, trip.name)
+            if reservation.extra_passenger_name not in (None, ""):
+                await EmailUseCases().send_subscription_confirmation_staff_for_extra_name(user.email, user.full_name, trip.name, reservation.extra_passenger_name)
+            else:
+                await EmailUseCases().send_subscription_confirmation_staff(user.email, user.full_name, trip.name)
         if user.profile == UserProfile.STUDENT:
             await EmailUseCases().send_subscription_confirmation_student(user.email, user.full_name, trip.name)
         
@@ -97,7 +100,7 @@ class PriorityEngine:
             extra_name=extra_name
         )
 
-        await self.subscribe_notifications(user, trip)
+        await self.subscribe_notifications(user, trip, new_res)
         
         return ResponseHandler.created(new_res, "Inscrição realizada com sucesso.")
 

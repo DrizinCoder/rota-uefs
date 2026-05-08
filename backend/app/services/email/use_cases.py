@@ -115,7 +115,7 @@ class EmailUseCases:
             html = self.template_service.render(
                 "subscription_confirmation_staff.html",
                 {
-                    "name": name,
+                    "name": name.split(" ")[0],
                     "trip_name": trip_name
                 }
             )
@@ -130,7 +130,29 @@ class EmailUseCases:
             raise InternalServerException(
                 message=f"Erro ao enviar notificação de lista de espera: {str(e)}"
             )
-        
+    
+    def send_subscription_confirmation_staff_for_extra_name(self, email: str, name: str, trip_name: str, extra_name: str):
+        try:
+            html = self.template_service.render(
+                "subscription_confirmation_staff_for_extra_name.html",
+                {
+                    "name": name.split(" ")[0],
+                    "trip_name": trip_name,
+                    "extra_name": extra_name
+                }
+            )
+
+            self.email_service.send(
+                subject="Inscrição confirmada - Rota UEFS 🚍",
+                email_to=email,
+                html_content=html
+            )
+
+        except Exception as e:
+            raise InternalServerException(
+                message=f"Erro ao enviar notificação de lista de espera: {str(e)}"
+            )
+
     def send_subscription_confirmation_student(self, email: str, name: str, trip_name: str):
         try:
             html = self.template_service.render(
