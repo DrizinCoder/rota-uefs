@@ -16,6 +16,13 @@ class TripController:
             logger.error(f"Error fetching subscriber for trip {trip_id}: {e}")
             raise
 
+    async def get_subscribers(self, trip_id: str):
+        try:
+            return await self.priority_engine.get_all_users_with_reservation_by_trip_id(trip_id)
+        except Exception as e:
+            logger.error(f"Error fetching subscribers for trip {trip_id}: {e}")
+            raise
+
     async def cancel_subscription(self, user_id: str, trip_id: str, extra_passenger_name: str = None):
         try:
             return await self.priority_engine.cancel_subscription(user_id, trip_id, extra_passenger_name)

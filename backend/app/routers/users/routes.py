@@ -67,6 +67,15 @@ async def subscribe_user(
 ):
     return await controller.subscriber(token.sub, trip_id, data.extra_passenger_name)
 
+
+@user_router.post("/trip/{trip_id}/subscribers")
+async def get_subscribers(
+    trip_id: str,
+    controller: TripController = Depends(get_trip_controller),
+    _: TokenData = Depends(require_profile(UserProfile.STAFF, UserProfile.STUDENT))
+):
+    return await controller.get_subscribers(trip_id)
+
 @user_router.post("/trip/{trip_id}/cancel")
 async def cancel_subscription(
     trip_id: str,
