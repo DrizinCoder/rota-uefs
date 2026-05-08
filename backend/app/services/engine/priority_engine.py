@@ -1,5 +1,4 @@
 from fastapi import BackgroundTasks
-
 from app.repositories.user_repository import UserRepository
 from app.repositories.reservation_repository import ReservationRepository
 from app.repositories.trip_repository import TripRepository
@@ -7,7 +6,8 @@ from app.repositories.bus_repository import BusRepository
 from app.core.exceptions import NotFoundException
 from app.enums.enums import UserProfile
 from app.core.responses import ResponseHandler
-from app.services.email.use_cases import EmailUseCases 
+from app.services.email.use_cases import EmailUseCases
+from app.models.models import Trip, User 
 
 class PriorityEngine:
     def __init__(self, user_repo: UserRepository, trip_repo: TripRepository, res_repo: ReservationRepository, bus_repo: BusRepository):
@@ -16,201 +16,112 @@ class PriorityEngine:
         self.reservation_repository = res_repo
         self.bus_repository = bus_repo
 
+    def get_priority(self, profile):
+        priorities = {UserProfile.STAFF: 0, UserProfile.STUDENT: 1}
+        return priorities.get(profile, 99)
 
-    async def get_trip_by_id(self, trip_id: str):
-        return await self.trip_repository.get_by_id(trip_id)
-
-    async def verify(self, trip_id: str):
-        trip = await self.get_trip_by_id(trip_id)
-
-        if not trip:
-            raise NotFoundException("Viagem não encontrada")
-        
+    async def _get_ordered_reservations(self, trip_id: str):
         reservations = await self.reservation_repository.get_by_trip_id(trip_id)
 
-        bus = await self.bus_repository.get_by_plate(trip.bus_license_plate)
-        if not bus:
-            raise NotFoundException("Ônibus não encontrado")
-            
-        max_capacity = bus.capacity
-        current_count = len(reservations)
-
-        data = {
-            "trip": trip,
-            "reservations": reservations,
-            "bus": bus,
-            "max_capacity": max_capacity,
-            "current_count": current_count
-            }
-        
-        return data
-    
-    def get_priority(self, profile):
-        if profile == UserProfile.STAFF:
-            return 0  # maior prioridade
-        elif profile == UserProfile.STUDENT:
-            return 1
-        return 99
-
-    async def subscribe_user_to_trip(self, user_id: str, trip_id: str, extra_name: str = None):
-        data = await self.verify(trip_id)
-
-        max_capacity = data["max_capacity"]
-
-        user = await self.user_repository.get_by_id(user_id)
-        if not user:
-            raise NotFoundException("Usuário não encontrado")
-
-        existing_res = next((r for r in data["reservations"] if r.user.id == user_id), None)
-        if existing_res:
-            await self.reservation_repository.activate_reservation(existing_res.id)
-            return ResponseHandler.ok(message="Reserva reativada com sucesso.")
-        else:
-            new_res = await self.reservation_repository.create(user_id=user_id, trip_id=trip_id, extra_name=extra_name)
-
-            updated_reservations = await self.reservation_repository.get_by_trip_id(trip_id)
-
-            ordered_reservations = sorted(
-                updated_reservations,
-                key=lambda r: (self.get_priority(r.user.profile), r.reservation_timestamp)
-            )
-
-            inside_capacity = ordered_reservations[:max_capacity]
-            waiting_list = ordered_reservations[max_capacity:]
-
-            is_inside = any(r.id == new_res.id for r in inside_capacity)
-
-
-            if user.profile == UserProfile.STUDENT:
-                if is_inside:
-                    return ResponseHandler.created(new_res, "Inscrição confirmada com sucesso.")
-                else:
-                    # 📧 TODO: enviar email informando que está na lista de espera
-                    return ResponseHandler.custom(
-                        status_code=201,
-                        data=new_res,
-                        message="Inscrito com sucesso, mas você está na LISTA DE ESPERA (vagas excedidas)."
-                    )
-
-            elif user.profile == UserProfile.STAFF:
-                if is_inside:
-                    students_inside = [
-                        r for r in ordered_reservations[:max_capacity+1]
-                        if r.user.profile == UserProfile.STUDENT
-                    ]
-
-                    if len(students_inside) > 0 and new_res in inside_capacity:
-                        displaced_student = next(
-                            (r for r in waiting_list if r.user.profile == UserProfile.STUDENT),
-                            None
-                        )
-
-                        if displaced_student:
-                            # 📧 TODO: enviar email avisando que perdeu a vaga
-                            return ResponseHandler.custom(
-                                status_code=201,
-                                data=new_res,
-                                message=f"Vaga garantida por prioridade. O aluno {displaced_student.user.full_name} foi movido para lista de espera."
-                            )
-
-                    return ResponseHandler.created(new_res, "Servidor inscrito com sucesso.")
-
-                else:
-                    # 📧 TODO: notificar administradores (superlotação de servidores)
-                    return ResponseHandler.custom(
-                        status_code=201,
-                        data=new_res,
-                        message="Inscrito como excedente. Administradores da UNIDRAN notificados (Super lotação de servidores)."
-                    )
-
-            else:
-                return ResponseHandler.custom(
-                    status_code=400,
-                    message="Perfil de usuário inválido para inscrição."
-                )
-        
-    async def cancel_user_reservation(self, user_id: str, trip_id: str, background_tasks: BackgroundTasks):
-        data = await self.verify(trip_id)
-
-        reservations = data["reservations"]
-        max_capacity = data["max_capacity"]
-
-        user = await self.user_repository.get_by_id(user_id)
-        if not user:
-            raise NotFoundException("Usuário não encontrado")
-
-        user_res = next((r for r in reservations if r.user.id == user_id), None)
-        if not user_res:
-            raise NotFoundException("Reserva não encontrada para este usuário")
-
-        await self.reservation_repository.cancel_reservation(user_res.id)
-
-        updated_reservations = await self.reservation_repository.get_by_trip_id(trip_id)
-
-        ordered_reservations = sorted(
-            updated_reservations,
-            key=lambda r: (self.get_priority(r.user.profile), r.reservation_timestamp)
-        )
-
-        inside_capacity = ordered_reservations[:max_capacity]
-        waiting_list = ordered_reservations[max_capacity:]
-
-        if not waiting_list:
-            return ResponseHandler.ok(message="Reserva cancelada com sucesso.")
-
-        old_ordered = sorted(
+        return sorted(
             reservations,
             key=lambda r: (self.get_priority(r.user.profile), r.reservation_timestamp)
         )
-
-        old_inside = old_ordered[:max_capacity]
-
-        promoted = [
-            r for r in inside_capacity
-            if r.id not in [old_r.id for old_r in old_inside]
-        ]
-
-        if not promoted:
-            return ResponseHandler.ok(message="Reserva cancelada com sucesso.")
-
-        promoted_user = promoted[0]
-
-        if promoted_user.user.profile == UserProfile.STUDENT:
-              background_tasks.add_task(
-                EmailUseCases().send_waitlist_notification,
-                user.email,
-                user.full_name,
-                data["trip"].name,
-                
-            )
-
-        elif promoted_user.user.profile == UserProfile.STAFF:
-            pass
-
-        return ResponseHandler.ok(
-            message="Reserva cancelada, fila reorganizada e vaga preenchida por prioridade."
-        )
     
-    async def alert_cancelled_trip(self, trip_id: str, background_tasks: BackgroundTasks):
-        trip = await self.get_trip_by_id(trip_id)
+    async def subscribe_notifications(self, user: User, trip: Trip):
+        if user.profile == UserProfile.STAFF:
+            await EmailUseCases().send_subscription_confirmation_staff(user.email, user.full_name, trip.name)
+        if user.profile == UserProfile.STUDENT:
+            await EmailUseCases().send_subscription_confirmation_student(user.email, user.full_name, trip.name)
+        
+    async def get_all_users_with_reservation_by_trip_id(self, trip_id: str):
+        trip = await self.trip_repository.get_by_id(trip_id)
 
         if not trip:
             raise NotFoundException("Viagem não encontrada")
+        
+        bus = await self.bus_repository.get_by_plate(trip.bus_license_plate)
 
-        users = await self.user_repository.get_users_by_trip_id(trip_id)
+        capacity = bus.capacity if bus else 0
+        
+        ordered_reservations = await self._get_ordered_reservations(trip_id)
 
-        if not users:
-            return ResponseHandler.ok(message="Viagem cancelada. Nenhum usuário para notificar.")
+        valid_reservations = []
+        waitlist_reservations = []
 
+        for index, res in enumerate(ordered_reservations):
+            is_guest = res.extra_passenger_name is not None
+            passenger_name = res.extra_passenger_name if is_guest else res.user.full_name
+
+            user_data = {
+                "user_id": str(res.user_id),
+                "name": passenger_name,
+                "is_invited": is_guest,
+                "timestamp": res.reservation_timestamp
+            }
+
+            if index < capacity:
+                valid_reservations.append(user_data)
+            else:
+                waitlist_reservations.append(user_data)
+
+        return ResponseHandler.ok(
+            data={
+                "valid_reservations": valid_reservations,
+                "waitlist_reservations": waitlist_reservations,
+                "stats": {
+                    "capacity": capacity,
+                    "total_reservations": len(ordered_reservations),
+                    "waitlist_count": len(waitlist_reservations)
+                }
+            },
+            message="Listagem de passageiros."
+        )
+
+    async def subscribe_user_to_trip(self, user_id: str, trip_id: str, extra_name: str = None):
+        trip = await self.trip_repository.get_by_id(trip_id)
+        if not trip: raise NotFoundException("Viagem não encontrada")
+        
+        user = await self.user_repository.get_by_id(user_id)
+        if not user: raise NotFoundException("Usuário não encontrado")
+
+        existing_reservation = await self.reservation_repository.get_reservation_by_user_and_trip_extra_name(user_id, trip_id, extra_name)
+        
+        if existing_reservation:
+            await self.reservation_repository.activate_reservation(existing_reservation.id)
+            return ResponseHandler.ok(message="Reserva reativada.")
+        
+        new_res = await self.reservation_repository.create(
+            user_id=user_id, 
+            trip_id=trip_id, 
+            extra_name=extra_name
+        )
+
+        await self.subscribe_notifications(user, trip)
+        
+        return ResponseHandler.created(new_res, "Inscrição realizada com sucesso.")
+
+    async def cancel_subscription(self, user_id: str, trip_id: str, extra_name: str = None):
+        user_res = await self.reservation_repository.get_reservation_by_user_and_trip_extra_name(user_id, trip_id, extra_name)
+        
+        if not user_res:
+            raise NotFoundException("Reserva não encontrada")
+
+        await self.reservation_repository.cancel_reservation(user_res.id)
+        
+        return ResponseHandler.ok(message="Reserva cancelada com sucesso.")
+
+    async def alert_cancelled_trip(self, trip_id: str, background_tasks: BackgroundTasks):
+        trip = await self.trip_repository.get_by_id(trip_id)
+
+        if not trip: raise NotFoundException("Viagem não encontrada")
+
+        users = await self.trip_repository.get_all_users_with_reservation_active_by_trip_id(trip_id)
+        
         for user in users:
             background_tasks.add_task(
                 EmailUseCases().send_trip_cancelled,
-                user.email,
-                user.full_name,
-                trip.name,
-                trip.date.strftime("%d/%m/%Y")
+                user.email, user.full_name, trip.name, trip.date.strftime("%d/%m/%Y")
             )
 
-        return ResponseHandler.ok(
-            message="Viagem cancelada e usuários notificados por email."
-        )
+        return ResponseHandler.ok(message="Viagem cancelada e usuários notificados.")
