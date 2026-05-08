@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QR Code de Embarque - Rota UEFS</title>
+  </head>
+
+  <body style="margin: 0; padding: 0; background-color: #eef3fb; font-family: Arial, Helvetica, sans-serif;">
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #eef3fb; padding: 40px 0;">
+      <tr>
+        <td align="center">
+
+          <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08);">
+
+            <!-- Header -->
+            <tr>
+              <td style="background: linear-gradient(135deg, #103173 0%, #0a1f4e 60%, #0d2a5e 100%); padding: 0;">
+                <table width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td width="6" style="background-color: #5B9BD5;">&nbsp;</td>
+                    <td style="padding: 32px 36px;">
+                      <table cellpadding="0" cellspacing="0" style="margin-bottom: 16px;">
+                        <tr>
+                          <td style="background-color: rgba(91,155,213,0.15); border: 1px solid rgba(91,155,213,0.3); border-radius: 20px; padding: 5px 14px;">
+                            <span style="font-size: 10px; font-weight: 900; color: #5B9BD5; letter-spacing: 2px; text-transform: uppercase;">Transporte Universitário Gratuito</span>
+                          </td>
+                        </tr>
+                      </table>
+                      <h1 style="margin: 0 0 4px; font-size: 28px; font-weight: 900; color: #ffffff; letter-spacing: -0.5px; text-transform: uppercase;">
+                        ROTA <span style="color: #5B9BD5;">UEFS</span>
+                      </h1>
+                      <p style="margin: 0; font-size: 13px; color: rgba(255,255,255,0.55); font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">
+                        QR Code de Embarque
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+                <table width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td width="6" style="background-color: #5B9BD5; height: 3px;"></td>
+                    <td style="background-color: #5B9BD5; height: 3px;"></td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Body -->
+            <tr>
+              <td style="background-color: #ffffff; padding: 40px 42px 36px;">
+                <h2 style="margin: 0 0 8px; font-size: 22px; font-weight: 900; color: #0a1f4e; letter-spacing: -0.3px;">
+                  Inscrição confirmada, {{ first_name }}!
+                </h2>
+                <p style="margin: 0 0 28px; font-size: 14px; color: #103173; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+                  Guarde seu QR Code de embarque
+                </p>
+
+                <p style="margin: 0 0 28px; font-size: 15px; color: #4a5568; line-height: 1.7;">
+                  Você se inscreveu na viagem abaixo e está na posição <strong style="color: #0a1f4e;">#{{ position }}</strong> da lista. Verifique no dia da viagem se sua inscrição foi confirmada ou se você permanece na lista de espera.
+                </p>
+
+                <!-- Detalhes da viagem -->
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 32px;">
+                  <tr>
+                    <td style="background-color: #f0f4ff; border-radius: 12px; padding: 20px 24px;">
+                      <table width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td style="padding-bottom: 12px;">
+                            <p style="margin: 0; font-size: 11px; font-weight: 900; color: #5B9BD5; letter-spacing: 2px; text-transform: uppercase;">Rota</p>
+                            <p style="margin: 4px 0 0; font-size: 15px; font-weight: 900; color: #0a1f4e;">{{ boarding_point }} → {{ drop_off_point }}</p>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="border-top: 1px solid #dce6f5; padding-top: 12px;">
+                            <table width="100%" cellpadding="0" cellspacing="0">
+                              <tr>
+                                <td width="50%">
+                                  <p style="margin: 0; font-size: 11px; font-weight: 900; color: #5B9BD5; letter-spacing: 2px; text-transform: uppercase;">Data</p>
+                                  <p style="margin: 4px 0 0; font-size: 15px; font-weight: 900; color: #0a1f4e;">{{ trip_date }}</p>
+                                </td>
+                                <td width="50%">
+                                  <p style="margin: 0; font-size: 11px; font-weight: 900; color: #5B9BD5; letter-spacing: 2px; text-transform: uppercase;">Horário de Partida</p>
+                                  <p style="margin: 4px 0 0; font-size: 15px; font-weight: 900; color: #0a1f4e;">{{ departure_time }}</p>
+                                </td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- QR Code -->
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 32px;">
+                  <tr>
+                    <td align="center">
+                      <table cellpadding="0" cellspacing="0" style="background-color: #f0f4ff; border-radius: 16px; padding: 28px;">
+                        <tr>
+                          <td align="center" style="padding-bottom: 16px;">
+                            <p style="margin: 0; font-size: 11px; font-weight: 900; color: #5B9BD5; letter-spacing: 2px; text-transform: uppercase;">Seu QR Code de Embarque</p>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td align="center" style="background-color: #ffffff; border-radius: 12px; padding: 16px;">
+                            <img src="data:image/png;base64,{{ qr_code_base64 }}" width="200" height="200" alt="QR Code de Embarque" style="display: block;" />
+                          </td>
+                        </tr>
+                        <tr>
+                          <td align="center" style="padding-top: 16px;">
+                            <p style="margin: 0; font-size: 13px; color: #4a5568; line-height: 1.6; text-align: center;">
+                              No dia da viagem, exiba este QR Code ao motorista para realizar o embarque.
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Aviso lista de espera -->
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 28px;">
+                  <tr>
+                    <td style="background-color: #fff8e1; border-left: 4px solid #f59e0b; border-radius: 0 8px 8px 0; padding: 14px 18px;">
+                      <p style="margin: 0; font-size: 13px; color: #4a5568; line-height: 1.6;">
+                        <strong style="color: #0a1f4e;">Atenção:</strong> sua vaga está sujeita à disponibilidade do ônibus. Consulte o aplicativo no dia da viagem para confirmar se sua inscrição foi efetivada ou se você permanece na lista de espera.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
+                  <tr>
+                    <td style="border-top: 1px solid #e8edf5; height: 1px;"></td>
+                  </tr>
+                </table>
+
+                <p style="margin: 0; font-size: 13px; color: #8a9ab5; line-height: 1.6;">
+                  <strong style="color: #4a5568;">Não realizou essa inscrição?</strong><br>
+                  Entre em contato com a equipe de suporte da UEFS.
+                </p>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td style="background: linear-gradient(135deg, #0a1f4e 0%, #103173 100%); padding: 28px 42px; text-align: center;">
+                <p style="margin: 0 0 4px; font-size: 12px; font-weight: 900; color: #5B9BD5; letter-spacing: 2px; text-transform: uppercase;">
+                  Universidade Estadual de Feira de Santana
+                </p>
+                <p style="margin: 0; font-size: 11px; color: rgba(255,255,255,0.4); letter-spacing: 1px;">
+                  © 2026 Rota UEFS · Feira de Santana ↔ Salvador
+                </p>
+              </td>
+            </tr>
+
+          </table>
+
+          <table width="600" cellpadding="0" cellspacing="0" style="margin-top: 20px;">
+            <tr>
+              <td style="text-align: center; padding: 0 42px;">
+                <p style="font-size: 11px; color: #999999; line-height: 1.6; margin: 0;">
+                  Este é um e-mail automático. Por favor, não responda.<br>
+                  Se tiver dúvidas, entre em contato com a equipe de suporte da UEFS.
+                </p>
+              </td>
+            </tr>
+          </table>
+
+        </td>
+      </tr>
+    </table>
+
+  </body>
+</html>
