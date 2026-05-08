@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 class TemplateService:
     def __init__(self):
-        template_path = os.path.join("app", "templates", "emails")
+        template_path = os.path.join("app", "services", "email", "templates")
         self.env = Environment(loader=FileSystemLoader(template_path))
 
     def render(self, template_name: str, context: dict) -> str:

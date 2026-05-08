@@ -16,11 +16,9 @@ class TripController:
             logger.error(f"Error fetching subscriber for trip {trip_id}: {e}")
             raise
 
-    async def cancel_trip(self, trip_id: str):
+    async def cancel_subscription(self, user_id: str, trip_id: str, extra_passenger_name: str = None):
         try:
-            await self.trip_service.cancel_trip(trip_id)
-            return await self.priority_engine.alert_cancelled_trip(trip_id)
+            return await self.priority_engine.cancel_subscription(user_id, trip_id, extra_passenger_name)
         except Exception as e:
-            logger.error(f"Error canceling trip {trip_id}: {e}")
+            logger.error(f"Error canceling subscription for trip {trip_id}: {e}")
             raise
-        
