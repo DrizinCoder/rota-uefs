@@ -1,7 +1,7 @@
 from sqlmodel import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models import Reservation, User
+from app.models.models import Reservation, User
 from app.enums.enums import BoardingStatus
 from datetime import datetime
 import uuid
