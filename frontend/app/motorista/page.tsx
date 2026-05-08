@@ -15,7 +15,7 @@ import { PassengerListInfo } from "@/entities/viagem/ui/PassengerListInfo";
 import { CheckinButton } from "@/features/fazer-checkin/ui/CheckinButton";
 import { StartTripButton } from "@/features/iniciar-viagem/ui/StartTripButton";
 import { TripRouteHeader } from "@/entities/viagem/ui/TripRouteHeader";
-import { passengerService, type HomePassageiro, type CardViagemFeed} from "@/services/passengerService";
+import { passengerService, type Home, type CardViagemFeed} from "@/services/homeService";
 
 import {
   MapPin,
@@ -118,14 +118,14 @@ const formatarData = (data: string) => {
 };
 
 export default function MotoristaPage() {
-  const [data, setData] = useState<HomePassageiro | null>(null);
+  const [data, setData] = useState<Home | null>(null);
     const [diaAtivo, setDiaAtivo] = useState("Segunda");
     const diaAtual = DIAS_SEMANA.find((d) => d.id === diaAtivo);
   
     // Busca os dados da home do passageiro
     useEffect(() => {
       const fetchData = async () => {
-        const resultado = await passengerService.getHomePassageiro();
+        const resultado = await passengerService.getHome();
         setData(resultado);
       }
       fetchData();

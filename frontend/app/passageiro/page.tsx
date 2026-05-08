@@ -15,7 +15,7 @@ import { SubscribeButton } from "@/features/inscrever-rota/ui/SubscribeButton";
 
 
 import {GraduationCap} from "lucide-react";
-import { passengerService , type HomePassageiro} from "@/services/passengerService";
+import { passengerService , type Home} from "@/services/homeService";
 import { EmptyDayCard } from "@/components/shared/empty-day-card";
 
 const DIAS_SEMANA = [
@@ -33,14 +33,14 @@ const formatarData = (data: string) => {
 };
 
 export default function PaginaAluno() {
-  const [data, setData] = useState<HomePassageiro | null>(null);
+  const [data, setData] = useState<Home | null>(null);
   const [diaAtivo, setDiaAtivo] = useState("Segunda");
   const diaAtual = DIAS_SEMANA.find((d) => d.id === diaAtivo);
 
   // Busca os dados da home do passageiro
   useEffect(() => {
     const fetchData = async () => {
-      const resultado = await passengerService.getHomePassageiro();
+      const resultado = await passengerService.getHome();
       setData(resultado);
     }
     fetchData();

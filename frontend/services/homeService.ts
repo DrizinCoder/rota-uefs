@@ -12,7 +12,7 @@ export interface CardViagemFeed {
   total_enrolled: number;
 }
 
-export interface HomePassageiro {
+export interface Home {
   reference_date: string;
   reference_weekday: string;
   start_date: string;
@@ -21,7 +21,7 @@ export interface HomePassageiro {
 }
 
 export const passengerService = {
-    async getHomePassageiro(): Promise<HomePassageiro> {
+    async getHome(): Promise<Home> {
         const response = await api.get('/trip/feed/trips');
         return response.data.data;
     },
