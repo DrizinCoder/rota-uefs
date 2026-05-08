@@ -121,13 +121,15 @@ class EmailUseCases:
                 }
             )
 
-            self.email_service.send(
+            self.email_service.send_with_inline_image(
                 subject="Seu QR Code de Embarque - Rota UEFS 🚍",
                 email_to=email,
-                html_content=html
+                html_content=html,
+                image_base64=qr_base64,
+                image_cid="boarding_qr_code",
             )
 
         except Exception as e:
-            return InternalServerException(
+            raise InternalServerException(
                 message=f"Erro ao enviar email: {str(e)}"
             )

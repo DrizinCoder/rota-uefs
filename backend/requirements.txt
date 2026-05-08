@@ -25,6 +25,8 @@ markdown-it-py==4.0.0
 MarkupSafe==3.0.3
 mdurl==0.1.2
 passlib==1.7.4
+qrcode==8.2
+pillow==12.2.0
 pydantic==2.13.1
 pydantic-extra-types==2.11.1
 pydantic-settings==2.13.1
