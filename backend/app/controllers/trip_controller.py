@@ -1,3 +1,4 @@
+from fastapi import BackgroundTasks
 from app.services.engine.priority_engine import PriorityEngine
 from app.services.trip_service import TripService
 import logging
@@ -9,9 +10,9 @@ class TripController:
         self.trip_service = trip_service
         self.priority_engine = priority_engine
 
-    async def subscriber(self, user_id: str, trip_id: str, extra_passenger_name: str = None):
+    async def subscriber(self, user_id: str, trip_id: str, background_tasks: BackgroundTasks, extra_name: str = None,):
         try:
-            return await self.priority_engine.subscribe_user_to_trip(user_id, trip_id, extra_passenger_name)
+            return await self.priority_engine.subscribe_user_to_trip(user_id, trip_id, background_tasks, extra_name)
         except Exception as e:
             logger.error(f"Error fetching subscriber for trip {trip_id}: {e}")
             raise

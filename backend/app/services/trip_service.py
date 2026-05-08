@@ -20,6 +20,15 @@ class TripService:
     def __init__(self, trip_repository: TripRepository):
         self.trip_repository = trip_repository
 
+
+    async def get_all_reservations(self):
+        logger.info("All reservations requested")
+
+        reservations = await self.trip_repository.get_all_reservations()
+
+        logger.info(f"All reservations retrieved | Count: {len(reservations)}")
+        return reservations
+
     async def create(self, data: CreateTripDTO):
         logger.info(f"Trip creation requested | Date: {data.trip_date} | Recurrence: {data.recurrence}")
 

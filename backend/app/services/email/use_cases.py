@@ -173,3 +173,64 @@ class EmailUseCases:
             raise InternalServerException(
                 message=f"Erro ao enviar notificação de lista de espera: {str(e)}"
             )
+        
+
+    def send_reactivation_confirmation_staff(self, email: str, name: str, trip_name: str):
+        try:
+            html = self.template_service.render(
+                "reactivation_staff.html",
+                {"name": name.split(" ")[0], "trip_name": trip_name}
+            )
+            self.email_service.send("Reserva reativada - Rota UEFS 🚍", email, html)
+        except Exception as e:
+            logger.error(f"Erro e-mail reativação staff: {e}")
+
+    def send_reactivation_confirmation_staff_for_extra_name(self, email: str, name: str, trip_name: str, extra_name: str):
+        try:
+            html = self.template_service.render(
+                "reactivation_staff_extra.html",
+                {"name": name.split(" ")[0], "trip_name": trip_name, "extra_name": extra_name}
+            )
+            self.email_service.send("Reserva de convidado reativada - Rota UEFS 🚍", email, html)
+        except Exception as e:
+            logger.error(f"Erro e-mail reativação extra: {e}")
+
+    def send_reactivation_confirmation_student(self, email: str, name: str, trip_name: str):
+        try:
+            html = self.template_service.render(
+                "reactivation_student.html",
+                {"name": name.split(" ")[0], "trip_name": trip_name}
+            )
+            self.email_service.send("Sua reserva foi reativada - Rota UEFS 🚍", email, html)
+        except Exception as e:
+            logger.error(f"Erro e-mail reativação estudante: {e}")
+
+    def send_cancellation_confirmation_staff(self, email: str, name: str, trip_name: str):
+        try:
+            html = self.template_service.render(
+                "cancellation_staff.html",
+                {"name": name.split(" ")[0], "trip_name": trip_name}
+            )
+            self.email_service.send("Reserva cancelada - Rota UEFS 🚍", email, html)
+        except Exception as e:
+            logger.error(f"Erro e-mail cancelamento staff: {e}")
+
+    def send_cancellation_confirmation_staff_for_extra_name(self, email: str, name: str, trip_name: str, extra_name: str):
+        try:
+            html = self.template_service.render(
+                "cancellation_staff_extra.html",
+                {"name": name.split(" ")[0], "trip_name": trip_name, "extra_name": extra_name}
+            )
+            self.email_service.send("Reserva de convidado cancelada - Rota UEFS 🚍", email, html)
+        except Exception as e:
+            logger.error(f"Erro e-mail cancelamento extra: {e}")
+
+    def send_cancellation_confirmation_student(self, email: str, name: str, trip_name: str):
+        try:
+            html = self.template_service.render(
+                "cancellation_student.html",
+                {"name": name.split(" ")[0], "trip_name": trip_name}
+            )
+            self.email_service.send("Confirmação de cancelamento - Rota UEFS 🚍", email, html)
+        except Exception as e:
+            logger.error(f"Erro e-mail cancelamento estudante: {e}")
