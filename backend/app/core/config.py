@@ -1,4 +1,3 @@
-import logging
 import os
 
 from dotenv import load_dotenv
@@ -24,6 +23,7 @@ class Settings(BaseSettings):
     USE_CREDENTIALS: bool = True
     VALIDATE_CERTS: bool = True
     BASE_URL_FRONTEND: str = os.getenv("BASE_URL_FRONTEND")
+    REGISTRATION_CODE_SECRET: str = os.getenv("REGISTRATION_CODE_SECRET")
 
     class Config:
         env_file = ".env"
