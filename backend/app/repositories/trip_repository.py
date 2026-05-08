@@ -98,7 +98,18 @@ class TripRepository:
         await self.session.delete(trip)
         await self.session.commit()
         return trip
+    
+    async def get_all_users_with_reservation_active_by_trip_id(self, trip_id: str) -> list[User]:
+        stmt = (
+            select(User)
+            .join(Reservation, Reservation.user_id == User.user_id)
+            .where(Reservation.trip_id == trip_id)
+            .where(Reservation.status == "not_boarded")
+        )
 
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
+    
     async def get_trips_for_feed_by_date_range(
         self, start_date: date, end_date: date
     ) -> list[TripFeedItem]:
