@@ -1,3 +1,4 @@
+from backend.app.routers.checkin.routes import checkin_router
 from app.routers.trip.routes import trip_router
 from fastapi import APIRouter
 
@@ -17,3 +18,4 @@ router.include_router(auth_router, prefix="/auth")
 router.include_router(bus_routes_router, prefix="/routes")
 router.include_router(fleet_router, prefix="/fleet")
 router.include_router(trip_router, prefix="/trip")
+router.include_router(checkin_router, prefix="/checkin")
