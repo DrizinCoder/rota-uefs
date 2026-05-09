@@ -11,11 +11,15 @@ class ReservationService:
     def __init__(self, repository: ReservationRepository):
         self.repository = repository
 
-    async def checkin(self, checkIn_code: str):
+    async def checkin(self, trip_id: uuid.UUID, checkIn_code: str):
         logger.info(f"Checkin requested | checkIn_code: {checkIn_code[:10]}...")
 
         reservation_id, received_hmac = checkIn_code.split(".")
 
+        # TODO: trocar get_by_id por função na classe priority_engine
+        # trocar daqui para um ReservationController para manter padrão do projeto
+        # Objetivo: Só pode embarcar se estiver em "Valid reservation" -> Entre os 46 primeiros do ônibus.
+        
         reservation = await self.repository.get_by_id(uuid.UUID(reservation_id))
 
         if not reservation:

@@ -23,5 +23,5 @@ async def checkin(
     body: CheckinRequestDTO,
     service: ReservationService = Depends(get_reservation_service),
 ):
-    result = await service.checkin(body.checkin_code)
+    result = await service.checkin(body.trip_id, body.checkin_code)
     return ResponseHandler.ok(result)
