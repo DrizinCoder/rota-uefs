@@ -51,8 +51,10 @@ class PriorityEngine:
             passenger_name = res.extra_passenger_name if is_guest else res.user.full_name
 
             user_data = {
+                "reservation_id": str(res.reservation_id),
                 "user_id": str(res.user_id),
                 "name": passenger_name,
+                "profile": res.user.profile.value,
                 "is_invited": is_guest,
                 "timestamp": res.reservation_timestamp
             }
