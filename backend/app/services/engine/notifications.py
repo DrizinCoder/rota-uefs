@@ -20,19 +20,19 @@ class Notifications:
             if user.profile == UserProfile.STAFF:
                 if reservation.extra_passenger_name not in (None, ""):
                     background_tasks.add_task(
-                        EmailUseCases().send_subscription_confirmation_staff_for_extra_name,
-                        user.email, user.full_name, trip.trip_id, reservation.extra_passenger_name
+                        EmailUseCases().send_boarding_qr_code,
+                        user.email, user.full_name, "-", trip.route.boarding_point, trip.route.drop_off_point, trip.trip_date, trip.departure_time.strftime("%H:%M"), reservation.reservation_id, trip.trip_id, user.registration_id
                     )
                 else:
                     background_tasks.add_task(
-                        EmailUseCases().send_subscription_confirmation_staff,
-                        user.email, user.full_name, trip.trip_id
+                        EmailUseCases().send_boarding_qr_code,
+                        user.email, user.full_name, "-", trip.route.boarding_point, trip.route.drop_off_point, trip.trip_date, trip.departure_time.strftime("%H:%M"), reservation.reservation_id, trip.trip_id, user.registration_id
                     )
             if user.profile == UserProfile.STUDENT:
                 background_tasks.add_task(
-                    EmailUseCases().send_subscription_confirmation_student,
-                    user.email, user.full_name, trip.trip_id
-                )
+                        EmailUseCases().send_boarding_qr_code,
+                        user.email, user.full_name, "-", trip.route.boarding_point, trip.route.drop_off_point, trip.trip_date, trip.departure_time.strftime("%H:%M"), reservation.reservation_id, trip.trip_id, user.registration_id
+                    )
 
     async def activate_notifications(self, user: User, trip: Trip, reservation: Reservation, background_tasks: BackgroundTasks):
             if user.profile == UserProfile.STAFF:
