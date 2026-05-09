@@ -1,3 +1,4 @@
+import uuid
 from fastapi import BackgroundTasks
 from app.repositories.user_repository import UserRepository
 from app.repositories.reservation_repository import ReservationRepository
@@ -76,6 +77,20 @@ class PriorityEngine:
             },
             message="Listagem de passageiros."
         )
+
+    async def get_valid_reservation(self, trip_id: uuid.UUID):
+        trip = await self.trip_repository.get_by_id(trip_id)
+
+        if not trip:
+            raise NotFoundException("Viagem não encontrada")
+        
+        bus = await self.bus_repository.get_by_plate(trip.bus_license_plate)
+
+        capacity = bus.capacity if bus else 0
+        
+        ordered_reservations = await self._get_ordered_reservations(trip_id)
+
+        return ordered_reservations[:capacity]
 
     async def subscriber_staff_generic_to_trip(self, trip_id: str):
         trip = await self.trip_repository.get_by_id(trip_id)
