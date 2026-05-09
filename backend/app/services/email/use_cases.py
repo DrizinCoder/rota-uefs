@@ -1,3 +1,6 @@
+from app.utils.utils import generate_qr_code_base64
+from app.utils.utils import generate_registration_code
+import uuid
 from .email_service import EmailService
 from .template_service import TemplateService
 from app.core.exceptions import InternalServerException
@@ -236,3 +239,46 @@ class EmailUseCases:
             print(f"E-mail de cancelamento enviado para estudante {name} email {email}")
         except Exception as e:
             logger.error(f"Erro e-mail cancelamento estudante: {e}")
+        
+    def send_boarding_qr_code(
+        self,
+        email: str,
+        first_name: str,
+        position: int,
+        boarding_point: str,
+        drop_off_point: str,
+        trip_date: str,
+        departure_time: str,
+        reservation_id: uuid.UUID,
+        trip_id: uuid.UUID,
+        registration_id: str,
+    ):
+        try:
+            code = generate_registration_code(reservation_id, trip_id, registration_id)
+            qr_base64 = generate_qr_code_base64(code)
+
+            html = self.template_service.render(
+                "boarding_qr_code.html",
+                {
+                    "first_name": first_name,
+                    "position": position,
+                    "boarding_point": boarding_point,
+                    "drop_off_point": drop_off_point,
+                    "trip_date": trip_date,
+                    "departure_time": departure_time,
+                    "qr_code_base64": qr_base64,
+                }
+            )
+
+            self.email_service.send_with_inline_image(
+                subject="Seu QR Code de Embarque - Rota UEFS 🚍",
+                email_to=email,
+                html_content=html,
+                image_base64=qr_base64,
+                image_cid="boarding_qr_code",
+            )
+
+        except Exception as e:
+            raise InternalServerException(
+                message=f"Erro ao enviar email: {str(e)}"
+            )

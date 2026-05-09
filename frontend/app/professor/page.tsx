@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navigation } from "@/components/landing/navigation";
 import { FooterSection } from "@/components/landing/footer-section";
 import { RoleHeader } from "@/components/shared/role-header";
@@ -14,38 +14,51 @@ import { TripCard } from "@/entities/viagem/ui/TripCard";
 import { ManageSubscriptionButton } from "@/features/gerenciar-inscricao/ui/ManageSubscriptionButton";
 import { TripModeToggle } from "@/entities/viagem/ui/TripModeToggle";
 import { SubscribeButton } from "@/features/inscrever-rota/ui/SubscribeButton";
-
+import { passengerService, type Home } from "@/services/homeService";
 import { GraduationCap } from "lucide-react";
-
-const VIAGENS_REQUISITOS = [
-  { id: "1", dia: "segunda", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "06:00", horarioFim: "08:00", inscritosAlunos: 15, inscritosProfessores: 3, vagasTotais: 44, jaInscrito: false },
-  { id: "2", dia: "segunda", origem: "Feira de Santana", destino: "Salvador", horarioInicio: "18:30", horarioFim: "20:30", inscritosAlunos: 30, inscritosProfessores: 5, vagasTotais: 44, jaInscrito: true },
-  { id: "3", dia: "terça", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "06:00", horarioFim: "08:00", inscritosAlunos: 20, inscritosProfessores: 2, vagasTotais: 44, jaInscrito: false },
-  { id: "4", dia: "terça", origem: "Feira de Santana", destino: "Salvador", horarioInicio: "18:30", horarioFim: "20:30", inscritosAlunos: 35, inscritosProfessores: 5, vagasTotais: 44, jaInscrito: false },
-  { id: "5", dia: "quarta", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "06:00", horarioFim: "08:00", inscritosAlunos: 12, inscritosProfessores: 3, vagasTotais: 44, jaInscrito: false },
-  { id: "6", dia: "quarta", origem: "Feira de Santana", destino: "Salvador", horarioInicio: "18:30", horarioFim: "20:30", inscritosAlunos: 25, inscritosProfessores: 5, vagasTotais: 44, jaInscrito: false },
-  { id: "7", dia: "quinta", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "06:00", horarioFim: "08:00", inscritosAlunos: 40, inscritosProfessores: 4, vagasTotais: 44, jaInscrito: true },
-  { id: "8", dia: "quinta", origem: "Feira de Santana", destino: "Salvador", horarioInicio: "18:30", horarioFim: "20:30", inscritosAlunos: 20, inscritosProfessores: 5, vagasTotais: 44, jaInscrito: false },
-  { id: "9", dia: "sexta", origem: "Salvador", destino: "Feira de Santana", horarioInicio: "06:00", horarioFim: "08:00", inscritosAlunos: 30, inscritosProfessores: 8, vagasTotais: 44, jaInscrito: false },
-  { id: "10", dia: "sexta", origem: "Feira de Santana", destino: "Salvador", horarioInicio: "18:30", horarioFim: "20:30", inscritosAlunos: 35, inscritosProfessores: 7, vagasTotais: 44, jaInscrito: true },
-];
+import { EmptyDayCard } from "@/components/shared/empty-day-card";
 
 const DIAS_SEMANA = [
-  { id: "segunda", label: "Seg", full: "Segunda-feira" },
-  { id: "terça", label: "Ter", full: "Terça-feira" },
-  { id: "quarta", label: "Qua", full: "Quarta-feira" },
-  { id: "quinta", label: "Qui", full: "Quinta-feira" },
-  { id: "sexta", label: "Sex", full: "Sexta-feira" },
+  { id: "Segunda", label: "Seg", full: "Segunda-feira" },
+  { id: "Terça", label: "Ter", full: "Terça-feira" },
+  { id: "Quarta", label: "Qua", full: "Quarta-feira" },
+  { id: "Quinta", label: "Qui", full: "Quinta-feira" },
+  { id: "Sexta", label: "Sex", full: "Sexta-feira" },
 ];
 
+const formatarHorario = (horario: string) => horario.slice(0, 5);
+const formatarData = (data: string) => {
+  const [ano, mes, dia] = data.split("-");
+  return `${dia}/${mes}`;
+};
+
 export default function PaginaProfessor() {
-  const [diaAtivo, setDiaAtivo] = useState("segunda");
+  const [data, setData] = useState<Home | null>(null);
+  const [diaAtivo, setDiaAtivo] = useState("Segunda");
   const diaAtual = DIAS_SEMANA.find((d) => d.id === diaAtivo);
   const [modalConvidado, setModalConvidado] = useState<string | null>(null);
 
+  // Busca os dados da home do passageiro
+  useEffect(() => {
+    const fetchData = async () => {
+      const resultado = await passengerService.getHome();
+      setData(resultado);
+    }
+    fetchData();
+  }, [])
+
+  // Define o dia ativo como o dia atual, quando os dados são carregados
+  useEffect(() => {
+    if (data?.reference_weekday) {
+      setDiaAtivo(data.reference_weekday);
+    }
+  }, [data])
+
+  // Estado para armazenar a modalidade escolhida para cada card de viagem
   const [modalidades, setModalidades] = useState<Record<string, "ida" | "ida-volta">>({});
 
-  const viagensDoDia = VIAGENS_REQUISITOS.filter((v) => v.dia === diaAtivo);
+  const viagensDoDia = (data?.trips || []).filter(viagem => viagem.weekday === diaAtivo);
+  
 
   const selecionarModalidade = (viagemId: string, modalidade: "ida" | "ida-volta") => {
     setModalidades(prev => ({ ...prev, [viagemId]: modalidade }));
@@ -64,7 +77,7 @@ export default function PaginaProfessor() {
           portalName="Portal do Professor"
           title="Inscreva-se na sua rota"
           subtitle="Confira as viagens da semana."
-          dateRange="(06/04 - 10/04)"
+          dateRange={data ? `(${formatarData(data.start_date)} - ${formatarData(data.end_date)})` : ""}
         />
 
         <WeekDaysMenu dias={DIAS_SEMANA} diaAtivo={diaAtivo} onDiaChange={setDiaAtivo} />
@@ -72,33 +85,36 @@ export default function PaginaProfessor() {
         <CurrentDayHeader dayName={diaAtual?.full} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {viagensDoDia.map((viagem) => {
-            const modalidadeAtual = modalidades[viagem.id] || "ida";
+            const modalidadeAtual = modalidades[viagem.trip_id] || "ida";
 
             return (
-              <TripCard key={viagem.id}>
-                
-                <TripRouteHeader origem={viagem.origem} destino={viagem.destino} horarioInicio={viagem.horarioInicio} horarioFim={viagem.horarioFim} />
+              <TripCard key={viagem.trip_id}>
+                <TripRouteHeader origem={viagem.boarding_point} destino={viagem.drop_off_point} horarioInicio={formatarHorario(viagem.departure_time)} />
 
-                <PassengerListInfo userType="professor" vagasTotais={viagem.vagasTotais} inscritosAlunos={viagem.inscritosAlunos} inscritosProfessores={viagem.inscritosProfessores} />
+                <PassengerListInfo userType="professor" vagasTotais={viagem.bus_capacity} inscritosAlunos={viagem.student_count} inscritosProfessores={viagem.staff_count} totalInscritos={viagem.total_enrolled} />
 
                 <div className="flex flex-col gap-3">
                   {viagem.jaInscrito ? (
-                    <ManageSubscriptionButton viagemId={viagem.id} />
+                    <ManageSubscriptionButton viagemId={viagem.trip_id} />
                   ) : (
                     <div className="space-y-3">
-                      <TripModeToggle modalidadeAtual={modalidadeAtual} onChange={(nova) => selecionarModalidade(viagem.id, nova)} />
-                      <SubscribeButton viagemId={viagem.id} />
+                      <TripModeToggle modalidadeAtual={modalidadeAtual} onChange={(nova) => selecionarModalidade(viagem.trip_id, nova)} />
+                      <SubscribeButton viagemId={viagem.trip_id} />
                     </div>
                   )}
 
                   <div className="w-full h-px bg-[#103173]/5 my-0" />
 
-                  <GuestSubscribeButton onClick={() => setModalConvidado(viagem.id)} />
+                  <GuestSubscribeButton onClick={() => setModalConvidado(viagem.trip_id)} />
                 </div>
               </TripCard>
             );
           })}
         </div>
+
+        {viagensDoDia.length === 0 && (
+          <EmptyDayCard diaNome={diaAtual?.full} />
+        )}
       </main>
 
         <GuestSubscribeModal 

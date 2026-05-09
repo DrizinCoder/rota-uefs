@@ -55,7 +55,7 @@ async def delete_trip(trip_id: uuid.UUID, service: TripService = Depends(get_tri
     result = await service.delete(trip_id)
     return ResponseHandler.ok(result)
 
-@trip_router.get("/trips", response_model=list[TripFeedItem])
+@trip_router.get("/feed/trips", response_model=list[TripFeedItem])
 async def get_student_trips(
     current_user: TokenData = Depends(get_current_user),
     service: TripService = Depends(get_trip_service)
@@ -63,7 +63,7 @@ async def get_student_trips(
     result = await service.get_trips_for_student_feed()
     return ResponseHandler.ok(result)
 
-@trip_router.get("/trips/{trip_id}", response_model=TripDetailFeedItem)
+@trip_router.get("/feed/trips/{trip_id}", response_model=TripDetailFeedItem)
 async def get_trip_detail(
     trip_id: uuid.UUID,
     current_user: TokenData = Depends(get_current_user),
