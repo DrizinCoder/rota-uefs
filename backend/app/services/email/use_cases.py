@@ -90,6 +90,155 @@ class EmailUseCases:
             raise InternalServerException(
                 message=f"Erro ao enviar email de confirmação de conta: {str(e)}"
             )
+
+    def send_trip_cancelled(self, email: str, name: str, trip_name: str, trip_date: str):
+        try:
+            html = self.template_service.render(
+                "trip_cancelled.html",
+                {
+                    "name": name.split(" ")[0],
+                    "trip_name": trip_name,
+                    "trip_date": trip_date
+                }
+            )
+
+            self.email_service.send(
+                subject="Viagem cancelada - Rota UEFS 🚍",
+                email_to=email,
+                html_content=html
+            )
+
+        except Exception as e:
+            raise InternalServerException(
+                message=f"Erro ao enviar email de cancelamento de viagem: {str(e)}"
+            )
+
+    def send_subscription_confirmation_staff(self, email: str, name: str, trip_name: str):
+        try:
+            html = self.template_service.render(
+                "subscription_confirmation_staff.html",
+                {
+                    "name": name.split(" ")[0],
+                    "trip_name": trip_name
+                }
+            )
+
+            self.email_service.send(
+                subject="Inscrição confirmada - Rota UEFS 🚍",
+                email_to=email,
+                html_content=html
+            )
+
+        except Exception as e:
+            raise InternalServerException(
+                message=f"Erro ao enviar notificação de lista de espera: {str(e)}"
+            )
+    
+    def send_subscription_confirmation_staff_for_extra_name(self, email: str, name: str, trip_name: str, extra_name: str):
+        try:
+            html = self.template_service.render(
+                "subscription_confirmation_staff_for_extra_name.html",
+                {
+                    "name": name.split(" ")[0],
+                    "trip_name": trip_name,
+                    "extra_name": extra_name
+                }
+            )
+
+            self.email_service.send(
+                subject="Inscrição confirmada - Rota UEFS 🚍",
+                email_to=email,
+                html_content=html
+            )
+
+        except Exception as e:
+            raise InternalServerException(
+                message=f"Erro ao enviar notificação de lista de espera: {str(e)}"
+            )
+
+    def send_subscription_confirmation_student(self, email: str, name: str, trip_name: str):
+        try:
+            html = self.template_service.render(
+                "subscription_confirmation_student.html",
+                {
+                    "name": name,
+                    "trip_name": trip_name
+                }
+            )
+
+            self.email_service.send(
+                subject="Inscrição confirmada - Rota UEFS 🚍",
+                email_to=email,
+                html_content=html
+            )
+
+        except Exception as e:
+            raise InternalServerException(
+                message=f"Erro ao enviar notificação de lista de espera: {str(e)}"
+            )
+        
+
+    def send_reactivation_confirmation_staff(self, email: str, name: str, trip_name: str):
+        try:
+            html = self.template_service.render(
+                "reactivation_staff.html",
+                {"name": name.split(" ")[0], "trip_name": trip_name}
+            )
+            self.email_service.send("Reserva reativada - Rota UEFS 🚍", email, html)
+        except Exception as e:
+            logger.error(f"Erro e-mail reativação staff: {e}")
+
+    def send_reactivation_confirmation_staff_for_extra_name(self, email: str, name: str, trip_name: str, extra_name: str):
+        try:
+            html = self.template_service.render(
+                "reactivation_staff_extra.html",
+                {"name": name.split(" ")[0], "trip_name": trip_name, "extra_name": extra_name}
+            )
+            self.email_service.send("Reserva de convidado reativada - Rota UEFS 🚍", email, html)
+        except Exception as e:
+            logger.error(f"Erro e-mail reativação extra: {e}")
+
+    def send_reactivation_confirmation_student(self, email: str, name: str, trip_name: str):
+        try:
+            html = self.template_service.render(
+                "reactivation_student.html",
+                {"name": name.split(" ")[0], "trip_name": trip_name}
+            )
+            self.email_service.send("Sua reserva foi reativada - Rota UEFS 🚍", email, html)
+        except Exception as e:
+            logger.error(f"Erro e-mail reativação estudante: {e}")
+
+    def send_cancellation_confirmation_staff(self, email: str, name: str, trip_name: str):
+        try:
+            html = self.template_service.render(
+                "cancellation_staff.html",
+                {"name": name.split(" ")[0], "trip_name": trip_name}
+            )
+            self.email_service.send("Reserva cancelada - Rota UEFS 🚍", email, html)
+        except Exception as e:
+            logger.error(f"Erro e-mail cancelamento staff: {e}")
+
+    async def send_cancellation_confirmation_staff_for_extra_name(self, email: str, name: str, trip_name: str, extra_name: str):
+        try:
+            html = self.template_service.render(
+                "cancellation_staff_extra.html",
+                {"name": name.split(" ")[0], "trip_name": trip_name, "extra_name": extra_name}
+            )
+            self.email_service.send("Reserva de convidado cancelada - Rota UEFS 🚍", email, html)
+        except Exception as e:
+            logger.error(f"Erro e-mail cancelamento extra: {e}")
+        
+    async def send_cancellation_confirmation_student(self, email: str, name: str, trip_name: str):
+        try:
+            html = self.template_service.render(
+                "cancellation_student.html",
+                {"name": name.split(" ")[0], "trip_name": trip_name}
+            )
+            print(f"Enviando e-mail de cancelamento para estudante {name} email {email}")
+            await self.email_service.send("Confirmação de cancelamento - Rota UEFS 🚍", email, html)
+            print(f"E-mail de cancelamento enviado para estudante {name} email {email}")
+        except Exception as e:
+            logger.error(f"Erro e-mail cancelamento estudante: {e}")
         
     def send_boarding_qr_code(
         self,

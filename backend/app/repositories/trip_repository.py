@@ -3,7 +3,7 @@ from app.DTOs.trip import PassengerTripItem
 from app.utils.utils import add_ninety_minutes
 from app.DTOs.trip import TripDetailFeedItem
 from typing import Optional
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import joinedload, selectinload
 import uuid
 from datetime import date
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -20,6 +20,11 @@ from sqlalchemy import case
 class TripRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
+
+    async def get_all_reservations(self):
+        stmt = select(Reservation).options(joinedload(Reservation.user))
+        result = await self.session.execute(stmt)
+        return result.scalars().all()   
 
     async def create(self, data: CreateTripDTO):
         trip = Trip(
@@ -58,6 +63,17 @@ class TripRepository:
             for trip in trips
         ]
 
+    async def cancel_trip(self, trip_id: str):
+        trip = await self.get_by_id(trip_id)
+        if not trip:
+            return None
+        
+        trip.status = TripStatus.CANCELLED
+        self.session.add(trip)
+        await self.session.commit()
+        await self.session.refresh(trip)
+        return trip
+
     async def get_by_id(self, trip_id: uuid.UUID):
         statement = select(Trip).where(Trip.trip_id == trip_id)
         result = await self.session.execute(statement)
@@ -88,7 +104,18 @@ class TripRepository:
         await self.session.delete(trip)
         await self.session.commit()
         return trip
+    
+    async def get_all_users_with_reservation_active_by_trip_id(self, trip_id: str) -> list[User]:
+        stmt = (
+            select(User)
+            .join(Reservation, Reservation.user_id == User.user_id)
+            .where(Reservation.trip_id == trip_id)
+            .where(Reservation.status == "not_boarded")
+        )
 
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
+    
     async def get_trips_for_feed_by_date_range(
         self, start_date: date, end_date: date
     ) -> list[TripFeedItem]:

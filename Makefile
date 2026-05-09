@@ -87,3 +87,19 @@ migrate: ## Atualiza Head do alembic (Aplica migrations)
 
 revision: ## Cria migration - Coloque mensagem personalizada com msg="<Exemplo>"
 	$(DOCKER_COMPOSE) run --rm backend alembic revision --autogenerate -m "$(msg)"
+
+# =========================
+# 🧪 TESTES (LOCAL VENV)
+# =========================
+
+test: ## 🧪 Roda os testes usando o .venv local
+	python3 -m pytest
+
+test-v: ## 🧪 Testes com verbose e prints (-s)
+	python3 -m pytest -v -s
+
+test-cov: ## 📊 Testes com relatório de cobertura
+	python3 -m pytest --cov=app --cov-report=term-missing
+
+test-failed: ## ⚡ Roda apenas os que falharam por último
+	python3 -m pytest --lf

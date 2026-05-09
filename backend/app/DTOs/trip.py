@@ -83,3 +83,6 @@ class DriverTripItem(BaseModel):
     bus_plate: str
     bus_capacity: int
     confirmed_passengers: int
+
+class SubscribeData(BaseModel):
+    extra_passenger_name: Optional[str] = None
