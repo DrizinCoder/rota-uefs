@@ -8,6 +8,7 @@ from app.enums.enums import UserProfile
 from app.core.responses import ResponseHandler
 from app.services.email.use_cases import EmailUseCases
 from app.models.models import Reservation, Trip, User 
+from .notifications import Notifications
 
 class PriorityEngine:
     def __init__(self, user_repo: UserRepository, trip_repo: TripRepository, res_repo: ReservationRepository, bus_repo: BusRepository):
@@ -15,6 +16,8 @@ class PriorityEngine:
         self.trip_repository = trip_repo
         self.reservation_repository = res_repo
         self.bus_repository = bus_repo
+
+        self.notifications = Notifications(user_repo, trip_repo, res_repo, bus_repo)
 
     def get_priority(self, profile):
         priorities = {UserProfile.STAFF: 0, UserProfile.STUDENT: 1}
@@ -28,57 +31,6 @@ class PriorityEngine:
             key=lambda r: (self.get_priority(r.user.profile), r.reservation_timestamp)
         )
     
-    async def subscribe_notifications(self, user: User, trip: Trip, reservation: Reservation, background_tasks: BackgroundTasks):
-        if user.profile == UserProfile.STAFF:
-            if reservation.extra_passenger_name not in (None, ""):
-                background_tasks.add_task(
-                    EmailUseCases().send_subscription_confirmation_staff_for_extra_name,
-                    user.email, user.full_name, trip.name, reservation.extra_passenger_name
-                )
-            else:
-                background_tasks.add_task(
-                    EmailUseCases().send_subscription_confirmation_staff,
-                    user.email, user.full_name, trip.name
-                )
-        if user.profile == UserProfile.STUDENT:
-            background_tasks.add_task(
-                EmailUseCases().send_subscription_confirmation_student,
-                user.email, user.full_name, trip.trip_id
-            )
-    async def activate_notifications(self, user: User, trip: Trip, reservation: Reservation, background_tasks: BackgroundTasks):
-        if user.profile == UserProfile.STAFF:
-            if reservation.extra_passenger_name not in (None, ""):
-                background_tasks.add_task(
-                    EmailUseCases().send_reactivation_confirmation_staff_for_extra_name,
-                    user.email, user.full_name, trip.name, reservation.extra_passenger_name
-                )
-            else:
-                background_tasks.add_task(
-                    EmailUseCases().send_reactivation_confirmation_staff,
-                    user.email, user.full_name, trip.name
-                )
-        if user.profile == UserProfile.STUDENT:
-            background_tasks.add_task(
-                EmailUseCases().send_reactivation_confirmation_student,
-                user.email, user.full_name, trip.trip_id
-            )
-    async def cancel_subscription_notifications(self, user: User, trip: Trip, reservation: Reservation, background_tasks: BackgroundTasks):
-        if user.profile == UserProfile.STAFF:
-            if reservation.extra_passenger_name not in (None, ""):
-                background_tasks.add_task(
-                    EmailUseCases().send_cancellation_confirmation_staff_for_extra_name,
-                    user.email, user.full_name, trip.name, reservation.extra_passenger_name
-                )
-            else:
-                background_tasks.add_task(
-                    EmailUseCases().send_cancellation_confirmation_staff,
-                    user.email, user.full_name, trip.name
-                )
-        if user.profile == UserProfile.STUDENT:
-            background_tasks.add_task(
-                EmailUseCases().send_cancellation_confirmation_student,
-                user.email, user.full_name, trip.trip_id
-            )
     async def get_all_users_with_reservation_by_trip_id(self, trip_id: str):
         trip = await self.trip_repository.get_by_id(trip_id)
 
@@ -123,6 +75,7 @@ class PriorityEngine:
             message="Listagem de passageiros."
         )
 
+
     async def subscribe_user_to_trip(self, user_id: str, trip_id: str, background_tasks: BackgroundTasks, extra_name: str = None):
         trip = await self.trip_repository.get_by_id(trip_id)
         if not trip: raise NotFoundException("Viagem não encontrada")
@@ -135,7 +88,7 @@ class PriorityEngine:
         if existing_reservation:
             await self.reservation_repository.activate_reservation(existing_reservation.reservation_id)
 
-            await self.activate_notifications(user, trip, existing_reservation, background_tasks)
+            await self.notifications.activate_notifications(user, trip, existing_reservation, background_tasks)
 
             return ResponseHandler.ok(message="Reserva reativada.")
         
@@ -145,11 +98,11 @@ class PriorityEngine:
             extra_name=extra_name
         )
 
-        self.subscribe_notifications(user, trip, new_res, background_tasks)
+        await self.notifications.subscribe_notifications(user, trip, new_res, background_tasks)
         
         return ResponseHandler.created(new_res, "Inscrição realizada com sucesso.")
 
-    async def cancel_subscription(self, user_id: str, trip_id: str, extra_name: str = None):
+    async def cancel_subscription(self, user_id: str, trip_id: str, background_tasks: BackgroundTasks, extra_name: str = None):
         user_res = await self.reservation_repository.get_reservation_by_user_and_trip_extra_name(user_id, trip_id, extra_name)
         
         if not user_res:
@@ -157,7 +110,7 @@ class PriorityEngine:
 
         await self.reservation_repository.cancel_reservation(user_res.reservation_id)
 
-        await self.cancel_subscription_notifications(user_res.user, user_res.trip, user_res, BackgroundTasks())
+        await self.notifications.cancel_subscription_notifications(user_res.user, user_res.trip, user_res, background_tasks)
         
         return ResponseHandler.ok(message="Reserva cancelada com sucesso.")
 
@@ -169,9 +122,9 @@ class PriorityEngine:
         users = await self.trip_repository.get_all_users_with_reservation_active_by_trip_id(trip_id)
         
         for user in users:
-            background_tasks.add_task(
-                EmailUseCases().send_trip_cancelled,
-                user.email, user.full_name, trip.name, trip.date.strftime("%d/%m/%Y")
+            await self.notifications.send_trip_cancelled(
+                user.email, user.full_name, trip.id, trip.date.strftime("%d/%m/%Y"),
+                background_tasks
             )
 
         return ResponseHandler.ok(message="Viagem cancelada e usuários notificados.")

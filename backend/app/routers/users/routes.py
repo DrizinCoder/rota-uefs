@@ -85,10 +85,11 @@ async def get_subscribers(
 async def cancel_subscription(
     trip_id: str,
     data: SubscribeData, 
+    background_tasks: BackgroundTasks, 
     controller: TripController = Depends(get_trip_controller),
     token: TokenData = Depends(require_profile(UserProfile.STAFF, UserProfile.STUDENT))
 ):
-    return await controller.cancel_subscription(token.sub, trip_id, data.extra_passenger_name)
+    return await controller.cancel_subscription(token.sub, trip_id, background_tasks, data.extra_passenger_name)
 
 @user_router.get("/trips/me", response_model=list[PassengerTripItem])
 async def get_passenger_trips(
