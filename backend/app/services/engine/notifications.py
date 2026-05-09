@@ -21,12 +21,12 @@ class Notifications:
                 if reservation.extra_passenger_name not in (None, ""):
                     background_tasks.add_task(
                         EmailUseCases().send_subscription_confirmation_staff_for_extra_name,
-                        user.email, user.full_name, trip.name, reservation.extra_passenger_name
+                        user.email, user.full_name, trip.trip_id, reservation.extra_passenger_name
                     )
                 else:
                     background_tasks.add_task(
                         EmailUseCases().send_subscription_confirmation_staff,
-                        user.email, user.full_name, trip.name
+                        user.email, user.full_name, trip.id
                     )
             if user.profile == UserProfile.STUDENT:
                 background_tasks.add_task(
@@ -39,12 +39,12 @@ class Notifications:
                 if reservation.extra_passenger_name not in (None, ""):
                     background_tasks.add_task(
                         EmailUseCases().send_reactivation_confirmation_staff_for_extra_name,
-                        user.email, user.full_name, trip.name, reservation.extra_passenger_name
+                        user.email, user.full_name, trip.trip_id, reservation.extra_passenger_name
                     )
                 else:
                     background_tasks.add_task(
                         EmailUseCases().send_reactivation_confirmation_staff,
-                        user.email, user.full_name, trip.name
+                        user.email, user.full_name, trip.trip_id
                     )
             if user.profile == UserProfile.STUDENT:
                 background_tasks.add_task(
@@ -57,12 +57,12 @@ class Notifications:
                 if reservation.extra_passenger_name not in (None, ""):
                     background_tasks.add_task(
                         EmailUseCases().send_cancellation_confirmation_staff_for_extra_name,
-                        user.email, user.full_name, trip.name, reservation.extra_passenger_name
+                        user.email, user.full_name, trip.trip_id, reservation.extra_passenger_name
                     )
                 else:
                     background_tasks.add_task(
                         EmailUseCases().send_cancellation_confirmation_staff,
-                        user.email, user.full_name, trip.name
+                        user.email, user.full_name, trip.trip_id
                     )
             if user.profile == UserProfile.STUDENT:
                 background_tasks.add_task(
