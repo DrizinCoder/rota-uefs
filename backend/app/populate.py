@@ -119,6 +119,7 @@ async def populate():
         with open("logs/database.txt", "w", encoding="utf-8") as f:
             f.write(f"=== CREDENCIAIS DE TESTE OK ===\n")
             f.write(f"Admin: ADM001 / admin123\n")
+            f.write(f"Genérico: STAFF_UNREGISTERED / staff_gen_2026\n")
             f.write(f"Prof: PRR4455 / prof123\n")
             f.write(f"Aluno: 202410123 / aluno123\n")
             f.write(f"Motorista: MOTT990 / driver123\n")
