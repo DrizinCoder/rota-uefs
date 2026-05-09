@@ -62,16 +62,15 @@ async def get_driver_trips(
 async def subscribe_staff_generic_to_trip(
     trip_id: str,
     controller: TripController = Depends(get_trip_controller),
-    _: TokenData = Depends(require_driver)
+    # _: TokenData = Depends(require_driver)
 ):
-    result = await controller.subscriber_staff_generic(trip_id)
-    return ResponseHandler.ok(data=result)
+    return await controller.subscriber_staff_generic(trip_id)
 
 @drive_router.delete("/reservations/{reservation_id}/delete-staff-generic")
 async def delete_reservation_staff_generic(
     reservation_id: str,
     controller: TripController = Depends(get_trip_controller),
-    _: TokenData = Depends(require_driver)
+    # _: TokenData = Depends(require_driver)
 ):
-    result = await controller.delete_reservation_staff_generic(reservation_id)
-    return ResponseHandler.ok(data=result)
+   return await controller.delete_reservation_staff_generic(reservation_id)
+   

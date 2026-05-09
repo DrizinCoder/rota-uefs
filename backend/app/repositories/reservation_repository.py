@@ -98,7 +98,7 @@ class ReservationRepository:
     async def delete(self, reservation_id: str):
         stmt = (
             select(Reservation)
-            .where(Reservation.id == reservation_id)
+            .where(Reservation.reservation_id == reservation_id)
         )
 
         result = await self.session.execute(stmt)

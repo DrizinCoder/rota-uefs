@@ -26,7 +26,7 @@ class Notifications:
                 else:
                     background_tasks.add_task(
                         EmailUseCases().send_subscription_confirmation_staff,
-                        user.email, user.full_name, trip.id
+                        user.email, user.full_name, trip.trip_id
                     )
             if user.profile == UserProfile.STUDENT:
                 background_tasks.add_task(
