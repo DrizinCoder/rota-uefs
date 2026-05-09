@@ -1,4 +1,4 @@
-from app.routers.checkin.routes import checkin_router
+from backend.app.routers.checkin.routes import checkin_router
 from app.routers.trip.routes import trip_router
 from fastapi import APIRouter
 
