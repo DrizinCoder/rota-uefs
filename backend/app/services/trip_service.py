@@ -12,6 +12,7 @@ from app.core.exceptions import NotFoundException
 from app.repositories.trip_repository import TripRepository
 from app.DTOs.trip import CreateTripDTO, UpdateTripDTO
 import logging
+from app.DTOs.trip import WEEKDAY_PT
 
 logger = logging.getLogger(__name__)
 
@@ -102,8 +103,11 @@ class TripService:
 
         logger.info(f"Trips for feed retrieved | Count: {len(trips)}")
 
+        reference_weekday = WEEKDAY_PT[weekday]
+
         return TripFeedResponse(
             reference_date=today,
+            reference_weekday=reference_weekday,
             start_date=start_date,
             end_date=end_date, 
             trips=trips

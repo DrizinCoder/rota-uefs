@@ -86,7 +86,7 @@ export function PassageirosScreen() {
 
   return (
     <div className="flex min-h-screen flex-col bg-[#E4F2F1]">
-      <Navigation tipoUsuario="motorista" />
+      <Navigation tipoUsuario="Driver" />
 
       <main className="flex-1 w-full max-w-4xl mx-auto py-10 px-4">
         <button

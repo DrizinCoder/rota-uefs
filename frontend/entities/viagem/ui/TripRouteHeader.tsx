@@ -4,10 +4,9 @@ interface TripRouteHeaderProps {
   origem: string;
   destino: string;
   horarioInicio: string;
-  horarioFim: string;
 }
 
-export function TripRouteHeader({ origem, destino, horarioInicio, horarioFim }: TripRouteHeaderProps) {
+export function TripRouteHeader({ origem, destino, horarioInicio }: TripRouteHeaderProps) {
   return (
     // Exatamente o seu código!
     <div className="flex items-start gap-3 mb-4">
@@ -23,7 +22,6 @@ export function TripRouteHeader({ origem, destino, horarioInicio, horarioFim }: 
         </div>
         <div className="flex justify-between mt-4.5">
           <p className="text-base font-extrabold text-[#103173]">{destino}</p>
-          <span className="text-[11px] font-bold text-[#103173]/50">{horarioFim}</span>
         </div>
       </div>
     </div>
