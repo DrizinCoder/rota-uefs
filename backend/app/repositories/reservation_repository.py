@@ -2,7 +2,7 @@ from datetime import datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, insert 
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload
 from app.models.models import Reservation
 from app.enums.enums import BoardingStatus
 
@@ -42,7 +42,8 @@ class ReservationRepository:
                 .where(Reservation.user_id == user_id)
                 .where(Reservation.trip_id == trip_id)
                 .where(Reservation.extra_passenger_name == extra_name)
-                )
+                ).options(selectinload(Reservation.user),selectinload(Reservation.trip))
+        
         result = await self.session.execute(stmt)
 
         return result.scalar_one_or_none()      

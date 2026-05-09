@@ -23,8 +23,6 @@ class PriorityEngine:
     async def _get_ordered_reservations(self, trip_id: str):
         reservations = await self.reservation_repository.get_by_trip_id(trip_id)
 
-        print(f"Reservations for trip {trip_id}: {[str(r) for r in reservations]}")  # Debug print
-
         return sorted(
             reservations,
             key=lambda r: (self.get_priority(r.user.profile), r.reservation_timestamp)
@@ -47,7 +45,6 @@ class PriorityEngine:
                 EmailUseCases().send_subscription_confirmation_student,
                 user.email, user.full_name, trip.trip_id
             )
-
     async def activate_notifications(self, user: User, trip: Trip, reservation: Reservation, background_tasks: BackgroundTasks):
         if user.profile == UserProfile.STAFF:
             if reservation.extra_passenger_name not in (None, ""):
@@ -82,7 +79,6 @@ class PriorityEngine:
                 EmailUseCases().send_cancellation_confirmation_student,
                 user.email, user.full_name, trip.trip_id
             )
-
     async def get_all_users_with_reservation_by_trip_id(self, trip_id: str):
         trip = await self.trip_repository.get_by_id(trip_id)
 
@@ -139,7 +135,7 @@ class PriorityEngine:
         if existing_reservation:
             await self.reservation_repository.activate_reservation(existing_reservation.reservation_id)
 
-            # TODO: Enviar email de reativação para o usuário
+            await self.activate_notifications(user, trip, existing_reservation, background_tasks)
 
             return ResponseHandler.ok(message="Reserva reativada.")
         
@@ -149,7 +145,7 @@ class PriorityEngine:
             extra_name=extra_name
         )
 
-        await self.subscribe_notifications(user, trip, new_res, background_tasks)
+        self.subscribe_notifications(user, trip, new_res, background_tasks)
         
         return ResponseHandler.created(new_res, "Inscrição realizada com sucesso.")
 
@@ -161,7 +157,7 @@ class PriorityEngine:
 
         await self.reservation_repository.cancel_reservation(user_res.reservation_id)
 
-        # TODO: Enviar email de cancelamento para o usuário
+        await self.cancel_subscription_notifications(user_res.user, user_res.trip, user_res, BackgroundTasks())
         
         return ResponseHandler.ok(message="Reserva cancelada com sucesso.")
 
