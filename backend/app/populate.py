@@ -27,7 +27,7 @@ async def populate():
             admin_user = User(
                 full_name="Robson Master",
                 password=pwd_context.hash("admin123"), # HASH DIRETO AQUI
-                registration_id="ADM-001",
+                registration_id="ADM001",
                 phone="75988880001",
                 email="admin@uefs.br",
                 profile=UserProfile.ADMIN,
@@ -37,11 +37,11 @@ async def populate():
             await session.flush()
             session.add(Admin(admin_id=admin_user.user_id, access_level=AccessLevel.MASTER))
 
-            # 2. PROFESSOR
+          # 2. PROFESSOR
             prof_user = User(
                 full_name="Dr. Ricardo",
                 password=pwd_context.hash("prof123"),
-                registration_id="PR-4455",
+                registration_id="PR4455",
                 phone="75988880002",
                 email="professor@uefs.br",
                 profile=UserProfile.STAFF,
@@ -50,6 +50,24 @@ async def populate():
             session.add(prof_user)
             await session.flush()
             session.add(Staff(staff_id=prof_user.user_id, employment_type=EmploymentType.FACULTY, department="Tecnologia"))
+
+            # 2.1 STAFF GENÉRICO (Para professores sem registro)
+            staff_unregistered_user = User(
+                full_name="Staff Não Registrado",
+                password=pwd_context.hash("staff_gen_2026"), # Senha interna/padrão
+                registration_id="STAFF_UNREGISTERED",
+                phone="00000000000",
+                email="staff_unregistered@uefs.br",
+                profile=UserProfile.STAFF,
+                registration_status=RegistrationStatus.ACTIVE
+            )
+            session.add(staff_unregistered_user)
+            await session.flush()
+            session.add(Staff(
+                staff_id=staff_unregistered_user.user_id, 
+                employment_type=EmploymentType.FACULTY, 
+                department="Geral"
+            ))
 
             # 3. ALUNO
             student_user = User(
@@ -68,7 +86,7 @@ async def populate():
             driver_user = User(
                 full_name="Carlos Motorista",
                 password=pwd_context.hash("driver123"),
-                registration_id="MOT-990",
+                registration_id="MOT990",
                 phone="75988880004",
                 email="carlos@transporte.com",
                 profile=UserProfile.DRIVER,
@@ -100,10 +118,10 @@ async def populate():
         os.makedirs("logs", exist_ok=True)
         with open("logs/database.txt", "w", encoding="utf-8") as f:
             f.write(f"=== CREDENCIAIS DE TESTE OK ===\n")
-            f.write(f"Admin: ADM-001 / admin123\n")
-            f.write(f"Prof: PR-4455 / prof123\n")
+            f.write(f"Admin: ADM001 / admin123\n")
+            f.write(f"Prof: PRR4455 / prof123\n")
             f.write(f"Aluno: 202410123 / aluno123\n")
-            f.write(f"Motorista: MOT-990 / driver123\n")
+            f.write(f"Motorista: MOTT990 / driver123\n")
 
     print("✅ Banco populado com sucesso!")
 
