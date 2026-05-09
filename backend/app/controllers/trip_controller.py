@@ -17,6 +17,20 @@ class TripController:
             logger.error(f"Error fetching subscriber for trip {trip_id}: {e}")
             raise
 
+    async def subscriber_staff_generic(self, trip_id: str):
+        try:
+            return await self.priority_engine.subscriber_staff_generic_to_trip(trip_id)
+        except Exception as e:
+            logger.error(f"Error subscribing generic staff to trip {trip_id}: {e}")
+            raise
+
+    async def delete_reservation_staff_generic(self, reservation_id: str):
+        try:
+            return await self.priority_engine.delete_reservation_staff_generic(reservation_id)
+        except Exception as e:
+            logger.error(f"Error deleting generic staff reservation {reservation_id}: {e}")
+            raise
+
     async def get_subscribers(self, trip_id: str):
         try:
             return await self.priority_engine.get_all_users_with_reservation_by_trip_id(trip_id)

@@ -10,6 +10,16 @@ class ReservationRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
+    async def get_by_id(self, reservation_id: str):
+        stmt = (
+            select(Reservation)
+            .where(Reservation.reservation_id == reservation_id)
+            .options(joinedload(Reservation.user), joinedload(Reservation.trip))
+        )
+
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none()
+
     async def create(self, user_id: str, trip_id: str, extra_name: str = None):
         timestamp = datetime.now()
 

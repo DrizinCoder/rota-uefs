@@ -77,6 +77,33 @@ class PriorityEngine:
             message="Listagem de passageiros."
         )
 
+    async def subscriber_staff_generic_to_trip(self, trip_id: str):
+        trip = await self.trip_repository.get_by_id(trip_id)
+        if not trip: raise NotFoundException("Viagem não encontrada")
+
+        staff_generic_user = await self.user_repository.get_by_registration_id("STAFF_UNREGISTERED")
+
+        if not staff_generic_user: raise NotFoundException("Usuário genérico de servidor(a) não encontrado")
+            
+        await self.reservation_repository.create(
+            user_id=staff_generic_user.user_id, 
+            trip_id=trip_id, 
+            extra_name=None
+        )
+
+        return ResponseHandler.created(message="Servidor(a) genérico inscrito na viagem.")   
+    
+
+    async def delete_reservation_staff_generic(self, reservation_id: str):
+        reservation = await self.reservation_repository.get_by_id(reservation_id)
+
+        if not reservation:
+            raise NotFoundException("Reserva não encontrada")
+
+        await self.reservation_repository.delete(reservation_id)
+
+        return ResponseHandler.ok(message="Reserva deletada com sucesso.")
+      
 
     async def subscribe_user_to_trip(self, user_id: str, trip_id: str, background_tasks: BackgroundTasks, extra_name: str = None):
         trip = await self.trip_repository.get_by_id(trip_id)
@@ -109,7 +136,7 @@ class PriorityEngine:
         
         if not user_res:
             raise NotFoundException("Reserva não encontrada")
-
+      
         await self.reservation_repository.cancel_reservation(user_res.reservation_id)
 
         await self.notifications.cancel_subscription_notifications(user_res.user, user_res.trip, user_res, background_tasks)
@@ -124,9 +151,10 @@ class PriorityEngine:
         users = await self.trip_repository.get_all_users_with_reservation_active_by_trip_id(trip_id)
         
         for user in users:
-            await self.notifications.send_trip_cancelled(
-                user.email, user.full_name, trip.id, trip.date.strftime("%d/%m/%Y"),
-                background_tasks
-            )
+            if user.user_id != "STAFF_UNREGISTERED":
+                await self.notifications.send_trip_cancelled(
+                    user.email, user.full_name, trip.id, trip.date.strftime("%d/%m/%Y"),
+                    background_tasks
+                )
 
         return ResponseHandler.ok(message="Viagem cancelada e usuários notificados.")
