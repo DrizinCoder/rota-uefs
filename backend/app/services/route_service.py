@@ -12,7 +12,7 @@ class RouteService:
         self.repository = repository
 
     async def create(self, dados: CreateRouteDTO):
-        logger.info(f"Route creation requested | Name: {dados.route_name}")
+        logger.info(f"Route creation requested | Name: {dados.name}")
 
         route = await self.repository.create(dados)
 

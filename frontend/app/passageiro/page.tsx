@@ -12,8 +12,6 @@ import { PassengerListInfo } from "@/entities/viagem/ui/PassengerListInfo";
 import { TripModeToggle } from "@/entities/viagem/ui/TripModeToggle";
 import { ManageSubscriptionButton } from "@/features/gerenciar-inscricao/ui/ManageSubscriptionButton";
 import { SubscribeButton } from "@/features/inscrever-rota/ui/SubscribeButton";
-
-
 import {GraduationCap} from "lucide-react";
 import { passengerService , type Home} from "@/services/homeService";
 import { EmptyDayCard } from "@/components/shared/empty-day-card";
