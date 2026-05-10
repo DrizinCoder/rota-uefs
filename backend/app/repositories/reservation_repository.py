@@ -133,7 +133,7 @@ class ReservationRepository:
         results = await self.session.execute(stmt)
         return results.scalars().all()
  
-    async def get_by_id(self, reservation_id: uuid.UUID) -> Reservation | None:
+    async def get_by_id_checkin(self, reservation_id: uuid.UUID) -> Reservation | None:
         statement = (
             select(Reservation)
             .join(User, User.user_id == Reservation.user_id)

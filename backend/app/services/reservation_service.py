@@ -16,7 +16,7 @@ class ReservationService:
 
         reservation_id, received_hmac = checkIn_code.split(".")
 
-        reservation = await self.repository.get_by_id(uuid.UUID(reservation_id))
+        reservation = await self.repository.get_by_id_checkin(uuid.UUID(reservation_id))
 
         if not reservation:
             raise NotFoundException("Reserva não encontrada")
