@@ -1,3 +1,4 @@
+from app.services.engine.priority_engine import PriorityEngine
 import uuid
 from app.utils.utils import generate_registration_code
 import logging
@@ -8,16 +9,24 @@ import hmac
 logger = logging.getLogger(__name__)
 
 class ReservationService:
-    def __init__(self, repository: ReservationRepository):
+    def __init__(self, repository: ReservationRepository, priority_engine: PriorityEngine):
         self.repository = repository
+        self.priority_engine = priority_engine
 
-    async def checkin(self, checkIn_code: str):
+    async def checkin(self, trip_id: uuid.UUID, checkIn_code: str):
         logger.info(f"Checkin requested | checkIn_code: {checkIn_code[:10]}...")
 
-        reservation_id, received_hmac = checkIn_code.split(".")
+        parts = checkIn_code.split(".")
+        if len(parts) != 2:
+            raise UnauthorizedException("Código inválido")
+        reservation_id_str, received_hmac = parts
 
-        reservation = await self.repository.get_by_id(uuid.UUID(reservation_id))
+        try:
+            reservation_uuid = uuid.UUID(reservation_id_str)
+        except ValueError:
+            raise UnauthorizedException("Código inválido")
 
+        reservation = await self.repository.get_by_id(reservation_uuid)
         if not reservation:
             raise NotFoundException("Reserva não encontrada")
 
@@ -26,14 +35,19 @@ class ReservationService:
             reservation.trip_id,
             reservation.user.registration_id,
         )
-
         _, expected_hmac = expected_code.split(".")
 
         if not hmac.compare_digest(expected_hmac, received_hmac):
             raise UnauthorizedException("Código de verificação inválido")
 
+        valid_reservations = await self.priority_engine.get_valid_reservation(trip_id)
+        is_valid = any(r.reservation_id == reservation_uuid for r in valid_reservations)
+
+        if not is_valid:
+            raise UnauthorizedException("Passageiro não está na lista de embarque")
+
         await self.repository.update_boarding(reservation)
 
-        logger.info(f"Checkin successful | Reservation ID: {reservation_id}")
+        logger.info(f"Checkin successful | Reservation ID: {reservation_id_str}")
         return {"message": "Checkin realizado com sucesso"}
             
