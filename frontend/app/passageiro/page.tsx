@@ -55,7 +55,7 @@ export default function PaginaAluno() {
   const [modalidades, setModalidades] = useState<Record<string, "ida" | "ida-volta">>({});
 
   const viagensDoDia = (data?.trips || []).filter(viagem => viagem.weekday === diaAtivo);
-  
+
 
   const selecionarModalidade = (viagemId: string, modalidade: "ida" | "ida-volta") => {
     setModalidades(prev => ({ ...prev, [viagemId]: modalidade }));

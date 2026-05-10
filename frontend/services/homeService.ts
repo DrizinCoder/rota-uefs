@@ -25,5 +25,14 @@ export const passengerService = {
         const response = await api.get('/trip/feed/trips');
         return response.data.data;
     },
+    async getTripById(tripId: string) {
+        const response = await api.get(`/trip/${tripId}`);
+        console.log(response.data.data)
+        return response.data.data;
+    },
+    async getRouteById(routeId: string) {
+        const response = await api.get(`/routes/routes/${routeId}`);
+        return response.data.data;
+    },
 }
     
