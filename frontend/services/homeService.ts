@@ -34,5 +34,11 @@ export const passengerService = {
         const response = await api.get(`/routes/routes/${routeId}`);
         return response.data.data;
     },
+    async subscribeUser(tripId: string, extraPassengerName?: string | null) {
+        const response = await api.post(`/users/trip/${tripId}/subscribe`, {
+            extra_passenger_name: extraPassengerName || null
+        });
+        return response.data;
+    },
 }
     

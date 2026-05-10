@@ -21,6 +21,7 @@ export function ConfirmacaoInscricaoScreen() {
   
   const [viagemSelecionada, setViagemSelecionada] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     async function fetchTrip() {
@@ -99,8 +100,19 @@ export function ConfirmacaoInscricaoScreen() {
     );
   }
 
-  const handleConfirmar = () => {
-    router.push("/passageiro/status");
+  const handleConfirmar = async () => {
+    try {
+      setIsSubmitting(true);
+      const viagemId = sessionStorage.getItem("viagemIdSelecionada");
+      if (!viagemId) return;
+
+      await passengerService.subscribeUser(viagemId);
+      router.push("/passageiro/status");
+    } catch (error) {
+      console.error("Erro ao confirmar inscrição:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -185,9 +197,10 @@ export function ConfirmacaoInscricaoScreen() {
           <CardFooter className="p-8 pt-0 flex flex-col gap-4">
             <Button
               onClick={handleConfirmar}
+              disabled={isSubmitting}
               className="w-full h-16 bg-[#23B99A] hover:bg-[#1a8a73] text-white font-black text-lg rounded-2xl shadow-xl shadow-[#23B99A]/20 transition-all hover:scale-[1.02] active:scale-95"
             >
-              CONFIRMAR MINHA VAGA
+              {isSubmitting ? "CONFIRMANDO..." : "CONFIRMAR MINHA VAGA"}
             </Button>
             <p className="text-center text-[11px] text-[#73AABF] font-bold uppercase tracking-tighter">
               Ao confirmar, você se compromete com o horário estabelecido.
