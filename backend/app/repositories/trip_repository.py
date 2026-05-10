@@ -75,7 +75,12 @@ class TripRepository:
         return trip
 
     async def get_by_id(self, trip_id: uuid.UUID):
-        statement = select(Trip).where(Trip.trip_id == trip_id)
+        statement = (
+            select(Trip)
+            .where(Trip.trip_id == trip_id)
+            .options(selectinload(Trip.route))
+        )
+        
         result = await self.session.execute(statement)
         return result.scalars().first()
 

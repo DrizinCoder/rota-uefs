@@ -1,4 +1,5 @@
-from uuid import UUID
+import uuid
+
 from fastapi import BackgroundTasks
 from app.repositories.user_repository import UserRepository
 from app.repositories.reservation_repository import ReservationRepository
@@ -31,7 +32,7 @@ class PriorityEngine:
         )
     
     async def get_all_users_with_reservation_by_trip_id(self, trip_id: str):
-        trip = await self.trip_repository.get_by_id(UUID(trip_id))
+        trip = await self.trip_repository.get_by_id(uuid.UUID(trip_id))
 
         if not trip:
             raise NotFoundException("Viagem não encontrada")
@@ -76,8 +77,22 @@ class PriorityEngine:
             message="Listagem de passageiros."
         )
 
+    async def get_valid_reservation(self, trip_id: uuid.UUID):
+        trip = await self.trip_repository.get_by_id(trip_id)
+
+        if not trip:
+            raise NotFoundException("Viagem não encontrada")
+        
+        bus = await self.bus_repository.get_by_plate(trip.bus_license_plate)
+
+        capacity = bus.capacity if bus else 0
+        
+        ordered_reservations = await self._get_ordered_reservations(trip_id)
+
+        return ordered_reservations[:capacity]
+
     async def subscriber_staff_generic_to_trip(self, trip_id: str):
-        trip = await self.trip_repository.get_by_id(UUID(trip_id))
+        trip = await self.trip_repository.get_by_id(uuid.UUID(trip_id))
         if not trip: raise NotFoundException("Viagem não encontrada")
 
         staff_generic_user = await self.user_repository.get_by_registration_id("STAFF_UNREGISTERED")
@@ -103,10 +118,10 @@ class PriorityEngine:
         return ResponseHandler.ok(message="Reserva deletada com sucesso.")
       
     async def subscribe_user_to_trip(self, user_id: str, trip_id: str, background_tasks: BackgroundTasks, extra_name: str = None):
-        trip = await self.trip_repository.get_by_id(UUID(trip_id))
+        trip = await self.trip_repository.get_by_id(uuid.UUID(trip_id))
         if not trip: raise NotFoundException("Viagem não encontrada")
         
-        user = await self.user_repository.get_by_id(UUID(user_id))
+        user = await self.user_repository.get_by_id(uuid.UUID(user_id))
         if not user: raise NotFoundException("Usuário não encontrado")
 
         existing_reservation = await self.reservation_repository.get_reservation_by_user_and_trip_extra_name(user_id, trip_id, extra_name)
@@ -117,6 +132,9 @@ class PriorityEngine:
             await self.notifications.activate_notifications(user, trip, existing_reservation, background_tasks)
 
             return ResponseHandler.ok(message="Reserva reativada.")
+        
+        if user.profile != UserProfile.STAFF:
+            extra_name=""
         
         new_res = await self.reservation_repository.create(
             user_id=user_id, 
@@ -141,7 +159,7 @@ class PriorityEngine:
         return ResponseHandler.ok(message="Reserva cancelada com sucesso.")
 
     async def alert_cancelled_trip(self, trip_id: str, background_tasks: BackgroundTasks):
-        trip = await self.trip_repository.get_by_id(UUID(trip_id))
+        trip = await self.trip_repository.get_by_id(uuid.UUID(trip_id))
 
         if not trip: raise NotFoundException("Viagem não encontrada")
 
