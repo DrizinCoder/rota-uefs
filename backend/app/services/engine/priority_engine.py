@@ -92,7 +92,7 @@ class PriorityEngine:
         return ordered_reservations[:capacity]
 
     async def subscriber_staff_generic_to_trip(self, trip_id: str):
-        trip = await self.trip_repository.get_by_id(UUID(trip_id))
+        trip = await self.trip_repository.get_by_id(uuid.UUID(trip_id))
         if not trip: raise NotFoundException("Viagem não encontrada")
 
         staff_generic_user = await self.user_repository.get_by_registration_id("STAFF_UNREGISTERED")
@@ -118,10 +118,10 @@ class PriorityEngine:
         return ResponseHandler.ok(message="Reserva deletada com sucesso.")
       
     async def subscribe_user_to_trip(self, user_id: str, trip_id: str, background_tasks: BackgroundTasks, extra_name: str = None):
-        trip = await self.trip_repository.get_by_id(UUID(trip_id))
+        trip = await self.trip_repository.get_by_id(uuid.UUID(trip_id))
         if not trip: raise NotFoundException("Viagem não encontrada")
         
-        user = await self.user_repository.get_by_id(UUID(user_id))
+        user = await self.user_repository.get_by_id(uuid.UUID(user_id))
         if not user: raise NotFoundException("Usuário não encontrado")
 
         existing_reservation = await self.reservation_repository.get_reservation_by_user_and_trip_extra_name(user_id, trip_id, extra_name)
@@ -132,6 +132,9 @@ class PriorityEngine:
             await self.notifications.activate_notifications(user, trip, existing_reservation, background_tasks)
 
             return ResponseHandler.ok(message="Reserva reativada.")
+        
+        if user.profile != UserProfile.STAFF:
+            extra_name=""
         
         new_res = await self.reservation_repository.create(
             user_id=user_id, 
@@ -156,7 +159,7 @@ class PriorityEngine:
         return ResponseHandler.ok(message="Reserva cancelada com sucesso.")
 
     async def alert_cancelled_trip(self, trip_id: str, background_tasks: BackgroundTasks):
-        trip = await self.trip_repository.get_by_id(UUID(trip_id))
+        trip = await self.trip_repository.get_by_id(uuid.UUID(trip_id))
 
         if not trip: raise NotFoundException("Viagem não encontrada")
 
