@@ -2,7 +2,7 @@ from app.repositories.bus_repository import BusRepository
 from app.repositories.trip_repository import TripRepository
 from app.repositories.user_repository import UserRepository
 from app.services.engine.priority_engine import PriorityEngine
-from app.DTOs.checkin import CheckinRequestDTO
+from app.DTOs.checkin import CheckinRequestDTO, ManualCheckinRequestDTO
 from app.repositories.reservation_repository import ReservationRepository
 from app.database.db import get_session
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -39,4 +39,12 @@ async def checkin(
     service: ReservationService = Depends(get_reservation_service),
 ):
     result = await service.checkin(body.trip_id, body.checkin_code)
+    return ResponseHandler.ok(result)
+
+@checkin_router.post("/manual")
+async def manual_checkin(
+    body: ManualCheckinRequestDTO,
+    service: ReservationService = Depends(get_reservation_service),
+):
+    result = await service.manual_checkin(body)
     return ResponseHandler.ok(result)
