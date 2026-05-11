@@ -7,8 +7,8 @@ import { usePathname } from "next/navigation";
 import {
   User,
   Map,
-  CalendarDays,
-  LayoutDashboard,
+  Ticket,
+  QrCode,
   CheckSquare,
   Users,
   Menu,
@@ -75,16 +75,16 @@ function getNavItems(tipo: TipoUsuario): NavItem[] {
       return [
         { label: "Viagens", href: "/passageiro", real: true, icon: Map },
         {
-          label: "Minhas Viagens",
+          label: "Minhas Reservas",
           href: "/minhas-viagens?tipo=Student",
           real: true,
-          icon: CalendarDays,
+          icon: Ticket,
         },
         {
-          label: "Status",
-          href: "/passageiro/status",
+          label: "Check-in",
+          href: "/passageiro/validar",
           real: true,
-          icon: LayoutDashboard,
+          icon: QrCode,
         },
       ];
 
@@ -92,16 +92,16 @@ function getNavItems(tipo: TipoUsuario): NavItem[] {
       return [
         { label: "Viagens", href: "/professor", real: true, icon: Map },
         {
-          label: "Minhas Viagens",
+          label: "Minhas Reservas",
           href: "/minhas-viagens?tipo=Staff",
           real: true,
-          icon: CalendarDays,
+          icon: Ticket,
         },
         {
-          label: "Status",
-          href: "/passageiro/status",
+          label: "Check-in",
+          href: "/passageiro/validar",
           real: true,
-          icon: LayoutDashboard,
+          icon: QrCode,
         },
       ];
 

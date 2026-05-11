@@ -116,14 +116,14 @@ const PRODUCT_LINKS: FooterLink[] = [
     audiences: ['publico', 'aluno', 'professor'],
   },
   {
-    label: 'Status das viagens',
-    href: '/passageiro/status',
+    label: 'Minhas reservas',
+    href: '/minhas-viagens',
     real: true,
     audiences: ['aluno', 'professor'],
   },
   {
-    label: 'Minhas reservas',
-    href: '/minhas-viagens',
+    label: 'Check-in de embarque',
+    href: '/passageiro/validar',
     real: true,
     audiences: ['aluno', 'professor'],
   },
@@ -168,12 +168,6 @@ const PRODUCT_LINKS: FooterLink[] = [
     href: '/admin/relatorios',
     real: true,
     audiences: ['admin'],
-  },
-  {
-    label: 'Check-in',
-    href: '#',
-    real: false,
-    audiences: ['publico', 'aluno', 'professor'],
   },
 ]
 

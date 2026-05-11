@@ -1,7 +1,8 @@
 /**
  * Indica se o link da navbar corresponde à rota atual (pathname + query quando aplicável).
  * Rotas “hub” (/passageiro, /professor, /motorista) só ficam ativas no path exato,
- * para não destacar “Viagens” quando o usuário está em /passageiro/status.
+ * para não destacar “Viagens” quando o usuário navega para subrotas contextuais
+ * (ex.: /passageiro/status, /passageiro/validar, /passageiro/confirmacao).
  */
 export function isNavHrefActive(
   pathname: string,
