@@ -49,7 +49,7 @@ function ViagemCard({ viagem }: { viagem: CardViagemFeed }) {
   const [statusViagem, setStatusViagem] = useState <"bloqueada" | "pronta" | "em_curso" | "finalizada">("pronta");
 
   const handleCheckIn = () => {
-    router.push("/motorista/embarque");
+    router.push(`/motorista/embarque?trip_id=${encodeURIComponent(viagem.trip_id)}`);
   };
 
   const handleAcaoViagem = () => {

@@ -1,7 +1,7 @@
 ﻿"use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,8 +33,11 @@ const PASSAGEIROS_MOCK = [
   { id: 9, nome: "Juliana Martins", matricula: "PROF-202409", status: "espera" },
 ];
 
-export function PassageirosScreen() {
+function PassageirosContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const tripId = searchParams.get("trip_id");
+  const tripLabel = tripId ?? "ROT-0042";
   const [busca, setBusca] = useState("");
   const [passageiros, setPassageiros] = useState(PASSAGEIROS_MOCK);
   const termoBusca = busca.trim().toLowerCase();
@@ -111,7 +114,7 @@ export function PassageirosScreen() {
             variant="outline"
             className="w-fit border-2 border-[#103173] text-[#103173] font-black px-4 py-2 bg-white"
           >
-            ROTA: ROT-0042
+            ROTA: {tripLabel}
           </Badge>
         </header>
 
@@ -271,3 +274,16 @@ export function PassageirosScreen() {
   );
 }
 
+export function PassageirosScreen() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-[#E4F2F1] font-bold text-[#103173]">
+          Carregando passageiros...
+        </div>
+      }
+    >
+      <PassageirosContent />
+    </Suspense>
+  );
+}

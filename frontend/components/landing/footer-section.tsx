@@ -134,14 +134,8 @@ const PRODUCT_LINKS: FooterLink[] = [
     audiences: ['motorista'],
   },
   {
-    label: 'Check-in de embarque',
-    href: '/motorista/embarque',
-    real: true,
-    audiences: ['motorista'],
-  },
-  {
-    label: 'Passageiros da viagem',
-    href: '/motorista/passageiros',
+    label: 'Minhas viagens',
+    href: '/minhas-viagens?tipo=motorista',
     real: true,
     audiences: ['motorista'],
   },

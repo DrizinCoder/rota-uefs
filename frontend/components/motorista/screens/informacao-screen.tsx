@@ -321,7 +321,11 @@ export function InformacaoScreen() {
                             <Button
                               variant="outline"
                               disabled={viagem.status === "cancelada"}
-                              onClick={() => router.push("/motorista/passageiros")}
+                              onClick={() =>
+                                router.push(
+                                  `/motorista/passageiros?trip_id=${encodeURIComponent(viagem.id)}`,
+                                )
+                              }
                               className="w-full sm:flex-1 h-14 border-2 border-[#103173] text-[#103173] font-black rounded-2xl hover:bg-[#103173] hover:text-white transition-all disabled:opacity-50"
                             >
                               <ClipboardList className="h-5 w-5 mr-2" /> LISTA
@@ -330,7 +334,11 @@ export function InformacaoScreen() {
 
                             <Button
                               disabled={viagem.status === "cancelada"}
-                              onClick={() => router.push("/motorista/embarque")}
+                              onClick={() =>
+                                router.push(
+                                  `/motorista/embarque?trip_id=${encodeURIComponent(viagem.id)}`,
+                                )
+                              }
                               className={`w-full sm:flex-1 h-14 font-black rounded-2xl shadow-lg transition-all active:scale-95 disabled:bg-slate-300 disabled:shadow-none ${
                                 quorumNaoAtingido
                                   ? "bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/20"

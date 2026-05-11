@@ -9,8 +9,7 @@ import {
   Map,
   Ticket,
   QrCode,
-  CheckSquare,
-  Users,
+  CalendarDays,
   Menu,
   X,
 } from "lucide-react";
@@ -110,16 +109,10 @@ function getNavItems(tipo: TipoUsuario): NavItem[] {
       return [
         { label: "Escalas", href: "/motorista", real: true, icon: Map },
         {
-          label: "Embarque",
-          href: "/motorista/embarque",
+          label: "Minhas Viagens",
+          href: "/minhas-viagens?tipo=motorista",
           real: true,
-          icon: CheckSquare,
-        },
-        {
-          label: "Passageiros",
-          href: "/motorista/passageiros",
-          real: true,
-          icon: Users,
+          icon: CalendarDays,
         },
       ];
 
