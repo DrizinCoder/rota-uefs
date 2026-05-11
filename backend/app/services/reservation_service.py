@@ -14,6 +14,11 @@ class ReservationService:
         self.repository = repository
         self.priority_engine = priority_engine
 
+    async def check_reservation(self, trip_id: uuid.UUID, reservation_id: uuid.UUID):
+        valid_reservations = await self.priority_engine.get_valid_reservation(trip_id)
+        is_valid = any(r.reservation_id == reservation_id for r in valid_reservations)
+        return is_valid
+
     async def checkin(self, trip_id: uuid.UUID, checkIn_code: str):
         logger.info(f"Checkin requested | checkIn_code: {checkIn_code[:10]}...")
 
@@ -41,8 +46,7 @@ class ReservationService:
         if not hmac.compare_digest(expected_hmac, received_hmac):
             raise UnauthorizedException("Código de verificação inválido")
 
-        valid_reservations = await self.priority_engine.get_valid_reservation(trip_id)
-        is_valid = any(r.reservation_id == reservation_uuid for r in valid_reservations)
+        is_valid = self.check_reservation(trip_id, reservation_uuid)
 
         if not is_valid:
             raise UnauthorizedException("Passageiro não está na lista de embarque")
@@ -60,8 +64,17 @@ class ReservationService:
         if not reservation:
             raise NotFoundException("Reserva não encontrada")
         
-        if not (data.reservation_id == reservation.reservation_id and data.trip_id == reservation.trip_id and data.user_id == reservation.user.user_id):
+        if not (
+                data.reservation_id == str(reservation.reservation_id) and 
+                data.trip_id        == str(reservation.trip_id)        and 
+                data.user_id        == str(reservation.user.user_id)
+            ):
             raise UnauthorizedException("Código de verificação inválido")
+        
+        is_valid = self.check_reservation(reservation.trip_id, reservation.reservation_id)
+
+        if not is_valid:
+            raise UnauthorizedException("Passageiro não está na lista de embarque")
 
         await self.repository.update_boarding(reservation)
 
