@@ -36,7 +36,7 @@ import {
 } from "lucide-react";
 import { api } from "@/services/api";
 
-// â”€â”€â”€ Tipos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// --- Tipos ---
 
 type TipoUsuario = "Driver" | "Student" | "Staff" | "Admin";
 
@@ -55,7 +55,7 @@ interface PasswordUpdateDTO {
   confirm_password: string;
 }
 
-// â”€â”€â”€ ServiÃ§o â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// --- Serviço ---
 
 const userService = {
   getMe: async (): Promise<UserProfile> => {
@@ -74,7 +74,7 @@ const userService = {
   },
 };
 
-// â”€â”€â”€ Componente principal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// --- Componente principal ---
 
 function PerfilContent() {
   const router = useRouter();
@@ -90,7 +90,7 @@ function PerfilContent() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Carrega os dados do usuÃ¡rio autenticado
+  // Carrega os dados do usuário autenticado
   useEffect(() => {
     userService
       .getMe()
@@ -116,7 +116,7 @@ function PerfilContent() {
   const isProfessor = tipoUsuario === "Staff";
   const isAdmin = tipoUsuario === "Admin";
 
-  // â”€â”€â”€ Handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // --- Handlers ---
 
   const handleSalvar = async () => {
     setErro("");
@@ -161,7 +161,7 @@ function PerfilContent() {
     try {
       await userService.deleteAccount();
       localStorage.removeItem("token");
-      alert("Conta excluÃ­da com sucesso.");
+      alert("Conta excluída com sucesso.");
       router.push("/");
     } catch {
       alert("Erro ao excluir conta. Tente novamente.");
@@ -171,7 +171,7 @@ function PerfilContent() {
     }
   };
 
-  // â”€â”€â”€ Badge por perfil â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // --- Badge por perfil ---
 
   const getBadgeConfig = () => {
     if (isAdmin) return { color: "bg-red-500 text-white", icon: ShieldAlert, label: "Admin" };
@@ -183,7 +183,7 @@ function PerfilContent() {
   const badgeConfig = getBadgeConfig();
   const IconePerfil = badgeConfig.icon;
 
-  // â”€â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // --- Render ---
 
   return (
     <div className="flex min-h-screen flex-col bg-[#E4F2F1] relative">
@@ -205,7 +205,7 @@ function PerfilContent() {
             Meu Perfil
           </h1>
           <p className="text-[#73AABF] font-bold text-lg">
-            Gerencie as suas informaÃ§Ãµes pessoais, contato e seguranÃ§a.
+            Gerencie as suas informações pessoais, contato e segurança.
           </p>
         </header>
 
@@ -216,7 +216,7 @@ function PerfilContent() {
             </div>
           )}
 
-          {/* â”€â”€ CabeÃ§alho do card â”€â”€ */}
+          {/* Cabeçalho do card */}
           <CardHeader className="bg-slate-50 border-b border-slate-100 pb-8 pt-8">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-6 w-full">
               <div className="flex flex-col sm:flex-row items-center gap-6">
@@ -239,7 +239,7 @@ function PerfilContent() {
                       className="border-2 border-[#103173] text-[#103173] font-black"
                     >
                       <Hash className="h-3 w-3 mr-1" />
-                      MATRÃCULA: {usuario.registration_id}
+                      MATRÍCULA: {usuario.registration_id}
                     </Badge>
                   </div>
                 </div>
@@ -259,10 +259,10 @@ function PerfilContent() {
           </CardHeader>
 
           <CardContent className="p-8 space-y-10">
-            {/* â”€â”€ InformaÃ§Ãµes Gerais â”€â”€ */}
+            {/* Informações gerais */}
             <section>
               <h3 className="text-lg font-black text-[#103173] mb-6 flex items-center gap-2 border-b border-slate-100 pb-2">
-                <User className="h-5 w-5 text-[#73AABF]" /> InformaÃ§Ãµes Gerais
+                <User className="h-5 w-5 text-[#73AABF]" /> Informações gerais
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Nome */}
@@ -277,7 +277,7 @@ function PerfilContent() {
                   />
                 </div>
 
-                {/* CPF â€” sÃ³ motorista */}
+                {/* CPF — só motorista */}
                 {isMotorista && usuario.cpf && (
                   <div className="space-y-2">
                     <Label className="text-xs font-black text-[#73AABF] uppercase tracking-widest flex items-center gap-2">
@@ -291,7 +291,7 @@ function PerfilContent() {
                   </div>
                 )}
 
-                {/* Telefone â€” somente leitura */}
+                {/* Telefone — somente leitura */}
                 {!isAdmin && (
                   <div className="space-y-2">
                     <Label className="text-xs font-black text-[#73AABF] uppercase tracking-widest flex items-center gap-2">
@@ -325,11 +325,11 @@ function PerfilContent() {
               </div>
             </section>
 
-            {/* â”€â”€ SeguranÃ§a â”€â”€ */}
+            {/* Segurança */}
             {!isMotorista && (
               <section>
                 <h3 className="text-lg font-black text-[#103173] mb-6 flex items-center gap-2 border-b border-slate-100 pb-2">
-                  <Lock className="h-5 w-5 text-[#73AABF]" /> SeguranÃ§a
+                  <Lock className="h-5 w-5 text-[#73AABF]" /> Segurança
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-slate-50 rounded-2xl border border-slate-100">
                   <div className="space-y-2">
@@ -338,7 +338,7 @@ function PerfilContent() {
                     </Label>
                     <Input
                       type="password"
-                      placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                      placeholder="••••••••"
                       value={senhaAtual}
                       onChange={(e) => setSenhaAtual(e.target.value)}
                       className="h-12 bg-white border-[#73AABF]/30 focus-visible:ring-[#103173] font-medium"
@@ -351,20 +351,20 @@ function PerfilContent() {
                     </Label>
                     <Input
                       type="password"
-                      placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                      placeholder="••••••••"
                       value={novaSenha}
                       onChange={(e) => setNovaSenha(e.target.value)}
                       className="h-12 bg-white border-[#73AABF]/30 focus-visible:ring-[#103173] font-medium"
                     />
                     <p className="text-[10px] text-[#73AABF] font-bold">
-                      MÃ­nimo de 8 caracteres.
+                      Mínimo de 8 caracteres.
                     </p>
                   </div>
                 </div>
               </section>
             )}
 
-            {/* â”€â”€ Zona de Perigo â”€â”€ */}
+            {/* Zona de perigo */}
             {!isAdmin && (
               <section className="pt-6 border-t border-red-100">
                 <h3 className="text-lg font-black text-red-600 mb-4 flex items-center gap-2">
@@ -376,8 +376,8 @@ function PerfilContent() {
                       Excluir Conta
                     </p>
                     <p className="text-sm text-red-700 font-medium mt-1">
-                      Esta aÃ§Ã£o Ã© irreversÃ­vel. Todos os seus dados, histÃ³rico
-                      de viagens e preferÃªncias serÃ£o apagados permanentemente.
+                      Esta ação é irreversível. Todos os seus dados, histórico
+                      de viagens e preferências serão apagados permanentemente.
                     </p>
                   </div>
                   <Button
@@ -393,7 +393,7 @@ function PerfilContent() {
             )}
           </CardContent>
 
-          {/* â”€â”€ RodapÃ© do card â”€â”€ */}
+          {/* Rodapé do card */}
           {!isMotorista && (
             <CardFooter className="bg-slate-50 border-t border-slate-100 p-6 flex justify-end">
               <Button
@@ -405,7 +405,7 @@ function PerfilContent() {
                   "Processando..."
                 ) : (
                   <span className="flex items-center gap-2">
-                    <Save className="h-5 w-5" /> SALVAR ALTERAÃ‡Ã•ES
+                    <Save className="h-5 w-5" /> SALVAR ALTERAÇÕES
                   </span>
                 )}
               </Button>
@@ -413,7 +413,7 @@ function PerfilContent() {
           )}
         </Card>
       </main>
-      {/* â”€â”€ Modal de exclusÃ£o de conta â”€â”€ */}
+      {/* Modal de exclusão de conta */}
       {showDeleteModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#103173]/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl p-6 md:p-8 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200">
@@ -422,13 +422,13 @@ function PerfilContent() {
             </div>
 
             <h2 className="text-2xl font-black text-center text-[#103173] mb-2 tracking-tight">
-              VocÃª tem certeza?
+              Você tem certeza?
             </h2>
 
             <p className="text-center text-slate-500 font-medium mb-8">
-              A exclusÃ£o da sua conta Ã©{" "}
-              <strong className="text-red-600">permanente e irreversÃ­vel</strong>
-              . Todo o seu histÃ³rico e dados associados a essa matrÃ­cula serÃ£o
+              A exclusão da sua conta é{" "}
+              <strong className="text-red-600">permanente e irreversível</strong>
+              . Todo o seu histórico e dados associados a essa matrícula serão
               deletados.
             </p>
 

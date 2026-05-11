@@ -17,7 +17,7 @@ export function ConfirmacaoInscricaoScreen() {
   const router = useRouter();
 
   const viagemSelecionada = {
-    origem: " Burger King/Ao lado do Sam's Club",
+    origem: "Burger King / ao lado do Sam's Club",
     destino: "UEFS",
     horarioInicio: "06:00",
     horarioFim: "08:00",
@@ -47,7 +47,7 @@ export function ConfirmacaoInscricaoScreen() {
               <CalendarCheck className="h-8 w-8 text-[#103173]" />
             </div>
             <CardTitle className="text-2xl font-black tracking-tight">
-              Confirme sua InscriÃ§Ã£o
+              Confirme sua inscrição
             </CardTitle>
             <p className="text-white/80 font-medium mt-2">
               Verifique os detalhes da viagem antes de prosseguir
@@ -85,7 +85,7 @@ export function ConfirmacaoInscricaoScreen() {
               <div className="bg-[#E4F2F1] p-4 rounded-2xl">
                 <div className="flex items-center gap-2 mb-1">
                   <Clock className="h-4 w-4 text-[#103173]" />
-                  <p className="text-[10px] font-black text-[#73AABF] uppercase tracking-widest">SaÃ­da</p>
+                  <p className="text-[10px] font-black text-[#73AABF] uppercase tracking-widest">Saída</p>
                 </div>
                 <p className="text-2xl font-black text-[#103173]">{viagemSelecionada.horarioInicio}</p>
               </div>
@@ -93,7 +93,7 @@ export function ConfirmacaoInscricaoScreen() {
               <div className="bg-[#E4F2F1] p-4 rounded-2xl">
                 <div className="flex items-center gap-2 mb-1">
                   <CheckCircle2 className="h-4 w-4 text-[#23B99A]" />
-                  <p className="text-[10px] font-black text-[#73AABF] uppercase tracking-widest">PrevisÃ£o</p>
+                  <p className="text-[10px] font-black text-[#73AABF] uppercase tracking-widest">Previsão</p>
                 </div>
                 <p className="text-2xl font-black text-[#103173]">{viagemSelecionada.horarioFim}</p>
               </div>
@@ -102,7 +102,7 @@ export function ConfirmacaoInscricaoScreen() {
             <div className="flex gap-3 bg-amber-50 border border-amber-100 p-4 rounded-xl">
               <AlertCircle className="h-5 w-5 text-amber-600 shrink-0" />
               <p className="text-sm text-amber-800 font-medium">
-                ApÃ³s confirmaÃ§Ã£o, serÃ¡ gerado um cÃ³digo que deve ser mostrado para o motorista no embarque.
+                Após confirmação, será gerado um código que deve ser mostrado para o motorista no embarque.
               </p>
             </div>
           </CardContent>
@@ -115,7 +115,7 @@ export function ConfirmacaoInscricaoScreen() {
               CONFIRMAR MINHA VAGA
             </Button>
             <p className="text-center text-[11px] text-[#73AABF] font-bold uppercase tracking-tighter">
-              Ao confirmar, vocÃª se compromete com o horÃ¡rio estabelecido.
+              Ao confirmar, você se compromete com o horário estabelecido.
             </p>
           </CardFooter>
         </Card>

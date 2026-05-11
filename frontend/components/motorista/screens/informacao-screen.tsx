@@ -81,7 +81,7 @@ const VIAGENS_ATRIBUIDAS = [
 
 const DIAS_SEMANA = [
   { id: "segunda", label: "Segunda" },
-  { id: "terca", label: "TerÃ§a" },
+  { id: "terca", label: "Terça" },
   { id: "quarta", label: "Quarta" },
   { id: "quinta", label: "Quinta" },
   { id: "sexta", label: "Sexta" },
@@ -129,14 +129,14 @@ export function InformacaoScreen() {
               Painel do Motorista
             </h1>
             <p className="text-[#73AABF] font-bold text-lg">
-              Bem-vindo, JoÃ£o Silva. Confira as suas escalas para hoje.
+              Bem-vindo, João Silva. Confira as suas escalas para hoje.
             </p>
           </div>
           <Badge
             variant="outline"
             className="w-fit border-2 border-[#103173] text-[#103173] font-black px-4 py-2 bg-white"
           >
-            VEÃCULO: JLS-1020
+            VEÍCULO: JLS-1020
           </Badge>
         </header>
 
@@ -228,7 +228,7 @@ export function InformacaoScreen() {
                                     className={`h-5 w-5 ${viagem.status === "cancelada" ? "text-red-500" : "text-[#F2D022]"}`}
                                   />
                                   <span>{viagem.origem}</span>
-                                  <span className="text-[#73AABF]">â†’</span>
+                                  <span className="text-[#73AABF]">→</span>
                                   <MapPin
                                     className={`h-5 w-5 ${viagem.status === "cancelada" ? "text-red-400" : "text-[#103173]"}`}
                                   />
@@ -261,7 +261,7 @@ export function InformacaoScreen() {
                               <Clock className="h-8 w-8 text-[#103173]" />
                               <div>
                                 <p className="text-[10px] font-black text-[#73AABF] uppercase tracking-widest">
-                                  HorÃ¡rio
+                                  Horário
                                 </p>
                                 <p className="text-xl font-black text-[#103173]">
                                   {viagem.horarioInicio} - {viagem.horarioFim}
@@ -289,7 +289,7 @@ export function InformacaoScreen() {
 
                             <div className="flex flex-col justify-center">
                               <div className="flex justify-between text-xs font-black text-[#103173] mb-2 uppercase tracking-tighter">
-                                <span>OcupaÃ§Ã£o</span>
+                                <span>Ocupação</span>
                                 <span>
                                   {viagem.status === "cancelada"
                                     ? "0%"
@@ -311,8 +311,8 @@ export function InformacaoScreen() {
                             <div className="bg-orange-50 border-y border-orange-100 px-6 py-2 flex items-center gap-2">
                               <AlertTriangle className="h-4 w-4 text-orange-500" />
                               <span className="text-[10px] font-black text-orange-700 uppercase tracking-wider">
-                                QuÃ³rum mÃ­nimo nÃ£o atingido (mÃ­n. {QUORUM_MINIMO}
-                                ). Viagem sujeita a cancelamento automÃ¡tico.
+                                Quórum mínimo não atingido (mín. {QUORUM_MINIMO}
+                                ). Viagem sujeita a cancelamento automático.
                               </span>
                             </div>
                           )}
@@ -337,7 +337,7 @@ export function InformacaoScreen() {
                                   : "bg-[#103173] hover:bg-[#103B73] text-white shadow-[#103173]/20"
                               }`}
                             >
-                              <QrCode className="h-5 w-5 mr-2" /> GERAR CÃ“DIGO
+                              <QrCode className="h-5 w-5 mr-2" /> GERAR CÓDIGO
                               DE EMBARQUE
                             </Button>
                           </CardFooter>
