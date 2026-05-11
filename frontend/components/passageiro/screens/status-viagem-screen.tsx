@@ -1,6 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { passengerService } from "@/services/homeService";
 import { Navigation } from "@/components/landing/navigation";
 import { FooterSection } from "@/components/landing/footer-section";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,24 +16,97 @@ import {
   Bus,
   CheckCircle2,
   Users,
+  AlertCircle,
 } from "lucide-react";
 
 export function StatusViagemScreen() {
   const router = useRouter();
 
-  const viagemInscrita = {
-    id: "ROT-UEFS-002",
-    origem: "Burger King/Ao lado do Sam's Club",
-    destino: "UEFS",
-    horarioInicio: "06:00",
-    horarioFim: "08:00",
-    inscritos: 19,
-    quorum: 1,
-    vagasTotais: 44,
-    motorista: "João Silva",
-    placa: "JLS-1020",
-    status: "Confirmada",
-  };
+  const [viagemInscrita, setViagemInscrita] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchTrip() {
+      const viagemId = sessionStorage.getItem("viagemIdSelecionada");
+      
+      if (!viagemId) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const tripData = await passengerService.getTripById(viagemId);
+
+        let origem = "Não informada";
+        let destino = "Não informada";
+
+        if (tripData.route_id) {
+          const routeData = await passengerService.getRouteById(tripData.route_id);
+          origem = routeData.boarding_point;
+          destino = routeData.drop_off_point;
+        } else {
+          // Fallback caso a rota venha vazia
+          origem = tripData.boarding_point || origem;
+          destino = tripData.drop_off_point || destino;
+        }
+
+        // Se a viagem for Salvador-Feira ou Feira-Salvador, adiciona 2 horas ao horário de término
+        const isSalvadorFeira = 
+          (origem.toLowerCase().includes("salvador") && destino.toLowerCase().includes("feira")) ||
+          (origem.toLowerCase().includes("feira") && destino.toLowerCase().includes("salvador"));
+
+        let horarioFim = "--:--";
+        if (isSalvadorFeira && tripData.departure_time) {
+          const [hoursStr, minutesStr] = tripData.departure_time.split(":");
+          if (hoursStr && minutesStr) {
+            let hours = parseInt(hoursStr, 10);
+            hours = (hours + 2) % 24;
+            horarioFim = `${hours.toString().padStart(2, "0")}:${minutesStr.substring(0, 2)}`;
+          }
+        }
+
+        const inscritos = (tripData.student_count || 0) + (tripData.staff_count || 0);
+
+        setViagemInscrita({
+          id: viagemId.substring(0, 8).toUpperCase(),
+          origem,
+          destino,
+          horarioInicio: tripData.departure_time ? tripData.departure_time.substring(0, 5) : "",
+          horarioFim,
+          inscritos: inscritos,
+          quorum: 1,
+          vagasTotais: tripData.bus_capacity || 44,
+          placa: tripData.placa || "A DEFINIR",
+          status: "Confirmada",
+        });
+      } catch (error) {
+        console.error("Erro ao buscar detalhes da viagem:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchTrip();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#E4F2F1]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#103173]"></div>
+      </div>
+    );
+  }
+
+  if (!viagemInscrita) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-[#E4F2F1] px-4 text-center">
+        <AlertCircle className="h-12 w-12 text-amber-600 mb-4" />
+        <h2 className="text-xl font-bold text-[#103173] mb-2">Viagem não encontrada</h2>
+        <p className="text-[#103173]/70 mb-6">Não conseguimos carregar os detalhes da sua viagem.</p>
+        <Button onClick={() => router.push("/passageiro")} className="bg-[#103173]">Voltar para Home</Button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-[#E4F2F1]">
@@ -108,9 +183,9 @@ export function StatusViagemScreen() {
                   <Info className="text-[#103173] h-6 w-6" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-[#73AABF] uppercase italic">Motorista e Veículo</p>
+                  <p className="text-[10px] font-black text-[#73AABF] uppercase italic">Veículo</p>
                   <p className="font-bold text-[#103173]">
-                    {viagemInscrita.motorista} • <span className="text-[#73AABF]">{viagemInscrita.placa}</span>
+                     <span className="text-[#73AABF]">{viagemInscrita.placa}</span>
                   </p>
                 </div>
               </div>
