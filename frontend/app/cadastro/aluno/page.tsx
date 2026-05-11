@@ -43,7 +43,11 @@ function getPasswordStrength(password: string) {
   return { score, label: "Forte", colorClass: "bg-green-500" };
 }
 
-const CADASTRO_ALUNO_TITLE_WORDS = ["Cadastro de Aluno", "Transporte universitário UEFS"];
+const CADASTRO_ALUNO_SUPPORT_PHRASES = [
+  "Transporte universitário com critérios institucionais.",
+  "Planeje deslocamentos com mais segurança e previsibilidade.",
+  "Acesso ao sistema de viagens da comunidade UEFS.",
+];
 const PASSWORD_RULES = [
   { test: (p: string) => p.length >= 8, text: "Mínimo 8 caracteres" },
   { test: (p: string) => /[A-Z]/.test(p), text: "Uma letra maiúscula" },
@@ -124,18 +128,18 @@ export default function CadastroAlunoPage() {
               className="w-[170px] sm:w-[210px] h-auto object-contain mb-5"
               priority
             />
-            <h1 className="w-full min-w-0 text-[2rem] font-bold text-gray-900 tracking-tight">
-              <Typewriter
-                words={CADASTRO_ALUNO_TITLE_WORDS}
-                speed={80}
-                delayBetweenWords={2600}
-                cursor
-                cursorChar="|"
-              />
+            <h1 className="w-full text-center text-xl font-semibold tracking-tight text-gray-900 sm:text-2xl sm:font-bold">
+              Cadastro de aluno
             </h1>
-            <p className="text-sm text-gray-500 text-center mt-1.5 leading-relaxed">
-              Crie sua conta para acessar o sistema de transporte
-            </p>
+            <div className="mx-auto mt-1.5 min-h-[2.5rem] w-full max-w-[17.5rem] text-center text-[13px] leading-snug text-gray-500 sm:min-h-[2.85rem] sm:max-w-md sm:text-sm sm:leading-relaxed">
+              <Typewriter
+                words={CADASTRO_ALUNO_SUPPORT_PHRASES}
+                speed={72}
+                delayBetweenWords={2600}
+                cursor={false}
+                allowWrap
+              />
+            </div>
           </div>
 
           {/* Erro */}

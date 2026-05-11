@@ -7,6 +7,8 @@ interface TypewriterProps {
   words: string[];
   /** Classes no container externo; o padrão é uma linha contínua, centralizada. */
   className?: string;
+  /** Permite quebra de linha (útil para subtítulos em telas estreitas). */
+  allowWrap?: boolean;
   speed?: number;
   delayBetweenWords?: number;
   cursor?: boolean;
@@ -16,6 +18,7 @@ interface TypewriterProps {
 export function Typewriter({
   words,
   className,
+  allowWrap = false,
   speed = 100,
   delayBetweenWords = 2000,
   cursor = true,
@@ -69,10 +72,15 @@ export function Typewriter({
     <div
       className={cn(
         "flex w-full justify-center overflow-x-visible overflow-y-visible",
+        allowWrap && "text-pretty text-center",
         className,
       )}
     >
-      <span className="inline-block whitespace-nowrap">
+      <span
+        className={cn(
+          allowWrap ? "inline hyphens-auto break-words" : "inline-block whitespace-nowrap",
+        )}
+      >
         {displayText}
         {cursor && (
           <span
