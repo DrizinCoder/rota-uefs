@@ -273,6 +273,51 @@ class TripRepository:
             for row in rows
         ]
     
+    async def get_all_trips_and_reservations_by_user_id(self, user_id: uuid.UUID) -> list[dict]:
+        statement = (
+            select(
+                Trip.trip_id,   
+                Trip.trip_date,
+                Trip.departure_time,
+                Trip.status,    
+                Route.boarding_point,
+                Route.drop_off_point,
+                Reservation.reservation_id,
+                Reservation.boarding_confirmation,
+                Reservation.extra_passenger_name,
+                Reservation.boarding_timestamp
+            )       
+            .join(Route, Route.route_id == Trip.route_id)
+            .join(Reservation, Reservation.trip_id == Trip.trip_id)
+            .where(Reservation.user_id == user_id)  
+            .order_by(Trip.trip_date, Trip.departure_time)
+        )
+
+        result = await self.session.execute(statement)
+        rows = result.all()         
+        trips_dict = {}
+        for row in rows:
+            trip_id = row.trip_id
+            if trip_id not in trips_dict:
+                trips_dict[trip_id] = {
+                    "trip_id": row.trip_id,
+                    "trip_date": row.trip_date,
+                    "departure_time": row.departure_time,
+                    "status": row.status,
+                    "boarding_point": row.boarding_point,
+                    "drop_off_point": row.drop_off_point,
+                    "reservations": []
+                }
+            trips_dict[trip_id]["reservations"].append({
+                "reservation_id": row.reservation_id,
+                "boarding_confirmation": row.boarding_confirmation,
+                "extra_passenger_name": row.extra_passenger_name,
+                "boarding_timestamp": row.boarding_timestamp
+            })
+
+        return list(trips_dict.values())    
+     
+    
     async def get_trips_by_driver_id(self, driver_id: uuid.UUID) -> list[DriverTripItem]:
         statement = (
             select(

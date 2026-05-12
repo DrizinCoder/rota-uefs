@@ -22,6 +22,15 @@ class TripService:
         self.trip_repository = trip_repository
 
 
+    async def get_all_trips_by_user_id(self, user_id: uuid.UUID):
+        logger.info(f"Trips by user ID requested | User ID: {user_id}")
+
+        trips = await self.trip_repository.get_all_trips_and_reservations_by_user_id(user_id)
+
+        logger.info(f"Trips by user ID retrieved | User ID: {user_id} | Count: {len(trips)}")
+        return trips
+
+
     async def get_all_reservations(self):
         logger.info("All reservations requested")
 
