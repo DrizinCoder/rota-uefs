@@ -9,7 +9,10 @@ export function LandingHero() {
   const router = useRouter();
 
   return (
-    <section id="inicio" className="relative min-h-[90vh] flex items-end overflow-hidden pt-16">
+    <section
+      id="inicio"
+      className="relative min-h-[90vh] flex items-end overflow-hidden pt-16 scroll-mt-24"
+    >
       {/* Background */}
       <div className="absolute inset-0">
         <Image
