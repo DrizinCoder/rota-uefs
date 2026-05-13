@@ -23,7 +23,7 @@ export const userService = {
   // GET /users/me — busca o usuário autenticado
   getMe: async (): Promise<UserProfile> => {
     const response = await api.get("/users/me");
-    return response.data.data.user;
+    return response.data.data;
   },
 
   // PATCH /users/update/password/{id}

@@ -12,8 +12,9 @@ import { PassengerListInfo } from "@/entities/viagem/ui/PassengerListInfo";
 import { TripModeToggle } from "@/entities/viagem/ui/TripModeToggle";
 import { ManageSubscriptionButton } from "@/features/gerenciar-inscricao/ui/ManageSubscriptionButton";
 import { SubscribeButton } from "@/features/inscrever-rota/ui/SubscribeButton";
-import {GraduationCap} from "lucide-react";
-import { passengerService , type Home} from "@/services/homeService";
+import { GraduationCap } from "lucide-react";
+import { passengerService, type Home, type UserTrip } from "@/services/homeService";
+import { userService } from "@/services/userService";
 import { EmptyDayCard } from "@/components/shared/empty-day-card";
 
 const DIAS_SEMANA = [
@@ -33,13 +34,23 @@ const formatarData = (data: string) => {
 export default function PaginaAluno() {
   const [data, setData] = useState<Home | null>(null);
   const [diaAtivo, setDiaAtivo] = useState("Segunda");
+  const [minhasViagens, setMinhasViagens] = useState<UserTrip[]>([]);
   const diaAtual = DIAS_SEMANA.find((d) => d.id === diaAtivo);
 
-  // Busca os dados da home do passageiro
+  // Busca os dados da home do passageiro e as viagens do usuário
   useEffect(() => {
     const fetchData = async () => {
       const resultado = await passengerService.getHome();
       setData(resultado);
+
+      try {
+        const user = await userService.getMe();
+        const trips = await passengerService.getUserTrips(user.user_id);
+        console.log("Viagens do usuário:", trips);
+        setMinhasViagens(trips);
+      } catch (error) {
+        console.error("Erro ao buscar viagens do usuário", error);
+      }
     }
     fetchData();
   }, [])
@@ -56,6 +67,8 @@ export default function PaginaAluno() {
 
   const viagensDoDia = (data?.trips || []).filter(viagem => viagem.weekday === diaAtivo);
 
+  // IDs das viagens em que o usuário já está inscrito
+  const idsInscritos = new Set(minhasViagens.map(v => v.trip_id));
 
   const selecionarModalidade = (viagemId: string, modalidade: "ida" | "ida-volta") => {
     setModalidades(prev => ({ ...prev, [viagemId]: modalidade }));
@@ -76,7 +89,7 @@ export default function PaginaAluno() {
           dateRange={data ? `(${formatarData(data.start_date)} - ${formatarData(data.end_date)})` : ""}
         />
         <WeekDaysMenu dias={DIAS_SEMANA} diaAtivo={diaAtivo} onDiaChange={setDiaAtivo} />
-      
+
         <CurrentDayHeader dayName={diaAtual?.full} />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -85,13 +98,13 @@ export default function PaginaAluno() {
 
             return (
               <TripCard key={viagem.trip_id}>
-                <TripRouteHeader 
-                  origem={viagem.boarding_point} 
-                  destino={viagem.drop_off_point} 
-                  horarioInicio={formatarHorario(viagem.departure_time)} 
+                <TripRouteHeader
+                  origem={viagem.boarding_point}
+                  destino={viagem.drop_off_point}
+                  horarioInicio={formatarHorario(viagem.departure_time)}
                 />
 
-                <PassengerListInfo 
+                <PassengerListInfo
                   userType="aluno"
                   vagasTotais={viagem.bus_capacity}
                   inscritosAlunos={viagem.student_count}
@@ -99,13 +112,13 @@ export default function PaginaAluno() {
                   totalInscritos={viagem.total_enrolled}
                 />
 
-                {viagem.jaInscrito ? (
+                {idsInscritos.has(viagem.trip_id) ? (
                   <ManageSubscriptionButton viagemId={viagem.trip_id} />
                 ) : (
                   <div className="space-y-3">
-                    <TripModeToggle 
-                      modalidadeAtual={modalidadeAtual} 
-                      onChange={(nova) => selecionarModalidade(viagem.trip_id, nova)} 
+                    <TripModeToggle
+                      modalidadeAtual={modalidadeAtual}
+                      onChange={(nova) => selecionarModalidade(viagem.trip_id, nova)}
                     />
                     <SubscribeButton viagemId={viagem.trip_id} />
                   </div>

@@ -20,6 +20,23 @@ export interface Home {
   trips: CardViagemFeed[];
 }
 
+export interface Reservation {
+  reservation_id: string;
+  boarding_confirmation: string;
+  extra_passenger_name: string | null;
+  boarding_timestamp: string | null;
+}
+
+export interface UserTrip {
+  trip_id: string;
+  trip_date: string;
+  departure_time: string;
+  status: string;
+  boarding_point: string;
+  drop_off_point: string;
+  reservations: Reservation[];
+}
+
 export const passengerService = {
     async getHome(): Promise<Home> {
         const response = await api.get('/trip/feed/trips');
@@ -40,5 +57,8 @@ export const passengerService = {
         });
         return response.data;
     },
+    async getUserTrips(userId: string): Promise<UserTrip[]> {
+        const response = await api.get(`/trip/me/${userId}`);
+        return response.data.data;
+    },
 }
-    

@@ -173,7 +173,7 @@ export function StatusViagemScreen() {
                     <span className="text-[10px] font-black uppercase">Ocupação</span>
                   </div>
                   <p className="text-xl font-black text-[#103173]">
-                    {viagemInscrita.inscritos}/{viagemInscrita.vagasTotais}
+                    {(viagemInscrita.inscritos) + 1}/{viagemInscrita.vagasTotais}
                   </p>
                 </div>
               </div>
