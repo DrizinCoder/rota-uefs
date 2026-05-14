@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect} from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,25 +21,29 @@ import {
   ListPlus,
 } from "lucide-react";
 
-const PASSAGEIROS_MOCK = [
-  { id: 1, nome: "Ana Beatriz Sousa", matricula: "PROF-202401", status: "embarcou" },
-  { id: 2, nome: "Carlos Eduardo Silva", matricula: "PROF-202402", status: "pendente" },
-  { id: 3, nome: "Fernanda Lima", matricula: "PROF-202403", status: "embarcou" },
-  { id: 4, nome: "João Pedro Alves", matricula: "PROF-202404", status: "pendente" },
-  { id: 5, nome: "Maria Clara Nunes", matricula: "PROF-202405", status: "falta" },
-  { id: 6, nome: "Pedro Henrique Santos", matricula: "PROF-202406", status: "pendente" },
-  { id: 7, nome: "Rafael Souza Costa", matricula: "PROF-202407", status: "embarcou" },
-  { id: 8, nome: "Lucas Mendes", matricula: "PROF-202408", status: "espera" },
-  { id: 9, nome: "Juliana Martins", matricula: "PROF-202409", status: "espera" },
-];
+import { driverService,type PassengerListResponse, type Reservation, type TripInfo, type Stats } from "@/services/driverService";
+
+interface PassageiroFormatado {
+  id: string;
+  nome: string;
+  matricula: string;
+  status: string;
+}
+
+const profileMap: Record<string, string> = {
+  Student: "Estudante",
+  Staff: "Servidor",
+};
 
 function PassageirosContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tripId = searchParams.get("trip_id");
-  const tripLabel = tripId ?? "ROT-0042";
   const [busca, setBusca] = useState("");
-  const [passageiros, setPassageiros] = useState(PASSAGEIROS_MOCK);
+  const [passageiros, setPassageiros] = useState<PassageiroFormatado[]>([]);
+  const [listaEspera, setListaEspera] = useState<PassageiroFormatado[]>([]);
+  const [dadosViagem, setDadosViagem] = useState<TripInfo | null>(null);
+
   const termoBusca = busca.trim().toLowerCase();
   const sanitizarBusca = (valor: string) =>
     valor
@@ -47,16 +51,84 @@ function PassageirosContent() {
       .replace(/[^\p{L}\p{N}\s-]/gu, "")
       .replace(/\s{2,}/g, " ");
 
+  if (!tripId) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#E4F2F1]">
+        <p className="font-bold text-[#103173]">Trip ID não encontrado</p>
+      </div>
+    );
+  }
+
+  useEffect(() => {
+    const carregarPassageiros = async () => {
+      try {
+        const dados = await driverService.listarPassageiros(tripId);
+        
+        console.log("DADOS COMPLETOS:", dados);
+        
+        // Função auxiliar pra ordenar
+        const ordenarPorProfileETimestamp = (reservations: Reservation[]) => {
+          return reservations.sort((a, b) => {
+            const profileOrder = { "Professor": 0, "Aluno": 1 };
+            const profileA = profileOrder[a.profile as keyof typeof profileOrder] ?? 2;
+            const profileB = profileOrder[b.profile as keyof typeof profileOrder] ?? 2;
+            
+            if (profileA !== profileB) {
+              return profileA - profileB;
+            }
+            
+            return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
+          });
+        };
+
+        const reservasOrdenadas = ordenarPorProfileETimestamp([...dados.valid_reservations]);
+        const passageirosValidos = reservasOrdenadas.map((res) => ({
+          id: res.reservation_id,
+          nome: res.name,
+          matricula: profileMap[res.profile] ?? res.profile,
+          status: "pendente",
+        }));
+
+        const esperaOrdenada = ordenarPorProfileETimestamp([...dados.waitlist_reservations]);
+        const passageirosEspera = esperaOrdenada.map((res) => ({
+          id: res.reservation_id,
+          nome: res.name,
+          matricula: profileMap[res.profile] ?? res.profile,
+          status: "espera",
+        }));
+
+        setPassageiros(passageirosValidos);
+        setListaEspera(passageirosEspera);
+        setDadosViagem({
+          route_name: dados.route_name,
+          trip_id: dados.trip_id,
+          boarding_point: dados.boarding_point,
+          drop_off_point: dados.drop_off_point,
+          stats: dados.stats
+        });
+      } catch (erro) {
+        console.error("ERRO AO CARREGAR:", erro);
+      }
+    };
+    
+    carregarPassageiros();
+  }, [tripId]);
+
   const passageirosFiltrados = passageiros.filter(
     (p) =>
       p.nome.toLowerCase().includes(termoBusca) ||
       p.matricula.toLowerCase().includes(termoBusca),
   );
 
-  const total = passageiros.filter((p) => p.status !== "espera").length;
+  const listaEsperaFiltrada = listaEspera.filter(
+    (p) =>
+      p.nome.toLowerCase().includes(termoBusca) ||
+      p.matricula.toLowerCase().includes(termoBusca),
+  );
+
   const embarcados = passageiros.filter((p) => p.status === "embarcou").length;
 
-  const alternarCheckIn = (id: number) => {
+  const alternarCheckIn = (id: string) => {
     setPassageiros(
       passageiros.map((p) => {
         if (p.id === id) {
@@ -114,7 +186,7 @@ function PassageirosContent() {
             variant="outline"
             className="w-fit border-2 border-[#103173] text-[#103173] font-black px-4 py-2 bg-white"
           >
-            ROTA: {tripLabel}
+            ROTA: {dadosViagem?.route_name}
           </Badge>
         </header>
 
@@ -127,10 +199,10 @@ function PassageirosContent() {
                 </p>
                 <div className="flex items-center flex-wrap justify-center sm:justify-start gap-2 text-sm md:text-base font-bold">
                   <CircleDot className="h-5 w-5 text-[#F2D022]" />
-                  <span>Salvador</span>
+                  <span>{dadosViagem?.boarding_point}</span>
                   <span className="text-[#73AABF]">→</span>
                   <MapPin className="h-5 w-5 text-[#73AABF]" />
-                  <span>Feira de Santana</span>
+                  <span>{dadosViagem?.drop_off_point}</span>
                 </div>
               </div>
 
@@ -139,7 +211,7 @@ function PassageirosContent() {
                   <p className="text-[10px] text-[#73AABF] font-black uppercase tracking-widest">
                     Vagas Reservadas
                   </p>
-                  <p className="text-2xl font-black">{total}</p>
+                  <p className="text-2xl font-black">{dadosViagem?.stats.total_reservations ?? 0}</p>
                 </div>
                 <div className="text-center px-4">
                   <p className="text-[10px] text-[#23B99A] font-black uppercase tracking-widest">
