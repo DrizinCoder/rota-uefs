@@ -66,6 +66,10 @@ class PriorityEngine:
 
         return ResponseHandler.ok(
             data={
+                "trip_id": trip.trip_id,
+                "boarding_point": trip.route.boarding_point,
+                "drop_off_point": trip.route.drop_off_point,
+                "route_name": trip.route.name,
                 "valid_reservations": valid_reservations,
                 "waitlist_reservations": waitlist_reservations,
                 "stats": {
