@@ -124,6 +124,10 @@ class PriorityEngine:
         user = await self.user_repository.get_by_id(uuid.UUID(user_id))
         if not user: raise NotFoundException("Usuário não encontrado")
 
+        extra_name = extra_name.strip() if extra_name else ""
+        if user.profile != UserProfile.STAFF:
+            extra_name=""
+
         existing_reservation = await self.reservation_repository.get_reservation_by_user_and_trip_extra_name(user_id, trip_id, extra_name)
         
         if existing_reservation:
@@ -132,9 +136,6 @@ class PriorityEngine:
             await self.notifications.activate_notifications(user, trip, existing_reservation, background_tasks)
 
             return ResponseHandler.ok(message="Reserva reativada.")
-        
-        if user.profile != UserProfile.STAFF:
-            extra_name=""
         
         new_res = await self.reservation_repository.create(
             user_id=user_id, 
@@ -154,7 +155,9 @@ class PriorityEngine:
       
         await self.reservation_repository.cancel_reservation(user_res.reservation_id)
 
-        await self.notifications.cancel_subscription_notifications(user_res.user, user_res.trip, user_res, background_tasks)
+        print("ddsdsddsdsdsdsds", extra_name)
+
+        self.notifications.cancel_subscription_notifications(user_res.user, user_res.trip, user_res, background_tasks)
         
         return ResponseHandler.ok(message="Reserva cancelada com sucesso.")
 

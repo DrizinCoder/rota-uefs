@@ -57,7 +57,7 @@ class ReservationRepository:
         return result.scalars().all()
     
 
-    async def get_reservation_by_user_and_trip_extra_name(self, user_id: str, trip_id: str, extra_name: str):
+    async def get_reservation_by_user_and_trip_extra_name(self, user_id: str, trip_id: str, extra_name: str = None):
         stmt = (select(Reservation)
                 .where(Reservation.user_id == user_id)
                 .where(Reservation.trip_id == trip_id)
