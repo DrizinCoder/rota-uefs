@@ -21,7 +21,7 @@ import {
   ListPlus,
 } from "lucide-react";
 
-import { driverService,type PassengerListResponse, type Reservation, type TripInfo, type Stats } from "@/services/driverService";
+import { driverService,type PassengerListResponse, type Reservation, type Stats } from "@/services/driverService";
 
 interface PassageiroFormatado {
   id: string;
@@ -42,7 +42,7 @@ function PassageirosContent() {
   const [busca, setBusca] = useState("");
   const [passageiros, setPassageiros] = useState<PassageiroFormatado[]>([]);
   const [listaEspera, setListaEspera] = useState<PassageiroFormatado[]>([]);
-  const [dadosViagem, setDadosViagem] = useState<TripInfo | null>(null);
+  const [dadosViagem, setDadosViagem] = useState<PassengerListResponse  | null>(null);
 
   const termoBusca = busca.trim().toLowerCase();
   const sanitizarBusca = (valor: string) =>
@@ -99,13 +99,7 @@ function PassageirosContent() {
 
         setPassageiros(passageirosValidos);
         setListaEspera(passageirosEspera);
-        setDadosViagem({
-          route_name: dados.route_name,
-          trip_id: dados.trip_id,
-          boarding_point: dados.boarding_point,
-          drop_off_point: dados.drop_off_point,
-          stats: dados.stats
-        });
+        setDadosViagem(dados);
       } catch (erro) {
         console.error("ERRO AO CARREGAR:", erro);
       }
