@@ -37,6 +37,11 @@ export function StatusViagemScreen() {
 
       try {
         const tripData = await passengerService.getTripById(viagemId);
+        
+        // Busca a home para encontrar o total_enrolled com base na listagem de viagens
+        const homeData = await passengerService.getHome();
+        const tripFromHome = homeData.trips?.find(t => t.trip_id === viagemId);
+
         let origem = "Não informada";
         let destino = "Não informada";
 
@@ -65,7 +70,9 @@ export function StatusViagemScreen() {
           }
         }
 
-        const inscritos = tripData.total_enrolled || 0;
+        const inscritos = tripFromHome?.total_enrolled !== undefined 
+          ? tripFromHome.total_enrolled 
+          : (tripData.total_enrolled !== undefined ? tripData.total_enrolled : (tripData.student_count || 0) + (tripData.staff_count || 0));
         const dataFormatada = tripData.trip_date ? tripData.trip_date.split('-').reverse().join('/') : "--/--/----";
 
         setViagemInscrita({
