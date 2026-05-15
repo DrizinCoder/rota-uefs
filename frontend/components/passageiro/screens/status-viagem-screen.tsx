@@ -17,6 +17,7 @@ import {
   CheckCircle2,
   Users,
   AlertCircle,
+  Calendar,
 } from "lucide-react";
 
 export function StatusViagemScreen() {
@@ -28,7 +29,7 @@ export function StatusViagemScreen() {
   useEffect(() => {
     async function fetchTrip() {
       const viagemId = sessionStorage.getItem("viagemIdSelecionada");
-      
+
       if (!viagemId) {
         setIsLoading(false);
         return;
@@ -36,7 +37,6 @@ export function StatusViagemScreen() {
 
       try {
         const tripData = await passengerService.getTripById(viagemId);
-
         let origem = "Não informada";
         let destino = "Não informada";
 
@@ -51,7 +51,7 @@ export function StatusViagemScreen() {
         }
 
         // Se a viagem for Salvador-Feira ou Feira-Salvador, adiciona 2 horas ao horário de término
-        const isSalvadorFeira = 
+        const isSalvadorFeira =
           (origem.toLowerCase().includes("salvador") && destino.toLowerCase().includes("feira")) ||
           (origem.toLowerCase().includes("feira") && destino.toLowerCase().includes("salvador"));
 
@@ -65,10 +65,12 @@ export function StatusViagemScreen() {
           }
         }
 
-        const inscritos = (tripData.student_count || 0) + (tripData.staff_count || 0);
+        const inscritos = tripData.total_enrolled || 0;
+        const dataFormatada = tripData.trip_date ? tripData.trip_date.split('-').reverse().join('/') : "--/--/----";
 
         setViagemInscrita({
           id: viagemId.substring(0, 8).toUpperCase(),
+          data: dataFormatada,
           origem,
           destino,
           horarioInicio: tripData.departure_time ? tripData.departure_time.substring(0, 5) : "",
@@ -160,6 +162,15 @@ export function StatusViagemScreen() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-[#E4F2F1] p-4 rounded-2xl">
                   <div className="flex items-center gap-2 mb-1 text-[#73AABF]">
+                    <Calendar className="h-4 w-4" />
+                    <span className="text-[10px] font-black uppercase">Data</span>
+                  </div>
+                  <p className="text-xl font-black text-[#103173]">
+                    {viagemInscrita.data}
+                  </p>
+                </div>
+                <div className="bg-[#E4F2F1] p-4 rounded-2xl">
+                  <div className="flex items-center gap-2 mb-1 text-[#73AABF]">
                     <Clock className="h-4 w-4" />
                     <span className="text-[10px] font-black uppercase">Horário</span>
                   </div>
@@ -167,13 +178,13 @@ export function StatusViagemScreen() {
                     {viagemInscrita.horarioInicio} - {viagemInscrita.horarioFim}
                   </p>
                 </div>
-                <div className="bg-[#E4F2F1] p-4 rounded-2xl">
+                <div className="bg-[#E4F2F1] p-4 rounded-2xl col-span-2">
                   <div className="flex items-center gap-2 mb-1 text-[#73AABF]">
                     <Users className="h-4 w-4" />
                     <span className="text-[10px] font-black uppercase">Ocupação</span>
                   </div>
                   <p className="text-xl font-black text-[#103173]">
-                    {(viagemInscrita.inscritos) + 1}/{viagemInscrita.vagasTotais}
+                    {viagemInscrita.inscritos}/{viagemInscrita.vagasTotais}
                   </p>
                 </div>
               </div>
@@ -185,7 +196,7 @@ export function StatusViagemScreen() {
                 <div>
                   <p className="text-[10px] font-black text-[#73AABF] uppercase italic">Veículo</p>
                   <p className="font-bold text-[#103173]">
-                     <span className="text-[#73AABF]">{viagemInscrita.placa}</span>
+                    <span className="text-[#73AABF]">{viagemInscrita.placa}</span>
                   </p>
                 </div>
               </div>
