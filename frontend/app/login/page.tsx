@@ -41,8 +41,8 @@ export default function LoginPage() {
 
   const REDIRECT_MAP: Record<string, string> = {
     Student: "/passageiro",
-    Staff: "/professor",
-    Faculty: "/professor",
+    Staff: "/passageiro",
+    Faculty: "/passageiro",
     Driver: "/motorista",
     Admin: "/admin",
   };
