@@ -115,7 +115,6 @@ export default function MotoristaPage() {
       if (dia === "Sábado" || dia === "Domingo") {
         return "Segunda";
       }
-
       return dia;
     };
 

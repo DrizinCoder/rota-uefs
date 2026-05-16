@@ -33,6 +33,12 @@ export default function PaginaAluno() {
   const [data, setData] = useState<Home | null>(null);
   const [diaAtivo, setDiaAtivo] = useState("Segunda");
   const diaAtual = DIAS_SEMANA.find((d) => d.id === diaAtivo);
+  const normalizarDia = (dia: string) => {
+      if (dia === "Sábado" || dia === "Domingo") {
+        return "Segunda";
+      }
+      return dia;
+    };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,9 +50,9 @@ export default function PaginaAluno() {
 
   useEffect(() => {
     if (data?.reference_weekday) {
-      setDiaAtivo(data.reference_weekday);
+      setDiaAtivo(normalizarDia(data.reference_weekday));
     }
-  }, [data])
+  }, [data]);
 
   const [modalidades, setModalidades] = useState<Record<string, "ida" | "ida-volta">>({});
 

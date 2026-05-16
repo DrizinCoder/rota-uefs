@@ -36,7 +36,13 @@ export default function PaginaProfessor() {
   const [diaAtivo, setDiaAtivo] = useState("Segunda");
   const diaAtual = DIAS_SEMANA.find((d) => d.id === diaAtivo);
   const [modalConvidado, setModalConvidado] = useState<string | null>(null);
-
+  const normalizarDia = (dia: string) => {
+      if (dia === "Sábado" || dia === "Domingo") {
+        return "Segunda";
+      }
+      return dia;
+    };
+  
   useEffect(() => {
     const fetchData = async () => {
       const resultado = await passengerService.getHome();
@@ -47,9 +53,9 @@ export default function PaginaProfessor() {
 
   useEffect(() => {
     if (data?.reference_weekday) {
-      setDiaAtivo(data.reference_weekday);
+      setDiaAtivo(normalizarDia(data.reference_weekday));
     }
-  }, [data])
+  }, [data]);
 
   const [modalidades, setModalidades] = useState<Record<string, "ida" | "ida-volta">>({});
 
