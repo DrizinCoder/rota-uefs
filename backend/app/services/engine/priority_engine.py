@@ -143,7 +143,13 @@ class PriorityEngine:
             extra_name=extra_name
         )
 
-        await self.notifications.subscribe_notifications(user, trip, new_res, background_tasks)
+        ordered_reservations = await self._get_ordered_reservations(trip_id)
+        position = next(
+            (i + 1 for i, r in enumerate(ordered_reservations) if r.reservation_id == new_res.reservation_id),
+            None
+        )
+
+        await self.notifications.subscribe_notifications(user, trip, new_res, background_tasks, position)
         
         return ResponseHandler.created(new_res, "Inscrição realizada com sucesso.")
 
@@ -155,9 +161,7 @@ class PriorityEngine:
       
         await self.reservation_repository.cancel_reservation(user_res.reservation_id)
 
-        print("ddsdsddsdsdsdsds", extra_name)
-
-        self.notifications.cancel_subscription_notifications(user_res.user, user_res.trip, user_res, background_tasks)
+        await self.notifications.cancel_subscription_notifications(user_res.user, user_res.trip, user_res, background_tasks)
         
         return ResponseHandler.ok(message="Reserva cancelada com sucesso.")
 

@@ -57,7 +57,10 @@
                 </p>
 
                 <p style="margin: 0 0 28px; font-size: 15px; color: #4a5568; line-height: 1.7;">
-                  Você se inscreveu na viagem abaixo e está na posição <strong style="color: #0a1f4e;">#{{ position }}</strong> da lista. Verifique no dia da viagem se sua inscrição foi confirmada ou se você permanece na lista de espera.
+                  Você se inscreveu na viagem abaixo e está na posição <strong style="color: #0a1f4e;">#{{ position }}</strong> da lista.
+                  Verifique no dia da viagem se sua inscrição foi confirmada ou se você
+                  permanece na lista de
+                  {% if in_boarding_list %}embarque{% else %}espera{% endif %}.
                 </p>
 
                 <!-- Detalhes da viagem -->
@@ -120,16 +123,20 @@
                 </table>
 
                 <!-- Aviso lista de espera -->
+                {% if student_mode %}
                 <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 28px;">
                   <tr>
                     <td style="background-color: #fff8e1; border-left: 4px solid #f59e0b; border-radius: 0 8px 8px 0; padding: 14px 18px;">
                       <p style="margin: 0; font-size: 13px; color: #4a5568; line-height: 1.6;">
-                        <strong style="color: #0a1f4e;">Atenção:</strong> sua vaga está sujeita à disponibilidade do ônibus. Consulte o aplicativo no dia da viagem para confirmar se sua inscrição foi efetivada ou se você permanece na lista de espera.
+                        <strong style="color: #0a1f4e;">Atenção:</strong> sua vaga está sujeita à
+                        disponibilidade do ônibus. Consulte o aplicativo no dia da viagem para confirmar
+                        se sua inscrição foi efetivada ou se você permanece na lista de espera.
                       </p>
                     </td>
                   </tr>
                 </table>
-
+                {% endif %}
+                
                 <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
                   <tr>
                     <td style="border-top: 1px solid #e8edf5; height: 1px;"></td>
