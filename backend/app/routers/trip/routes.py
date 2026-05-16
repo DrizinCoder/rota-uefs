@@ -1,9 +1,10 @@
+from app.enums.enums import UserProfile
 from app.DTOs.trip import TripDetailFeedItem
 from app.middleware import TokenData
 from app.middleware import get_current_user
 from app.DTOs.trip import TripFeedItem
 from app.services.trip_service import TripService
-from app.routers.users.dependencies import get_trip_service
+from app.routers.users.dependencies import get_trip_controller, get_trip_service
 from app.DTOs.trip import UpdateTripDTO
 import uuid
 from app.DTOs.trip import CreateTripDTO
@@ -14,6 +15,8 @@ from app.middleware import require_admin
 from datetime import date
 from fastapi import Query
 
+from app.controllers.trip_controller import TripController
+
 trip_router = APIRouter(
     #dependencies=[Depends(require_admin)]
 )
@@ -21,6 +24,21 @@ trip_router = APIRouter(
 @trip_router.get("/")
 async def get_all_trips(service: TripService = Depends(get_trip_service)):
     result = await service.get_all()
+    return ResponseHandler.ok(result)
+
+@trip_router.get("/reservations")
+async def get_all_reservations(service: TripService = Depends(get_trip_service)):
+    result = await service.get_all_reservations()
+    return ResponseHandler.ok(result)
+
+@trip_router.get("/me/{user_id}")
+async def get_all_trips_by_user_id(user_id: uuid.UUID, controller: TripController = Depends(get_trip_controller)):
+    result = await controller.get_all_trips_by_user_id(user_id)
+    return ResponseHandler.ok(result)
+
+@trip_router.post("/cancel/{trip_id}")
+async def cancel_trip(trip_id: uuid.UUID, controller: TripController = Depends(get_trip_controller)):
+    result = await controller.cancel_trip(trip_id)
     return ResponseHandler.ok(result)
 
 @trip_router.get("/{trip_id}")
@@ -43,15 +61,16 @@ async def delete_trip(trip_id: uuid.UUID, service: TripService = Depends(get_tri
     result = await service.delete(trip_id)
     return ResponseHandler.ok(result)
 
-@trip_router.get("/trips", response_model=list[TripFeedItem])
-async def get_student_trips(
+@trip_router.get("/feed", response_model=list[TripFeedItem])
+async def get_trips_for_feed(
     current_user: TokenData = Depends(get_current_user),
     service: TripService = Depends(get_trip_service)
-):
-    result = await service.get_trips_for_student_feed()
+):  
+    
+    result = await service.get_trips_for_feed(current_user.driver_id)
     return ResponseHandler.ok(result)
 
-@trip_router.get("/trips/{trip_id}", response_model=TripDetailFeedItem)
+@trip_router.get("/feed/{trip_id}", response_model=TripDetailFeedItem)
 async def get_trip_detail(
     trip_id: uuid.UUID,
     current_user: TokenData = Depends(get_current_user),

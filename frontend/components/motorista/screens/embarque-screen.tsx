@@ -1,12 +1,21 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Scan, ClipboardList } from "lucide-react";
 
-export function MotoristaEmbarqueScreen() {
+function EmbarqueContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const tripId = searchParams.get("trip_id");
+  const tripLabel = tripId ?? "ROT-0042";
+
+  const irParaPassageiros = () => {
+    const qs = tripId ? `?trip_id=${encodeURIComponent(tripId)}` : "";
+    router.push(`/motorista/passageiros${qs}`);
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-[#E4F2F1] items-center justify-center p-4">
@@ -24,7 +33,7 @@ export function MotoristaEmbarqueScreen() {
           </CardTitle>
           <div className="mt-2 flex flex-col items-center space-y-2">
             <p className="text-[#F2D022] text-sm font-black tracking-widest uppercase">
-              Rota ROT-0042
+              Rota {tripLabel}
             </p>
             <p className="text-[#73AABF] text-sm sm:text-base font-bold uppercase tracking-wider px-4">
               Aponte a câmera para o QR Code do passageiro
@@ -59,7 +68,7 @@ export function MotoristaEmbarqueScreen() {
             </div>
 
             <Button
-              onClick={() => router.push("/motorista/passageiros")}
+              onClick={irParaPassageiros}
               className="w-full h-14 rounded-2xl font-black transition-all shadow-lg bg-[#23B99A] hover:bg-[#1d9e83] text-white active:scale-95"
             >
               <ClipboardList className="mr-2 h-5 w-5" /> ACESSAR LISTA DE PASSAGEIROS
@@ -80,5 +89,19 @@ export function MotoristaEmbarqueScreen() {
         <div className="h-1 w-1 bg-[#103173] rounded-full" />
       </div>
     </div>
+  );
+}
+
+export function MotoristaEmbarqueScreen() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-[#E4F2F1] font-bold text-[#103173]">
+          Carregando embarque...
+        </div>
+      }
+    >
+      <EmbarqueContent />
+    </Suspense>
   );
 }

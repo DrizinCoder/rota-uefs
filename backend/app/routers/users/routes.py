@@ -1,8 +1,8 @@
 from app.services.trip_service import TripService
 from app.routers.users.dependencies import get_trip_service
-from app.DTOs.trip import PassengerTripItem
+from app.DTOs.trip import PassengerTripItem, SubscribeData
 import uuid
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends
 
 from app.routers.users.staff.route_staff import staff_router
 from app.routers.users.drive.route_drive import drive_router
@@ -10,9 +10,10 @@ from app.routers.users.student.route_student import student_router
 from app.DTOs.users import PasswordUpdate, PhoneUpdate
 from app.middleware.auth_middleware import TokenData, get_current_user, require_profile
 from app.core.responses import ResponseHandler
-from app.routers.users.dependencies import get_user_service
+from app.routers.users.dependencies import get_trip_controller, get_user_service
 from app.services.user_service import UserService
 from app.enums.enums import UserProfile
+from app.controllers.trip_controller import TripController
 
 user_router = APIRouter()
 
@@ -56,6 +57,39 @@ async def update_phone(
 ):
     await service.update_phone(id, data)
     return ResponseHandler.ok(message="Telefone atualizado!")
+
+@user_router.post("/trip/{trip_id}/subscribe")
+async def subscribe_user(
+    trip_id: str, 
+    data: SubscribeData, 
+    background_tasks: BackgroundTasks, 
+    controller: TripController = Depends(get_trip_controller), 
+    token: TokenData = Depends(get_current_user)
+):
+    return await controller.subscriber(
+        token.sub, 
+        trip_id, 
+        background_tasks, 
+        data.extra_passenger_name
+    )
+
+@user_router.get("/trip/{trip_id}/subscribers")
+async def get_subscribers(
+    trip_id: str,
+    controller: TripController = Depends(get_trip_controller),
+    _: TokenData = Depends(get_current_user)
+):
+    return await controller.get_subscribers(trip_id)
+
+@user_router.post("/trip/{trip_id}/cancel")
+async def cancel_subscription(
+    trip_id: str,
+    data: SubscribeData, 
+    background_tasks: BackgroundTasks, 
+    controller: TripController = Depends(get_trip_controller),
+    token: TokenData = Depends(require_profile(UserProfile.STAFF, UserProfile.STUDENT))
+):
+    return await controller.cancel_subscription(token.sub, trip_id, background_tasks, data.extra_passenger_name)
 
 @user_router.get("/trips/me", response_model=list[PassengerTripItem])
 async def get_passenger_trips(

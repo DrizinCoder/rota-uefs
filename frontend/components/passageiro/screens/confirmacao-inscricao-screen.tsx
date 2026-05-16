@@ -1,8 +1,7 @@
-"use client";
+﻿"use client";
 
 import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
-import { FooterSection } from "@/components/landing/footer-section";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,7 +17,7 @@ export function ConfirmacaoInscricaoScreen() {
   const router = useRouter();
 
   const viagemSelecionada = {
-    origem: " Burger King/Ao lado do Sam's Club",
+    origem: "Burger King / ao lado do Sam's Club",
     destino: "UEFS",
     horarioInicio: "06:00",
     horarioFim: "08:00",
@@ -48,7 +47,7 @@ export function ConfirmacaoInscricaoScreen() {
               <CalendarCheck className="h-8 w-8 text-[#103173]" />
             </div>
             <CardTitle className="text-2xl font-black tracking-tight">
-              Confirme sua Inscrição
+              Confirme sua inscrição
             </CardTitle>
             <p className="text-white/80 font-medium mt-2">
               Verifique os detalhes da viagem antes de prosseguir
@@ -120,9 +119,7 @@ export function ConfirmacaoInscricaoScreen() {
             </p>
           </CardFooter>
         </Card>
-      </main>
-
-      <FooterSection />
-    </div>
+      </main>    </div>
   );
 }
+

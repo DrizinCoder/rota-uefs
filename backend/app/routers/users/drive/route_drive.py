@@ -10,9 +10,10 @@ from app.services.driver_service import DriverService
 from app.routers.users.dependencies import get_driver_service
 from fastapi.encoders import jsonable_encoder
 from app.services.trip_service import TripService
-from app.routers.users.dependencies import get_trip_service
+from app.routers.users.dependencies import get_trip_service, get_trip_controller
 from app.DTOs.trip import DriverTripItem
 from app.middleware.auth_middleware import require_driver
+from app.controllers.trip_controller import TripController
 
 drive_router = APIRouter()
 
@@ -57,3 +58,19 @@ async def get_driver_trips(
     result = await service.get_trips_for_driver(current_user.user_id)
     return ResponseHandler.ok(data=result)
     
+@drive_router.post("/trips/{trip_id}/subscribe-staff-generic")
+async def subscribe_staff_generic_to_trip(
+    trip_id: str,
+    controller: TripController = Depends(get_trip_controller),
+    # _: TokenData = Depends(require_driver)
+):
+    return await controller.subscriber_staff_generic(trip_id)
+
+@drive_router.delete("/reservations/{reservation_id}/delete-staff-generic")
+async def delete_reservation_staff_generic(
+    reservation_id: str,
+    controller: TripController = Depends(get_trip_controller),
+    # _: TokenData = Depends(require_driver)
+):
+   return await controller.delete_reservation_staff_generic(reservation_id)
+   

@@ -1,8 +1,9 @@
+from app.DTOs.trip import WEEKDAY_PT
 from app.DTOs.trip import PassengerTripItem
 from app.utils.utils import add_ninety_minutes
 from app.DTOs.trip import TripDetailFeedItem
 from typing import Optional
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import joinedload, selectinload
 import uuid
 from datetime import date
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,15 +11,20 @@ from sqlalchemy import and_, select
 from app.models.models import Trip
 from app.enums.enums import TripStatus
 from app.DTOs.trip import CreateTripDTO, UpdateTripDTO, DriverTripItem
-from sqlmodel import select, func
+from sqlmodel import select, func, and_
 from app.models.models import Trip, Route, Bus, Reservation, User
-from app.enums.enums import UserProfile
+from app.enums.enums import UserProfile, BoardingStatus
 from app.DTOs.trip import TripFeedItem
 from sqlalchemy import case
 
 class TripRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
+
+    async def get_all_reservations(self):
+        stmt = select(Reservation).options(joinedload(Reservation.user))
+        result = await self.session.execute(stmt)
+        return result.scalars().all()   
 
     async def create(self, data: CreateTripDTO):
         trip = Trip(
@@ -57,8 +63,24 @@ class TripRepository:
             for trip in trips
         ]
 
+    async def cancel_trip(self, trip_id: str):
+        trip = await self.get_by_id(trip_id)
+        if not trip:
+            return None
+        
+        trip.status = TripStatus.CANCELLED
+        self.session.add(trip)
+        await self.session.commit()
+        await self.session.refresh(trip)
+        return trip
+
     async def get_by_id(self, trip_id: uuid.UUID):
-        statement = select(Trip).where(Trip.trip_id == trip_id)
+        statement = (
+            select(Trip)
+            .where(Trip.trip_id == trip_id)
+            .options(selectinload(Trip.route))
+        )
+        
         result = await self.session.execute(statement)
         return result.scalars().first()
 
@@ -87,9 +109,20 @@ class TripRepository:
         await self.session.delete(trip)
         await self.session.commit()
         return trip
+    
+    async def get_all_users_with_reservation_active_by_trip_id(self, trip_id: str) -> list[User]:
+        stmt = (
+            select(User)
+            .join(Reservation, Reservation.user_id == User.user_id)
+            .where(Reservation.trip_id == trip_id)
+            .where(Reservation.status == "not_boarded")
+        )
 
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
+    
     async def get_trips_for_feed_by_date_range(
-        self, start_date: date, end_date: date
+        self, start_date: date, end_date: date, driver_id: str | None = None,
     ) -> list[TripFeedItem]:
 
         student_count_expr = func.sum(
@@ -116,16 +149,19 @@ class TripRepository:
             .outerjoin(Reservation, Reservation.trip_id == Trip.trip_id)
             .outerjoin(User, User.user_id == Reservation.user_id)
             .where(Trip.trip_date.between(start_date, end_date))
-            .group_by(
+        )
+
+        if driver_id is not None:  # 👈
+            statement = statement.where(Trip.driver_id == driver_id)
+        
+        statement  = statement.group_by(
                 Trip.trip_id,
                 Trip.trip_date,
                 Route.boarding_point,
                 Route.drop_off_point,
                 Trip.departure_time,
                 Bus.capacity,
-            )
-            .order_by(Trip.trip_date, Trip.departure_time)
-        )
+            ).order_by(Trip.trip_date, Trip.departure_time)
 
         result = await self.session.execute(statement)
         rows = result.all()
@@ -133,7 +169,7 @@ class TripRepository:
         return [
             TripFeedItem(
                 trip_id=row.trip_id,
-                trip_date=row.trip_date,
+                weekday=WEEKDAY_PT[row.trip_date.weekday()],
                 boarding_point=row.boarding_point,
                 drop_off_point=row.drop_off_point,
                 departure_time=row.departure_time,
@@ -240,6 +276,51 @@ class TripRepository:
             for row in rows
         ]
     
+    async def get_all_trips_and_reservations_by_user_id(self, user_id: uuid.UUID) -> list[dict]:
+        statement = (
+            select(
+                Trip.trip_id,   
+                Trip.trip_date,
+                Trip.departure_time,
+                Trip.status,    
+                Route.boarding_point,
+                Route.drop_off_point,
+                Reservation.reservation_id,
+                Reservation.boarding_confirmation,
+                Reservation.extra_passenger_name,
+                Reservation.boarding_timestamp
+            )       
+            .join(Route, Route.route_id == Trip.route_id)
+            .join(Reservation, Reservation.trip_id == Trip.trip_id)
+            .where(Reservation.user_id == user_id)  
+            .order_by(Trip.trip_date, Trip.departure_time)
+        )
+
+        result = await self.session.execute(statement)
+        rows = result.all()         
+        trips_dict = {}
+        for row in rows:
+            trip_id = row.trip_id
+            if trip_id not in trips_dict:
+                trips_dict[trip_id] = {
+                    "trip_id": row.trip_id,
+                    "trip_date": row.trip_date,
+                    "departure_time": row.departure_time,
+                    "status": row.status,
+                    "boarding_point": row.boarding_point,
+                    "drop_off_point": row.drop_off_point,
+                    "reservations": []
+                }
+            trips_dict[trip_id]["reservations"].append({
+                "reservation_id": row.reservation_id,
+                "boarding_confirmation": row.boarding_confirmation,
+                "extra_passenger_name": row.extra_passenger_name,
+                "boarding_timestamp": row.boarding_timestamp
+            })
+
+        return list(trips_dict.values())    
+     
+    
     async def get_trips_by_driver_id(self, driver_id: uuid.UUID) -> list[DriverTripItem]:
         statement = (
             select(
@@ -255,7 +336,13 @@ class TripRepository:
             )
             .join(Route, Route.route_id == Trip.route_id)
             .join(Bus, Bus.bus_plate == Trip.bus_license_plate)
-            .outerjoin(Reservation, Reservation.trip_id == Trip.trip_id)
+            .outerjoin(
+                Reservation, 
+                and_(
+                    Reservation.trip_id == Trip.trip_id,
+                    Reservation.boarding_confirmation != BoardingStatus.CANCELLED
+                )
+            )
             .where(Trip.driver_id == driver_id)
             .group_by(
                 Trip.trip_id,

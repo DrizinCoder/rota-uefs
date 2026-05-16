@@ -26,7 +26,7 @@ export function WeekDaysMenu({ dias, diaAtivo, onDiaChange }: WeekDaysMenuProps)
                 : "bg-white text-[#103173]/70"
             }`}
           >
-            {dia.id}
+            {dia.label}
           </button>
         ))}
       </div>
