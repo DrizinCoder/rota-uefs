@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Suspense, useState, useEffect} from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -28,7 +28,8 @@ import {
 import { driverService ,type PassengerListResponse, type Reservation, type Stats } from "@/services/driverService";
 
 interface PassageiroFormatado {
-  id: string;
+  reservation_id: string;
+  user_id: string;
   nome: string;
   matricula: string;
   status: string;
@@ -84,7 +85,8 @@ function PassageirosContent() {
 
       const reservasOrdenadas = ordenarPorProfileETimestamp([...dados.valid_reservations]);
       const passageirosValidos = reservasOrdenadas.map((res) => ({
-        id: res.reservation_id,
+        reservation_id: res.reservation_id,
+        user_id: res.user_id,
         nome: res.name === "Staff Não Registrado" ? "Servidor Avulso" : res.name,
         matricula: profileMap[res.profile] ?? res.profile,
         status: res.profile === "Staff" && res.name === "Staff Não Registrado" ? "embarcou" : (res.onboard ? "embarcou" : "pendente"),
@@ -93,7 +95,8 @@ function PassageirosContent() {
 
       const esperaOrdenada = ordenarPorProfileETimestamp([...dados.waitlist_reservations]);
       const passageirosEspera = esperaOrdenada.map((res) => ({
-        id: res.reservation_id,
+        reservation_id: res.reservation_id,
+        user_id: res.user_id,
         nome: res.name === "Staff Não Registrado" ? "Servidor Avulso" : res.name,
         matricula: profileMap[res.profile] ?? res.profile,
         status: "espera",
@@ -125,10 +128,10 @@ function PassageirosContent() {
 
   const embarcados = passageiros.filter((p) => p.status === "embarcou").length;
 
-  const alternarCheckIn = (id: string) => {
+  const alternarCheckIn = (id: string) => { // REMOVER ESSA FUNÇÃO, O EMBARQUE SERÁ FEITO PELO BOTÃO "EMBARCAR"
     setPassageiros(
       passageiros.map((p) => {
-        if (p.id === id) {
+        if (p.reservation_id === id) {
           return {
             ...p,
             status: p.status === "embarcou" ? "pendente" : "embarcou",
@@ -160,6 +163,21 @@ function PassageirosContent() {
       }
     } catch (erro) {
       console.error("Erro ao remover avulso:", erro);
+    }
+  };
+
+  const handleEmbarcar = async (user_id: string, reservation_id: string, trip_id: string) => {
+    try {
+      const resultado = await driverService.embarcar(user_id, reservation_id, trip_id);
+      if (resultado.success) {
+        setPassageiros(
+          passageiros.map((p) =>
+            p.reservation_id === reservation_id ? { ...p, status: "embarcou" } : p
+          )
+        );
+      }
+    } catch (erro) {
+      console.error("Erro ao embarcar:", erro);
     }
   };
 
@@ -243,14 +261,16 @@ function PassageirosContent() {
             ) : (
               passageirosFiltrados.map((passageiro) => (
                 <PassengerCard
-                  key={passageiro.id}
-                  id={passageiro.id}
+                  key={passageiro.reservation_id}
+                  user_id={passageiro.user_id}
+                  reservation_id={passageiro.reservation_id}
+                  trip_id={tripId!}
                   nome={passageiro.nome}
                   tipo={passageiro.matricula}
                   status={passageiro.status as "pendente" | "embarcou" | "espera"}
                   isAvulso={passageiro.isAvulso}
                   isWaitlist={false}
-                  onEmbarcar={alternarCheckIn}
+                  onEmbarcar={handleEmbarcar}
                   onCancelarEmbarque={alternarCheckIn}
                   onMarcarFalta={() => {}}
                   onRemoverAvulso={handleRemoverAvulso}
@@ -280,14 +300,16 @@ function PassageirosContent() {
 
               {listaEsperaFiltrada.map((passageiro) => (
                 <PassengerCard
-                  key={passageiro.id}
-                  id={passageiro.id}
+                  key={passageiro.reservation_id}
+                  user_id={passageiro.user_id}
+                  reservation_id={passageiro.reservation_id}
+                  trip_id={tripId!}
                   nome={passageiro.nome}
                   tipo={passageiro.matricula}
                   isAvulso={passageiro.isAvulso}
                   status="espera"
                   isWaitlist={true}
-                  onEmbarcar={alternarCheckIn}
+                  onEmbarcar={handleEmbarcar}
                   onCancelarEmbarque={alternarCheckIn}
                   onMarcarFalta={() => {}}
                   onRemoverAvulso={handleRemoverAvulso}

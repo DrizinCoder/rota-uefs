@@ -4,20 +4,24 @@ import { Button } from "@/components/ui/button";
 import { User, UserCheck, Clock, UserX, Trash2 } from "lucide-react";
 
 interface PassengerCardProps {
-  id: string;
+  reservation_id: string;
+  user_id: string;
+  trip_id: string;
   nome: string;
   tipo: string;
   status: "pendente" | "embarcou" | "espera";
   isAvulso?: boolean;
   isWaitlist?: boolean;
-  onEmbarcar: (id: string) => void;
+  onEmbarcar: (user_id: string, reservation_id: string, trip_id: string) => void;
   onCancelarEmbarque: (id: string) => void;
   onMarcarFalta: (id: string) => void;
-  onRemoverAvulso: (id: string) => void;
+  onRemoverAvulso: (reservation_id: string) => void;
 }
 
 export function PassengerCard({
-  id,
+  user_id,
+  trip_id,
+  reservation_id,
   nome,
   tipo,
   status,
@@ -81,7 +85,7 @@ export function PassengerCard({
                 {/* BOTÕES - SERVIDOR AVULSO */}
                 {isAvulso ? (
                   <Button
-                    onClick={() => onRemoverAvulso(id)}
+                    onClick={() => onRemoverAvulso(reservation_id)}
                     variant="ghost"
                     className="h-10 px-4 rounded-xl font-bold text-red-500 hover:text-red-600 hover:bg-red-50 transition-all"
                   >
@@ -93,7 +97,7 @@ export function PassengerCard({
                     {/* BOTÕES - PASSAGEIRO NORMAL */}
                     {status === "embarcou" ? (
                       <Button
-                        onClick={() => onCancelarEmbarque(id)}
+                        onClick={() => onCancelarEmbarque(reservation_id)}
                         variant="ghost"
                         className="h-10 px-4 rounded-xl font-bold text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all"
                       >
@@ -103,7 +107,7 @@ export function PassengerCard({
                       <>
                         {/* FALTA À ESQUERDA */}
                         <Button
-                          onClick={() => onMarcarFalta(id)}
+                          onClick={() => onMarcarFalta(reservation_id)}
                           variant="ghost"
                           className="h-10 px-4 rounded-xl font-bold text-red-500 hover:text-red-600 hover:bg-red-50 transition-all"
                         >
@@ -112,7 +116,7 @@ export function PassengerCard({
                         </Button>
                         {/* EMBARCAR À DIREITA */}
                         <Button
-                          onClick={() => onEmbarcar(id)}
+                          onClick={() => onEmbarcar(user_id, reservation_id, trip_id)}
                           className="h-10 px-4 rounded-xl font-bold bg-[#103173] text-white hover:bg-[#103B73] shadow-md transition-all"
                         >
                           Embarcar

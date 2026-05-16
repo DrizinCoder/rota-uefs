@@ -38,5 +38,13 @@ export const driverService = {
     async removerAvulso(reservation_id: string) {
         const response = await api.delete(`/users/driver/reservations/${reservation_id}/delete-staff-generic`);
         return { success: response.status >= 200 && response.status < 300 };
+    },
+    async embarcar(user_id: string, reservation_id: string, trip_id: string) {
+        const response = await api.post(`/checkin/manual`, {
+            user_id,
+            reservation_id,
+            trip_id
+        });
+        return { success: response.status >= 200 && response.status < 300 };
     }
 }
