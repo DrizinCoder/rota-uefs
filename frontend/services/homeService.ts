@@ -24,7 +24,7 @@ export interface Home {
 
 export const passengerService = {
     async getHome(): Promise<Home> {
-        const response = await api.get('/trip/feed/trips');
+        const response = await api.get('/trip/feed');
         return response.data.data;
     },
 }
