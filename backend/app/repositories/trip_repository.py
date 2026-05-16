@@ -122,7 +122,7 @@ class TripRepository:
         return result.scalars().all()
     
     async def get_trips_for_feed_by_date_range(
-        self, start_date: date, end_date: date
+        self, start_date: date, end_date: date, driver_id: str | None = None,
     ) -> list[TripFeedItem]:
 
         student_count_expr = func.sum(
@@ -149,16 +149,19 @@ class TripRepository:
             .outerjoin(Reservation, Reservation.trip_id == Trip.trip_id)
             .outerjoin(User, User.user_id == Reservation.user_id)
             .where(Trip.trip_date.between(start_date, end_date))
-            .group_by(
+        )
+
+        if driver_id is not None:  # 👈
+            statement = statement.where(Trip.driver_id == driver_id)
+        
+        statement  = statement.group_by(
                 Trip.trip_id,
                 Trip.trip_date,
                 Route.boarding_point,
                 Route.drop_off_point,
                 Trip.departure_time,
                 Bus.capacity,
-            )
-            .order_by(Trip.trip_date, Trip.departure_time)
-        )
+            ).order_by(Trip.trip_date, Trip.departure_time)
 
         result = await self.session.execute(statement)
         rows = result.all()
