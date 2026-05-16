@@ -52,7 +52,7 @@ class Notifications:
                     user.email, user.full_name, trip.trip_id
                 )
 
-    async def cancel_subscription_notifications(self, user: User, trip: Trip, reservation: Reservation, background_tasks: BackgroundTasks):
+    def cancel_subscription_notifications(self, user: User, trip: Trip, reservation: Reservation, background_tasks: BackgroundTasks):
             if user.profile == UserProfile.STAFF:
                 if reservation.extra_passenger_name not in (None, ""):
                     background_tasks.add_task(
