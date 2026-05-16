@@ -63,4 +63,8 @@ export const passengerService = {
         const response = await api.get(`/trip/me/${userId}`);
         return response.data.data;
     },
+    async cancelSubscription(reservationId: string) {
+        const response = await api.delete(`/users/driver/reservations/${reservationId}/delete-staff-generic`);
+        return response.data;
+    },
 }

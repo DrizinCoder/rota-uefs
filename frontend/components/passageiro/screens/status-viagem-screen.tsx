@@ -1,8 +1,9 @@
-﻿"use client";
+"use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { passengerService } from "@/services/homeService";
+import { userService } from "@/services/userService";
 import { Navigation } from "@/components/landing/navigation";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,15 @@ export function StatusViagemScreen() {
       try {
         const tripData = await passengerService.getTripById(viagemId);
         
+        const userData = await userService.getMe();
+        const userTrips = await passengerService.getUserTrips(userData.user_id);
+        const currentTrip = userTrips.find(t => t.trip_id === viagemId);
+        
+        let reservationId = null;
+        if (currentTrip && currentTrip.reservations && currentTrip.reservations.length > 0) {
+            reservationId = currentTrip.reservations[0].reservation_id;
+        }
+
         // Busca a home para encontrar o total_enrolled com base na listagem de viagens
         const homeData = await passengerService.getHome();
         const tripFromHome = homeData.trips?.find(t => t.trip_id === viagemId);
@@ -87,6 +97,7 @@ export function StatusViagemScreen() {
           vagasTotais: tripFromHome?.bus_capacity || 44,
           placa: tripData.placa || "A DEFINIR",
           status: "Pending",
+          reservationId: reservationId,
         });
       } catch (error) {
         console.error("Erro ao buscar detalhes da viagem:", error);
@@ -222,9 +233,19 @@ export function StatusViagemScreen() {
 
               <Button
                 variant="ghost"
-                onClick={() => {
+                onClick={async () => {
                   if (confirm("Tem certeza que deseja cancelar sua vaga?")) {
-                    router.push("/passageiro");
+                    try {
+                      if (viagemInscrita.reservationId) {
+                        await passengerService.cancelSubscription(viagemInscrita.reservationId);
+                        router.push("/passageiro");
+                      } else {
+                        alert("Não foi possível encontrar o ID da sua reserva.");
+                      }
+                    } catch (error) {
+                      console.error("Erro ao cancelar vaga:", error);
+                      alert("Ocorreu um erro ao cancelar a reserva.");
+                    }
                   }
                 }}
                 className="text-red-500 font-bold hover:text-red-600 hover:bg-red-50"

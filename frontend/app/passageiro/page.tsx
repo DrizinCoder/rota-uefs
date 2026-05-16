@@ -17,7 +17,6 @@ import { GraduationCap } from "lucide-react";
 import { passengerService, type Home, type UserTrip } from "@/services/homeService";
 import { userService, type UserProfile } from "@/services/userService";
 import { EmptyDayCard } from "@/components/shared/empty-day-card";
-import { FooterSection } from "@/components/landing/footer-section";
 
 const DIAS_SEMANA = [
   { id: "Segunda", label: "Seg", full: "Segunda-feira" },
@@ -166,7 +165,6 @@ export default function PaginaPassageiro() {
         />
       )}
 
-      <FooterSection />
     </div>
   );
 }
