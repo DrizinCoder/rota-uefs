@@ -16,22 +16,28 @@ class Notifications:
         self.reservation_repository = res_repo
         self.bus_repository = bus_repo
     
-    async def subscribe_notifications(self, user: User, trip: Trip, reservation: Reservation, background_tasks: BackgroundTasks):
+    async def subscribe_notifications(
+        self, user: User, 
+        trip: Trip, 
+        reservation: Reservation, 
+        background_tasks: BackgroundTasks, 
+        position: int
+    ):
             if user.profile == UserProfile.STAFF:
                 if reservation.extra_passenger_name not in (None, ""):
                     background_tasks.add_task(
                         EmailUseCases().send_boarding_qr_code,
-                        user.email, user.full_name, "-", trip.route.boarding_point, trip.route.drop_off_point, trip.trip_date, trip.departure_time.strftime("%H:%M"), reservation.reservation_id, trip.trip_id, user.registration_id
+                        user.email, user.full_name, position, trip.route.boarding_point, trip.route.drop_off_point, trip.trip_date, trip.departure_time.strftime("%H:%M"), reservation.reservation_id, trip.trip_id, user.registration_id
                     )
                 else:
                     background_tasks.add_task(
                         EmailUseCases().send_boarding_qr_code,
-                        user.email, user.full_name, "-", trip.route.boarding_point, trip.route.drop_off_point, trip.trip_date, trip.departure_time.strftime("%H:%M"), reservation.reservation_id, trip.trip_id, user.registration_id
+                        user.email, user.full_name, position, trip.route.boarding_point, trip.route.drop_off_point, trip.trip_date, trip.departure_time.strftime("%H:%M"), reservation.reservation_id, trip.trip_id, user.registration_id
                     )
             if user.profile == UserProfile.STUDENT:
                 background_tasks.add_task(
                         EmailUseCases().send_boarding_qr_code,
-                        user.email, user.full_name, "-", trip.route.boarding_point, trip.route.drop_off_point, trip.trip_date, trip.departure_time.strftime("%H:%M"), reservation.reservation_id, trip.trip_id, user.registration_id, True
+                        user.email, user.full_name, position, trip.route.boarding_point, trip.route.drop_off_point, trip.trip_date, trip.departure_time.strftime("%H:%M"), reservation.reservation_id, trip.trip_id, user.registration_id, True
                     )
 
     async def activate_notifications(self, user: User, trip: Trip, reservation: Reservation, background_tasks: BackgroundTasks):
