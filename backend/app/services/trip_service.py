@@ -111,7 +111,7 @@ class TripService:
         logger.info(f"Trip deleted successfully | Trip ID: {trip_id}")
         return trip.model_dump(mode='json')
     
-    async def get_trips_for_student_feed(self) -> TripFeedResponse:
+    async def get_trips_for_feed(self, driver_id: uuid.UUID | None = None) -> TripFeedResponse:
         today = date.today()
         weekday = today.weekday()
         if weekday < 5:  # Segunda a Sexta
@@ -124,11 +124,10 @@ class TripService:
             end_date = start_date + timedelta(days=4)
 
         logger.info(
-            f"Trips for feed requested | Today: {today} | Range: {start_date} → {end_date}"
+            f"Trips for feed requested | driver_filter: {driver_id} | ..."
         )
-
         trips = await self.trip_repository.get_trips_for_feed_by_date_range(
-            start_date, end_date
+            start_date, end_date, driver_id
         )
 
         logger.info(f"Trips for feed retrieved | Count: {len(trips)}")

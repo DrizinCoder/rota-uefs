@@ -1,3 +1,4 @@
+from app.enums.enums import UserProfile
 from app.DTOs.trip import TripDetailFeedItem
 from app.middleware import TokenData
 from app.middleware import get_current_user
@@ -60,15 +61,16 @@ async def delete_trip(trip_id: uuid.UUID, service: TripService = Depends(get_tri
     result = await service.delete(trip_id)
     return ResponseHandler.ok(result)
 
-@trip_router.get("/feed/trips", response_model=list[TripFeedItem])
-async def get_student_trips(
+@trip_router.get("/feed", response_model=list[TripFeedItem])
+async def get_trips_for_feed(
     current_user: TokenData = Depends(get_current_user),
     service: TripService = Depends(get_trip_service)
-):
-    result = await service.get_trips_for_student_feed()
+):  
+    
+    result = await service.get_trips_for_feed(current_user.driver_id)
     return ResponseHandler.ok(result)
 
-@trip_router.get("/feed/trips/{trip_id}", response_model=TripDetailFeedItem)
+@trip_router.get("/feed/{trip_id}", response_model=TripDetailFeedItem)
 async def get_trip_detail(
     trip_id: uuid.UUID,
     current_user: TokenData = Depends(get_current_user),
