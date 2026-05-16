@@ -1,7 +1,7 @@
 from app.enums.enums import UserProfile, RegistrationStatus, BusStatus, TripStatus
 
 
-def test_enums_values():
+def test_enums_have_expected_values():
     assert UserProfile.ADMIN.value == 'Admin'
     assert RegistrationStatus.PENDING.value == 'Pending'
     assert BusStatus.ACTIVE.value == 'Active'

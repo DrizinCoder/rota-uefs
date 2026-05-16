@@ -1,9 +1,11 @@
+from fastapi.testclient import TestClient
 from app.main import app
 
 
-def test_app_existe():
-    assert app is not None
+def test_app_health_route_redirects_to_frontend():
+    client = TestClient(app)
+    response = client.get("/", follow_redirects=False)
 
-
-def test_app_tem_rotas_registradas():
-    assert len(app.routes) > 0
+    assert response.status_code in (307, 308)
+    assert response.headers.get("location")
+    assert "http" in response.headers.get("location")
