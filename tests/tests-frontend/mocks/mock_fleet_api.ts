@@ -19,11 +19,11 @@ export async function mockAdminHomeInfo(page: Page) {
 }
 
 export async function mockBusCreationSuccess(page: Page) {
-  await mockJsonRoute(page, '**/fleet/', BUS_CREATED_RESPONSE, 201);
+  await mockJsonRoute(page, '**/fleet**', BUS_CREATED_RESPONSE, 201);
 }
 
 export async function mockBusCreationFailure(page: Page) {
-  await mockJsonRoute(page, '**/fleet/', BUS_DUPLICATE_ERROR_RESPONSE, 400);
+  await mockJsonRoute(page, '**/fleet**', BUS_DUPLICATE_ERROR_RESPONSE, 400);
 }
 
 export async function mockTripCreationDependencies(page: Page) {
@@ -35,7 +35,7 @@ export async function mockTripCreationDependencies(page: Page) {
     data: ROUTE_OPTIONS,
   });
 
-  await mockJsonRoute(page, '**/fleet/', {
+  await mockJsonRoute(page, '**/fleet**', {
     data: BUS_OPTIONS,
   });
 }
