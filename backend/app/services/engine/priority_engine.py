@@ -155,8 +155,6 @@ class PriorityEngine:
       
         await self.reservation_repository.cancel_reservation(user_res.reservation_id)
 
-        print("ddsdsddsdsdsdsds", extra_name)
-
         self.notifications.cancel_subscription_notifications(user_res.user, user_res.trip, user_res, background_tasks)
         
         return ResponseHandler.ok(message="Reserva cancelada com sucesso.")
