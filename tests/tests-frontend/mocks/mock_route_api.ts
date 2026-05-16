@@ -9,7 +9,15 @@ export async function mockJsonRoute(
 ) {
   await page.route(urlPattern, async (route) => {
     const request = route.request();
-    if (request.method() === 'POST' || request.method() === 'GET') {
+    if (request.method() === 'OPTIONS') {
+      await route.fulfill({
+        status: 204,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+      });
+      return;
+    }
+
+    if (request.method() === 'POST' || request.method() === 'GET' || request.method() === 'PATCH' || request.method() === 'DELETE' || request.method() === 'PUT') {
       await route.fulfill({
         status,
         contentType: 'application/json',
