@@ -1,9 +1,8 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
-import { FooterSection } from "@/components/landing/footer-section";
 import {
   Card,
   CardContent,
@@ -37,7 +36,7 @@ import {
 } from "lucide-react";
 import { api } from "@/services/api";
 
-// ─── Tipos ────────────────────────────────────────────────────────────────────
+// --- Tipos ---
 
 type TipoUsuario = "Driver" | "Student" | "Staff" | "Admin";
 
@@ -56,7 +55,7 @@ interface PasswordUpdateDTO {
   confirm_password: string;
 }
 
-// ─── Serviço ──────────────────────────────────────────────────────────────────
+// --- Serviço ---
 
 const userService = {
   getMe: async (): Promise<UserProfile> => {
@@ -75,7 +74,7 @@ const userService = {
   },
 };
 
-// ─── Componente principal ─────────────────────────────────────────────────────
+// --- Componente principal ---
 
 function PerfilContent() {
   const router = useRouter();
@@ -117,7 +116,7 @@ function PerfilContent() {
   const isProfessor = tipoUsuario === "Staff";
   const isAdmin = tipoUsuario === "Admin";
 
-  // ─── Handlers ───────────────────────────────────────────────────────────────
+  // --- Handlers ---
 
   const handleSalvar = async () => {
     setErro("");
@@ -172,7 +171,7 @@ function PerfilContent() {
     }
   };
 
-  // ─── Badge por perfil ────────────────────────────────────────────────────────
+  // --- Badge por perfil ---
 
   const getBadgeConfig = () => {
     if (isAdmin) return { color: "bg-red-500 text-white", icon: ShieldAlert, label: "Admin" };
@@ -184,7 +183,7 @@ function PerfilContent() {
   const badgeConfig = getBadgeConfig();
   const IconePerfil = badgeConfig.icon;
 
-  // ─── Render ──────────────────────────────────────────────────────────────────
+  // --- Render ---
 
   return (
     <div className="flex min-h-screen flex-col bg-[#E4F2F1] relative">
@@ -217,7 +216,7 @@ function PerfilContent() {
             </div>
           )}
 
-          {/* ── Cabeçalho do card ── */}
+          {/* Cabeçalho do card */}
           <CardHeader className="bg-slate-50 border-b border-slate-100 pb-8 pt-8">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-6 w-full">
               <div className="flex flex-col sm:flex-row items-center gap-6">
@@ -260,10 +259,10 @@ function PerfilContent() {
           </CardHeader>
 
           <CardContent className="p-8 space-y-10">
-            {/* ── Informações Gerais ── */}
+            {/* Informações gerais */}
             <section>
               <h3 className="text-lg font-black text-[#103173] mb-6 flex items-center gap-2 border-b border-slate-100 pb-2">
-                <User className="h-5 w-5 text-[#73AABF]" /> Informações Gerais
+                <User className="h-5 w-5 text-[#73AABF]" /> Informações gerais
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Nome */}
@@ -326,7 +325,7 @@ function PerfilContent() {
               </div>
             </section>
 
-            {/* ── Segurança ── */}
+            {/* Segurança */}
             {!isMotorista && (
               <section>
                 <h3 className="text-lg font-black text-[#103173] mb-6 flex items-center gap-2 border-b border-slate-100 pb-2">
@@ -365,7 +364,7 @@ function PerfilContent() {
               </section>
             )}
 
-            {/* ── Zona de Perigo ── */}
+            {/* Zona de perigo */}
             {!isAdmin && (
               <section className="pt-6 border-t border-red-100">
                 <h3 className="text-lg font-black text-red-600 mb-4 flex items-center gap-2">
@@ -394,7 +393,7 @@ function PerfilContent() {
             )}
           </CardContent>
 
-          {/* ── Rodapé do card ── */}
+          {/* Rodapé do card */}
           {!isMotorista && (
             <CardFooter className="bg-slate-50 border-t border-slate-100 p-6 flex justify-end">
               <Button
@@ -414,10 +413,7 @@ function PerfilContent() {
           )}
         </Card>
       </main>
-
-      <FooterSection />
-
-      {/* ── Modal de exclusão de conta ── */}
+      {/* Modal de exclusão de conta */}
       {showDeleteModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#103173]/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl p-6 md:p-8 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200">

@@ -1,10 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { passengerService } from "@/services/homeService";
 import { Navigation } from "@/components/landing/navigation";
-import { FooterSection } from "@/components/landing/footer-section";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -242,9 +241,7 @@ export function StatusViagemScreen() {
             </p>
           </div>
         </div>
-      </main>
-
-      <FooterSection />
-    </div>
+      </main>    </div>
   );
 }
+

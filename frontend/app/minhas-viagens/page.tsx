@@ -1,9 +1,8 @@
-"use client";
+﻿"use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
 import { Bus, MapPin, Calendar, Clock, Ticket, ArrowLeft, ClipboardList } from "lucide-react";
-import { FooterSection } from "@/components/landing/footer-section";
 import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { passengerService, UserTrip } from "@/services/homeService";
@@ -47,7 +46,7 @@ function ViagensContent() {
 
       <main className="max-w-3xl mx-auto px-4 pt-6 pb-20">
         
-        {/* Barra de Ações Rápidas: Voltar e Visualizar Inscrição */}
+        {/* Barra de ações rápidas: voltar e visualizar inscrição */}
         <div className="flex items-center mb-8">
           <button 
             onClick={() => router.back()}
@@ -121,9 +120,7 @@ function ViagensContent() {
             </div>
           )}
         </div>
-      </main>
-      <FooterSection />
-    </div>
+      </main>    </div>
   );
 }
 

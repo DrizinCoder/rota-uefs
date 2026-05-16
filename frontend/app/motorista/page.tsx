@@ -1,9 +1,8 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
-import { FooterSection } from "@/components/landing/footer-section";
 import { RoleHeader } from "@/components/shared/role-header";
 import { WeekDaysMenu } from "@/components/shared/week-days-menu";
 import { CurrentDayHeader } from "@/components/shared/current-day-header";
@@ -18,22 +17,13 @@ import { TripRouteHeader } from "@/entities/viagem/ui/TripRouteHeader";
 import { passengerService, type Home, type CardViagemFeed} from "@/services/homeService";
 
 import {
-  MapPin,
-  CircleDot,
   Bus,
-  CalendarDays
 } from "lucide-react";
 import {
   Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { EmptyDayCard } from "@/components/shared/empty-day-card";
 
-// Dias da semana simulados para o filtro (Seg a Sex)
 const DIAS_SEMANA = [
   { id: "Segunda", label: "Seg", full: "Segunda-feira" },
   { id: "Terça", label: "Ter", full: "Terça-feira" },
@@ -59,7 +49,7 @@ function ViagemCard({ viagem }: { viagem: CardViagemFeed }) {
   const [statusViagem, setStatusViagem] = useState <"bloqueada" | "pronta" | "em_curso" | "finalizada">("pronta");
 
   const handleCheckIn = () => {
-    router.push("/motorista/embarque");
+    router.push(`/motorista/embarque?trip_id=${encodeURIComponent(viagem.trip_id)}`);
   };
 
   const handleAcaoViagem = () => {
@@ -89,7 +79,7 @@ function ViagemCard({ viagem }: { viagem: CardViagemFeed }) {
           vagasTotais={viagem.bus_capacity} 
           inscritosAlunos={viagem.student_count}
           inscritosProfessores={viagem.staff_count}
-          totalInscritos={viagem.staff_count}
+          totalInscritos={viagem.total_enrolled}
         />
 
         <div className="flex flex-col gap-3">
@@ -122,7 +112,6 @@ export default function MotoristaPage() {
     const [diaAtivo, setDiaAtivo] = useState("Segunda");
     const diaAtual = DIAS_SEMANA.find((d) => d.id === diaAtivo);
   
-    // Busca os dados da home do passageiro
     useEffect(() => {
       const fetchData = async () => {
         const resultado = await passengerService.getHome();
@@ -131,7 +120,6 @@ export default function MotoristaPage() {
       fetchData();
     }, [])
   
-    // Define o dia ativo como o dia atual, quando os dados são carregados
     useEffect(() => {
       if (data?.reference_weekday) {
         setDiaAtivo(data.reference_weekday);
@@ -154,7 +142,6 @@ export default function MotoristaPage() {
           rightContent={<CentralSuporte />}
         />
 
-        {/* Seletor de Dias da Semana */}
         <WeekDaysMenu 
           dias={DIAS_SEMANA} 
           diaAtivo={diaAtivo} 
@@ -163,7 +150,6 @@ export default function MotoristaPage() {
 
         <CurrentDayHeader dayName={diaAtual?.full} />
 
-        {/* Lista de Viagens do Dia Selecionado */}
         {viagensDoDia.length > 0 ? (
           viagensDoDia.map((viagem) => (
             <ViagemCard key={viagem.trip_id} viagem={viagem} />
@@ -176,8 +162,6 @@ export default function MotoristaPage() {
           />
         )}
       </main>
-
-      <FooterSection />
     </div>
   );
 }

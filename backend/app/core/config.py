@@ -1,6 +1,7 @@
 import os
 
 from dotenv import load_dotenv
+from pydantic import Field
 from pydantic_settings import BaseSettings
 
 load_dotenv()
@@ -23,7 +24,10 @@ class Settings(BaseSettings):
     USE_CREDENTIALS: bool = True
     VALIDATE_CERTS: bool = True
     BASE_URL_FRONTEND: str = os.getenv("BASE_URL_FRONTEND")
-    REGISTRATION_CODE_SECRET: str = os.getenv("REGISTRATION_CODE_SECRET")
+    REGISTRATION_CODE_SECRET: str = Field(
+        default="dev-registration-code-secret-altere-em-producao",
+        description="Segredo HMAC para assinar códigos de registro (defina em produção).",
+    )
 
     class Config:
         env_file = ".env"

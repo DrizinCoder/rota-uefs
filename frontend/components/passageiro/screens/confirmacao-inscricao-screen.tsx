@@ -1,10 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { passengerService } from "@/services/homeService";
 import { Navigation } from "@/components/landing/navigation";
-import { FooterSection } from "@/components/landing/footer-section";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -135,7 +134,7 @@ export function ConfirmacaoInscricaoScreen() {
               <CalendarCheck className="h-8 w-8 text-[#103173]" />
             </div>
             <CardTitle className="text-2xl font-black tracking-tight">
-              Confirme sua Inscrição
+              Confirme sua inscrição
             </CardTitle>
             <p className="text-white/80 font-medium mt-2">
               Verifique os detalhes da viagem antes de prosseguir
@@ -208,9 +207,7 @@ export function ConfirmacaoInscricaoScreen() {
             </p>
           </CardFooter>
         </Card>
-      </main>
-
-      <FooterSection />
-    </div>
+      </main>    </div>
   );
 }
+

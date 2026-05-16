@@ -1,8 +1,7 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { Navigation } from "@/components/landing/navigation";
-import { FooterSection } from "@/components/landing/footer-section";
 import { RoleHeader } from "@/components/shared/role-header";
 import { WeekDaysMenu } from "@/components/shared/week-days-menu";
 import { CurrentDayHeader } from "@/components/shared/current-day-header";
@@ -18,6 +17,7 @@ import { GraduationCap } from "lucide-react";
 import { passengerService, type Home, type UserTrip } from "@/services/homeService";
 import { userService, type UserProfile } from "@/services/userService";
 import { EmptyDayCard } from "@/components/shared/empty-day-card";
+import { FooterSection } from "@/components/landing/footer-section";
 
 const DIAS_SEMANA = [
   { id: "Segunda", label: "Seg", full: "Segunda-feira" },
@@ -68,7 +68,6 @@ export default function PaginaPassageiro() {
     fetchData();
   }, [])
 
-  // Define o dia ativo como o dia atual, quando os dados são carregados
   useEffect(() => {
     if (data?.reference_weekday) {
       setDiaAtivo(data.reference_weekday);
@@ -94,9 +93,7 @@ export default function PaginaPassageiro() {
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f0f4f8]">
-      <div className="bg-[#103173] relative overflow-hidden">
-        <Navigation tipoUsuario={user?.profile || "Student"} />
-      </div>
+      <Navigation tipoUsuario="Student" />
 
       <main className="flex-1 max-w-lg md:max-w-3xl lg:max-w-[80vw] mx-auto w-full px-4 pt-10 pb-32">
         <RoleHeader
