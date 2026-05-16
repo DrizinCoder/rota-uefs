@@ -111,7 +111,14 @@ export default function MotoristaPage() {
   const [data, setData] = useState<Home | null>(null);
     const [diaAtivo, setDiaAtivo] = useState("Segunda");
     const diaAtual = DIAS_SEMANA.find((d) => d.id === diaAtivo);
-  
+    const normalizarDia = (dia: string) => {
+      if (dia === "Sábado" || dia === "Domingo") {
+        return "Segunda";
+      }
+
+      return dia;
+    };
+
     useEffect(() => {
       const fetchData = async () => {
         const resultado = await passengerService.getHome();
@@ -122,9 +129,9 @@ export default function MotoristaPage() {
   
     useEffect(() => {
       if (data?.reference_weekday) {
-        setDiaAtivo(data.reference_weekday);
+        setDiaAtivo(normalizarDia(data.reference_weekday));
       }
-    }, [data])
+    }, [data]);
 
     const viagensDoDia = (data?.trips || []).filter(viagem => viagem.weekday === diaAtivo);
   
