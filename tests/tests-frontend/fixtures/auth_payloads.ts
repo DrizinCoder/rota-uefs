@@ -15,6 +15,17 @@ export interface AuthLoginSuccessBody {
     };
   };
 }
+  export interface AuthRegisterSuccessBody {
+    data: {
+      access_token: string;
+      user: {
+        profile: UserProfile;
+        registration_id: string;
+        full_name: string;
+      };
+    };
+  }
+
 
 export const LOGIN_VALID_PAYLOAD: LoginFormPayload = {
   registration_id: '23121111',
@@ -38,3 +49,25 @@ export const AUTH_LOGIN_STUDENT_SUCCESS: AuthLoginSuccessBody = {
 };
 
 export const AUTH_LOGIN_ERROR_MESSAGE = 'Matrícula ou senha incorretos.';
+
+export const AUTH_REGISTER_STUDENT_SUCCESS: AuthRegisterSuccessBody = {
+  data: {
+    access_token: 'playwright-register-student-token',
+    user: {
+      profile: 'Student',
+      registration_id: '23121111',
+      full_name: 'Aluno de Teste',
+    },
+  },
+};
+
+export const AUTH_REGISTER_STAFF_SUCCESS: AuthRegisterSuccessBody = {
+  data: {
+    access_token: 'playwright-register-staff-token',
+    user: {
+      profile: 'Staff',
+      registration_id: '20240001',
+      full_name: 'Servidor de Teste',
+    },
+  },
+};

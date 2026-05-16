@@ -7,7 +7,7 @@ import { TEST_PROFILE_COOKIE_NAME } from '../fixtures/profile_payloads';
 import { mockAuthLoginFailure, mockAuthLoginSuccess } from '../mocks/mock_auth_api';
 
 test.describe('Login flow', () => {
-  test('login bem-sucedido redireciona para o perfil do aluno', async ({ page }) => {
+  test('Login successful, redirection to student profile.', async ({ page }) => {
     await mockAuthLoginSuccess(page);
     await page.goto('/login');
 
@@ -30,7 +30,7 @@ test.describe('Login flow', () => {
     expect(cookies.some(c => c.name === TEST_PROFILE_COOKIE_NAME && c.value === 'Student')).toBeTruthy();
   });
 
-  test('login inválido mantém a tela e mostra erro', async ({ page }) => {
+  test('Invalid login: screen remains on and displays error.', async ({ page }) => {
     await mockAuthLoginFailure(page);
     await page.goto('/login');
 
