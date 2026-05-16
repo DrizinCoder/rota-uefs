@@ -58,6 +58,7 @@ class ReservationService:
         await self.repository.update_boarding(reservation)
 
         logger.info(f"Checkin successful | Reservation ID: {reservation_id_str}")
+        
         return {"message": "Checkin realizado com sucesso"}
             
     async def manual_checkin(self, data: ManualCheckinRequestDTO):
@@ -65,11 +66,11 @@ class ReservationService:
 
         reservation = await self.repository.get_by_id(uuid.UUID(data.reservation_id))
 
-        if reservation.boarding_confirmation == BoardingStatus.BOARDED:
-            raise ForbiddenException("Usuário já embarcado")
-
         if not reservation:
             raise NotFoundException("Reserva não encontrada")
+
+        if reservation.boarding_confirmation == BoardingStatus.BOARDED:
+            raise ForbiddenException("Usuário já embarcado")
         
         if not (
                 data.reservation_id == str(reservation.reservation_id) and 
@@ -86,5 +87,6 @@ class ReservationService:
         await self.repository.update_boarding(reservation)
 
         logger.info(f"Checkin successful | Reservation ID: {data.reservation_id}")
+
         return {"message": "Checkin manual realizado com sucesso"}
             
