@@ -1,4 +1,4 @@
-from tests.fixtures.motorista_payloads import (
+from fixtures.motorista_payloads import (
     MOTORISTA_CREATE_VALID,
     MOTORISTA_CREATE_INVALID,
     MOTORISTA_UPDATE_VALID,

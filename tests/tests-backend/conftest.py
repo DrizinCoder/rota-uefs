@@ -4,14 +4,25 @@ from contextlib import asynccontextmanager
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 
+os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
+os.environ.setdefault("SECRET_KEY", "test-secret")
+os.environ.setdefault("MAIL_USERNAME", "test@example.com")
+os.environ.setdefault("MAIL_PASSWORD", "password")
+os.environ.setdefault("MAIL_FROM", "test@example.com")
+os.environ.setdefault("BASE_URL_FRONTEND", "https://rota-uefs/test")
 os.environ.setdefault("REFRESH_TOKEN_EXPIRE_DAYS", "30")
 
 import pytest
 from fastapi import HTTPException, Depends
 from fastapi.testclient import TestClient
 
-ROOT_DIR = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT_DIR))
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+BACKEND_DIR = PROJECT_ROOT / "backend"
+TESTS_BACKEND_DIR = Path(__file__).resolve().parent
+
+sys.path.insert(0, str(PROJECT_ROOT))
+sys.path.insert(0, str(BACKEND_DIR))
+sys.path.insert(0, str(TESTS_BACKEND_DIR))
 
 from app.main import app
 from app.database.db import get_session
@@ -401,7 +412,7 @@ def auth_student_client(client, created_estudante):
 @pytest.fixture
 def created_admin(client):
     """Fixture que retorna um admin criado com seu ID"""
-    from tests.fixtures.admin_payloads import ADMIN_CREATE_VALID
+    from fixtures.admin_payloads import ADMIN_CREATE_VALID
     
     response = client.post("/admin/", json=ADMIN_CREATE_VALID)
     assert response.status_code == 201
@@ -417,7 +428,7 @@ def created_admin(client):
 @pytest.fixture
 def created_estudante(client):
     """Fixture que retorna um estudante criado com seu ID"""
-    from tests.fixtures.estudante_payloads import ESTUDANTE_CREATE_VALID
+    from fixtures.estudante_payloads import ESTUDANTE_CREATE_VALID
     
     response = client.post("/auth/register/student", json=ESTUDANTE_CREATE_VALID)
     assert response.status_code == 201

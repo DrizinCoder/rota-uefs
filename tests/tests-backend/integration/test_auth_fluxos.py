@@ -1,4 +1,4 @@
-from tests.fixtures.auth_payloads import (
+from fixtures.auth_payloads import (
     REGISTER_USER_VALID,
     REGISTER_USER_INVALID,
     LOGIN_VALID,

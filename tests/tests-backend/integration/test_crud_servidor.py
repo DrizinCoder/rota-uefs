@@ -1,4 +1,4 @@
-from tests.fixtures.servidor_payloads import (
+from fixtures.servidor_payloads import (
     SERVIDOR_CREATE_VALID,
     SERVIDOR_CREATE_INVALID,
     SERVIDOR_UPDATE_VALID,

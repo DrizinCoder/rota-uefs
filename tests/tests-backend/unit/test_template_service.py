@@ -1,14 +1,12 @@
-import os
-from jinja2 import Environment, FileSystemLoader
+from pathlib import Path
+from jinja2 import FileSystemLoader
 from app.services.email.template_service import TemplateService
 
 
 def test_template_service_renders_welcome_template():
     service = TemplateService()
-    template_dir = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), '..', '..', 'app', 'templates', 'emails')
-    )
-    service.env = Environment(loader=FileSystemLoader(template_dir))
+    template_dir = Path(__file__).resolve().parents[3] / 'backend' / 'app' / 'templates' / 'emails'
+    service.env.loader = FileSystemLoader(str(template_dir))
 
     html = service.render(
         'welcome.html',

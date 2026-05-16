@@ -7,7 +7,7 @@ com asserções fortes de status code e estrutura de resposta.
 import uuid
 
 import pytest
-from tests.fixtures.estudante_payloads import (
+from fixtures.estudante_payloads import (
     ESTUDANTE_CREATE_VALID,
     ESTUDANTE_CREATE_INVALID,
     ESTUDANTE_UPDATE_PHONE_VALID,

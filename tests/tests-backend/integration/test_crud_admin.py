@@ -3,7 +3,7 @@ Testes de integração para CRUD de Administrador
 """
 import uuid
 import pytest
-from tests.fixtures.admin_payloads import (
+from fixtures.admin_payloads import (
     ADMIN_CREATE_VALID,
     ADMIN_CREATE_INVALID,
     ADMIN_UPDATE_VALID,
