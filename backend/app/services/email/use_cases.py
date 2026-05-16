@@ -252,6 +252,7 @@ class EmailUseCases:
         reservation_id: uuid.UUID,
         trip_id: uuid.UUID,
         registration_id: str,
+        student_mode: bool = False,
     ):
         try:
             code = generate_registration_code(reservation_id, trip_id, registration_id)
@@ -267,6 +268,8 @@ class EmailUseCases:
                     "trip_date": trip_date,
                     "departure_time": departure_time,
                     "qr_code_base64": qr_base64,
+                    "student_mode": student_mode,
+                    "in_boarding_list": position < 45,
                 }
             )
 
