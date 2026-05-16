@@ -30,4 +30,8 @@ export const driverService = {
         const response = await api.get(`/users/trip/${trip_id}/subscribers`);
         return response.data.data;
     },
+    async adicionarAvulso(trip_id: string) {
+        const response = await api.post(`/users/driver/trips/${trip_id}/subscribe-staff-generic`);
+        return response.data.data;
+    }
 }
