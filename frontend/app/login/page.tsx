@@ -34,14 +34,6 @@ const LOGIN_SUPPORT_PHRASES = [
   "Conta institucional para a comunidade acadêmica da UEFS.",
 ];
 
-const REDIRECT_MAP: Record<string, string> = {
-  Student: "/passageiro",
-  Staff: "/professor",
-  Faculty: "/professor",
-  Driver: "/motorista",
-  Admin: "/admin",
-};
-
 export default function LoginPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
