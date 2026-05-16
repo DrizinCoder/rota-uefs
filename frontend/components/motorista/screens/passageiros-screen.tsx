@@ -25,13 +25,14 @@ import {
   UserPlus,
 } from "lucide-react";
 
-import { driverService,type PassengerListResponse, type Reservation, type Stats } from "@/services/driverService";
+import { driverService ,type PassengerListResponse, type Reservation, type Stats } from "@/services/driverService";
 
 interface PassageiroFormatado {
   id: string;
   nome: string;
   matricula: string;
   status: string;
+  isAvulso?: boolean;
 }
 
 const profileMap: Record<string, string> = {
@@ -63,52 +64,50 @@ function PassageirosContent() {
     );
   }
 
+   const carregarPassageiros = async () => {
+    try {
+      const dados = await driverService.listarPassageiros(tripId!);
+      
+      const ordenarPorProfileETimestamp = (reservations: Reservation[]) => {
+        return reservations.sort((a, b) => {
+          const profileOrder = { "Professor": 0, "Aluno": 1 };
+          const profileA = profileOrder[a.profile as keyof typeof profileOrder] ?? 2;
+          const profileB = profileOrder[b.profile as keyof typeof profileOrder] ?? 2;
+          
+          if (profileA !== profileB) {
+            return profileA - profileB;
+          }
+          
+          return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
+        });
+      };
+
+      const reservasOrdenadas = ordenarPorProfileETimestamp([...dados.valid_reservations]);
+      const passageirosValidos = reservasOrdenadas.map((res) => ({
+        id: res.reservation_id,
+        nome: res.name === "Staff Não Registrado" ? "Servidor Avulso" : res.name,
+        matricula: profileMap[res.profile] ?? res.profile,
+        status: res.profile === "Staff" && res.name === "Staff Não Registrado" ? "embarcou" : (res.onboard ? "embarcou" : "pendente"),
+        isAvulso: res.profile === "Staff" && res.name === "Staff Não Registrado",
+      }));
+
+      const esperaOrdenada = ordenarPorProfileETimestamp([...dados.waitlist_reservations]);
+      const passageirosEspera = esperaOrdenada.map((res) => ({
+        id: res.reservation_id,
+        nome: res.name === "Staff Não Registrado" ? "Servidor Avulso" : res.name,
+        matricula: profileMap[res.profile] ?? res.profile,
+        status: "espera",
+      }));
+
+      setPassageiros(passageirosValidos);
+      setListaEspera(passageirosEspera);
+      setDadosViagem(dados);
+    } catch (erro) {
+      console.error("ERRO AO CARREGAR:", erro);
+    }
+  };
+
   useEffect(() => {
-    const carregarPassageiros = async () => {
-      try {
-        const dados = await driverService.listarPassageiros(tripId);
-        
-        console.log("DADOS COMPLETOS:", dados);
-        
-        // Função auxiliar pra ordenar
-        const ordenarPorProfileETimestamp = (reservations: Reservation[]) => {
-          return reservations.sort((a, b) => {
-            const profileOrder = { "Professor": 0, "Aluno": 1 };
-            const profileA = profileOrder[a.profile as keyof typeof profileOrder] ?? 2;
-            const profileB = profileOrder[b.profile as keyof typeof profileOrder] ?? 2;
-            
-            if (profileA !== profileB) {
-              return profileA - profileB;
-            }
-            
-            return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
-          });
-        };
-
-        const reservasOrdenadas = ordenarPorProfileETimestamp([...dados.valid_reservations]);
-        const passageirosValidos = reservasOrdenadas.map((res) => ({
-          id: res.reservation_id,
-          nome: res.name,
-          matricula: profileMap[res.profile] ?? res.profile,
-          status: "pendente",
-        }));
-
-        const esperaOrdenada = ordenarPorProfileETimestamp([...dados.waitlist_reservations]);
-        const passageirosEspera = esperaOrdenada.map((res) => ({
-          id: res.reservation_id,
-          nome: res.name,
-          matricula: profileMap[res.profile] ?? res.profile,
-          status: "espera",
-        }));
-
-        setPassageiros(passageirosValidos);
-        setListaEspera(passageirosEspera);
-        setDadosViagem(dados);
-      } catch (erro) {
-        console.error("ERRO AO CARREGAR:", erro);
-      }
-    };
-    
     carregarPassageiros();
   }, [tripId]);
 
@@ -140,19 +139,27 @@ function PassageirosContent() {
     );
   };
 
-  const chamarProximo = () => {
-    const proximo = passageiros.find((p) => p.status === "espera");
+  const handleAdicionarAvulso = async () => {
+    try {
+      const resultado = await driverService.adicionarAvulso(tripId!);
+      if (resultado.success) {
+        await carregarPassageiros();
+      } else {
+        console.error("Erro ao adicionar avulso");
+      }
+    } catch (erro) {
+      console.error("Erro:", erro);
+    }
+  };
 
-    if (proximo) {
-      alert(`Chamando próximo da lista de espera: ${proximo.nome}\nMatrícula: ${proximo.matricula}`);
-
-      setPassageiros(
-        passageiros.map((p) =>
-          p.id === proximo.id ? { ...p, status: "pendente" } : p,
-        ),
-      );
-    } else {
-      alert("Não há mais passageiros na lista de espera.");
+  const handleRemoverAvulso = async (reservation_id: string) => {
+    try {
+      const resultado = await driverService.removerAvulso(reservation_id);
+      if (resultado.success) {
+        await carregarPassageiros();
+      }
+    } catch (erro) {
+      console.error("Erro ao remover avulso:", erro);
     }
   };
 
@@ -202,7 +209,7 @@ function PassageirosContent() {
           />
 
           <Button
-            onClick={chamarProximo}
+            onClick={handleAdicionarAvulso}
             className="h-14 px-6 bg-[#23B99A] hover:bg-[#1fa589] text-white rounded-2xl shadow-sm font-bold text-base flex items-center justify-center gap-2 w-full md:w-auto transition-all"
           >
             <UserPlus className="h-5 w-5" />
@@ -241,11 +248,12 @@ function PassageirosContent() {
                   nome={passageiro.nome}
                   tipo={passageiro.matricula}
                   status={passageiro.status as "pendente" | "embarcou" | "espera"}
+                  isAvulso={passageiro.isAvulso}
                   isWaitlist={false}
                   onEmbarcar={alternarCheckIn}
                   onCancelarEmbarque={alternarCheckIn}
                   onMarcarFalta={() => {}}
-                  onRemoverAvulso={() => {}}
+                  onRemoverAvulso={handleRemoverAvulso}
                 />
               ))
             )}
@@ -276,12 +284,13 @@ function PassageirosContent() {
                   id={passageiro.id}
                   nome={passageiro.nome}
                   tipo={passageiro.matricula}
+                  isAvulso={passageiro.isAvulso}
                   status="espera"
                   isWaitlist={true}
                   onEmbarcar={alternarCheckIn}
                   onCancelarEmbarque={alternarCheckIn}
                   onMarcarFalta={() => {}}
-                  onRemoverAvulso={() => {}}
+                  onRemoverAvulso={handleRemoverAvulso}
                 />
               ))}
             </section>

@@ -6,6 +6,7 @@ export interface Reservation {
     name: string;
     profile: string;
     is_invited: boolean;
+    onboard: boolean;
     timestamp: string;
 }
 
@@ -32,6 +33,10 @@ export const driverService = {
     },
     async adicionarAvulso(trip_id: string) {
         const response = await api.post(`/users/driver/trips/${trip_id}/subscribe-staff-generic`);
-        return response.data.data;
+        return { success: response.status >= 200 && response.status < 300 };
+    },
+    async removerAvulso(reservation_id: string) {
+        const response = await api.delete(`/users/driver/reservations/${reservation_id}/delete-staff-generic`);
+        return { success: response.status >= 200 && response.status < 300 };
     }
 }
