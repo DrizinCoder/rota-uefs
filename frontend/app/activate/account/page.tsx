@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
 import { authService } from "@/services/authService";
@@ -14,7 +14,7 @@ const REDIRECT_MAP: Record<string, string> = {
   Admin: "/admin",
 };
 
-export default function ActivateAccountPage() {
+function ActivateAccountContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -47,6 +47,10 @@ export default function ActivateAccountPage() {
     activate();
   }, [token, router]);
 
+  return <ActivateAccountFallback />;
+}
+
+function ActivateAccountFallback() {
   return (
     <div className="flex min-h-screen flex-col bg-[#E4F2F1] items-center justify-center p-4">
       <Spinner className="h-16 w-16 text-[#103173]" />
@@ -54,5 +58,13 @@ export default function ActivateAccountPage() {
         Ativando sua conta...
       </p>
     </div>
+  );
+}
+
+export default function ActivateAccountPage() {
+  return (
+    <Suspense fallback={<ActivateAccountFallback />}>
+      <ActivateAccountContent />
+    </Suspense>
   );
 }

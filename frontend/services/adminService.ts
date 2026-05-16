@@ -105,6 +105,12 @@ export interface Rota {
   drop_off_point: string;
 }
 
+export interface CadastroRotaPayload {
+  name: string;
+  boarding_point: string;
+  drop_off_point: string;
+}
+
 // ── Administrador ─────────────────────────────────────
 
 export interface Administrador {
@@ -200,6 +206,11 @@ export const adminService = {
   // Rotas
   async listarRotas(): Promise<Rota[]> {
     const response = await api.get("/routes/routes/");
+    return response.data.data;
+  },
+
+  async cadastrarRota(payload: CadastroRotaPayload): Promise<Rota> {
+    const response = await api.post("/routes/routes/create", payload);
     return response.data.data;
   },
 

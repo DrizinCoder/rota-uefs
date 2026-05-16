@@ -1,8 +1,7 @@
-"use client";
+﻿"use client";
 
 import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
-import { FooterSection } from "@/components/landing/footer-section";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -108,9 +107,9 @@ export function StatusViagemScreen() {
                   <Info className="text-[#103173] h-6 w-6" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-[#73AABF] uppercase italic">Motorista e Veículo</p>
+                  <p className="text-[10px] font-black text-[#73AABF] uppercase italic">Motorista e veículo</p>
                   <p className="font-bold text-[#103173]">
-                    {viagemInscrita.motorista} • <span className="text-[#73AABF]">{viagemInscrita.placa}</span>
+                    {viagemInscrita.motorista} · <span className="text-[#73AABF]">{viagemInscrita.placa}</span>
                   </p>
                 </div>
               </div>
@@ -148,9 +147,7 @@ export function StatusViagemScreen() {
             </p>
           </div>
         </div>
-      </main>
-
-      <FooterSection />
-    </div>
+      </main>    </div>
   );
 }
+

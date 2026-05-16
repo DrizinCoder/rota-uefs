@@ -2,19 +2,17 @@ import asyncio
 import uuid
 from datetime import date, time
 from unittest.mock import AsyncMock, MagicMock
-
 from app.models.models import Trip
 from app.repositories.trip_repository import TripRepository
 
 
-def test_get_all_returns_driver_and_route_names():
-    mock_session = AsyncMock()
-    mock_result = MagicMock()
-    mock_scalars = MagicMock()
+def test_get_all_returns_trip_with_driver_and_route_data():
+    session = AsyncMock()
+    result = MagicMock()
+    scalars = MagicMock()
 
     driver = MagicMock()
     driver.full_name = "Motorista Teste"
-
     route = MagicMock()
     route.name = "Rota Teste"
     route.boarding_point = "Ponto de Embarque Teste"
@@ -30,12 +28,12 @@ def test_get_all_returns_driver_and_route_names():
     trip.driver = driver
     trip.route = route
 
-    mock_scalars.all.return_value = [trip]
-    mock_result.scalars.return_value = mock_scalars
-    mock_session.execute.return_value = mock_result
+    scalars.all.return_value = [trip]
+    result.scalars.return_value = scalars
+    session.execute.return_value = result
 
-    repository = TripRepository(mock_session)
-    result = asyncio.run(repository.get_all())
+    repository = TripRepository(session)
+    actual = asyncio.run(repository.get_all())
 
     expected = [
         {
@@ -46,5 +44,4 @@ def test_get_all_returns_driver_and_route_names():
             "drop_off_point": "Ponto de Desembarque Teste",
         }
     ]
-
-    assert result == expected
+    assert actual == expected

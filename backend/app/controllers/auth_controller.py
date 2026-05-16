@@ -47,8 +47,8 @@ class AuthController:
         if user.registration_status == RegistrationStatus.BLOCKED:
             raise UnauthorizedException("Usuário bloqueado. Entre em contato com o administrador.")
         
-        #if user.registration_status == RegistrationStatus.PENDING:
-        #    raise UnauthorizedException("Cadastro pendente de aprovação.")
+        if user.registration_status == RegistrationStatus.PENDING:
+            raise UnauthorizedException("Cadastro pendente de aprovação.")
         
         if not self.auth_service.verify_password(data.password, user.password):
             raise UnauthorizedException("Credenciais inválidas")

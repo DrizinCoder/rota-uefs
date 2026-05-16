@@ -17,7 +17,6 @@ h11==0.16.0
 httpcore==1.0.9
 httptools==0.7.1
 httpx==0.28.1
-python-jose[cryptography]
 idna==3.11
 Jinja2==3.1.6
 bcrypt==4.0.1
@@ -25,6 +24,8 @@ markdown-it-py==4.0.0
 MarkupSafe==3.0.3
 mdurl==0.1.2
 passlib==1.7.4
+qrcode==8.2
+pillow==12.2.0
 pydantic==2.13.1
 pydantic-extra-types==2.11.1
 pydantic-settings==2.13.1
@@ -47,7 +48,7 @@ typing-inspection==0.4.2
 typing_extensions==4.15.0
 urllib3==2.6.3
 uvicorn==0.44.0
-uvloop==0.22.1
+uvloop==0.22.1; sys_platform != "win32" # uvloop não é compatível com Windows
 watchfiles==1.1.1
 websockets==16.0
 fastapi-mail

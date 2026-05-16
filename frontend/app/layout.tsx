@@ -7,6 +7,7 @@ import {
   JetBrains_Mono,
 } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { FooterSection } from "@/components/landing/footer-section";
 import "./globals.css";
 
 const instrumentSans = Instrument_Sans({
@@ -26,9 +27,14 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Rota UEFS — Transporte Universitário",
+  title: "Rota UEFS",
   description:
     "Sistema de gestão de transporte universitário entre Salvador e Feira de Santana para alunos e professores da UEFS.",
+  icons: {
+    icon: "/images/logo_rota_black.png",
+    shortcut: "/images/logo_rota_black.png",
+    apple: "/images/logo_rota_black.png",
+  },
 };
 
 export default function RootLayout({
@@ -44,6 +50,7 @@ export default function RootLayout({
       >
         <ToastProvider>
           {children}
+          <FooterSection />
           <Analytics />
         </ToastProvider>
       </body>

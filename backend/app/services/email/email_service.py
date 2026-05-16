@@ -1,3 +1,5 @@
+from email.mime.image import MIMEImage
+import base64
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -24,6 +26,33 @@ class EmailService:
         msg["To"] = email_to
 
         msg.attach(MIMEText(html_content, "html"))
+
+        server = self._connect()
+        server.sendmail(self.from_email, [email_to], msg.as_string())
+        server.quit()
+
+    def send_with_inline_image(
+        self,
+        subject: str,
+        email_to: str,
+        html_content: str,
+        image_base64: str,
+        image_cid: str,
+    ):
+        msg = MIMEMultipart("related")
+        msg["Subject"] = subject
+        msg["From"] = self.from_email
+        msg["To"] = email_to
+
+        msg_alternative = MIMEMultipart("alternative")
+        msg.attach(msg_alternative)
+        msg_alternative.attach(MIMEText(html_content, "html"))
+
+        image_data = base64.b64decode(image_base64)
+        image = MIMEImage(image_data, _subtype="png")
+        image.add_header("Content-ID", f"<{image_cid}>")
+        image.add_header("Content-Disposition", "inline", filename=f"{image_cid}.png")
+        msg.attach(image)
 
         server = self._connect()
         server.sendmail(self.from_email, [email_to], msg.as_string())

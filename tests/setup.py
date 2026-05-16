@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -24,20 +25,34 @@ def ensure_nodeenv() -> None:
         print(f"Nodeenv já existe em: {NODEENV_DIR}")
         return
 
+    if shutil.which("node") and shutil.which("npm") and shutil.which("npx"):
+        print("Node/npm/npx encontrados no sistema; pulando criação de nodeenv.")
+        return
+
     print("Criando ambiente Node local com nodeenv...")
-    run([sys.executable, "-m", "nodeenv", "--prebuilt", "--npm", str(NODEENV_DIR)])
+    run([sys.executable, "-m", "nodeenv", "--prebuilt", "--with-npm", str(NODEENV_DIR)])
 
 
 def npm_path() -> str:
-    if sys.platform == "win32":
-        return str(NODEENV_DIR / "Scripts" / "npm.cmd")
-    return str(NODEENV_DIR / "bin" / "npm")
+    if NODEENV_DIR.exists():
+        if sys.platform == "win32":
+            return str(NODEENV_DIR / "Scripts" / "npm.cmd")
+        return str(NODEENV_DIR / "bin" / "npm")
+    npm = shutil.which("npm")
+    if npm:
+        return npm
+    raise RuntimeError("npm não encontrado: instale Node.js ou crie .nodeenv")
 
 
 def npx_path() -> str:
-    if sys.platform == "win32":
-        return str(NODEENV_DIR / "Scripts" / "npx.cmd")
-    return str(NODEENV_DIR / "bin" / "npx")
+    if NODEENV_DIR.exists():
+        if sys.platform == "win32":
+            return str(NODEENV_DIR / "Scripts" / "npx.cmd")
+        return str(NODEENV_DIR / "bin" / "npx")
+    npx = shutil.which("npx")
+    if npx:
+        return npx
+    raise RuntimeError("npx não encontrado: instale Node.js ou crie .nodeenv")
 
 
 def install_frontend_dependencies() -> None:
