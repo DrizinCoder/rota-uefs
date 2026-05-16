@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { passengerService } from "@/services/homeService";
 import { Navigation } from "@/components/landing/navigation";
@@ -22,13 +22,14 @@ import {
 
 export function StatusViagemScreen() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [viagemInscrita, setViagemInscrita] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function fetchTrip() {
-      const viagemId = sessionStorage.getItem("viagemIdSelecionada");
+      const viagemId = searchParams.get("viagemId");
 
       if (!viagemId) {
         setIsLoading(false);
@@ -84,9 +85,9 @@ export function StatusViagemScreen() {
           horarioFim,
           inscritos: inscritos,
           quorum: 1,
-          vagasTotais: tripData.bus_capacity || 44,
+          vagasTotais: tripFromHome?.bus_capacity || 44,
           placa: tripData.placa || "A DEFINIR",
-          status: "Confirmada",
+          status: "Pending",
         });
       } catch (error) {
         console.error("Erro ao buscar detalhes da viagem:", error);

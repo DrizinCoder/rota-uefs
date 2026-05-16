@@ -44,7 +44,7 @@ export const passengerService = {
     },
     async getTripById(tripId: string) {
         const response = await api.get(`/trip/${tripId}`);
-        console.log(response.data.data)
+        console.log("OLAAAA", response.data.data)
         return response.data.data;
     },
     async getRouteById(routeId: string) {

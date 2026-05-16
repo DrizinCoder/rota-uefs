@@ -13,8 +13,7 @@ export function SubscribeButton({ viagemId }: SubscribeButtonProps) {
   return (
     <button 
       onClick={() => {
-        sessionStorage.setItem("viagemIdSelecionada", viagemId);
-        router.push("/passageiro/confirmacao");
+        router.push(`/passageiro/confirmacao?viagemId=${viagemId}`);
       }} 
       className="w-full py-3.5 rounded-xl text-sm font-extrabold bg-[#103173] text-white shadow-lg flex items-center justify-center gap-2 hover:bg-[#0d2a63] transition-colors"
     >

@@ -105,8 +105,7 @@ function ViagensContent() {
               {/* Botão de visualizar inscrição da viagem para passageiros confirmados */}
               {!isMotorista && viagem.status === "Pending" && (
                 <Link 
-                  href="/passageiro/status"
-                  onClick={() => sessionStorage.setItem("viagemIdSelecionada", viagem.trip_id)}
+                  href={`/passageiro/status?viagemId=${viagem.trip_id}`}
                   className="flex items-center justify-center gap-2 text-sm font-bold bg-white text-[#103173] border border-[#103173]/20 px-4 py-2 rounded-xl shadow-sm hover:bg-slate-50 transition-all active:scale-[0.98] whitespace-nowrap mt-2 md:mt-0"
                 >
                   <ClipboardList className="h-4 w-4" />

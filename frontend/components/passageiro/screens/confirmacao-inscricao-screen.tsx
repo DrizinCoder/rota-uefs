@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { passengerService } from "@/services/homeService";
 import { Navigation } from "@/components/landing/navigation";
@@ -18,6 +18,7 @@ import {
 
 export function ConfirmacaoInscricaoScreen() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   
   const [viagemSelecionada, setViagemSelecionada] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,7 +26,7 @@ export function ConfirmacaoInscricaoScreen() {
 
   useEffect(() => {
     async function fetchTrip() {
-      const viagemId = sessionStorage.getItem("viagemIdSelecionada");
+      const viagemId = searchParams.get("viagemId");
       
       if (!viagemId) {
         setIsLoading(false);
@@ -103,11 +104,11 @@ export function ConfirmacaoInscricaoScreen() {
   const handleConfirmar = async () => {
     try {
       setIsSubmitting(true);
-      const viagemId = sessionStorage.getItem("viagemIdSelecionada");
+      const viagemId = searchParams.get("viagemId");
       if (!viagemId) return;
 
       await passengerService.subscribeUser(viagemId);
-      router.push("/passageiro/status");
+      router.push(`/passageiro/status?viagemId=${viagemId}`);
     } catch (error) {
       console.error("Erro ao confirmar inscrição:", error);
     } finally {
