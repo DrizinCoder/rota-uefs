@@ -41,6 +41,12 @@ export default function PaginaPassageiro() {
   const [isLoading, setIsLoading] = useState(true);
 
   const diaAtual = DIAS_SEMANA.find((d) => d.id === diaAtivo);
+  const normalizarDia = (dia: string) => {
+      if (dia === "Sábado" || dia === "Domingo") {
+        return "Segunda";
+      }
+      return dia;
+    };
 
   // Estado para armazenar a modalidade escolhida para cada card de viagem
   const [modalidades, setModalidades] = useState<Record<string, "ida" | "ida-volta">>({});
@@ -69,7 +75,7 @@ export default function PaginaPassageiro() {
 
   useEffect(() => {
     if (data?.reference_weekday) {
-      setDiaAtivo(data.reference_weekday);
+      setDiaAtivo(normalizarDia(data.reference_weekday));
     }
   }, [data])
 
