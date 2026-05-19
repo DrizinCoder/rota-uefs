@@ -1,6 +1,6 @@
 import asyncio
 from app.database.db import init_db
-from app.models.models import User, Staff, Admin, Reservation, Bus
+from app.models.models import *
 
 async def main():
     await init_db()
