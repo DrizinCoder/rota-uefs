@@ -28,9 +28,9 @@ class Settings(BaseSettings):
         default="dev-registration-code-secret-altere-em-producao",
         description="Segredo HMAC para assinar códigos de registro (defina em produção).",
     )
-    vapid_private_key: str
-    vapid_public_key: str
-    vapid_claims_email: str
+    VAPID_PRIVATE_KEY: str
+    VAPID_PUBLIC_KEY: str
+    VAPID_CLAIMS_EMAIL: str
 
     class Config:
         env_file = ".env"
