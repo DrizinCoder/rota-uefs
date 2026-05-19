@@ -9,7 +9,7 @@ class PassengerInsuranceItem(BaseModel):
     registration_id: str
     user_role: str
 
-class TripInsuranceItem(BaseModel):
+class TripInsuranceReportDTO(BaseModel):
     trip_id: uuid.UUID
     trip_date: date
     departure_time: time

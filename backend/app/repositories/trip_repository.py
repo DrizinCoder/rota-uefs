@@ -3,7 +3,7 @@ from app.DTOs.trip import PassengerTripItem
 from app.utils.utils import add_ninety_minutes
 from app.DTOs.trip import TripDetailFeedItem
 from typing import Optional
-from sqlalchemy.orm import joinedload, selectinload
+from sqlalchemy.orm import joinedload, selectinload, aliased
 import uuid
 from datetime import date
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,6 +16,7 @@ from app.models.models import Trip, Route, Bus, Reservation, User
 from app.enums.enums import UserProfile, BoardingStatus
 from app.DTOs.trip import TripFeedItem
 from sqlalchemy import case
+from app.DTOs.reports import TripInsuranceReportDTO, PassengerInsuranceItem
 
 class TripRepository:
     def __init__(self, session: AsyncSession):
@@ -374,3 +375,67 @@ class TripRepository:
             )
             for row in rows
         ]
+    
+    async def get_trip_insurance_data(self, trip_id: uuid.UUID) -> TripInsuranceReportDTO | None:
+        DriverUser = aliased(User)
+
+        trip_statement = (
+            select(
+                Trip.trip_id,
+                Trip.trip_date,
+                Trip.departure_time,
+                Trip.bus_license_plate,
+                Route.boarding_point,
+                Route.drop_off_point,
+                DriverUser.name.label("driver_name")
+            )
+            .join(Route, Route.route_id == Trip.route_id)
+            .join(DriverUser, DriverUser.user_id == Trip.driver_id)
+            .where(Trip.trip_id == trip_id)
+        )
+
+        trip_result = await self.session.execute(trip_statement)
+        trip_row = trip_result.first()
+
+        if not trip_row:
+            return None
+        
+        passengers_statement = (
+            select(
+                User.name,
+                User.email,
+                Reservation.registration_id,
+                User.role.label("user_role")
+            )
+            .join(Reservation, Reservation.user_id == User.user_id)
+            .where(
+                Reservation.trip_id == trip_id,
+                Reservation.boarding_confirmation != BoardingStatus.CANCELLED
+            )
+            .order_by(User.name)
+        )
+
+        passengers_result = await self.session.execute(passengers_statement)
+        passengers_rows = passengers_result.all()
+
+        passenger_list = [
+            PassengerInsuranceItem(
+                name=p.name,
+                email=p.email,
+                registration_id=str(p.registration_id),
+                user_role=str(p.user_role)
+            )
+            for p in passengers_rows
+        ]
+
+        return TripInsuranceReportDTO(
+            trip_id=trip_row.trip_id,
+            trip_date=trip_row.trip_date,
+            departure_time=trip_row.departure_time,
+            bus_license_plate=trip_row.bus_license_plate,
+            driver_name=trip_row.driver_name,
+            boarding_point=trip_row.boarding_point,
+            drop_off_point=trip_row.drop_off_point,
+            total_passengers=len(passenger_list),
+            passengers=passenger_list
+        )
