@@ -1,0 +1,55 @@
+{% extends "base_report.html" %}
+
+{% block content %}
+    <h3>Detalhes da Operação</h3>
+    
+    <div class="info-grid">
+        <div class="info-item">
+            <div class="info-label">Identificador da Viagem</div>
+            <div class="info-value">{{ trip.trip_id }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Data e Hora de Saída</div>
+            <div class="info-value">{{ trip.trip_date }} às {{ trip.departure_time }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Veículo (Placa)</div>
+            <div class="info-value">{{ trip.bus_license_plate }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Motorista</div>
+            <div class="info-value">{{ trip.driver_name }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Trecho</div>
+            <div class="info-value">{{ trip.boarding_point }} ➝ {{ trip.drop_off_point }}</div>
+        </div>
+    </div>
+
+    <h3>Manifesto de Passageiros Confirmados (Total: {{ trip.total_passengers }})</h3>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Nome do Passageiro</th>
+                <th>Vínculo Institucional</th>
+                <th>Documento (Matrícula)</th>
+                <th>Assinatura / Visto</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for passenger in trip.passengers %}
+            <tr>
+                <td>{{ passenger.name }}</td>
+                <td>{{ passenger.user_role }}</td>
+                <td>{{ passenger.registration_id }}</td>
+                <td>______________________________</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4" style="text-align: center;">Nenhum passageiro confirmado para esta viagem.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

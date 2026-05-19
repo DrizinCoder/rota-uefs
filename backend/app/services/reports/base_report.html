@@ -9,9 +9,15 @@
         .title { font-size: 24px; font-weight: bold; color: #0f172a; }
         .date { color: #64748b; font-size: 14px; margin-top: auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border-bottom: 1px solid #cbd5e1; padding: 12px; text-align: left; }
+        th, td { border-bottom: 1px solid #cbd5e1; padding: 12px; text-align: left; font-size: 14px; }
         th { background-color: #f8fafc; font-weight: bold; text-transform: uppercase; font-size: 12px; }
-        .footer { position: fixed; bottom: 30px; width: 100%; text-align: center; font-size: 10px; color: #94a3b8; }
+        .footer { position: fixed; bottom: 30px; width: 100%; text-align: center; font-size: 10px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 10px; }
+        
+        /* Classes utilitárias */
+        .info-grid { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px; background-color: #f8fafc; padding: 15px; border-radius: 8px; }
+        .info-item { flex: 1; min-width: 200px; }
+        .info-label { font-size: 12px; color: #64748b; font-weight: bold; text-transform: uppercase; }
+        .info-value { font-size: 16px; color: #0f172a; font-weight: bold; margin-top: 4px; }
     </style>
 </head>
 <body>
@@ -21,11 +27,11 @@
     </div>
 
     <div class="content">
-        <p>A arquitetura desacoplada do gerador de PDF está pronta para receber os dados do sistema.</p>
+        {% block content %}{% endblock %}
     </div>
 
     <div class="footer">
-        Rota UEFS - Sistema de Gestão de Frota
+        Rota UEFS - Sistema de Gestão de Frota | Documento gerado eletronicamente.
     </div>
 </body>
 </html>
