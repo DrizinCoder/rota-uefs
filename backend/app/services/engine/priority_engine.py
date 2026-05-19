@@ -6,7 +6,7 @@ from app.repositories.reservation_repository import ReservationRepository
 from app.repositories.trip_repository import TripRepository
 from app.repositories.bus_repository import BusRepository
 from app.core.exceptions import NotFoundException
-from app.enums.enums import UserProfile
+from app.enums.enums import BoardingStatus, UserProfile
 from app.core.responses import ResponseHandler
 from .notifications import Notifications
 
@@ -55,6 +55,7 @@ class PriorityEngine:
                 "user_id": str(res.user_id),
                 "name": passenger_name,
                 "profile": res.user.profile.value,
+                "onboard": res.boarding_confirmation == BoardingStatus.BOARDED,
                 "is_invited": is_guest,
                 "timestamp": res.reservation_timestamp
             }
@@ -78,7 +79,7 @@ class PriorityEngine:
                     "waitlist_count": len(waitlist_reservations)
                 }
             },
-            message="Listagem de passageiros."
+            message="Listagem de passageiros na viagem."
         )
 
     async def get_valid_reservation(self, trip_id: uuid.UUID):
