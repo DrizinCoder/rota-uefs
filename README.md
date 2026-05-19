@@ -135,6 +135,24 @@ Este guia contém os comandos essenciais e o fluxo de trabalho obrigatório para
 
 ---
 
+## Script de regração das chaves VAPID (Para Web Push)
+```python 
+python -c "
+from py_vapid import Vapid
+
+v = Vapid()
+v.generate_keys()
+v.save_key('private_key.pem')
+
+public_key = v.public_key.public_bytes(
+    __import__('cryptography.hazmat.primitives.serialization', fromlist=['Encoding']).Encoding.X962,
+    __import__('cryptography.hazmat.primitives.serialization', fromlist=['PublicFormat']).PublicFormat.UncompressedPoint,
+).hex()
+
+print('VAPID_PUBLIC_KEY=' + public_key)
+"
+```
+
 ## 👷🏻 Em Construção...
 
 Este README será atualizado futuramente para servir como a documentação oficial do projeto, especificando os padrões de arquitetura, padrões de projeto (Design Patterns) e guias de contribuição.
