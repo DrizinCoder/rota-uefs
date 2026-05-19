@@ -67,3 +67,4 @@ uvicorn==0.44.0
 uvloop==0.22.1; sys_platform != "win32" # uvloop não é compatível com Windows
 watchfiles==1.1.1
 websockets==16.0
+weasyprint>=61.0
