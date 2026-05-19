@@ -19,6 +19,13 @@ class TripController:
             logger.error(f"Error fetching subscriber for trip {trip_id}: {e}")
             raise
 
+    async def remove_boarding_confirmation(self, reservation_id: str):
+        try:
+            return await self.priority_engine.remove_boarding_confirmation(reservation_id)
+        except Exception as e:
+            logger.error(f"Error removing boarding confirmation for reservation {reservation_id}: {e}")
+            raise
+
     async def get_all_trips_by_user_id(self, user_id: uuid.UUID):
         try:
             return await self.trip_service.get_all_trips_by_user_id(user_id)

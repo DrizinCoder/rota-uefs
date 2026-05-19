@@ -83,6 +83,23 @@ class ReservationRepository:
             return True 
         
         return False
+    
+    async def remove_boarding_confirmation(self, reservation_id: str):
+        stmt = (
+            select(Reservation)
+            .where(Reservation.reservation_id == reservation_id)
+        )
+
+        result = await self.session.execute(stmt)
+        reservation = result.scalar_one_or_none()
+
+        if reservation:
+            reservation.boarding_confirmation = BoardingStatus.NOT_BOARDED
+            reservation.boarding_timestamp = None
+            await self.session.commit()
+            return True 
+        
+        return False
         
 
     async def activate_reservation(self, reservation_id: str):

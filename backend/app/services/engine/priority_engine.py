@@ -19,16 +19,26 @@ class PriorityEngine:
 
         self.notifications = Notifications(user_repo, trip_repo, res_repo, bus_repo)
 
-    def get_priority(self, profile):
-        priorities = {UserProfile.STAFF: 0, UserProfile.STUDENT: 1}
-        return priorities.get(profile, 99)
+    def get_priority(self, profile: UserProfile, boarding_status: BoardingStatus, extra_name: str = None):
+        if boarding_status == BoardingStatus.BOARDED:
+            return -1
 
+        if profile == UserProfile.STAFF:
+            if extra_name and extra_name.strip():
+                return 1  
+            return 0      
+
+        if profile == UserProfile.STUDENT:
+            return 2
+
+        return 99
+    
     async def _get_ordered_reservations(self, trip_id: str):
         reservations = await self.reservation_repository.get_by_trip_id(trip_id)
 
         return sorted(
             reservations,
-            key=lambda r: (self.get_priority(r.user.profile), r.reservation_timestamp)
+            key=lambda r: (self.get_priority(r.user.profile, r.boarding_confirmation, r.extra_passenger_name), r.reservation_timestamp)
         )
     
     async def get_all_users_with_reservation_by_trip_id(self, trip_id: str):
@@ -96,6 +106,16 @@ class PriorityEngine:
 
         return ordered_reservations[:capacity]
 
+    async def remove_boarding_confirmation(self, reservation_id: str):
+        reservation = await self.reservation_repository.get_by_id(reservation_id)
+
+        if not reservation:
+            raise NotFoundException("Reserva não encontrada")
+
+        await self.reservation_repository.remove_boarding_confirmation(reservation_id)
+
+        return ResponseHandler.ok(message="Confirmação de embarque removida com sucesso.")
+        
     async def subscriber_staff_generic_to_trip(self, trip_id: str):
         trip = await self.trip_repository.get_by_id(uuid.UUID(trip_id))
         if not trip: raise NotFoundException("Viagem não encontrada")
