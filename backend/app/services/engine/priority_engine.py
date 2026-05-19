@@ -8,6 +8,7 @@ from app.repositories.bus_repository import BusRepository
 from app.core.exceptions import NotFoundException
 from app.enums.enums import BoardingStatus, UserProfile
 from app.core.responses import ResponseHandler
+from app.core.config import Settings
 from .notifications import Notifications
 
 class PriorityEngine:
@@ -172,17 +173,18 @@ class PriorityEngine:
         
         return ResponseHandler.created(new_res, "Inscrição realizada com sucesso.")
 
-    async def cancel_subscription(self, user_id: str, trip_id: str, background_tasks: BackgroundTasks, extra_name: str = None):
-        user_res = await self.reservation_repository.get_reservation_by_user_and_trip_extra_name(user_id, trip_id, extra_name)
+    async def cancel_subscription(self, profile: UserProfile, reservation_id: str, background_tasks: BackgroundTasks):
+        reservation = await self.reservation_repository.get_by_id(reservation_id)
         
-        if not user_res:
+        if not reservation:
             raise NotFoundException("Reserva não encontrada")
       
-        await self.reservation_repository.cancel_reservation(user_res.reservation_id)
+        await self.reservation_repository.cancel_reservation(reservation.reservation_id)
 
-        print("ddsdsddsdsdsdsds", extra_name)
-
-        self.notifications.cancel_subscription_notifications(user_res.user, user_res.trip, user_res, background_tasks)
+        user = reservation.user
+        trip = reservation.trip
+        
+        await self.notifications.cancel_subscription_notifications(user, profile, trip, reservation, background_tasks)
         
         return ResponseHandler.ok(message="Reserva cancelada com sucesso.")
 

@@ -35,6 +35,19 @@ class EmailUseCases:
                 message=f"Erro ao enviar email: {str(e)}"
             )
         
+    def send_cancellation_confirmation_driver(self, email: str, name: str, trip_name: str):
+        try:
+            html = self.template_service.render(
+                "cancellation_driver.html",
+                {
+                    "name": name.split(" ")[0],
+                    "trip_name": trip_name
+                }
+            )
+            self.email_service.send("Confirmação de cancelamento - Rota UEFS 🚍", email, html)
+        except Exception as e:
+            logger.error(f"Erro e-mail cancelamento motorista: {e}")
+
     def send_recover_password(self, email: str, name: str, token: str):
         try:
             html = self.template_service.render(

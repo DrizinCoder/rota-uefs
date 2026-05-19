@@ -52,8 +52,8 @@ class Notifications:
                     user.email, user.full_name, trip.trip_id
                 )
 
-    async def cancel_subscription_notifications(self, user: User, trip: Trip, reservation: Reservation, background_tasks: BackgroundTasks):
-            if user.profile == UserProfile.STAFF:
+    async def cancel_subscription_notifications(self, user: User, profile: UserProfile ,trip: Trip, reservation: Reservation, background_tasks: BackgroundTasks):
+            if profile == UserProfile.STAFF:
                 if reservation.extra_passenger_name not in (None, ""):
                     background_tasks.add_task(
                         EmailUseCases().send_cancellation_confirmation_staff_for_extra_name,
@@ -64,11 +64,16 @@ class Notifications:
                         EmailUseCases().send_cancellation_confirmation_staff,
                         user.email, user.full_name, trip.trip_id
                     )
-            if user.profile == UserProfile.STUDENT:
+            if profile == UserProfile.STUDENT:
                 background_tasks.add_task(
                     EmailUseCases().send_cancellation_confirmation_student,
                     user.email, user.full_name, trip.trip_id
                 )
+
+            if profile == UserProfile.DRIVER:
+                background_tasks.add_task(
+                    EmailUseCases().send_cancellation_confirmation_driver, user.email, user.full_name, trip.trip_id
+                ) 
 
     async def send_trip_cancelled(self, email: str, name: str, trip_id: str, trip_date: str,  background_tasks: BackgroundTasks):
         background_tasks.add_task(

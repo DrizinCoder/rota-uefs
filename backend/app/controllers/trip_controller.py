@@ -3,6 +3,8 @@ import uuid
 from fastapi import BackgroundTasks
 from app.services.engine.priority_engine import PriorityEngine
 from app.services.trip_service import TripService
+from app.enums.enums import UserProfile
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -54,9 +56,9 @@ class TripController:
             logger.error(f"Error fetching subscribers for trip {trip_id}: {e}")
             raise
 
-    async def cancel_subscription(self, user_id: str, trip_id: str, background_tasks: BackgroundTasks, extra_passenger_name: str = None):
+    async def cancel_subscription(self, profile: UserProfile, reservation_id: str, background_tasks: BackgroundTasks):
         try:
-            return await self.priority_engine.cancel_subscription(user_id, trip_id, background_tasks, extra_passenger_name)
+            return await self.priority_engine.cancel_subscription(profile, reservation_id, background_tasks)
         except Exception as e:
-            logger.error(f"Error canceling subscription for trip {trip_id}: {e}")
+            logger.error(f"Error canceling subscription for reservation {reservation_id}: {e}")
             raise
