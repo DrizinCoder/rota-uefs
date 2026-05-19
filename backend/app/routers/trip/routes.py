@@ -1,3 +1,4 @@
+from app.enums.enums import UserProfile
 from app.DTOs.trip import TripDetailFeedItem
 from app.middleware import TokenData
 from app.middleware import get_current_user
@@ -30,6 +31,15 @@ async def get_all_reservations(service: TripService = Depends(get_trip_service))
     result = await service.get_all_reservations()
     return ResponseHandler.ok(result)
 
+@trip_router.get("/feed", response_model=list[TripFeedItem])
+async def get_trips_for_feed(
+    current_user: TokenData = Depends(get_current_user),
+    service: TripService = Depends(get_trip_service)
+):  
+    
+    result = await service.get_trips_for_feed(current_user.driver_id)
+    return ResponseHandler.ok(result)
+
 @trip_router.get("/me/{user_id}")
 async def get_all_trips_by_user_id(user_id: uuid.UUID, controller: TripController = Depends(get_trip_controller)):
     result = await controller.get_all_trips_by_user_id(user_id)
@@ -55,24 +65,16 @@ async def patch_trip(trip_id: uuid.UUID, data: UpdateTripDTO, service: TripServi
     result = await service.patch(trip_id, data)
     return ResponseHandler.ok(result)
 
-@trip_router.delete("/{trip_id}")
-async def delete_trip(trip_id: uuid.UUID, service: TripService = Depends(get_trip_service)):
-    result = await service.delete(trip_id)
-    return ResponseHandler.ok(result)
-
-@trip_router.get("/feed/trips", response_model=list[TripFeedItem])
-async def get_student_trips(
-    current_user: TokenData = Depends(get_current_user),
-    service: TripService = Depends(get_trip_service)
-):
-    result = await service.get_trips_for_student_feed()
-    return ResponseHandler.ok(result)
-
-@trip_router.get("/feed/trips/{trip_id}", response_model=TripDetailFeedItem)
+@trip_router.get("/feed/{trip_id}", response_model=TripDetailFeedItem)
 async def get_trip_detail(
     trip_id: uuid.UUID,
     current_user: TokenData = Depends(get_current_user),
     service: TripService = Depends(get_trip_service),
 ):
     result = await service.get_trip_detail_for_feed(trip_id)
+    return ResponseHandler.ok(result)
+
+@trip_router.delete("/{trip_id}")
+async def delete_trip(trip_id: uuid.UUID, service: TripService = Depends(get_trip_service)):
+    result = await service.delete(trip_id)
     return ResponseHandler.ok(result)
