@@ -14,6 +14,9 @@ def add_ninety_minutes(t: time) -> time:
     dummy = datetime(2000, 1, 1, t.hour, t.minute, t.second)
     return (dummy + timedelta(minutes=90)).time()
 
+def generate_uuid() -> str:
+    return str(uuid.uuid4())
+
 def generate_registration_code(
     reservation_id: uuid.UUID,
     trip_id: uuid.UUID,
