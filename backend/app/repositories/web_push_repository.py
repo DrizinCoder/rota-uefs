@@ -1,9 +1,8 @@
-from app.core.exceptions import ConflictException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 import uuid
 from app.DTOs.web_push import CreateWebPushSubscriptionDTO
-from app.models import PushSubscription
+from app.models.models import PushSubscription
 import logging
 
 logger = logging.getLogger(__name__)
@@ -27,3 +26,7 @@ class PushSubscriptionRepository:
         await self.session.commit()
         await self.session.refresh(push_subscription)
         return push_subscription
+    
+    async def delete(self, subscription: PushSubscription):
+        await self.session.delete(subscription)
+        await self.session.commit()
