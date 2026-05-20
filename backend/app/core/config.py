@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     MAIL_STARTTLS: bool = True
     MAIL_SSL_TLS: bool = False
     USE_CREDENTIALS: bool = True
+    MISFIRE_GRACE_TIME: int 
+    MINUTES_NOTICE: int = 120
     VALIDATE_CERTS: bool = True
     BASE_URL_FRONTEND: str = os.getenv("BASE_URL_FRONTEND")
     REGISTRATION_CODE_SECRET: str = Field(
