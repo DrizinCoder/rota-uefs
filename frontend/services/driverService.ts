@@ -46,5 +46,13 @@ export const driverService = {
             trip_id
         });
         return { success: response.status >= 200 && response.status < 300 };
+    },
+    async desembarcar(reservation_id: string) {
+        const response = await api.patch(`/users/driver/reservation/${reservation_id}/remove/boarding`);
+        return { success: response.status >= 200 && response.status < 300 };
+    },
+    async marcarFalta(reservation_id: string) { 
+        const response = await api.post(`/users/reservation/${reservation_id}/cancel`);
+        return { success: response.status >= 200 && response.status < 300 };
     }
 }
