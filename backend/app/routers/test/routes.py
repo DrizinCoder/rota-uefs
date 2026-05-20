@@ -1,5 +1,6 @@
+import asyncio
 from asyncio.log import logger
-# 1. IMPORTAÇÃO CORRETA E LIMPA
+
 from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, BackgroundTasks
@@ -9,36 +10,30 @@ from app.services.email.use_cases import EmailUseCases
 from app.core.responses import ResponseHandler
 from app.middleware.auth_middleware import TokenData, get_current_user, require_student, require_admin
 from app.core.scheduler import task_scheduler
-from app.core.config import settings
+
+
+from app.services.jobs.verify_quorum import verify_quorum_test
 
 router = APIRouter()
 
 class EmailRequest(BaseModel):
     target_email: str  
 
-def schedule_function_test(menssage: str = "Olá, mundo!", executor: str = "Sistema"):
-    # Corrigido aqui também para usar datetime.now() direto
-    logger.info(f"💥 [JOB EXECUTED] O alarme tocou! Mensagem recebida: {menssage} | Executor: {executor} | Horário de execução: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
-
 @router.get("/schedule")
 async def schedule_test_endpoint():
-    """
-    Endpoint de teste que agenda uma tarefa para daqui a exatamente 1 minuto.
-    """
-    # 2. CHAMADA CORRIGIDA (Sem o .datetime duplicado)
+    
     agora = datetime.now() 
     
-    # Se agora é 23h20, a viagem simulada será às 23h22 (daqui a 2 minutos)
+    
     tempo_viagem_teste = agora + timedelta(minutes=2)
     
-    # 3. CHAMADA DO SEU SCHEDULER ADAPTADA À NOVA ORDEM
-    # Passamos os textos do *args direto e o minutes_notice nomeado no final
+    
     job = task_scheduler.schedule_task(
-        schedule_function_test,                # func
-        tempo_viagem_teste,                    # date / travel_date
-        "Testando o novo agendador com UUID!", # *args[0] -> vai para 'menssage'
-        "Robson",                              # *args[1] -> vai para 'executor'
-        minutes_notice=1                       # 👈 Definido explicitamente como 1 minuto!
+        verify_quorum_test,                
+        tempo_viagem_teste,                    
+        "Testando o novo agendador com UUID!", 
+        "Robson",                              
+        minutes_notice=1                       
     )
     
     if not job:
