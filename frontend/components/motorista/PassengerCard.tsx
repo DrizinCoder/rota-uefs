@@ -13,8 +13,8 @@ interface PassengerCardProps {
   isAvulso?: boolean;
   isWaitlist?: boolean;
   onEmbarcar: (user_id: string, reservation_id: string, trip_id: string) => void;
-  onCancelarEmbarque: (id: string) => void;
-  onMarcarFalta: (id: string) => void;
+  onCancelarEmbarque: (reservation_id: string) => void;
+  onMarcarFalta: (reservation_id: string) => void;
   onRemoverAvulso: (reservation_id: string) => void;
 }
 

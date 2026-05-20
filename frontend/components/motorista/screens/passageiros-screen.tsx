@@ -25,7 +25,7 @@ import {
   UserPlus,
 } from "lucide-react";
 
-import { driverService ,type PassengerListResponse, type Reservation, type Stats } from "@/services/driverService";
+import { driverService ,type PassengerListResponse, type Reservation } from "@/services/driverService";
 
 interface PassageiroFormatado {
   reservation_id: string;
@@ -128,20 +128,6 @@ function PassageirosContent() {
 
   const embarcados = passageiros.filter((p) => p.status === "embarcou").length;
 
-  const alternarCheckIn = (id: string) => { // REMOVER ESSA FUNÇÃO, O EMBARQUE SERÁ FEITO PELO BOTÃO "EMBARCAR"
-    setPassageiros(
-      passageiros.map((p) => {
-        if (p.reservation_id === id) {
-          return {
-            ...p,
-            status: p.status === "embarcou" ? "pendente" : "embarcou",
-          };
-        }
-        return p;
-      }),
-    );
-  };
-
   const handleAdicionarAvulso = async () => {
     try {
       const resultado = await driverService.adicionarAvulso(tripId!);
@@ -180,6 +166,32 @@ function PassageirosContent() {
       console.error("Erro ao embarcar:", erro);
     }
   };
+
+  const handleDesembarcar = async (reservation_id: string) => {
+    try{
+      const resultado = await driverService.desembarcar(reservation_id);
+      if (resultado.success) {
+        setPassageiros(
+          passageiros.map((p) =>
+            p.reservation_id === reservation_id ? { ...p, status: "pendente" } : p
+          )
+        );
+      }
+    } catch (erro) {
+      console.error("Erro ao desembarcar:", erro);status
+    }
+  }
+
+  const handleMarcarFalta = async (reservation_id: string) => {
+    try{
+      const resultado = await driverService.marcarFalta(reservation_id);
+      if (resultado.success) {
+        await carregarPassageiros();
+      }
+    } catch (erro) {
+      console.error("Erro ao marcar falta:", erro);
+    }
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-[#E4F2F1]">
@@ -271,8 +283,8 @@ function PassageirosContent() {
                   isAvulso={passageiro.isAvulso}
                   isWaitlist={false}
                   onEmbarcar={handleEmbarcar}
-                  onCancelarEmbarque={alternarCheckIn}
-                  onMarcarFalta={() => {}}
+                  onCancelarEmbarque={handleDesembarcar}
+                  onMarcarFalta={handleMarcarFalta}
                   onRemoverAvulso={handleRemoverAvulso}
                 />
               ))
@@ -310,8 +322,8 @@ function PassageirosContent() {
                   status="espera"
                   isWaitlist={true}
                   onEmbarcar={handleEmbarcar}
-                  onCancelarEmbarque={alternarCheckIn}
-                  onMarcarFalta={() => {}}
+                  onCancelarEmbarque={handleDesembarcar}
+                  onMarcarFalta={handleMarcarFalta}
                   onRemoverAvulso={handleRemoverAvulso}
                 />
               ))}
