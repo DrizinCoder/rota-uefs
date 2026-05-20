@@ -180,3 +180,17 @@ class PriorityEngine:
                 )
 
         return ResponseHandler.ok(message="Viagem cancelada e usuários notificados.")
+    
+    async def verify_quorum(self, trip_id: str, background_tasks: BackgroundTasks):
+        trip = await self.trip_repository.get_by_id(uuid.UUID(trip_id))
+
+        if not trip: raise NotFoundException("Viagem não encontrada")
+
+        users = await self.trip_repository.get_all_users_with_reservation_active_by_trip_id(trip_id)
+        
+        if not any(u for u in users if u.profile == UserProfile.STAFF or (u.profile == UserProfile.STUDENT and u.is_invited)):
+            await self.trip_repository.cancel_trip(trip_id)
+            await self.alert_cancelled_trip(trip_id, background_tasks)
+            # Realizar notificação push para os usuários informando sobre o cancelamento devido à falta de quorum
+            # (Isso pode ser implementado dentro do método alert_cancelled_trip, que já notifica os usuários sobre o cancelamento da viagem)
+    
