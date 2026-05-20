@@ -15,6 +15,12 @@ class PushSubscriptionRepository:
         result = await self.session.execute(select(PushSubscription).where(PushSubscription.endpoint == endpoint))
         return result.scalar_one_or_none()
 
+    async def find_all_by_user_id(self, user_id: uuid.UUID) -> list[PushSubscription]:
+        result = await self.session.execute(
+            select(PushSubscription).where(PushSubscription.user_id == user_id)
+        )
+        return result.scalars().all()
+
     async def create(self, user_id: uuid.UUID, data: CreateWebPushSubscriptionDTO):
         push_subscription = PushSubscription(
             user_id=user_id,

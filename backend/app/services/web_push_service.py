@@ -1,9 +1,15 @@
+from app.models.models import PushSubscription
+from sqlalchemy.connectors import asyncio
 from app.core.exceptions import NotFoundException
 from app.core.exceptions import ConflictException
-from backend.app.repositories.web_push_repository import PushSubscriptionRepository
-from backend.app.DTOs.web_push import CreateWebPushSubscriptionDTO
+from app.repositories.web_push_repository import PushSubscriptionRepository
+from app.DTOs.web_push import CreateWebPushSubscriptionDTO
 import uuid
 import logging
+from pywebpush import webpush, WebPushException
+from app.core.config import settings
+import json
+from functools import partial
 
 logger = logging.getLogger(__name__)
 
@@ -36,3 +42,42 @@ class PushSubscriptionService:
 
         logger.info(f"Push subscription deleted successfully | User ID: {user_id}")
         return delete_success
+
+    async def _send_to_subscription(self, sub: PushSubscription, title: str, body: str):
+        try:
+            await asyncio.to_thread(
+            partial(
+                webpush,
+                    subscription_info={
+                        "endpoint": sub.endpoint,
+                        "keys": {
+                            "p256dh": sub.p256dh,
+                            "auth": sub.auth
+                        },
+                    },
+                    data=json.dumps({"title": title, "body": body}),
+                    vapid_private_key=settings.vapid_private_key,
+                    vapid_claims={"sub": settings.vapid_claims_email},
+                )
+            )
+            logger.info(f"Push sent successfully | Endpoint: {sub.endpoint}")
+        except WebPushException as e:
+            if e.response and e.response.status_code == 410:
+                logger.warning(f"Subscription expired (410), removing | Endpoint: {sub.endpoint}")
+                await self.push_subscription_repo.delete(sub)
+            else:
+                logger.error(f"Failed to send push | Endpoint: {sub.endpoint} | Error: {e}")
+
+    async def send_to_user(self, user_id: uuid.UUID, title: str, body: str):
+        logger.info(f"Sending push notification | User ID: {user_id}")
+
+        subscriptions = await self.push_subscription_repo.find_all_by_user_id(user_id)
+
+        if not subscriptions:
+            logger.warning(f"No subscriptions found | User ID: {user_id}")
+            return
+
+        await asyncio.gather(*[
+            self._send_to_subscription(sub, title, body)
+            for sub in subscriptions
+        ])
