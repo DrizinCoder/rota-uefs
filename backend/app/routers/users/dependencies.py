@@ -1,3 +1,5 @@
+from app.repositories.web_push_repository import PushSubscriptionRepository
+from app.services.web_push_service import PushSubscriptionService
 from app.repositories.reservation_repository import ReservationRepository
 from app.repositories.bus_repository import BusRepository
 from app.services.engine.priority_engine import PriorityEngine
@@ -65,3 +67,7 @@ async def get_trip_controller(
 ) -> TripController:
     
     return TripController(trip_service, priority_engine)
+
+async def get_push_subscription_service(session: AsyncSession = Depends(get_session)) -> PushSubscriptionService:
+    repo = PushSubscriptionRepository(session)
+    return PushSubscriptionService(repo)
