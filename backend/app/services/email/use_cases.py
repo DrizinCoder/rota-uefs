@@ -14,6 +14,27 @@ class EmailUseCases:
         self.email_service = EmailService()
         self.template_service = TemplateService()
 
+    def send_quorum_not_reached_notification(self, email: str, admin_name: str, trip_name: str):
+        try:
+            html = self.template_service.render(
+                "quorum_not_reached_notification.html",
+                {
+                    "admin_name": admin_name,
+                    "trip_name": trip_name,
+                }
+            )
+
+            self.email_service.send(
+                subject="Viagem sem quórum - Rota UEFS 🚍",
+                email_to=email,
+                html_content=html,
+            )
+
+        except Exception as e:
+            raise InternalServerException(
+                message=f"Erro ao enviar notificação de quórum: {str(e)}"
+            )
+
     def send_welcome(self, email: str, name: str, link: str):
         try:
             html = self.template_service.render(
