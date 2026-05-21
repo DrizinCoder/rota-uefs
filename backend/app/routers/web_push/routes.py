@@ -9,8 +9,6 @@ from app.middleware import TokenData
 from app.core.responses import ResponseHandler
 
 web_push_router = APIRouter(
-    prefix="/web-push",
-    tags=["web-push"]
 )
 
 @web_push_router.post("/subscribe")
@@ -19,7 +17,7 @@ async def subscribe_web_push(
     current_user: TokenData = Depends(get_current_user),
     service: PushSubscriptionService = Depends(get_push_subscription_service)
 ):
-    result = await service.subscribe(current_user.user_id, data)
+    result = await service.subscribe(current_user.sub, data)
     return ResponseHandler.ok(result)
     
 @web_push_router.delete("/unsubscribe")
@@ -28,5 +26,5 @@ async def unsubscribe_web_push(
     current_user: TokenData = Depends(get_current_user),
     service: PushSubscriptionService = Depends(get_push_subscription_service)
 ):
-    result = await service.unsubscribe(current_user.user_id, data)
+    result = await service.unsubscribe(current_user.sub, data)
     return ResponseHandler.ok(result)
