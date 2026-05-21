@@ -58,6 +58,8 @@ class TripService:
                 verify_quorum_job,
                 departure_datetime,
                 str(trip.trip_id),
+                #minutes_notice=60,  # Verificar o quorum 1 hora antes da viagem
+                #misfire_grace_time=3600  # Permitir que a tarefa seja executada mesmo que haja um atraso de até 1 hora
             )
             
         logger.info(f"Trips created successfully | Count: {len(trips)}")
