@@ -25,12 +25,12 @@ class TaskScheduler:
     def start(self):
         if not self.scheduler.running:
             self.scheduler.start()
-            logger.info("⏰ APScheduler iniciado com armazenamento persistente.")
+            logger.info("APScheduler iniciado com armazenamento persistente.")
 
     def shutdown(self):
         if self.scheduler.running:
             self.scheduler.shutdown()
-            logger.info("⏰ APScheduler desligado com sucesso.")
+            logger.info("APScheduler desligado com sucesso.")
 
     def schedule_task(self, func, date: datetime.datetime, *args, minutes_notice: int = settings.MINUTES_NOTICE, misfire_grace_time: int = settings.MISFIRE_GRACE_TIME, **kwargs):
         now = datetime.datetime.now()
@@ -39,7 +39,7 @@ class TaskScheduler:
         
         if now > trigger_time:
             logger.warning(
-                f"⚠️ Não foi possível agendar task'. "
+                f"Não foi possível agendar task'. "
                 f"O horário de disparo calculado ({trigger_time.strftime('%d/%m/%Y %H:%M:%S')}) "
                 f"já passou. (Horário atual: {now.strftime('%d/%m/%Y %H:%M:%S')})"
             )
@@ -57,7 +57,7 @@ class TaskScheduler:
             misfire_grace_time=misfire_grace_time  
         )
         
-        logger.info(f"📌 Tarefa '{job_id}' agendada com sucesso para rodar em: {trigger_time.strftime('%d/%m/%Y %H:%M:%S')}")
+        logger.info(f"Tarefa '{job_id}' agendada com sucesso para rodar em: {trigger_time.strftime('%d/%m/%Y %H:%M:%S')}")
         return job
     
 task_scheduler = TaskScheduler()

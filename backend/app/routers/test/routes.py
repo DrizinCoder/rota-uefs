@@ -12,47 +12,13 @@ from app.middleware.auth_middleware import TokenData, get_current_user, require_
 from app.core.scheduler import task_scheduler
 
 
-from app.services.jobs.verify_quorum import verify_quorum_test
+
 
 router = APIRouter()
 
 class EmailRequest(BaseModel):
     target_email: str  
-
-@router.get("/schedule")
-async def schedule_test_endpoint():
-    
-    agora = datetime.now() 
-    
-    
-    tempo_viagem_teste = agora + timedelta(minutes=2)
-    
-    
-    job = task_scheduler.schedule_task(
-        verify_quorum_test,                
-        tempo_viagem_teste,                    
-        "Testando o novo agendador com UUID!", 
-        "Robson",                              
-        minutes_notice=1                       
-    )
-    
-    if not job:
-        return ResponseHandler.error(
-            message="Não foi possível agendar, o tempo de disparo calculado já passou.",
-            status_code=400
-        )
-        
-    # Calculando o momento exato do disparo (23h22 - 1 minuto = 23h21)
-    momento_disparo = tempo_viagem_teste - timedelta(minutes=1)
-
-    return ResponseHandler.ok(
-        data={
-            "job_id": job.id,  
-            "horario_do_disparo": momento_disparo.strftime('%d/%m/%Y %H:%M:%S'),
-        },
-        message="Tarefa registrada no SQLite. Rodará em 1 minuto!"
-    )
-    
+  
 @router.get("/verify-token")
 async def test_verify_token(current_user: TokenData = Depends(get_current_user)):
     return {
