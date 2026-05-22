@@ -147,4 +147,4 @@ async def delete_account(
     result = await controller.trip_report(trip_id)
     if not result:
         raise NotFoundException("Report could not be generated")
-    return ResponseHandler.created(data=result)
+    return ResponseHandler.ok(data=result)
