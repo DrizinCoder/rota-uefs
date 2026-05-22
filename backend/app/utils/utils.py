@@ -14,7 +14,7 @@ def add_ninety_minutes(t: time) -> time:
     dummy = datetime(2000, 1, 1, t.hour, t.minute, t.second)
     return (dummy + timedelta(minutes=90)).time()
 
-def generate_uuid() -> str:
+def generate_unique_id() -> str:
     return str(uuid.uuid4())
 
 def generate_registration_code(

@@ -5,7 +5,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 
 from app.core.config import settings
-from app.utils.utils import generate_uuid
+from app.utils.utils import generate_unique_id
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ class TaskScheduler:
             )
             return None
             
-        job_id = generate_uuid()
+        job_id = generate_unique_id()
         job = self.scheduler.add_job(
             func=func,
             trigger='date',
