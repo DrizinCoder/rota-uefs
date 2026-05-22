@@ -10,6 +10,9 @@ from app.database.db import get_session
 from app.repositories.user_repository import UserRepository
 from app.services.admin_service import AdminService
 from app.controllers.admin_controller import AdminController
+from app.repositories.trip_repository import TripRepository
+from app.services.trip_service import TripService
+from app.controllers.trip_controller import TripController
 from app.services.admin_service import AdminService
 from app.repositories.user_repository import UserRepository
 from app.controllers.admin_controller import AdminController
@@ -37,6 +40,12 @@ async def get_dashboard_controller(session: AsyncSession = Depends(get_session))
     dashboard_service = DashboardService(dashboard_repo)
     
     return DashboardController(dashboard_service)
+
+async def get_trip_controller(session: AsyncSession = Depends(get_session)) -> TripController:
+    trip_repo = TripRepository(session)
+    trip_service = TripService(trip_repo)
+    
+    return TripController(trip_service, None)
 
 @router.post("/register/motorista")
 async def register_motorista(
@@ -129,3 +138,13 @@ async def delete_account(
     if not result:
         raise NotFoundException("User not found")
     return ResponseHandler.ok("User account has been anonymized successfully")
+
+@router.get("/report/trip/{trip_id}")
+async def delete_account(
+    trip_id: uuid.UUID,
+    controller: TripController = Depends(get_trip_controller)
+):
+    result = await controller.trip_report(trip_id)
+    if not result:
+        raise NotFoundException("Report could not be generated")
+    return ResponseHandler.created(data=result)

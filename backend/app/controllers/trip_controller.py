@@ -1,5 +1,6 @@
 import uuid
 
+from app.services.reports.weasyprint_generator import WeasyPrintGenerator
 from fastapi import BackgroundTasks
 from app.services.engine.priority_engine import PriorityEngine
 from app.services.trip_service import TripService
@@ -52,4 +53,13 @@ class TripController:
             return await self.priority_engine.cancel_subscription(user_id, trip_id, background_tasks, extra_passenger_name)
         except Exception as e:
             logger.error(f"Error canceling subscription for trip {trip_id}: {e}")
+            raise
+
+    async def trip_report(self, trip_id: uuid.UUID):
+        try:
+            report = await self.trip_service.get_trip_report(trip_id)
+            return WeasyPrintGenerator().generate_pdf('insurance_report', report)
+        
+        except Exception as e:
+            logger.error(f"Error generating trip report {trip_id}: {e}")
             raise

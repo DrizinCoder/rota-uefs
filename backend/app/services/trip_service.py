@@ -3,6 +3,7 @@ from app.DTOs.trip import TripFeedResponse
 from app.DTOs.trip import TripDetailFeedItem
 from app.DTOs.trip import TripFeedItem
 from app.DTOs.trip import DriverTripItem
+from app.DTOs.reports import TripInsuranceReportDTO
 from calendar import calendar, monthrange
 from datetime import timedelta
 from app.enums.enums import TripRecurrence
@@ -13,6 +14,7 @@ from app.repositories.trip_repository import TripRepository
 from app.DTOs.trip import CreateTripDTO, UpdateTripDTO
 import logging
 from app.DTOs.trip import WEEKDAY_PT
+
 
 logger = logging.getLogger(__name__)
 
@@ -193,3 +195,13 @@ class TripService:
 
         logger.info(f"Driver trips retrieved | Driver ID: {driver_id} | Count: {len(trips)}")
         return trips
+    
+    async def get_trip_report(self, trip_id: uuid.UUID) -> TripInsuranceReportDTO:
+        logger.info(f"Trip insurance report requested | Trip ID: {trip_id}")
+
+        report = await self.trip_repository.get_trip_insurance_data(trip_id)
+        if not report:
+            raise NotFoundException("Viagem não encontrada")
+
+        logger.info(f"Trip insurance report returned successfully | Trip ID: {trip_id}")
+        return report
