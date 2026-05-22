@@ -144,7 +144,7 @@ class TripService:
 
         logger.info(f"Trips for feed retrieved | Count: {len(trips)}")
 
-        reference_weekday = WEEKDAY_PT[weekday]
+        reference_weekday = WEEKDAY_PT[weekday] if weekday < 5 else WEEKDAY_PT[0]
 
         return TripFeedResponse(
             reference_date=today,
