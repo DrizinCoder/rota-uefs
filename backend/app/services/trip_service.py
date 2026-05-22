@@ -4,13 +4,14 @@ from app.DTOs.trip import TripDetailFeedItem
 from app.DTOs.trip import TripFeedItem
 from app.DTOs.trip import DriverTripItem
 from calendar import calendar, monthrange
-from datetime import timedelta
+from datetime import datetime, timedelta, date
 from app.enums.enums import TripRecurrence
 import uuid
-from datetime import date
 from app.core.exceptions import NotFoundException
 from app.repositories.trip_repository import TripRepository
 from app.DTOs.trip import CreateTripDTO, UpdateTripDTO
+from app.core.scheduler import task_scheduler
+from app.services.jobs.verify_quorum import verify_quorum_job
 import logging
 from app.DTOs.trip import WEEKDAY_PT
 
@@ -49,7 +50,18 @@ class TripService:
             trip_data = data.model_copy(update={"trip_date": trip_date})
             trip = await self.trip_repository.create(trip_data)
             trips.append(trip)
-
+        
+        for trip in trips:
+            departure_datetime = datetime.combine(trip.trip_date, trip.departure_time)
+            
+            task_scheduler.schedule_task(
+                verify_quorum_job,
+                departure_datetime,
+                str(trip.trip_id),
+                #minutes_notice=60,  # Verificar o quorum 1 hora antes da viagem
+                #misfire_grace_time=3600  # Permitir que a tarefa seja executada mesmo que haja um atraso de até 1 hora
+            )
+            
         logger.info(f"Trips created successfully | Count: {len(trips)}")
         return [trip.model_dump(mode='json') for trip in trips]
 

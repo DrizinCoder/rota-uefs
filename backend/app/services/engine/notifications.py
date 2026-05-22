@@ -16,6 +16,20 @@ class Notifications:
         self.reservation_repository = res_repo
         self.bus_repository = bus_repo
     
+    
+    async def send_quorum_not_reached_notification(self, trip: Trip, background_tasks: BackgroundTasks):
+        admins = await self.user_repository.list_all_admins_full()
+        trip_name = trip.route.name if trip.route and trip.route.name else str(trip.trip_id)
+
+        for admin in admins:
+            background_tasks.add_task(
+                EmailUseCases().send_quorum_not_reached_notification,
+                admin.user.email,
+                admin.user.full_name,
+                trip_name,
+            )
+        
+    
     async def subscribe_notifications(
         self, user: User, 
         trip: Trip, 
