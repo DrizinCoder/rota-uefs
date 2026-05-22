@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 class TaskScheduler:
     def __init__(self):
-        self.data_dir = "/app/app/database/scheduler_data"
+        self.data_dir = os.getenv("SCHEDULER_DATA_DIR", "/app/app/database/scheduler_data")
         os.makedirs(self.data_dir, exist_ok=True)
         
         db_path = os.path.join(self.data_dir, "jobs.sqlite")
