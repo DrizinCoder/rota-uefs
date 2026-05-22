@@ -86,6 +86,7 @@ class PriorityEngine:
                 "waitlist_reservations": waitlist_reservations,
                 "stats": {
                     "capacity": capacity,
+                    "total_onboarded": sum(1 for r in ordered_reservations if r.boarding_confirmation == BoardingStatus.BOARDED),
                     "total_reservations": len(ordered_reservations),
                     "waitlist_count": len(waitlist_reservations)
                 }
