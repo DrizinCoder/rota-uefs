@@ -5,7 +5,7 @@ from app.repositories.user_repository import UserRepository
 from app.repositories.reservation_repository import ReservationRepository
 from app.repositories.trip_repository import TripRepository
 from app.repositories.bus_repository import BusRepository
-from app.core.exceptions import NotFoundException
+from app.core.exceptions import InternalServerException, NotFoundException
 from app.enums.enums import BoardingStatus, UserProfile
 from app.core.responses import ResponseHandler
 from app.core.config import Settings
@@ -42,14 +42,17 @@ class PriorityEngine:
             key=lambda r: (self.get_priority(r.user.profile, r.boarding_confirmation, r.extra_passenger_name), r.reservation_timestamp)
         )
         
-    async def get_all_users_with_reservation_by_trip_id(self, trip_id: str):
+    async def get_all_users_with_reservation_by_trip_id(
+        self, 
+        trip_id: str, 
+        background_tasks: BackgroundTasks
+    ):
         trip = await self.trip_repository.get_by_id(uuid.UUID(trip_id))
 
         if not trip:
             raise NotFoundException("Viagem não encontrada")
         
         bus = await self.bus_repository.get_by_plate(trip.bus_license_plate)
-
         capacity = bus.capacity if bus else 0
         
         ordered_reservations = await self._get_ordered_reservations(trip_id)
@@ -61,17 +64,24 @@ class PriorityEngine:
             is_guest = bool(res.extra_passenger_name and res.extra_passenger_name.strip())
             passenger_name = res.extra_passenger_name if is_guest else res.user.full_name
 
+           
+            is_staff_not_registered = res.user.full_name == "Staff Não Registrado"
+            is_onboarded = (res.boarding_confirmation == BoardingStatus.BOARDED) or (index < capacity and is_staff_not_registered)
+
             user_data = {
                 "reservation_id": str(res.reservation_id),
                 "user_id": str(res.user_id),
                 "name": passenger_name,
                 "profile": res.user.profile.value,
-                "onboard": res.boarding_confirmation == BoardingStatus.BOARDED,
+                "onboard": is_onboarded,
                 "is_invited": is_guest,
                 "timestamp": res.reservation_timestamp
             }
 
             if index < capacity:
+                if is_staff_not_registered and res.boarding_confirmation != BoardingStatus.BOARDED:
+                    background_tasks.add_task(self._bg_confirm_staff_boarding, res.reservation_id)
+                        
                 valid_reservations.append(user_data)
             else:
                 waitlist_reservations.append(user_data)
@@ -86,13 +96,14 @@ class PriorityEngine:
                 "waitlist_reservations": waitlist_reservations,
                 "stats": {
                     "capacity": capacity,
+                    "total_onboarded": sum(1 for r in valid_reservations if r["onboard"]),
                     "total_reservations": len(ordered_reservations),
                     "waitlist_count": len(waitlist_reservations)
                 }
             },
             message="Listagem de passageiros na viagem."
         )
-
+        
     async def get_valid_reservation(self, trip_id: uuid.UUID):
         trip = await self.trip_repository.get_by_id(trip_id)
 
@@ -116,6 +127,18 @@ class PriorityEngine:
         await self.reservation_repository.remove_boarding_confirmation(reservation_id)
 
         return ResponseHandler.ok(message="Confirmação de embarque removida com sucesso.")
+    
+    
+    async def _trip_is_available(self, trip_id: str):
+        data = await self.trip_repository.get_bus_capacity_and_total_reservations_by_trip_id(uuid.UUID(trip_id)) 
+        return data and data.capacity > data.total_reservations
+        
+        
+    async def _bg_confirm_staff_boarding(self, reservation_id: uuid.UUID):
+        try:
+            await self.reservation_repository.confirm_boarding(reservation_id)
+        except Exception as e:      
+            return InternalServerException(f"Erro ao confirmar embarque de servidor avulso em background: {e}")
         
     async def subscriber_staff_generic_to_trip(self, trip_id: str):
         trip = await self.trip_repository.get_by_id(uuid.UUID(trip_id))
@@ -124,11 +147,14 @@ class PriorityEngine:
         staff_generic_user = await self.user_repository.get_by_registration_id("STAFF_UNREGISTERED")
 
         if not staff_generic_user: raise NotFoundException("Usuário genérico de servidor(a) não encontrado")
-            
+        
+        boarded_status = BoardingStatus.BOARDED if await self._trip_is_available(trip_id) else BoardingStatus.NOT_BOARDED
+                    
         await self.reservation_repository.create(
             user_id=staff_generic_user.user_id, 
             trip_id=trip_id, 
-            extra_name=None
+            extra_name=None,
+            boarding_status=boarded_status
         )
 
         return ResponseHandler.created(message="Servidor(a) genérico inscrito na viagem.")   

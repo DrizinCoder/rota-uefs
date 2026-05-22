@@ -79,10 +79,11 @@ async def subscribe_user(
 @user_router.get("/trip/{trip_id}/subscribers")
 async def get_subscribers(
     trip_id: str,
+    background_tasks: BackgroundTasks,
     controller: TripController = Depends(get_trip_controller),
     _: TokenData = Depends(get_current_user)
 ):
-    return await controller.get_subscribers(trip_id)
+    return await controller.get_subscribers(trip_id, background_tasks)
 
 @user_router.post("/reservation/{reservation_id}/cancel")
 async def cancel_subscription(
