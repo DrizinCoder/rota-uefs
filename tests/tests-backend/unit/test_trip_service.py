@@ -1,6 +1,6 @@
 import asyncio
 import uuid
-from datetime import date
+from datetime import date, time
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -40,17 +40,25 @@ def test_generate_dates_monthly_excludes_weekends():
 
 def test_create_returns_list_of_json_trips():
     trip1 = MagicMock()
+    trip1.trip_date = date(2026, 5, 1)
+    trip1.departure_time = time(8, 0)
     trip1.model_dump.return_value = {'trip_id': str(uuid.uuid4())}
+
     repository = AsyncMock()
     repository.create.return_value = trip1
     service = TripService(repository)
-    dto = MagicMock(recurrence=TripRecurrence.SINGLE, trip_date=date(2026, 5, 1), model_copy=lambda update: MagicMock())
+
+    dto = MagicMock(
+        recurrence=TripRecurrence.SINGLE,
+        trip_date=date(2026, 5, 1),
+        departure_time=time(8, 0),
+        model_copy=lambda update={}: MagicMock(trip_date=date(2026, 5, 1), departure_time=time(8, 0))
+    )
 
     result = asyncio.run(service.create(dto))
 
     assert isinstance(result, list)
     assert result[0] == {'trip_id': str(uuid.UUID(result[0]['trip_id']))}
-
 
 def test_get_by_id_raises_not_found_when_trip_missing():
     repository = AsyncMock()
