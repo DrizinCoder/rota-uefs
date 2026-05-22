@@ -6,8 +6,9 @@ from app.repositories.reservation_repository import ReservationRepository
 from app.repositories.trip_repository import TripRepository
 from app.repositories.bus_repository import BusRepository
 from app.core.exceptions import NotFoundException
-from app.enums.enums import UserProfile
+from app.enums.enums import BoardingStatus, UserProfile
 from app.core.responses import ResponseHandler
+from app.core.config import Settings
 from .notifications import Notifications
 
 class PriorityEngine:
@@ -19,16 +20,26 @@ class PriorityEngine:
 
         self.notifications = Notifications(user_repo, trip_repo, res_repo, bus_repo)
 
-    def get_priority(self, profile):
-        priorities = {UserProfile.STAFF: 0, UserProfile.STUDENT: 1}
-        return priorities.get(profile, 99)
+    def get_priority(self, profile: UserProfile, boarding_status: BoardingStatus, extra_name: str = None):
+        if boarding_status == BoardingStatus.BOARDED:
+            return -1
 
+        if profile == UserProfile.STAFF:
+            if extra_name and extra_name.strip():
+                return 1  
+            return 0      
+
+        if profile == UserProfile.STUDENT:
+            return 2
+
+        return 99
+    
     async def _get_ordered_reservations(self, trip_id: str):
         reservations = await self.reservation_repository.get_by_trip_id(trip_id)
 
         return sorted(
             reservations,
-            key=lambda r: (self.get_priority(r.user.profile), r.reservation_timestamp)
+            key=lambda r: (self.get_priority(r.user.profile, r.boarding_confirmation, r.extra_passenger_name), r.reservation_timestamp)
         )
         
     async def get_all_users_with_reservation_by_trip_id(self, trip_id: str):
@@ -55,6 +66,7 @@ class PriorityEngine:
                 "user_id": str(res.user_id),
                 "name": passenger_name,
                 "profile": res.user.profile.value,
+                "onboard": res.boarding_confirmation == BoardingStatus.BOARDED,
                 "is_invited": is_guest,
                 "timestamp": res.reservation_timestamp
             }
@@ -66,6 +78,10 @@ class PriorityEngine:
 
         return ResponseHandler.ok(
             data={
+                "trip_id": trip.trip_id,
+                "boarding_point": trip.route.boarding_point,
+                "drop_off_point": trip.route.drop_off_point,
+                "route_name": trip.route.name,
                 "valid_reservations": valid_reservations,
                 "waitlist_reservations": waitlist_reservations,
                 "stats": {
@@ -74,7 +90,7 @@ class PriorityEngine:
                     "waitlist_count": len(waitlist_reservations)
                 }
             },
-            message="Listagem de passageiros."
+            message="Listagem de passageiros na viagem."
         )
 
     async def get_valid_reservation(self, trip_id: uuid.UUID):
@@ -91,6 +107,16 @@ class PriorityEngine:
 
         return ordered_reservations[:capacity]
 
+    async def remove_boarding_confirmation(self, reservation_id: str):
+        reservation = await self.reservation_repository.get_by_id(reservation_id)
+
+        if not reservation:
+            raise NotFoundException("Reserva não encontrada")
+
+        await self.reservation_repository.remove_boarding_confirmation(reservation_id)
+
+        return ResponseHandler.ok(message="Confirmação de embarque removida com sucesso.")
+        
     async def subscriber_staff_generic_to_trip(self, trip_id: str):
         trip = await self.trip_repository.get_by_id(uuid.UUID(trip_id))
         if not trip: raise NotFoundException("Viagem não encontrada")
@@ -153,15 +179,18 @@ class PriorityEngine:
         
         return ResponseHandler.created(new_res, "Inscrição realizada com sucesso.")
 
-    async def cancel_subscription(self, user_id: str, trip_id: str, background_tasks: BackgroundTasks, extra_name: str = None):
-        user_res = await self.reservation_repository.get_reservation_by_user_and_trip_extra_name(user_id, trip_id, extra_name)
+    async def cancel_subscription(self, profile: UserProfile, reservation_id: str, background_tasks: BackgroundTasks):
+        reservation = await self.reservation_repository.get_by_id(reservation_id)
         
-        if not user_res:
+        if not reservation:
             raise NotFoundException("Reserva não encontrada")
       
-        await self.reservation_repository.cancel_reservation(user_res.reservation_id)
+        await self.reservation_repository.cancel_reservation(reservation.reservation_id)
 
-        await self.notifications.cancel_subscription_notifications(user_res.user, user_res.trip, user_res, background_tasks)
+        user = reservation.user
+        trip = reservation.trip
+        
+        await self.notifications.cancel_subscription_notifications(user, profile, trip, reservation, background_tasks)
         
         return ResponseHandler.ok(message="Reserva cancelada com sucesso.")
 
