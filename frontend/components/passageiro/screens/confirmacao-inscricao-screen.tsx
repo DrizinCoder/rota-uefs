@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -18,7 +18,7 @@ import {
 export function ConfirmacaoInscricaoScreen() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   const [viagemSelecionada, setViagemSelecionada] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -26,7 +26,7 @@ export function ConfirmacaoInscricaoScreen() {
   useEffect(() => {
     async function fetchTrip() {
       const viagemId = searchParams.get("viagemId");
-      
+
       if (!viagemId) {
         setIsLoading(false);
         return;
@@ -50,7 +50,7 @@ export function ConfirmacaoInscricaoScreen() {
 
 
         // Se a viagem for Salvador-Feira ou Feira-Salvador, adiciona 2 horas ao horário de término
-        const isSalvadorFeira = 
+        const isSalvadorFeira =
           (origem.toLowerCase().includes("salvador") && destino.toLowerCase().includes("feira")) ||
           (origem.toLowerCase().includes("feira") && destino.toLowerCase().includes("salvador"));
 
@@ -119,8 +119,8 @@ export function ConfirmacaoInscricaoScreen() {
     <div className="flex min-h-screen flex-col bg-[#E4F2F1]">
       <Navigation />
 
-      <main className="flex-1 w-full max-w-2xl mx-auto py-12 px-4">
-        <Button
+      <main className="flex-1 w-full max-w-5xl mx-auto py-12 px-4 ">
+        <Button 
           variant="ghost"
           onClick={() => router.back()}
           className="mb-6 text-[#103173] font-bold hover:bg-[#103173]/5"

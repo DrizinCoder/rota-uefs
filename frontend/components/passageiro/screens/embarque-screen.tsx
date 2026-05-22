@@ -1,12 +1,34 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, QrCode } from "lucide-react";
+import { ArrowLeft, Loader2, QrCode } from "lucide-react";
+import { driverService } from "@/services/driverService";
 
 export function EmbarqueScreen() {
   const router = useRouter();
-  const codigoViagem = "UEFS-7729-X";
+  const searchParams = useSearchParams();
+  const trip_id = searchParams.get("trip_id");
+  
+  const [qrCode, setQrCode] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (trip_id) {
+      driverService.obterCodigoEmbarque(trip_id)
+        .then(data => {
+            setQrCode(data);
+        })
+        .catch(err => console.error("Erro ao carregar qr code", err))
+        .finally(() => setIsLoading(false));
+        console.log("Service", driverService);
+    } else {
+        setIsLoading(false);
+    }
+  }, [trip_id]);
+
+  const codigoViagem = "---";
 
   return (
     <div className="flex min-h-screen flex-col bg-[#E4F2F1] items-center justify-center p-4">
@@ -34,8 +56,14 @@ export function EmbarqueScreen() {
 
         <CardContent className="flex flex-col items-center p-10">
           <div className="bg-white p-6 border-[6px] border-[#F2D022] rounded-[40px] mb-10 shadow-xl">
-            <div className="bg-slate-50 w-56 h-56 flex items-center justify-center rounded-2xl border-2 border-dashed border-slate-200">
-              <QrCode className="h-40 w-40 text-[#103173]" />
+            <div className="bg-slate-50 w-56 h-56 flex items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 overflow-hidden">
+              {isLoading ? (
+                <Loader2 className="h-10 w-10 text-[#103173] animate-spin" />
+              ) : qrCode ? (
+                <img src={`data:image/png;base64,${qrCode}`} alt="QR Code de Embarque" className="w-full h-full object-contain p-2" />
+              ) : (
+                <QrCode className="h-40 w-40 text-[#103173]" />
+              )}
             </div>
           </div>
 

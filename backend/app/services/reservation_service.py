@@ -93,15 +93,17 @@ class ReservationService:
         return {"message": "Checkin manual realizado com sucesso"}
             
     
-    async def get_checkin_code(self, user: User, trip_id: str):
-        logger.info(f"Checkin code lookup requested | User ID: {user.user_id} | Trip ID: {trip_id}")
+    async def get_checkin_code(self, user_id: str, trip_id: str):
+        logger.info(f"Checkin code lookup requested | User ID: {user_id} | Trip ID: {trip_id}")
 
-        reservation = await self.repository.get_by_trip_and_user_id(user.user_id, trip_id)
-        if not reservation:
+        reservations = await self.repository.get_by_trip_and_user_id(user_id, trip_id)
+        if not reservations:
             raise NotFoundException("Reserva não encontrada!")
+            
+        reservation = reservations[0]
 
-        code = generate_registration_code(reservation.reservation_id, trip_id, user.registration_id)
+        code = generate_registration_code(reservation.reservation_id, trip_id, reservation.user.registration_id)
         qr_base64 = generate_qr_code_base64(code)
 
-        logger.info(f"Checkin code retrieved successfully | User ID: {user.user_id} | Trip ID: {trip_id}")
+        logger.info(f"Checkin code retrieved successfully | User ID: {user_id} | Trip ID: {trip_id}")
         return qr_base64
