@@ -40,6 +40,23 @@ class TripRepository:
         await self.session.refresh(trip)
         return trip
 
+    async def get_bus_capacity_and_total_reservations_by_trip_id(self, trip_id: uuid.UUID):
+        stmt = (
+            select(
+                Bus.capacity,
+                func.count(Reservation.reservation_id).label("total_reservations")
+            )
+            .select_from(Trip)
+            .join(Bus, Trip.bus_license_plate == Bus.bus_plate)
+            .outerjoin(Reservation, Trip.trip_id == Reservation.trip_id)
+            .where(Trip.trip_id == trip_id)
+            .group_by(Trip.trip_id, Bus.capacity)
+        )
+        
+        result = await self.session.execute(stmt)
+        
+        return result.first()
+
     async def get_all(self):
         statement = (
             select(Trip)
