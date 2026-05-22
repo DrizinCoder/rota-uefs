@@ -1,3 +1,6 @@
+from app.routers.users.dependencies import get_reservation_service
+from app.services.reservation_service import ReservationService
+from app.DTOs.users import CheckinCodeRequest
 from app.services.trip_service import TripService
 from app.routers.users.dependencies import get_trip_service
 from app.DTOs.trip import PassengerTripItem, SubscribeData
@@ -96,4 +99,13 @@ async def get_passenger_trips(
     service: TripService = Depends(get_trip_service),
 ):
     result = await service.get_trips_for_passenger(current_user.sub)
+    return ResponseHandler.ok(result)
+
+@user_router.get("/trips/checkin_code/{trip_id}")
+async def get_checkin_code(
+    trip_id: uuid.UUID,
+    current_user: TokenData = Depends(get_current_user),
+    service: ReservationService = Depends(get_reservation_service)
+):
+    result = await service.get_checkin_code(current_user.sub, trip_id)
     return ResponseHandler.ok(result)

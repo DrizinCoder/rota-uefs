@@ -1,3 +1,4 @@
+from app.services.reservation_service import ReservationService
 from app.repositories.web_push_repository import PushSubscriptionRepository
 from app.services.web_push_service import PushSubscriptionService
 from app.repositories.reservation_repository import ReservationRepository
@@ -71,3 +72,10 @@ async def get_trip_controller(
 async def get_push_subscription_service(session: AsyncSession = Depends(get_session)) -> PushSubscriptionService:
     repo = PushSubscriptionRepository(session)
     return PushSubscriptionService(repo)
+
+# Reservation Dependencies
+
+async def get_reservation_service(session: AsyncSession = Depends(get_session)) -> ReservationService:
+    repo = ReservationRepository(session)
+    priority_engine = get_priority_engine(session)
+    return ReservationService(repo, priority_engine)

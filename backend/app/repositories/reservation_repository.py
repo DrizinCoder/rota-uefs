@@ -150,6 +150,20 @@ class ReservationRepository:
         results = await self.session.execute(stmt)
         return results.scalars().all()
  
+    async def get_by_trip_and_user_id(self, user_id: str, trip_ID: str):
+        stmt = (
+            select(Reservation)
+            .where(Reservation.trip_id == trip_ID)
+            .where(Reservation.user_id == user_id)
+            .where(Reservation.boarding_confirmation != BoardingStatus.CANCELLED)
+            .order_by(Reservation.reservation_timestamp)
+            .options(joinedload(Reservation.user)) 
+        )
+
+        results = await self.session.execute(stmt)
+        return results.scalars().all()
+ 
+
     async def get_by_id_checkin(self, reservation_id: uuid.UUID) -> Reservation | None:
         statement = (
             select(Reservation)
