@@ -1,6 +1,8 @@
 ﻿"use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { passengerService } from "@/services/homeService";
 import { Navigation } from "@/components/landing/navigation";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,17 +17,102 @@ import {
 
 export function ConfirmacaoInscricaoScreen() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  const [viagemSelecionada, setViagemSelecionada] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const viagemSelecionada = {
-    origem: "Burger King / ao lado do Sam's Club",
-    destino: "UEFS",
-    horarioInicio: "06:00",
-    horarioFim: "08:00",
-    data: "Segunda-feira, 6 de Abril",
-  };
+  useEffect(() => {
+    async function fetchTrip() {
+      const viagemId = searchParams.get("viagemId");
+      
+      if (!viagemId) {
+        setIsLoading(false);
+        return;
+      }
 
-  const handleConfirmar = () => {
-    router.push("/passageiro/status");
+      try {
+        const tripData = await passengerService.getTripById(viagemId);
+
+        let origem = "Não informada";
+        let destino = "Não informada";
+
+        if (tripData.route_id) {
+          const routeData = await passengerService.getRouteById(tripData.route_id);
+          origem = routeData.boarding_point;
+          destino = routeData.drop_off_point;
+        } else {
+          // Fallback caso a rota venha vazia
+          origem = tripData.boarding_point || origem;
+          destino = tripData.drop_off_point || destino;
+        }
+
+
+        // Se a viagem for Salvador-Feira ou Feira-Salvador, adiciona 2 horas ao horário de término
+        const isSalvadorFeira = 
+          (origem.toLowerCase().includes("salvador") && destino.toLowerCase().includes("feira")) ||
+          (origem.toLowerCase().includes("feira") && destino.toLowerCase().includes("salvador"));
+
+        let horarioFim = "--:--";
+        if (isSalvadorFeira && tripData.departure_time) {
+          const [hoursStr, minutesStr] = tripData.departure_time.split(":");
+          if (hoursStr && minutesStr) {
+            let hours = parseInt(hoursStr, 10);
+            hours = (hours + 2) % 24;
+            horarioFim = `${hours.toString().padStart(2, "0")}:${minutesStr.substring(0, 2)}`;
+          }
+        }
+
+        setViagemSelecionada({
+          origem,
+          destino,
+          horarioInicio: tripData.departure_time ? tripData.departure_time.substring(0, 5) : "",
+          horarioFim,
+        });
+        console.log("Trip Data:", tripData);
+      } catch (error) {
+        console.error("Erro ao buscar detalhes da viagem:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchTrip();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#E4F2F1]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#103173]"></div>
+      </div>
+    );
+  }
+
+  if (!viagemSelecionada) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-[#E4F2F1] px-4 text-center">
+        <AlertCircle className="h-12 w-12 text-amber-600 mb-4" />
+        <h2 className="text-xl font-bold text-[#103173] mb-2">Viagem não encontrada</h2>
+        <p className="text-[#103173]/70 mb-6">Não conseguimos carregar os detalhes desta viagem.</p>
+        <Button onClick={() => router.back()} className="bg-[#103173]">Voltar para Rotas</Button>
+      </div>
+    );
+  }
+
+  const handleConfirmar = async () => {
+    try {
+      setIsSubmitting(true);
+      const viagemId = searchParams.get("viagemId");
+      if (!viagemId) return;
+
+      await passengerService.subscribeUser(viagemId);
+      router.push(`/passageiro/status?viagemId=${viagemId}`);
+    } catch (error) {
+      console.error("Erro ao confirmar inscrição:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -110,9 +197,10 @@ export function ConfirmacaoInscricaoScreen() {
           <CardFooter className="p-8 pt-0 flex flex-col gap-4">
             <Button
               onClick={handleConfirmar}
+              disabled={isSubmitting}
               className="w-full h-16 bg-[#23B99A] hover:bg-[#1a8a73] text-white font-black text-lg rounded-2xl shadow-xl shadow-[#23B99A]/20 transition-all hover:scale-[1.02] active:scale-95"
             >
-              CONFIRMAR MINHA VAGA
+              {isSubmitting ? "CONFIRMANDO..." : "CONFIRMAR MINHA VAGA"}
             </Button>
             <p className="text-center text-[11px] text-[#73AABF] font-bold uppercase tracking-tighter">
               Ao confirmar, você se compromete com o horário estabelecido.

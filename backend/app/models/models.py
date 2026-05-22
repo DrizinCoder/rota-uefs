@@ -34,6 +34,11 @@ class User(SQLModel, table=True):
     )
     reservations: List["Reservation"] = Relationship(back_populates="user")
 
+    push_subscriptions: List["PushSubscription"] = Relationship(
+        back_populates="user",
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    )
+
 class Staff(SQLModel, table=True):
     staff_id: uuid.UUID = Field(
         foreign_key="user.user_id", 
@@ -121,3 +126,18 @@ class Reservation(SQLModel, table=True):
 
     trip: Trip = Relationship(back_populates="reservations")
     user: User = Relationship(back_populates="reservations")
+
+class PushSubscription(SQLModel, table=True):
+    subscription_id: uuid.UUID = Field(
+        default_factory=uuid.uuid4,
+        primary_key=True,
+        index=True,
+        nullable=False
+    )
+    
+    user_id: uuid.UUID = Field(foreign_key="user.user_id")
+    endpoint: str = Field(unique=True)
+    p256dh: str
+    auth: str
+
+    user: User = Relationship(back_populates="push_subscriptions")

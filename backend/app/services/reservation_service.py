@@ -3,8 +3,9 @@ import uuid
 from app.utils.utils import generate_registration_code
 import logging
 from app.DTOs.checkin import ManualCheckinRequestDTO
+from app.enums.enums import BoardingStatus
 from app.repositories.reservation_repository import ReservationRepository
-from app.core.exceptions import NotFoundException, UnauthorizedException
+from app.core.exceptions import NotFoundException, UnauthorizedException, ForbiddenException
 import hmac
 
 logger = logging.getLogger(__name__)
@@ -36,6 +37,9 @@ class ReservationService:
         if not reservation:
             raise NotFoundException("Reserva não encontrada")
 
+        if reservation.boarding_confirmation == BoardingStatus.BOARDED:
+            raise ForbiddenException("Usuário já embarcado")
+
         expected_code = generate_registration_code(
             reservation.reservation_id,
             reservation.trip_id,
@@ -54,6 +58,7 @@ class ReservationService:
         await self.repository.update_boarding(reservation)
 
         logger.info(f"Checkin successful | Reservation ID: {reservation_id_str}")
+        
         return {"message": "Checkin realizado com sucesso"}
             
     async def manual_checkin(self, data: ManualCheckinRequestDTO):
@@ -63,6 +68,9 @@ class ReservationService:
 
         if not reservation:
             raise NotFoundException("Reserva não encontrada")
+
+        if reservation.boarding_confirmation == BoardingStatus.BOARDED:
+            raise ForbiddenException("Usuário já embarcado")
         
         if not (
                 data.reservation_id == str(reservation.reservation_id) and 
@@ -79,5 +87,6 @@ class ReservationService:
         await self.repository.update_boarding(reservation)
 
         logger.info(f"Checkin successful | Reservation ID: {data.reservation_id}")
+
         return {"message": "Checkin manual realizado com sucesso"}
             

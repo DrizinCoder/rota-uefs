@@ -16,7 +16,7 @@ export function EmptyDayCard({
       <CalendarDays className="h-10 w-10 text-slate-300 mb-3" />
       <p className="text-[#103173] font-bold">{titulo}</p>
       <p className="text-slate-500 text-sm mt-1">
-        {subtitulo ?? `Não há viagens disponíveis ${diaNome?.toLowerCase()}.`}
+        {subtitulo ?? `Não há viagens disponíveis.`}
       </p>
     </div>
   );

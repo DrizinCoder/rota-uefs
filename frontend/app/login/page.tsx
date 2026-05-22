@@ -34,14 +34,6 @@ const LOGIN_SUPPORT_PHRASES = [
   "Conta institucional para a comunidade acadêmica da UEFS.",
 ];
 
-const REDIRECT_MAP: Record<string, string> = {
-  Student: "/passageiro",
-  Staff: "/professor",
-  Faculty: "/professor",
-  Driver: "/motorista",
-  Admin: "/admin",
-};
-
 export default function LoginPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -55,8 +47,18 @@ export default function LoginPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (erro) setErro("");
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const REDIRECT_MAP: Record<string, string> = {
+    Student: "/passageiro",
+    Staff: "/passageiro",
+    Faculty: "/passageiro",
+    Driver: "/motorista",
+    Admin: "/admin",
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

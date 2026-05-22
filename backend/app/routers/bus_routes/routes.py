@@ -10,7 +10,7 @@ from app.DTOs.routes import CreateRouteDTO, UpdateRouteDTO
 
 router = APIRouter(
     prefix="/routes", tags=["Routes"],
-    dependencies=[Depends(require_admin)]
+    #dependencies=[Depends(require_admin)]
 )
 
 async def get_route_service(session: AsyncSession = Depends(get_session)) -> RouteService:

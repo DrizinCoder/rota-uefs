@@ -79,12 +79,6 @@ function getNavItems(tipo: TipoUsuario): NavItem[] {
           real: true,
           icon: Ticket,
         },
-        {
-          label: "Check-in",
-          href: "/passageiro/validar",
-          real: true,
-          icon: QrCode,
-        },
       ];
 
     case "Staff":
@@ -95,12 +89,6 @@ function getNavItems(tipo: TipoUsuario): NavItem[] {
           href: "/minhas-viagens?tipo=Staff",
           real: true,
           icon: Ticket,
-        },
-        {
-          label: "Check-in",
-          href: "/passageiro/validar",
-          real: true,
-          icon: QrCode,
         },
       ];
 

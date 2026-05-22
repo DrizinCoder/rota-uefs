@@ -41,7 +41,7 @@ class PriorityEngine:
             reservations,
             key=lambda r: (self.get_priority(r.user.profile, r.boarding_confirmation, r.extra_passenger_name), r.reservation_timestamp)
         )
-    
+        
     async def get_all_users_with_reservation_by_trip_id(self, trip_id: str):
         trip = await self.trip_repository.get_by_id(uuid.UUID(trip_id))
 
@@ -169,7 +169,13 @@ class PriorityEngine:
             extra_name=extra_name
         )
 
-        await self.notifications.subscribe_notifications(user, trip, new_res, background_tasks)
+        ordered_reservations = await self._get_ordered_reservations(trip_id)
+        position = next(
+            (i + 1 for i, r in enumerate(ordered_reservations) if r.reservation_id == new_res.reservation_id),
+            None
+        )
+
+        await self.notifications.subscribe_notifications(user, trip, new_res, background_tasks, position)
         
         return ResponseHandler.created(new_res, "Inscrição realizada com sucesso.")
 
@@ -203,3 +209,17 @@ class PriorityEngine:
                 )
 
         return ResponseHandler.ok(message="Viagem cancelada e usuários notificados.")
+    
+    
+    
+    async def verify_quorum(self, trip_id: str, background_tasks: BackgroundTasks):
+        trip = await self.trip_repository.get_by_id(uuid.UUID(trip_id))
+
+        if not trip: raise NotFoundException("Viagem não encontrada")
+        
+        reservations = await self.reservation_repository.get_reservation_of_staff(trip_id)
+        
+        if not reservations:
+            await self.notifications.send_quorum_not_reached_notification(trip, background_tasks)
+            
+        

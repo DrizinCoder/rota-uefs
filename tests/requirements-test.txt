@@ -1,0 +1,24 @@
+-r ../backend/requirements.txt
+
+# Dependências do Backend
+pytest==8.4.0
+pytest-cov==4.1.0
+requests==2.31.0
+
+# Dependências de preparação para os testes do Frontend
+nodeenv==1.10.0
+-e .
+
+# Observações
+# - As dependências Python para testes estão listadas acima.
+# - O pacote local de tests executa `tests/setup.py` automaticamente durante a instalação.
+
+# Como preparar todo o ambiente de testes
+# Execute a partir da raiz do repositório:
+#   pip install -r tests/requirements-test.txt
+
+# Depois, rode os testes backend:
+#   pytest
+
+# Depois, rode os testes frontend a partir da raiz:
+#   npm --prefix tests/tests-frontend run test:e2e
