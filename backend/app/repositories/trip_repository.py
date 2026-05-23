@@ -387,7 +387,7 @@ class TripRepository:
                 Trip.bus_license_plate,
                 Route.boarding_point,
                 Route.drop_off_point,
-                DriverUser.name.label("driver_name")
+                DriverUser.full_name.label("driver_name")
             )
             .join(Route, Route.route_id == Trip.route_id)
             .join(DriverUser, DriverUser.user_id == Trip.driver_id)
@@ -402,17 +402,17 @@ class TripRepository:
         
         passengers_statement = (
             select(
-                User.name,
+                User.full_name,
                 User.email,
-                Reservation.registration_id,
-                User.role.label("user_role")
+                User.registration_id,
+                User.profile.label("user_role")
             )
             .join(Reservation, Reservation.user_id == User.user_id)
             .where(
                 Reservation.trip_id == trip_id,
-                Reservation.boarding_confirmation != BoardingStatus.CANCELLED
+                Reservation.boarding_confirmation == BoardingStatus.BOARDED
             )
-            .order_by(User.name)
+            .order_by(User.full_name)
         )
 
         passengers_result = await self.session.execute(passengers_statement)
@@ -420,10 +420,10 @@ class TripRepository:
 
         passenger_list = [
             PassengerInsuranceItem(
-                name=p.name,
+                name=p.full_name,
                 email=p.email,
                 registration_id=str(p.registration_id),
-                user_role=str(p.user_role)
+                user_role=p.user_role
             )
             for p in passengers_rows
         ]

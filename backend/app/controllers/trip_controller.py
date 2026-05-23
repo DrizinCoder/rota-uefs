@@ -1,5 +1,6 @@
+from datetime import datetime
 import uuid
-
+import base64
 from app.services.reports.weasyprint_generator import WeasyPrintGenerator
 from fastapi import BackgroundTasks
 from app.services.engine.priority_engine import PriorityEngine
@@ -58,8 +59,10 @@ class TripController:
     async def trip_report(self, trip_id: uuid.UUID):
         try:
             report = await self.trip_service.get_trip_report(trip_id)
-            return WeasyPrintGenerator().generate_pdf('insurance_report', report)
-        
+            log_data = {'timestamp':datetime.now(),'title':'trip_report'}
+            bytes = WeasyPrintGenerator().generate_pdf('insurance_report.html', report, log_data)
+            return base64.b64encode(bytes)
+
         except Exception as e:
             logger.error(f"Error generating trip report {trip_id}: {e}")
             raise
