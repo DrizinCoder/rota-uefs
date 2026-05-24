@@ -23,10 +23,10 @@ class DashboardController:
     
     async def trip_report(self, trip_id: uuid.UUID):
         try:
-            report = await self.trip_service.get_trip_report(trip_id)
+            report = await self.service.get_trip_report(trip_id)
             log_data = {'timestamp':datetime.now(),'title':'trip_report'}
             bytes = WeasyPrintGenerator().generate_pdf('insurance_report.html', report, log_data)
-            
+
             return base64.b64encode(bytes)
 
         except Exception as e:
