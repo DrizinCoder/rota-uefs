@@ -108,5 +108,5 @@ async def get_checkin_code(
     current_user: TokenData = Depends(get_current_user),
     service: ReservationService = Depends(get_reservation_service)
 ):
-    result = await service.get_checkin_code(current_user.sub, trip_id)
+    result = await service.get_checkin_code(current_user, trip_id)
     return ResponseHandler.ok(result)

@@ -1,3 +1,5 @@
+import asyncio
+from starlette.concurrency import run_in_threadpool
 from app.models.models import User
 from app.utils.utils import generate_qr_code_base64
 from app.services.engine.priority_engine import PriorityEngine
@@ -91,19 +93,40 @@ class ReservationService:
         logger.info(f"Checkin successful | Reservation ID: {data.reservation_id}")
 
         return {"message": "Checkin manual realizado com sucesso"}
-            
-    
-    async def get_checkin_code(self, user_id: str, trip_id: str):
-        logger.info(f"Checkin code lookup requested | User ID: {user_id} | Trip ID: {trip_id}")
 
-        reservations = await self.repository.get_by_trip_and_user_id(user_id, trip_id)
+    @staticmethod
+    def _sync_generate_qr(reservation_id: str, trip_id: str, registration_id: str) -> str:
+        code = generate_registration_code(reservation_id, trip_id, registration_id)
+        return generate_qr_code_base64(code)
+
+    async def get_checkin_code(self, user: User, trip_id: str):
+        logger.info(f"Checkin code lookup requested | User ID: {user.user_id} | Trip ID: {trip_id}")
+
+        reservations = await self.repository.get_by_trip_and_user_id(user.user_id, trip_id)
         if not reservations:
             raise NotFoundException("Reserva não encontrada!")
-            
-        reservation = reservations[0]
 
-        code = generate_registration_code(reservation.reservation_id, trip_id, reservation.user.registration_id)
-        qr_base64 = generate_qr_code_base64(code)
+        tasks = [
+            run_in_threadpool(
+                self._sync_generate_qr,
+                res.reservation_id,
+                trip_id,
+                user.registration_id
+            )
+            for res in reservations
+        ]
 
-        logger.info(f"Checkin code retrieved successfully | User ID: {user_id} | Trip ID: {trip_id}")
-        return qr_base64
+        qr_codes = await asyncio.gather(*tasks)
+
+        result = [
+            {
+                "name": res.extra_passenger_name or user.full_name,
+                "qr_code": qr
+            }
+            for res, qr in zip(reservations, qr_codes)
+        ]
+
+        logger.info(f"Checkin code(s) retrieved successfully | User ID: {user.user_id} | Trip ID: {trip_id}")
+        return result
+
+    

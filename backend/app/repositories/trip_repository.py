@@ -80,6 +80,47 @@ class TripRepository:
             for trip in trips
         ]
 
+    async def get_all_with_reservation(self):
+        statement = (
+        select(Trip)
+        .options(
+            selectinload(Trip.driver),
+            selectinload(Trip.route),
+            selectinload(Trip.reservations).selectinload(Reservation.user)
+        )
+    )
+
+        result = await self.session.execute(statement)
+        trips = result.scalars().all()
+
+        return [
+            {
+                **trip.model_dump(mode='json'),
+                "driver_name": trip.driver.full_name if trip.driver else None,
+                "route_name": trip.route.name if trip.route else None,
+                "boarding_point": trip.route.boarding_point if trip.route else None,
+                "drop_off_point": trip.route.drop_off_point if trip.route else None,
+                
+                "total_reservations": len(trip.reservations),
+                
+                "total_checkins": sum(
+                    1 for res in trip.reservations 
+                    if res.boarding_confirmation == BoardingStatus.BOARDED
+                ),
+                
+                "teachers_count": sum(
+                    1 for res in trip.reservations 
+                    if res.user and res.user.profile in [UserProfile.STAFF]
+                ),
+                
+                "students_count": sum(
+                    1 for res in trip.reservations 
+                    if res.user and res.user.profile == UserProfile.STUDENT
+                ),
+            }
+            for trip in trips
+        ]
+
     async def cancel_trip(self, trip_id: str):
         trip = await self.get_by_id(trip_id)
         if not trip:
