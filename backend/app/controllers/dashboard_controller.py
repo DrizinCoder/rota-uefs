@@ -35,7 +35,7 @@ class DashboardController:
         headers = [
             "trip_id", "trip_date", "departure_time", "bus_license_plate", 
             "driver_name", "boarding_point", "drop_off_point",
-            "name", "email", "registration_id", "user_role"
+            "name", "email", "registration_id", "user_role", "boarding_status"
         ]
 
         dados = []

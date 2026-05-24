@@ -25,9 +25,13 @@
                 <div class="info-label">Motorista</div>
                 <div class="info-value">{{ report.driver_name }}</div>
             </div>
+            <div class="info-item">
+                <div class="info-label">Taxa de Conversão (Embarque)</div>
+                <div class="info-value">{{ report.boarding_conversion_rate }}</div>
+            </div>
         </div>
 
-        <h3>Manifesto de Passageiros Confirmados (Total: {{ report.total_passengers }})</h3>
+        <h3>Manifesto de Passageiros Confirmados (Total: {{ report.total_passengers }} BOARDED / {{ report.total_reservations }} Reservas)</h3>
         
         <table style="margin-bottom: 40px;">
             <thead>
@@ -35,6 +39,7 @@
                     <th>Nome do Passageiro</th>
                     <th>Vínculo Institucional</th>
                     <th>Documento (Matrícula)</th>
+                    <th>Status de Embarque</th>
                 </tr>
             </thead>
             <tbody>
@@ -43,10 +48,11 @@
                     <td>{{ passenger.name }}</td>
                     <td>{{ passenger.user_role._value_ }}</td>
                     <td>{{ passenger.registration_id }}</td>
+                    <td>{{ passenger.boarding_status._value_ }}</td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="3" style="text-align: center; color: #64748b; font-style: italic;">
+                    <td colspan="4" style="text-align: center; color: #64748b; font-style: italic;">
                         Nenhum passageiro confirmado para esta viagem.
                     </td>
                 </tr>

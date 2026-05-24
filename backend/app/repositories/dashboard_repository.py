@@ -80,33 +80,34 @@ class DashboardRepository:
         if not trip_row:
             return None
         
-        passengers_statement = (
+        all_reservations_statement = (
             select(
+                Reservation.boarding_confirmation,
                 User.full_name,
                 User.email,
                 User.registration_id,
                 User.profile.label("user_role")
             )
             .join(Reservation, Reservation.user_id == User.user_id)
-            .where(
-                Reservation.trip_id == trip_id,
-                Reservation.boarding_confirmation == BoardingStatus.BOARDED
-            )
+            .where(Reservation.trip_id == trip_id)
             .order_by(User.full_name)
         )
 
-        passengers_result = await self.session.execute(passengers_statement)
-        passengers_rows = passengers_result.all()
+        all_reservations_result = await self.session.execute(all_reservations_statement)
+        all_reservations_rows = all_reservations_result.all()
 
         passenger_list = [
             PassengerInsuranceItem(
                 name=p.full_name,
                 email=p.email,
                 registration_id=str(p.registration_id),
-                user_role=p.user_role
+                user_role=p.user_role,
+                boarding_status=p.boarding_confirmation
             )
-            for p in passengers_rows
+            for p in all_reservations_rows
         ]
+
+        boarded_count = sum(1 for p in passenger_list if p.boarding_status == BoardingStatus.BOARDED)
 
         return TripInsuranceReportDTO(
             trip_id=trip_row.trip_id,
@@ -116,7 +117,8 @@ class DashboardRepository:
             driver_name=trip_row.driver_name,
             boarding_point=trip_row.boarding_point,
             drop_off_point=trip_row.drop_off_point,
-            total_passengers=len(passenger_list),
+            total_passengers=boarded_count,
+            total_reservations=len(passenger_list),
             passengers=passenger_list
         )
     
@@ -150,6 +152,7 @@ class DashboardRepository:
         passengers_statement = (
             select(
                 Reservation.trip_id,
+                Reservation.boarding_confirmation,
                 User.full_name,
                 User.email,
                 User.registration_id,
@@ -157,8 +160,7 @@ class DashboardRepository:
             )
             .join(Reservation, Reservation.user_id == User.user_id)
             .where(
-                Reservation.trip_id.in_(trip_ids),
-                Reservation.boarding_confirmation == BoardingStatus.BOARDED
+                Reservation.trip_id.in_(trip_ids)
             )
             .order_by(User.full_name)
         )
@@ -172,13 +174,15 @@ class DashboardRepository:
                 name=p.full_name,
                 email=p.email,
                 registration_id=str(p.registration_id),
-                user_role=p.user_role
+                user_role=p.user_role,
+                boarding_status=p.boarding_confirmation
             )
             passengers_by_trip[p.trip_id].append(passenger_item)
 
         reports = []
         for trip in trip_rows:
             passenger_list = passengers_by_trip[trip.trip_id]
+            boarded_count = sum(1 for p in passenger_list if p.boarding_status == BoardingStatus.BOARDED)
             
             reports.append(
                 TripInsuranceReportDTO(
@@ -189,7 +193,8 @@ class DashboardRepository:
                     driver_name=trip.driver_name,
                     boarding_point=trip.boarding_point,
                     drop_off_point=trip.drop_off_point,
-                    total_passengers=len(passenger_list),
+                    total_passengers=boarded_count,
+                    total_reservations=len(passenger_list),
                     passengers=passenger_list
                 )
             )
