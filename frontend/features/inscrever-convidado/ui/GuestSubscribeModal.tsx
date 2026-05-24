@@ -72,10 +72,10 @@ export function GuestSubscribeModal({ viagemId, onClose }: GuestSubscribeModalPr
             {erro && <p className="text-xs font-bold text-red-500 ml-1">{erro}</p>}
           </div>
 
-          <TripModeToggle 
+          {/* <TripModeToggle 
             modalidadeAtual={modalidade} 
             onChange={setModalidade} 
-          />
+          /> */}
 
           <Button
             className="w-full h-14 rounded-2xl bg-[#23B99A] hover:bg-[#1d9980] text-white font-black text-lg mt-4 shadow-lg shadow-[#23B99A]/30 transition-all"

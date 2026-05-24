@@ -1,9 +1,9 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Loader2, QrCode } from "lucide-react";
+import { ArrowLeft, Loader2, QrCode, ChevronLeft, ChevronRight } from "lucide-react";
 import { driverService } from "@/services/driverService";
 
 interface PassengerQRCode {
@@ -18,12 +18,12 @@ export function EmbarqueScreen() {
   
   const [qrCodes, setQrCodes] = useState<PassengerQRCode[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const carouselRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (trip_id) {
       driverService.obterCodigoEmbarque(trip_id)
         .then(data => {
-          console.log(data)
           setQrCodes(Array.isArray(data) ? data : []);
         })
         .catch(err => console.error("Erro ao carregar qr code", err))
@@ -32,6 +32,18 @@ export function EmbarqueScreen() {
         setIsLoading(false);
     }
   }, [trip_id]);
+
+  const scrollLeft = () => {
+    if (carouselRef.current) {
+      carouselRef.current.scrollBy({ left: -250, behavior: "smooth" });
+    }
+  };
+
+  const scrollRight = () => {
+    if (carouselRef.current) {
+      carouselRef.current.scrollBy({ left: 250, behavior: "smooth" });
+    }
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-[#E4F2F1] items-center justify-center p-4">
@@ -49,7 +61,7 @@ export function EmbarqueScreen() {
           </CardTitle>
         </CardHeader>
 
-        <CardContent className="flex flex-col items-center p-6 w-full">
+        <CardContent className="flex flex-col items-center p-6 w-full relative">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20">
               <Loader2 className="h-10 w-10 text-[#103173] animate-spin mb-4" />
@@ -60,23 +72,47 @@ export function EmbarqueScreen() {
               {qrCodes.length > 1 && (
                 <div className="mb-2 text-[#73AABF] animate-pulse">
                   <span className="text-[10px] font-black uppercase tracking-widest">
-                    Deslize para ver mais →
+                    Deslize para ver mais
                   </span>
                 </div>
               )}
-              <div className="flex w-full overflow-x-auto snap-x snap-mandatory pb-6 pt-2 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-                {qrCodes.map((item, index) => (
-                  <div key={index} className="flex flex-col items-center w-full shrink-0 snap-center px-2">
-                    <p className="text-[#103173] font-black uppercase text-xl mb-4 text-center line-clamp-1 break-all px-4">
-                      {item.name}
-                    </p>
-                    <div className="bg-white p-4 border-[6px] border-[#F2D022] rounded-[40px] shadow-lg shrink-0">
-                      <div className="bg-slate-50 w-56 h-56 flex items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 overflow-hidden">
-                        <img src={`data:image/png;base64,${item.qr_code}`} alt={`QR Code de ${item.name}`} className="w-full h-full object-contain p-2" />
+              <div className="relative w-full flex items-center">
+                {qrCodes.length > 1 && (
+                  <button 
+                    onClick={scrollLeft}
+                    className="absolute left-0 z-10 p-2 bg-white/90 rounded-full shadow-lg text-[#103173] hover:bg-gray-100 focus:outline-none -ml-2"
+                  >
+                    <ChevronLeft className="h-6 w-6" />
+                  </button>
+                )}
+
+                <div 
+                  ref={carouselRef}
+                  className="flex w-full overflow-x-auto snap-x snap-mandatory pb-6 pt-2 [&::-webkit-scrollbar]:hidden" 
+                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                >
+                  {qrCodes.map((item, index) => (
+                    <div key={index} className="flex flex-col items-center w-full shrink-0 snap-center px-2">
+                      <p className="text-[#103173] font-black uppercase text-xl mb-4 text-center line-clamp-1 break-all px-4">
+                        {item.name}
+                      </p>
+                      <div className="bg-white p-4 border-[6px] border-[#F2D022] rounded-[40px] shadow-lg shrink-0">
+                        <div className="bg-slate-50 w-56 h-56 flex items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 overflow-hidden">
+                          <img src={`data:image/png;base64,${item.qr_code}`} alt={`QR Code de ${item.name}`} className="w-full h-full object-contain p-2" />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+
+                {qrCodes.length > 1 && (
+                  <button 
+                    onClick={scrollRight}
+                    className="absolute right-0 z-10 p-2 bg-white/90 rounded-full shadow-lg text-[#103173] hover:bg-gray-100 focus:outline-none -mr-2"
+                  >
+                    <ChevronRight className="h-6 w-6" />
+                  </button>
+                )}
               </div>
             </div>
           ) : (
