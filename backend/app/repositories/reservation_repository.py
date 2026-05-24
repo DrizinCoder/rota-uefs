@@ -30,12 +30,13 @@ class ReservationRepository:
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def create(self, user_id: str, trip_id: str, extra_name: str = None):
+    async def create(self, user_id: str, trip_id: str, extra_name: str = None, boarding_status: BoardingStatus = BoardingStatus.NOT_BOARDED ):
         timestamp = datetime.now()
 
         stmt = insert(Reservation).values(
             user_id=user_id, 
             trip_id=trip_id,
+            boarding_confirmation=boarding_status,
             extra_passenger_name=extra_name,
             reservation_timestamp=timestamp
         ).returning(Reservation)
@@ -83,7 +84,40 @@ class ReservationRepository:
             return True 
         
         return False
+    
+    async def remove_boarding_confirmation(self, reservation_id: str):
+        stmt = (
+            select(Reservation)
+            .where(Reservation.reservation_id == reservation_id)
+        )
+
+        result = await self.session.execute(stmt)
+        reservation = result.scalar_one_or_none()
+
+        if reservation:
+            reservation.boarding_confirmation = BoardingStatus.NOT_BOARDED
+            reservation.boarding_timestamp = None
+            await self.session.commit()
+            return True 
         
+        return False
+        
+    async def confirm_boarding(self, reservation_id: str):
+        stmt = (
+            select(Reservation)
+            .where(Reservation.reservation_id == reservation_id)
+        )
+
+        result = await self.session.execute(stmt)
+        reservation = result.scalar_one_or_none()
+
+        if reservation:
+            reservation.boarding_confirmation = BoardingStatus.BOARDED
+            reservation.boarding_timestamp = datetime.now()
+            await self.session.commit()
+            return True 
+        
+        return False
 
     async def activate_reservation(self, reservation_id: str):
         timestamp = datetime.now()
@@ -133,6 +167,20 @@ class ReservationRepository:
         results = await self.session.execute(stmt)
         return results.scalars().all()
  
+    async def get_by_trip_and_user_id(self, user_id: str, trip_ID: str):
+        stmt = (
+            select(Reservation)
+            .where(Reservation.trip_id == trip_ID)
+            .where(Reservation.user_id == user_id)
+            .where(Reservation.boarding_confirmation != BoardingStatus.CANCELLED)
+            .order_by(Reservation.reservation_timestamp)
+            .options(joinedload(Reservation.user)) 
+        )
+
+        results = await self.session.execute(stmt)
+        return results.scalars().all()
+ 
+
     async def get_by_id_checkin(self, reservation_id: uuid.UUID) -> Reservation | None:
         statement = (
             select(Reservation)

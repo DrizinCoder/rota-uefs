@@ -8,6 +8,9 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
+      - ./backend/app/database/scheduler_data:/app/app/database/scheduler_data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
     environment:
       DATABASE_URL: postgresql+asyncpg://user:password@db:5432/meu_banco
     depends_on:
@@ -42,3 +45,4 @@ services:
 volumes:
   pgdata:
   node_modules:
+  scheduler_data:

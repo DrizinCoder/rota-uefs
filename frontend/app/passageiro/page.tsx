@@ -77,7 +77,7 @@ export default function PaginaPassageiro() {
     if (data?.reference_weekday) {
       setDiaAtivo(normalizarDia(data.reference_weekday));
     }
-  }, [data])
+  }, [data]);
 
   const viagensDoDia = (data?.trips || []).filter(viagem => viagem.weekday === diaAtivo);
 

@@ -2,6 +2,7 @@ from app.routers.checkin.routes import checkin_router
 from app.routers.trip.routes import trip_router
 from fastapi import APIRouter
 
+from app.routers.web_push.routes import web_push_router
 from app.routers.users.routes import user_router
 from app.routers.test.routes import router as test_router
 from app.routers.admin.routes import router as adm_router
@@ -19,3 +20,4 @@ router.include_router(bus_routes_router, prefix="/routes")
 router.include_router(fleet_router, prefix="/fleet")
 router.include_router(trip_router, prefix="/trip")
 router.include_router(checkin_router, prefix="/checkin")
+router.include_router(web_push_router, prefix="/web-push")

@@ -22,12 +22,17 @@ class Settings(BaseSettings):
     MAIL_STARTTLS: bool = True
     MAIL_SSL_TLS: bool = False
     USE_CREDENTIALS: bool = True
+    MISFIRE_GRACE_TIME: int 
+    MINUTES_NOTICE: int = 120
     VALIDATE_CERTS: bool = True
     BASE_URL_FRONTEND: str = os.getenv("BASE_URL_FRONTEND")
     REGISTRATION_CODE_SECRET: str = Field(
         default="dev-registration-code-secret-altere-em-producao",
         description="Segredo HMAC para assinar códigos de registro (defina em produção).",
     )
+    VAPID_PRIVATE_KEY: str
+    VAPID_PUBLIC_KEY: str
+    VAPID_CLAIMS_EMAIL: str
 
     class Config:
         env_file = ".env"
