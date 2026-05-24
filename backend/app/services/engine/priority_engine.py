@@ -20,7 +20,7 @@ class PriorityEngine:
 
         self.notifications = Notifications(user_repo, trip_repo, res_repo, bus_repo)
 
-    def get_priority(self, profile: UserProfile, boarding_status: BoardingStatus, extra_name: str = None):
+    def get_priority(self, profile: UserProfile, boarding_status: BoardingStatus = None, extra_name: str = None):
         if boarding_status == BoardingStatus.BOARDED:
             return -1
 

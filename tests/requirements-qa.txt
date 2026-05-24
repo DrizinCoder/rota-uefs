@@ -15,7 +15,7 @@ nodeenv==1.10.0
 
 # Como preparar todo o ambiente de testes
 # Execute a partir da raiz do repositório:
-#   pip install -r tests/requirements-test.txt
+#   pip install tests/requirements-qa.txt
 
 # Depois, rode os testes backend:
 #   pytest

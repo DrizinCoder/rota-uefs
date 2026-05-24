@@ -11,6 +11,10 @@ os.environ.setdefault("MAIL_PASSWORD", "password")
 os.environ.setdefault("MAIL_FROM", "test@example.com")
 os.environ.setdefault("BASE_URL_FRONTEND", "https://rota-uefs/test")
 os.environ.setdefault("REFRESH_TOKEN_EXPIRE_DAYS", "30")
+os.environ.setdefault("MISFIRE_GRACE_TIME", "30")
+os.environ.setdefault("VAPID_PRIVATE_KEY", "test-private-key")
+os.environ.setdefault("VAPID_PUBLIC_KEY", "test-public-key")
+os.environ.setdefault("VAPID_CLAIMS_EMAIL", "test@example.com")
 
 import pytest
 from fastapi import HTTPException, Depends
