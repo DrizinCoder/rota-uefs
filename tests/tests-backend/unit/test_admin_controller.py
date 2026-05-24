@@ -1,4 +1,4 @@
-﻿import pytest
+import pytest
 import uuid
 from types import SimpleNamespace
 from app.controllers.admin_controller import AdminController
