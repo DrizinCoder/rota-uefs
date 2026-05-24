@@ -17,7 +17,7 @@ class WeasyPrintGenerator(PDFGeneratorInterface):
 
     def generate_pdf(self, template_name: str, context: Dict[str, Any], log_data: Dict[str, Any]) -> bytes:
         template = self.env.get_template(template_name)
-        html_content = template.render(report=context, log=log_data)
+        html_content = template.render(**context, log=log_data)
         pdf_bytes = HTML(string=html_content).write_pdf()
     
         return pdf_bytes

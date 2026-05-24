@@ -150,3 +150,14 @@ async def audit_report(
         raise NotFoundException("Report could not be generated")
     return ResponseHandler.ok(data=result)
     
+@router.get("/report/monthly")
+async def monthly_report(
+    month: date,
+    format: str,
+    controller: DashboardController = Depends(get_dashboard_controller)
+):
+    result = await controller.monthly_report(month, format)
+    if not result:
+        raise NotFoundException("Report could not be generated")
+    return ResponseHandler.ok(data=result)
+    

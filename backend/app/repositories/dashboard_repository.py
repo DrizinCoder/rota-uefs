@@ -1,3 +1,6 @@
+import calendar
+from collections import defaultdict
+from typing import List
 import uuid
 from datetime import date
 from sqlalchemy import and_, select, func, case, distinct
@@ -116,3 +119,79 @@ class DashboardRepository:
             total_passengers=len(passenger_list),
             passengers=passenger_list
         )
+    
+    async def get_monthly_trip_insurance_data(self, target_month: date) -> List[TripInsuranceReportDTO]:
+        DriverUser = aliased(User)
+
+        start_date = date(target_month.year, target_month.month, 1)
+        _, last_day = calendar.monthrange(target_month.year, target_month.month)
+        end_date = date(target_month.year, target_month.month, last_day)
+
+        trip_statement = (
+            select(
+                Trip.trip_id,
+                Trip.trip_date,
+                Trip.departure_time,
+                Trip.bus_license_plate,
+                Route.boarding_point,
+                Route.drop_off_point,
+                DriverUser.full_name.label("driver_name")
+            )
+            .join(Route, Route.route_id == Trip.route_id)
+            .join(DriverUser, DriverUser.user_id == Trip.driver_id)
+            .where(Trip.trip_date.between(start_date, end_date)) 
+        )
+
+        trip_result = await self.session.execute(trip_statement)
+        trip_rows = trip_result.all()
+
+        trip_ids = [t.trip_id for t in trip_rows]
+
+        passengers_statement = (
+            select(
+                Reservation.trip_id,
+                User.full_name,
+                User.email,
+                User.registration_id,
+                User.profile.label("user_role")
+            )
+            .join(Reservation, Reservation.user_id == User.user_id)
+            .where(
+                Reservation.trip_id.in_(trip_ids),
+                Reservation.boarding_confirmation == BoardingStatus.BOARDED
+            )
+            .order_by(User.full_name)
+        )
+
+        passengers_result = await self.session.execute(passengers_statement)
+        passengers_rows = passengers_result.all()
+
+        passengers_by_trip = defaultdict(list)
+        for p in passengers_rows:
+            passenger_item = PassengerInsuranceItem(
+                name=p.full_name,
+                email=p.email,
+                registration_id=str(p.registration_id),
+                user_role=p.user_role
+            )
+            passengers_by_trip[p.trip_id].append(passenger_item)
+
+        reports = []
+        for trip in trip_rows:
+            passenger_list = passengers_by_trip[trip.trip_id]
+            
+            reports.append(
+                TripInsuranceReportDTO(
+                    trip_id=trip.trip_id,
+                    trip_date=trip.trip_date,
+                    departure_time=trip.departure_time,
+                    bus_license_plate=trip.bus_license_plate,
+                    driver_name=trip.driver_name,
+                    boarding_point=trip.boarding_point,
+                    drop_off_point=trip.drop_off_point,
+                    total_passengers=len(passenger_list),
+                    passengers=passenger_list
+                )
+            )
+
+        return reports
