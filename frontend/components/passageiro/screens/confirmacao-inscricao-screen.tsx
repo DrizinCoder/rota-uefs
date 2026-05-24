@@ -70,7 +70,6 @@ export function ConfirmacaoInscricaoScreen() {
           horarioInicio: tripData.departure_time ? tripData.departure_time.substring(0, 5) : "",
           horarioFim,
         });
-        console.log("Trip Data:", tripData);
       } catch (error) {
         console.error("Erro ao buscar detalhes da viagem:", error);
       } finally {
