@@ -16,7 +16,7 @@ def test_get_by_id_without_password_raises_not_found():
         asyncio.run(service.get_by_id_without_password('00000000-0000-0000-0000-000000000000'))
 
 
-def test_check_email_available_raises_conflict():
+def test_check_email_available_raises_conflict_when_email_exists():
     repository = AsyncMock()
     repository.get_by_email.return_value = {'email': 'teste@uefs.br'}
     service = UserService(repository)
@@ -28,12 +28,22 @@ def test_check_email_available_raises_conflict():
 def test_update_email_successfully_updates_user_email():
     repository = AsyncMock()
     repository.get_by_id.return_value = SimpleNamespace(email='old@test.com')
+    repository.update = AsyncMock()
     service = UserService(repository)
 
     asyncio.run(service.update_email('00000000-0000-0000-0000-000000000000', 'new@test.com'))
 
-    assert repository.update.await_count == 1
-    assert repository.get_by_id.await_count == 1
+    repository.update.assert_awaited_once()
+    repository.get_by_id.assert_awaited_once()
+
+
+def test_update_email_raises_not_found_when_user_missing():
+    repository = AsyncMock()
+    repository.get_by_id.return_value = None
+    service = UserService(repository)
+
+    with pytest.raises(NotFoundException):
+        asyncio.run(service.update_email('00000000-0000-0000-0000-000000000000', 'new@test.com'))
 
 
 def test_update_password_raises_bad_request_when_passwords_differ():
@@ -64,6 +74,15 @@ def test_update_phone_returns_updated_user():
 
     assert updated == {'phone': '55555555'}
     repository.patch.assert_awaited_once()
+
+
+def test_delete_account_raises_not_found_when_user_missing():
+    repository = AsyncMock()
+    repository.anonymize.return_value = None
+    service = UserService(repository)
+
+    with pytest.raises(NotFoundException):
+        asyncio.run(service.delete_account('00000000-0000-0000-0000-000000000000'))
 
 
 def test_list_students_returns_students():

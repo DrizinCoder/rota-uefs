@@ -57,7 +57,7 @@ test.describe('Registration Flow', () => {
     await fillStudentForm(page);
     await expectNoInvalidFields(page);
 
-    await page.getByRole('button', { name: /cadastrar/i }).first().click();
+    await page.getByRole('button', { name: /criar conta/i }).first().click();
     await expect(page).toHaveURL(/\/login/, { timeout: 10000 });
   });
 
@@ -69,15 +69,9 @@ test.describe('Registration Flow', () => {
     await fillStudentForm(page);
     await expectNoInvalidFields(page);
 
-    const dialogPromise = page.waitForEvent('dialog');
+    await page.getByRole('button', { name: /criar conta/i }).first().click();
 
-    await page.getByRole('button', { name: /cadastrar/i }).first().click();
-
-    const dialog = await dialogPromise;
-    const dialogMessage = dialog.message();
-    await dialog.dismiss();
-
-    expect(dialogMessage).toMatch(/erro ao cadastrar/i);
+    await expect(page.getByText(/erro ao realizar cadastro/i)).toBeVisible({ timeout: 5000 });
 
     await expect(page).toHaveURL(/\/cadastro\/aluno/);
   });
@@ -102,15 +96,9 @@ test.describe('Registration Flow', () => {
     await fillProfessorForm(page);
     await expectNoInvalidFields(page);
 
-    const dialogPromise = page.waitForEvent('dialog');
-
     await page.getByRole('button', { name: /solicitar cadastro/i }).first().click();
 
-    const dialog = await dialogPromise;
-    const dialogMessage = dialog.message();
-    await dialog.dismiss();
-
-    expect(dialogMessage).toMatch(/erro ao cadastrar/i);
+    await expect(page.getByText(/erro ao realizar cadastro/i)).toBeVisible({ timeout: 5000 });
 
     await expect(page).toHaveURL(/\/cadastro\/professor/);
   });
