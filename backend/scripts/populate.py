@@ -1,6 +1,7 @@
 import os
 import asyncio
 import random
+import uuid
 from datetime import date, time, datetime, timedelta
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
@@ -36,7 +37,7 @@ def generate_random_name():
     return f"{random.choice(NAMES)} {random.choice(SURNAMES)}"
 
 async def populate():
-    print("🚀 Iniciando super população do banco de dados (Gerando +10 de cada)...")
+    print("🚀 Iniciando super população do banco de dados (Com Staff Genérico + 10 de cada)...")
     
     # Dicionários/Listas para guardar credenciais para o log
     logs_credentials = {
@@ -67,7 +68,7 @@ async def populate():
                     registration_status=RegistrationStatus.ACTIVE
                 )
                 session.add(user)
-                await session.flush() # Flush gera o user_id (UUID) necessário para o Admin
+                await session.flush()
                 
                 admin = Admin(
                     admin_id=user.user_id, 
@@ -77,8 +78,31 @@ async def populate():
                 
                 logs_credentials["ADMIN"].append((reg_id, password_plain, full_name))
 
-            # 2. GERAR STAFF / SERVIDORES (10)
+            # 2. GERAR STAFF / SERVIDORES
             print("💼 Criando Servidores/Staff...")
+            
+            # 2.1 FIXO: Criando o Servidor Genérico Obrigatório para o Sistema
+            generic_staff_user = User(
+                full_name="Staff Não Registrado",
+                password=pwd_context.hash("staff_gen_2026"),
+                registration_id="STAFF_UNREGISTERED", # O ID esperado pelo seu repositório
+                phone="00000000000",
+                email="staff_unregistered@uefs.br",
+                profile=UserProfile.STAFF,
+                registration_status=RegistrationStatus.ACTIVE
+            )
+            session.add(generic_staff_user)
+            await session.flush()
+            
+            generic_staff = Staff(
+                staff_id=generic_staff_user.user_id,
+                employment_type=EmploymentType.FACULTY,
+                department="Geral"
+            )
+            session.add(generic_staff)
+            logs_credentials["STAFF"].append(("STAFF_UNREGISTERED", "staff_gen_2026", "Staff Não Registrado (GENÉRICO)"))
+
+            # 2.2 DINÂMICOS: +10 Servidores aleatórios
             for i in range(1, 11):
                 full_name = generate_random_name()
                 reg_id = f"STF{200 + i}"
@@ -106,7 +130,7 @@ async def populate():
                 
                 logs_credentials["STAFF"].append((reg_id, password_plain, full_name))
 
-            # 3. GERAR ALUNOS (15 para garantir volume)
+            # 3. GERAR ALUNOS (15)
             print("🎓 Criando Alunos...")
             for i in range(1, 16):
                 full_name = generate_random_name()
@@ -124,13 +148,12 @@ async def populate():
                     registration_status=RegistrationStatus.ACTIVE
                 )
                 session.add(user)
-                # Aluno não tem tabela filha associada obrigatoriamente no seu modelo, flush opcional aqui
                 
                 logs_credentials["STUDENT"].append((reg_id, password_plain, full_name))
 
             # 4. GERAR MOTORISTAS (10)
             print("🚌 Criando Motoristas...")
-            drivers_ids = [] # Guardar ids para vincular nas viagens depois
+            drivers_ids = []
             for i in range(1, 11):
                 full_name = generate_random_name()
                 reg_id = f"MOT{400 + i}"
@@ -180,10 +203,9 @@ async def populate():
 
             # 7. GERAR VIAGENS (15)
             print("📅 Agendando Viagens...")
-            await session.flush() # Garante que todas as entidades anteriores possuem ID válido em memória
+            await session.flush()
             
             for i in range(1, 16):
-                # Define datas variadas (hoje, amanhã, etc)
                 trip_date = date.today() + timedelta(days=random.randint(0, 3))
                 departure_time = time(hour=random.choice([6, 7, 12, 13, 18, 22]), minute=random.choice([0, 15, 30]))
                 
@@ -197,10 +219,10 @@ async def populate():
                 )
                 session.add(trip)
 
-            # Envia tudo de uma vez para o banco de dados de maneira transacional
+            # Transação única e segura
             await session.commit()
 
-        # --- GERAÇÃO DO ARQUIVO DE LOGS SEPARADO POR CATEGORIA ---
+        # --- GERAÇÃO DO ARQUIVO DE LOGS ---
         print("📝 Escrevendo arquivo de logs...")
         os.makedirs("logs", exist_ok=True)
         with open("logs/database.txt", "w", encoding="utf-8") as f:
@@ -211,13 +233,13 @@ async def populate():
             
             for profile, accounts in logs_credentials.items():
                 f.write(f"--- CATEGORIA: {profile} ({len(accounts)} contas) ---\n")
-                f.write(f"{'Matrícula/ID':<20} | {'Senha':<15} | {'Nome Completo':<30}\n")
-                f.write("-" * 70 + "\n")
+                f.write(f"{'Matrícula/ID':<25} | {'Senha':<15} | {'Nome Completo':<35}\n")
+                f.write("-" * 80 + "\n")
                 for reg_id, pwd, name in accounts:
-                    f.write(f"{reg_id:<20} | {pwd:<15} | {name:<30}\n")
+                    f.write(f"{reg_id:<25} | {pwd:<15} | {name:<35}\n")
                 f.write("\n" + "="*50 + "\n\n")
 
-    print("✅ Banco populado dinamicamente com absoluto sucesso!")
+    print("✅ Banco populado com sucesso! O ID 'STAFF_UNREGISTERED' está pronto para uso.")
 
 if __name__ == "__main__":
     asyncio.run(populate())
