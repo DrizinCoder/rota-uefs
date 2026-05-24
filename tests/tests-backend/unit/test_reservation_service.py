@@ -55,7 +55,7 @@ async def test_reservation_service_checkin_raises_unauthorized_for_invalid_code(
     reservation_id = uuid.uuid4()
     trip_id = uuid.uuid4()
     user = SimpleNamespace(registration_id='24123456')
-    reservation = SimpleNamespace(reservation_id=reservation_id, trip_id=trip_id, user=user)
+    reservation = SimpleNamespace(reservation_id=reservation_id, trip_id=trip_id, user=user, boarding_confirmation=None)
 
     repository = AsyncMock()
     repository.get_by_id.return_value = reservation
@@ -75,7 +75,8 @@ async def test_reservation_service_manual_checkin_success():
     reservation = SimpleNamespace(
         reservation_id=reservation_id,
         trip_id=trip_id,
-        user=SimpleNamespace(user_id=user_id, registration_id="24123456")
+        user=SimpleNamespace(user_id=user_id, registration_id="24123456"),
+        boarding_confirmation=None
     )
     repo = DummyRepository(reservation)
     service = ReservationService(repo, DummyPriorityEngine([reservation_id]))

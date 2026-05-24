@@ -8,9 +8,9 @@ from app.enums.enums import UserProfile
 
 def test_get_priority_returns_expected_values():
     engine = PriorityEngine(None, None, None, None)
-    assert engine.get_priority(UserProfile.STAFF) == 0
-    assert engine.get_priority(UserProfile.STUDENT) == 1
-    assert engine.get_priority("unknown") == 99
+    assert engine.get_priority(UserProfile.STAFF, None) == 0
+    assert engine.get_priority(UserProfile.STUDENT, None) == 2
+    assert engine.get_priority("unknown", None) == 99
 
 
 @pytest.mark.asyncio
@@ -19,8 +19,8 @@ async def test_get_valid_reservation_returns_only_capacity_reservations():
     trip = SimpleNamespace(bus_license_plate="BUS001")
     bus = SimpleNamespace(capacity=1)
     user = SimpleNamespace(profile=UserProfile.STUDENT)
-    reservation1 = SimpleNamespace(reservation_id=uuid.uuid4(), reservation_timestamp="2026-05-16T08:00:00", user=user)
-    reservation2 = SimpleNamespace(reservation_id=uuid.uuid4(), reservation_timestamp="2026-05-16T08:01:00", user=user)
+    reservation1 = SimpleNamespace(reservation_id=uuid.uuid4(), reservation_timestamp="2026-05-16T08:00:00", user=user, boarding_confirmation=None, extra_passenger_name=None)
+    reservation2 = SimpleNamespace(reservation_id=uuid.uuid4(), reservation_timestamp="2026-05-16T08:01:00", user=user, boarding_confirmation=None, extra_passenger_name=None)
 
     trip_repo = AsyncMock()
     bus_repo = AsyncMock()
