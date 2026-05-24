@@ -11,6 +11,8 @@ from app.core.config import settings
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.logger_config import setup_app_logging
 
+from app.core.scheduler import task_scheduler
+
 setup_app_logging()
 logger = logging.getLogger(__name__)
 
@@ -19,8 +21,16 @@ async def lifespan(app: FastAPI):
     logger.info("🚀 Iniciando aplicação...")
     await init_db()
     logger.info("✅ Aplicação iniciada...")
+
+    task_scheduler.start()
+    logger.info("✅ Scheduler iniciado...")
+
     yield
-    logger.info("🧱 Encerrando aplicação...")
+
+    task_scheduler.shutdown()
+    logger.info("🛑 Scheduler desligado...")
+    
+    logger.info("🛑 Encerrando aplicação...")
     await engine.dispose()
     logger.info("🛑 Aplicação encerrada...")
 

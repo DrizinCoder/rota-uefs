@@ -3,6 +3,8 @@ import uuid
 from fastapi import BackgroundTasks
 from app.services.engine.priority_engine import PriorityEngine
 from app.services.trip_service import TripService
+from app.enums.enums import UserProfile
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -17,6 +19,13 @@ class TripController:
             return await self.priority_engine.subscribe_user_to_trip(user_id, trip_id, background_tasks, extra_name)
         except Exception as e:
             logger.error(f"Error fetching subscriber for trip {trip_id}: {e}")
+            raise
+
+    async def remove_boarding_confirmation(self, reservation_id: str):
+        try:
+            return await self.priority_engine.remove_boarding_confirmation(reservation_id)
+        except Exception as e:
+            logger.error(f"Error removing boarding confirmation for reservation {reservation_id}: {e}")
             raise
 
     async def get_all_trips_by_user_id(self, user_id: uuid.UUID):
@@ -40,16 +49,16 @@ class TripController:
             logger.error(f"Error deleting generic staff reservation {reservation_id}: {e}")
             raise
 
-    async def get_subscribers(self, trip_id: str):
+    async def get_subscribers(self, trip_id: str, background_tasks: BackgroundTasks):
         try:
-            return await self.priority_engine.get_all_users_with_reservation_by_trip_id(trip_id)
+            return await self.priority_engine.get_all_users_with_reservation_by_trip_id(trip_id, background_tasks)
         except Exception as e:
             logger.error(f"Error fetching subscribers for trip {trip_id}: {e}")
             raise
 
-    async def cancel_subscription(self, user_id: str, trip_id: str, background_tasks: BackgroundTasks, extra_passenger_name: str = None):
+    async def cancel_subscription(self, profile: UserProfile, reservation_id: str, background_tasks: BackgroundTasks):
         try:
-            return await self.priority_engine.cancel_subscription(user_id, trip_id, background_tasks, extra_passenger_name)
+            return await self.priority_engine.cancel_subscription(profile, reservation_id, background_tasks)
         except Exception as e:
-            logger.error(f"Error canceling subscription for trip {trip_id}: {e}")
+            logger.error(f"Error canceling subscription for reservation {reservation_id}: {e}")
             raise

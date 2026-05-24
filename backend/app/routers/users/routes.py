@@ -1,3 +1,6 @@
+from app.routers.users.dependencies import get_reservation_service
+from app.services.reservation_service import ReservationService
+from app.DTOs.users import CheckinCodeRequest
 from app.services.trip_service import TripService
 from app.routers.users.dependencies import get_trip_service
 from app.DTOs.trip import PassengerTripItem, SubscribeData
@@ -76,20 +79,20 @@ async def subscribe_user(
 @user_router.get("/trip/{trip_id}/subscribers")
 async def get_subscribers(
     trip_id: str,
+    background_tasks: BackgroundTasks,
     controller: TripController = Depends(get_trip_controller),
     _: TokenData = Depends(get_current_user)
 ):
-    return await controller.get_subscribers(trip_id)
+    return await controller.get_subscribers(trip_id, background_tasks)
 
-@user_router.post("/trip/{trip_id}/cancel")
+@user_router.post("/reservation/{reservation_id}/cancel")
 async def cancel_subscription(
-    trip_id: str,
-    data: SubscribeData, 
+    reservation_id: str,
     background_tasks: BackgroundTasks, 
     controller: TripController = Depends(get_trip_controller),
-    token: TokenData = Depends(require_profile(UserProfile.STAFF, UserProfile.STUDENT))
+    token: TokenData = Depends(require_profile(UserProfile.STAFF, UserProfile.STUDENT, UserProfile.DRIVER))
 ):
-    return await controller.cancel_subscription(token.sub, trip_id, background_tasks, data.extra_passenger_name)
+    return await controller.cancel_subscription(token.profile, reservation_id, background_tasks)
 
 @user_router.get("/trips/me", response_model=list[PassengerTripItem])
 async def get_passenger_trips(
@@ -97,4 +100,13 @@ async def get_passenger_trips(
     service: TripService = Depends(get_trip_service),
 ):
     result = await service.get_trips_for_passenger(current_user.sub)
+    return ResponseHandler.ok(result)
+
+@user_router.get("/trips/checkin_code/{trip_id}")
+async def get_checkin_code(
+    trip_id: uuid.UUID,
+    current_user: TokenData = Depends(get_current_user),
+    service: ReservationService = Depends(get_reservation_service)
+):
+    result = await service.get_checkin_code(current_user, trip_id)
     return ResponseHandler.ok(result)

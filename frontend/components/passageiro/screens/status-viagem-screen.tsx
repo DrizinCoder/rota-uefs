@@ -1,6 +1,9 @@
-﻿"use client";
+"use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { passengerService } from "@/services/homeService";
+import { userService } from "@/services/userService";
 import { Navigation } from "@/components/landing/navigation";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,24 +16,117 @@ import {
   Bus,
   CheckCircle2,
   Users,
+  AlertCircle,
+  Calendar,
 } from "lucide-react";
 
 export function StatusViagemScreen() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const viagemInscrita = {
-    id: "ROT-UEFS-002",
-    origem: "Burger King/Ao lado do Sam's Club",
-    destino: "UEFS",
-    horarioInicio: "06:00",
-    horarioFim: "08:00",
-    inscritos: 19,
-    quorum: 1,
-    vagasTotais: 44,
-    motorista: "João Silva",
-    placa: "JLS-1020",
-    status: "Confirmada",
-  };
+  const [viagemInscrita, setViagemInscrita] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchTrip() {
+      const viagemId = searchParams.get("viagemId");
+
+      if (!viagemId) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const tripData = await passengerService.getTripById(viagemId);
+        
+        const userData = await userService.getMe();
+        const userTrips = await passengerService.getUserTrips(userData.user_id);
+        const currentTrip = userTrips.find(t => t.trip_id === viagemId);
+        
+        let reservationId = null;
+        if (currentTrip && currentTrip.reservations && currentTrip.reservations.length > 0) {
+            reservationId = currentTrip.reservations[0].reservation_id;
+        }
+
+        // Busca a home para encontrar o total_enrolled com base na listagem de viagens
+        const homeData = await passengerService.getHome();
+        const tripFromHome = homeData.trips?.find(t => t.trip_id === viagemId);
+
+        let origem = "Não informada";
+        let destino = "Não informada";
+
+        if (tripData.route_id) {
+          const routeData = await passengerService.getRouteById(tripData.route_id);
+          origem = routeData.boarding_point;
+          destino = routeData.drop_off_point;
+        } else {
+          // Fallback caso a rota venha vazia
+          origem = tripData.boarding_point || origem;
+          destino = tripData.drop_off_point || destino;
+        }
+
+        // Se a viagem for Salvador-Feira ou Feira-Salvador, adiciona 2 horas ao horário de término
+        const isSalvadorFeira =
+          (origem.toLowerCase().includes("salvador") && destino.toLowerCase().includes("feira")) ||
+          (origem.toLowerCase().includes("feira") && destino.toLowerCase().includes("salvador"));
+
+        let horarioFim = "--:--";
+        if (isSalvadorFeira && tripData.departure_time) {
+          const [hoursStr, minutesStr] = tripData.departure_time.split(":");
+          if (hoursStr && minutesStr) {
+            let hours = parseInt(hoursStr, 10);
+            hours = (hours + 2) % 24;
+            horarioFim = `${hours.toString().padStart(2, "0")}:${minutesStr.substring(0, 2)}`;
+          }
+        }
+
+        const inscritos = tripFromHome?.total_enrolled !== undefined 
+          ? tripFromHome.total_enrolled 
+          : (tripData.total_enrolled !== undefined ? tripData.total_enrolled : (tripData.student_count || 0) + (tripData.staff_count || 0));
+        const dataFormatada = tripData.trip_date ? tripData.trip_date.split('-').reverse().join('/') : "--/--/----";
+
+        setViagemInscrita({
+          id: viagemId.substring(0, 8).toUpperCase(),
+          data: dataFormatada,
+          origem,
+          destino,
+          horarioInicio: tripData.departure_time ? tripData.departure_time.substring(0, 5) : "",
+          horarioFim,
+          inscritos: inscritos,
+          quorum: 1,
+          vagasTotais: tripFromHome?.bus_capacity || 44,
+          placa: tripData.placa || "A DEFINIR",
+          status: "Pending",
+          reservationId: reservationId,
+        });
+      } catch (error) {
+        console.error("Erro ao buscar detalhes da viagem:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchTrip();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#E4F2F1]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#103173]"></div>
+      </div>
+    );
+  }
+
+  if (!viagemInscrita) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-[#E4F2F1] px-4 text-center">
+        <AlertCircle className="h-12 w-12 text-amber-600 mb-4" />
+        <h2 className="text-xl font-bold text-[#103173] mb-2">Viagem não encontrada</h2>
+        <p className="text-[#103173]/70 mb-6">Não conseguimos carregar os detalhes da sua viagem.</p>
+        <Button onClick={() => router.push("/passageiro")} className="bg-[#103173]">Voltar para Home</Button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-[#E4F2F1]">
@@ -84,6 +180,15 @@ export function StatusViagemScreen() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-[#E4F2F1] p-4 rounded-2xl">
                   <div className="flex items-center gap-2 mb-1 text-[#73AABF]">
+                    <Calendar className="h-4 w-4" />
+                    <span className="text-[10px] font-black uppercase">Data</span>
+                  </div>
+                  <p className="text-xl font-black text-[#103173]">
+                    {viagemInscrita.data}
+                  </p>
+                </div>
+                <div className="bg-[#E4F2F1] p-4 rounded-2xl">
+                  <div className="flex items-center gap-2 mb-1 text-[#73AABF]">
                     <Clock className="h-4 w-4" />
                     <span className="text-[10px] font-black uppercase">Horário</span>
                   </div>
@@ -91,7 +196,7 @@ export function StatusViagemScreen() {
                     {viagemInscrita.horarioInicio} - {viagemInscrita.horarioFim}
                   </p>
                 </div>
-                <div className="bg-[#E4F2F1] p-4 rounded-2xl">
+                <div className="bg-[#E4F2F1] p-4 rounded-2xl col-span-2">
                   <div className="flex items-center gap-2 mb-1 text-[#73AABF]">
                     <Users className="h-4 w-4" />
                     <span className="text-[10px] font-black uppercase">Ocupação</span>
@@ -107,9 +212,9 @@ export function StatusViagemScreen() {
                   <Info className="text-[#103173] h-6 w-6" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-[#73AABF] uppercase italic">Motorista e veículo</p>
+                  <p className="text-[10px] font-black text-[#73AABF] uppercase italic">Veículo</p>
                   <p className="font-bold text-[#103173]">
-                    {viagemInscrita.motorista} · <span className="text-[#73AABF]">{viagemInscrita.placa}</span>
+                    <span className="text-[#73AABF]">{viagemInscrita.placa}</span>
                   </p>
                 </div>
               </div>
@@ -128,9 +233,19 @@ export function StatusViagemScreen() {
 
               <Button
                 variant="ghost"
-                onClick={() => {
+                onClick={async () => {
                   if (confirm("Tem certeza que deseja cancelar sua vaga?")) {
-                    router.push("/passageiro");
+                    try {
+                      if (viagemInscrita.reservationId) {
+                        await passengerService.cancelSubscription(viagemInscrita.reservationId);
+                        router.push("/passageiro");
+                      } else {
+                        alert("Não foi possível encontrar o ID da sua reserva.");
+                      }
+                    } catch (error) {
+                      console.error("Erro ao cancelar vaga:", error);
+                      alert("Ocorreu um erro ao cancelar a reserva.");
+                    }
                   }
                 }}
                 className="text-red-500 font-bold hover:text-red-600 hover:bg-red-50"

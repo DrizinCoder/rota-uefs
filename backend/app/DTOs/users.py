@@ -29,3 +29,6 @@ class PhoneUpdate(SQLModel):
         if not re.match(r'^\+?1?\d{9,15}$', v):
             raise ValueError('Formato de telefone inválido')
         return v
+
+class CheckinCodeRequest(SQLModel):
+    trip_id: str

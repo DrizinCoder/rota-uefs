@@ -40,6 +40,23 @@ class TripRepository:
         await self.session.refresh(trip)
         return trip
 
+    async def get_bus_capacity_and_total_reservations_by_trip_id(self, trip_id: uuid.UUID):
+        stmt = (
+            select(
+                Bus.capacity,
+                func.count(Reservation.reservation_id).label("total_reservations")
+            )
+            .select_from(Trip)
+            .join(Bus, Trip.bus_license_plate == Bus.bus_plate)
+            .outerjoin(Reservation, Trip.trip_id == Reservation.trip_id)
+            .where(Trip.trip_id == trip_id)
+            .group_by(Trip.trip_id, Bus.capacity)
+        )
+        
+        result = await self.session.execute(stmt)
+        
+        return result.first()
+
     async def get_all(self):
         statement = (
             select(Trip)
@@ -59,6 +76,47 @@ class TripRepository:
                 "route_name": trip.route.name if trip.route else None,
                 "boarding_point": trip.route.boarding_point if trip.route else None,
                 "drop_off_point": trip.route.drop_off_point if trip.route else None,
+            }
+            for trip in trips
+        ]
+
+    async def get_all_with_reservation(self):
+        statement = (
+        select(Trip)
+        .options(
+            selectinload(Trip.driver),
+            selectinload(Trip.route),
+            selectinload(Trip.reservations).selectinload(Reservation.user)
+        )
+    )
+
+        result = await self.session.execute(statement)
+        trips = result.scalars().all()
+
+        return [
+            {
+                **trip.model_dump(mode='json'),
+                "driver_name": trip.driver.full_name if trip.driver else None,
+                "route_name": trip.route.name if trip.route else None,
+                "boarding_point": trip.route.boarding_point if trip.route else None,
+                "drop_off_point": trip.route.drop_off_point if trip.route else None,
+                
+                "total_reservations": len(trip.reservations),
+                
+                "total_checkins": sum(
+                    1 for res in trip.reservations 
+                    if res.boarding_confirmation == BoardingStatus.BOARDED
+                ),
+                
+                "teachers_count": sum(
+                    1 for res in trip.reservations 
+                    if res.user and res.user.profile in [UserProfile.STAFF]
+                ),
+                
+                "students_count": sum(
+                    1 for res in trip.reservations 
+                    if res.user and res.user.profile == UserProfile.STUDENT
+                ),
             }
             for trip in trips
         ]

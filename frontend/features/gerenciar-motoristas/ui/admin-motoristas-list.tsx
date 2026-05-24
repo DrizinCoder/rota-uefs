@@ -72,9 +72,6 @@ export function AdminMotoristasList({
 
             <div className="flex items-center gap-4 md:gap-6 border-t md:border-t-0 md:border-l border-slate-100 pt-4 md:pt-0 md:pl-6">
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Editar</span>
-              <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-[#103173] group-hover:text-white transition-colors ml-auto md:ml-0">
-                <ChevronRight className="h-5 w-5" />
-              </div>
             </div>
           </div>
         ))}

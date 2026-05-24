@@ -52,6 +52,7 @@ coverage.xml
 
 # Banco local
 *.sqlite3
+*.sqlite
 
 # Alembic
 alembic/versions/__pycache__/
@@ -103,3 +104,5 @@ Thumbs.db
 # ======================
 *.bak
 *.tmp
+
+private_key.pem

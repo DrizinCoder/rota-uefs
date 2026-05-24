@@ -3,7 +3,7 @@
 # Dependências do Backend
 pytest==8.4.0
 pytest-cov==4.1.0
-requests==2.31.0
+requests==2.34.2
 
 # Dependências de preparação para os testes do Frontend
 nodeenv==1.10.0

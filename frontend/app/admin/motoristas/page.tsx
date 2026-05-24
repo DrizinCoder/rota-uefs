@@ -17,7 +17,6 @@ export default function AdminMotoristasPage() {
     const fetchMotoristas = async () => {
       try {
         const data = await adminService.listarMotoristas();
-        console.log(data);
         setMotoristas(data);
       } catch (error) {
         console.error("Erro ao listar motoristas:", error);

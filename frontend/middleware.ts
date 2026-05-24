@@ -5,8 +5,7 @@ import type { NextRequest } from "next/server";
 const ROUTE_PERMISSIONS: Record<string, string[]> = {
   "/admin":      ["Admin"],
   "/motorista":  ["Driver"],
-  "/passageiro": ["Student"],
-  "/professor": ["Staff", "Faculty"],
+  "/passageiro": ["Student", "Staff", "Faculty"],
   "/perfil": ["Student", "Staff", "Faculty", "Driver", "Admin"],
   "/minhas-viagens": ["Student", "Staff", "Faculty"],
 };
@@ -35,11 +34,11 @@ export function middleware(request: NextRequest) {
   const perfisPermitidos = ROUTE_PERMISSIONS[rotaProtegida];
   if (!perfisPermitidos.includes(profile)) {
     const REDIRECT_MAP: Record<string, string> = {
-      Student: "/",
-      Staff: "/",
-      Faculty: "/",
-      Driver: "/",
-      Admin: "/",
+      Student: "/passageiro",
+      Staff: "/passageiro",
+      Faculty: "/passageiro",
+      Driver: "/motorista",
+      Admin: "/admin",
     };
     const destino = REDIRECT_MAP[profile] || "/login";
     return NextResponse.redirect(new URL(destino, request.url));
@@ -54,7 +53,6 @@ export const config = {
     "/admin/:path*",
     "/motorista/:path*",
     "/passageiro/:path*",
-    "/professor/:path*",
     "/perfil/:path*",
     "/minhas-viagens/:path*",
   ],

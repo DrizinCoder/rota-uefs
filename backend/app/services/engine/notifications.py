@@ -16,22 +16,42 @@ class Notifications:
         self.reservation_repository = res_repo
         self.bus_repository = bus_repo
     
-    async def subscribe_notifications(self, user: User, trip: Trip, reservation: Reservation, background_tasks: BackgroundTasks):
+    
+    async def send_quorum_not_reached_notification(self, trip: Trip, background_tasks: BackgroundTasks):
+        admins = await self.user_repository.list_all_admins_full()
+        trip_name = trip.route.name if trip.route and trip.route.name else str(trip.trip_id)
+
+        for admin in admins:
+            background_tasks.add_task(
+                EmailUseCases().send_quorum_not_reached_notification,
+                admin.user.email,
+                admin.user.full_name,
+                trip_name,
+            )
+        
+    
+    async def subscribe_notifications(
+        self, user: User, 
+        trip: Trip, 
+        reservation: Reservation, 
+        background_tasks: BackgroundTasks, 
+        position: int
+    ):
             if user.profile == UserProfile.STAFF:
                 if reservation.extra_passenger_name not in (None, ""):
                     background_tasks.add_task(
                         EmailUseCases().send_boarding_qr_code,
-                        user.email, user.full_name, "-", trip.route.boarding_point, trip.route.drop_off_point, trip.trip_date, trip.departure_time.strftime("%H:%M"), reservation.reservation_id, trip.trip_id, user.registration_id
+                        user.email, user.full_name, position, trip.route.boarding_point, trip.route.drop_off_point, trip.trip_date, trip.departure_time.strftime("%H:%M"), reservation.reservation_id, trip.trip_id, user.registration_id
                     )
                 else:
                     background_tasks.add_task(
                         EmailUseCases().send_boarding_qr_code,
-                        user.email, user.full_name, "-", trip.route.boarding_point, trip.route.drop_off_point, trip.trip_date, trip.departure_time.strftime("%H:%M"), reservation.reservation_id, trip.trip_id, user.registration_id
+                        user.email, user.full_name, position, trip.route.boarding_point, trip.route.drop_off_point, trip.trip_date, trip.departure_time.strftime("%H:%M"), reservation.reservation_id, trip.trip_id, user.registration_id
                     )
             if user.profile == UserProfile.STUDENT:
                 background_tasks.add_task(
                         EmailUseCases().send_boarding_qr_code,
-                        user.email, user.full_name, "-", trip.route.boarding_point, trip.route.drop_off_point, trip.trip_date, trip.departure_time.strftime("%H:%M"), reservation.reservation_id, trip.trip_id, user.registration_id
+                        user.email, user.full_name, position, trip.route.boarding_point, trip.route.drop_off_point, trip.trip_date, trip.departure_time.strftime("%H:%M"), reservation.reservation_id, trip.trip_id, user.registration_id, True
                     )
 
     async def activate_notifications(self, user: User, trip: Trip, reservation: Reservation, background_tasks: BackgroundTasks):
@@ -52,8 +72,8 @@ class Notifications:
                     user.email, user.full_name, trip.trip_id
                 )
 
-    async def cancel_subscription_notifications(self, user: User, trip: Trip, reservation: Reservation, background_tasks: BackgroundTasks):
-            if user.profile == UserProfile.STAFF:
+    async def cancel_subscription_notifications(self, user: User, profile: UserProfile ,trip: Trip, reservation: Reservation, background_tasks: BackgroundTasks):
+            if profile == UserProfile.STAFF:
                 if reservation.extra_passenger_name not in (None, ""):
                     background_tasks.add_task(
                         EmailUseCases().send_cancellation_confirmation_staff_for_extra_name,
@@ -64,11 +84,16 @@ class Notifications:
                         EmailUseCases().send_cancellation_confirmation_staff,
                         user.email, user.full_name, trip.trip_id
                     )
-            if user.profile == UserProfile.STUDENT:
+            if profile == UserProfile.STUDENT:
                 background_tasks.add_task(
                     EmailUseCases().send_cancellation_confirmation_student,
                     user.email, user.full_name, trip.trip_id
                 )
+
+            if profile == UserProfile.DRIVER:
+                background_tasks.add_task(
+                    EmailUseCases().send_cancellation_confirmation_driver, user.email, user.full_name, trip.trip_id
+                ) 
 
     async def send_trip_cancelled(self, email: str, name: str, trip_id: str, trip_date: str,  background_tasks: BackgroundTasks):
         background_tasks.add_task(
