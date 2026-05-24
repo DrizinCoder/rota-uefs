@@ -37,11 +37,22 @@ def test_get_current_user_with_valid_bearer_token():
     assert current_user.email == "24123456@discente.uefs.br"
 
 
-def test_get_current_user_missing_token_raises():
+def test_get_current_user_reads_token_from_cookie_when_header_missing():
+    token = build_token(UserProfile.STUDENT)
+    request = DummyRequest(cookies={"access_token": token})
+
+    current_user = get_current_user(request=request, credentials=None)
+
+    assert isinstance(current_user, TokenData)
+    assert current_user.sub == "user-id-123"
+
+
+def test_get_current_user_with_invalid_token_raises_unauthorized():
+    credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials="invalid.token")
     request = DummyRequest()
 
     with pytest.raises(UnauthorizedException):
-        get_current_user(request=request, credentials=None)
+        get_current_user(request=request, credentials=credentials)
 
 
 def test_require_admin_allows_admin():

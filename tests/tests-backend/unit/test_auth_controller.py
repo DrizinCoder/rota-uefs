@@ -6,7 +6,7 @@ from jose import jwt
 
 from app.controllers.auth_controller import AuthController
 from app.core.config import settings
-from app.core.exceptions import NotFoundException, UnauthorizedException, ForbiddenException
+from app.core.exceptions import NotFoundException
 from app.enums.enums import RegistrationStatus
 from app.DTOs.auth import LoginUserDTO, ResetPasswordDTO
 
@@ -62,12 +62,12 @@ class DummyAuthService:
 
 
 @pytest.mark.asyncio
-async def test_register_student_returns_response_object(monkeypatch):
+async def test_register_student_returns_aluno_response():
     repo = DummyRepository()
     controller = AuthController(repo)
     controller.auth_service = DummyAuthService()
 
-    data = SimpleNamespace(
+    payload = SimpleNamespace(
         full_name="Test Student",
         registration_id="24123456",
         phone="123456789",
@@ -76,15 +76,15 @@ async def test_register_student_returns_response_object(monkeypatch):
         profile="Student",
     )
 
-    result = await controller.register_student(data, background_tasks=SimpleNamespace())
+    result = await controller.register_student(payload, background_tasks=SimpleNamespace())
 
     assert hasattr(result, "user_id")
-    assert result.email == data.email
-    assert result.registration_id == data.registration_id
+    assert result.email == payload.email
+    assert result.registration_id == payload.registration_id
 
 
 @pytest.mark.asyncio
-async def test_login_success_returns_token(monkeypatch):
+async def test_login_success_returns_access_token():
     user = SimpleNamespace(
         user_id=uuid.uuid4(),
         registration_id="24123456",
@@ -98,6 +98,7 @@ async def test_login_success_returns_token(monkeypatch):
     result = await controller.login(LoginUserDTO(registration_id="24123456", password="secret123"))
 
     assert result["access_token"] == "token"
+    assert result["token_type"] == "bearer"
 
 
 @pytest.mark.asyncio
@@ -111,7 +112,7 @@ async def test_login_not_found_raises_not_found():
 
 
 @pytest.mark.asyncio
-async def test_recover_password_sends_token(monkeypatch):
+async def test_recover_password_returns_recovery_token(monkeypatch):
     user = SimpleNamespace(
         user_id=uuid.uuid4(),
         email="24123456@discente.uefs.br",
@@ -122,19 +123,10 @@ async def test_recover_password_sends_token(monkeypatch):
     controller = AuthController(repo)
     controller.auth_service = DummyAuthService()
 
-    class DummyEmailUseCases:
-        def __init__(self):
-            self.sent = False
-
-        def send_recover_password(self, email, full_name, token):
-            self.sent = True
-
-    import app.controllers.auth_controller as auth_controller_module
-    monkeypatch.setattr(auth_controller_module, "EmailUseCases", DummyEmailUseCases)
-
     result = await controller.recover_password(user.email)
 
     assert result["access_token"] == "recovery-token"
+    assert result["token_type"] == "bearer"
 
 
 @pytest.mark.asyncio
@@ -162,12 +154,12 @@ async def test_reset_password_updates_password():
 
 
 @pytest.mark.asyncio
-async def test_register_staff_returns_staff_response(monkeypatch):
+async def test_register_staff_returns_servidor_response():
     repo = DummyRepository()
     controller = AuthController(repo)
     controller.auth_service = DummyAuthService()
 
-    data = SimpleNamespace(
+    payload = SimpleNamespace(
         full_name="Test Staff",
         registration_id="SRV1234",
         phone="123456789",
@@ -176,8 +168,9 @@ async def test_register_staff_returns_staff_response(monkeypatch):
         employment="Professor",
     )
 
-    result = await controller.register_staff(data)
+    result = await controller.register_staff(payload)
 
     assert hasattr(result, "user_id")
-    assert result.email == data.email
-    assert result.department == data.department
+    assert result.email == payload.email
+    assert result.department == payload.department
+    assert result.employment == payload.employment

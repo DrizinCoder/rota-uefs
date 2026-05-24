@@ -56,7 +56,7 @@ def test_reservation_flow_subscribe_and_cancel(auth_student_client):
         json={}
     )
 
-    assert subscribe_response.status_code in (200, 201, 202)
+    assert subscribe_response.status_code == 200
     subscribe_data = subscribe_response.json()
     assert subscribe_data["message"] == "subscribed"
     assert subscribe_data["trip_id"] == trip_id
@@ -72,7 +72,7 @@ def test_reservation_flow_subscribe_and_cancel(auth_student_client):
         f"/users/trip/{trip_id}/cancel",
         json={}
     )
-    assert cancel_response.status_code in (200, 201, 202)
+    assert cancel_response.status_code == 200
     cancel_data = cancel_response.json()
     assert cancel_data["message"] == "canceled"
     assert cancel_data["trip_id"] == trip_id

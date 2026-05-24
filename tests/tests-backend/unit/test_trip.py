@@ -5,7 +5,7 @@ from app.enums.enums import TripStatus
 from app.routers.trip.routes import trip_router
 
 
-def test_trip_dtos_and_router_are_defined():
+def test_trip_dtos_validate_expected_fields_and_router_endpoints():
     assert trip_router is not None
 
     create_dto = CreateTripDTO(
@@ -29,6 +29,7 @@ def test_trip_dtos_and_router_are_defined():
         reference_date=date.today()
     )
 
-    assert create_dto.bus_plate == "ABC1234" if hasattr(create_dto, 'bus_plate') else True
+    assert create_dto.bus_license_plate == "ABC1234"
     assert update_dto.status == TripStatus.CONFIRMED
     assert feed_item.weekday == "Segunda"
+    assert len(trip_router.routes) > 0

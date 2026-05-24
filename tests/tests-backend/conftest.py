@@ -212,21 +212,30 @@ class FakeAuthController:
             registration_id=registration_id
         )
 
-    async def register_staff(self, dados, background_tasks):
+    async def register_staff(self, dados, background_tasks=None):
         email = getattr(dados, "email", None)
         if email and email in self._created_emails:
             raise HTTPException(status_code=409, detail="Email já está em uso")
         if email:
             self._created_emails.add(email)
-        return ServidorRegisterResponseDTO(
-            user_id=uuid.UUID(str(uuid.uuid4())),
-            full_name=getattr(dados, "name", "Servidor"),
-            registration_id=getattr(dados, "registration_id", None),
-            email=email
-        )
+
+        return ServidorRegisterResponseDTO.model_validate({
+            "user_id": uuid.UUID(str(uuid.uuid4())),
+            "full_name": getattr(dados, "full_name", "Servidor"),
+            "registration_id": getattr(dados, "registration_id", None),
+            "email": email,
+            "staff_member": {
+                "department": getattr(dados, "department", "TI"),
+                "employment_type": getattr(dados, "employment", "efetivo"),
+            },
+        })
 
     async def login(self, dados):
-        return {"access_token": "fake-token", "token_type": "bearer"}
+        return {
+            "access_token": "fake-token",
+            "refresh_token": "fake-refresh-token",
+            "token_type": "bearer",
+        }
 
     async def recover_password(self, email: str):
         return {"message": "Email enviado"}

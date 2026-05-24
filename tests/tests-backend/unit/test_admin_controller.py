@@ -1,5 +1,6 @@
 ﻿import pytest
 import uuid
+from types import SimpleNamespace
 from app.controllers.admin_controller import AdminController
 
 
@@ -11,10 +12,10 @@ class DummyService:
         return {'id': admin['admin_id'], 'full_name': admin['full_name']}
 
     async def get_alls_admins(self):
-        return []
+        return [SimpleNamespace(admin_id=uuid.uuid4(), user=SimpleNamespace(full_name='Admin Test', email='admin@test.com', registration_id='REG123', phone='000000000', registration_status='Active'), access_level=SimpleNamespace(value='Operator'))]
 
     def serialize_admin_list(self, admins):
-        return admins
+        return [{'admin_id': str(admin.admin_id), 'full_name': admin.user.full_name} for admin in admins]
 
     async def get_driver(self, driver_id):
         return {'driver_id': str(driver_id)}
@@ -72,25 +73,26 @@ async def test_admin_controller_create_returns_serialized_response():
 
 
 @pytest.mark.asyncio
-async def test_admin_controller_list_all_returns_empty_list():
+async def test_admin_controller_list_all_returns_serialized_admins():
     service = DummyService()
     controller = AdminController(service)
 
     result = await controller.list_all()
 
-    assert result == []
+    assert isinstance(result, list)
+    assert result[0]['admin_id']
+    assert result[0]['full_name'] == 'Admin Test'
 
 
 @pytest.mark.asyncio
 async def test_admin_controller_get_driver_returns_driver_dict():
     service = DummyService()
     controller = AdminController(service)
-    driver_id = uuid.uuid4()
 
+    driver_id = uuid.uuid4()
     result = await controller.get_driver(driver_id)
 
-    assert isinstance(result, dict)
-    assert result['driver_id'] == str(driver_id)
+    assert result == {'driver_id': str(driver_id)}
 
 
 @pytest.mark.asyncio

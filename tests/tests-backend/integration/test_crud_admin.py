@@ -67,7 +67,8 @@ class TestAdminCRUD:
         admin_id = create_resp.json()["data"]["admin_id"]
 
         response = client.delete(f"/admin/{admin_id}")
-        assert response.status_code in (200, 204)
+        assert response.status_code == 200
+        assert response.json()["success"] is True
 
     def test_delete_admin_inexistente_retorna_404(self, client):
         response = client.delete(f"/admin/{uuid.uuid4()}")
@@ -79,7 +80,8 @@ class TestAdminCRUD:
         admin_id = create_resp.json()["data"]["admin_id"]
 
         response = client.delete(f"/admin/delete/account/{admin_id}")
-        assert response.status_code in (200, 204)
+        assert response.status_code == 200
+        assert response.json()["success"] is True
 
 
 class TestAdminValidacoes:

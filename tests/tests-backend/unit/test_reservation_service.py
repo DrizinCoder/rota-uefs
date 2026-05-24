@@ -1,9 +1,11 @@
 import uuid
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from types import SimpleNamespace
 from app.DTOs.checkin import ManualCheckinRequestDTO
 from app.services.reservation_service import ReservationService
+from app.core.exceptions import NotFoundException, UnauthorizedException
 
 
 class DummyRepository:
@@ -37,6 +39,35 @@ async def test_reservation_service_check_reservation_returns_true():
 
 
 @pytest.mark.asyncio
+async def test_reservation_service_checkin_raises_not_found_when_reservation_missing():
+    repository = AsyncMock()
+    repository.get_by_id.return_value = None
+    service = ReservationService(repository, DummyPriorityEngine([]))
+
+    invalid_code = f"{uuid.uuid4()}.deadbeef"
+
+    with pytest.raises(NotFoundException):
+        await service.checkin(uuid.uuid4(), invalid_code)
+
+
+@pytest.mark.asyncio
+async def test_reservation_service_checkin_raises_unauthorized_for_invalid_code():
+    reservation_id = uuid.uuid4()
+    trip_id = uuid.uuid4()
+    user = SimpleNamespace(registration_id='24123456')
+    reservation = SimpleNamespace(reservation_id=reservation_id, trip_id=trip_id, user=user)
+
+    repository = AsyncMock()
+    repository.get_by_id.return_value = reservation
+    service = ReservationService(repository, DummyPriorityEngine([reservation_id]))
+
+    invalid_code = f"{reservation_id}.badhash"
+
+    with pytest.raises(UnauthorizedException):
+        await service.checkin(trip_id, invalid_code)
+
+
+@pytest.mark.asyncio
 async def test_reservation_service_manual_checkin_success():
     reservation_id = uuid.uuid4()
     trip_id = uuid.uuid4()
@@ -44,11 +75,10 @@ async def test_reservation_service_manual_checkin_success():
     reservation = SimpleNamespace(
         reservation_id=reservation_id,
         trip_id=trip_id,
-        user=SimpleNamespace(user_id=user_id)
+        user=SimpleNamespace(user_id=user_id, registration_id="24123456")
     )
     repo = DummyRepository(reservation)
     service = ReservationService(repo, DummyPriorityEngine([reservation_id]))
-    service.check_reservation = lambda trip_id, reservation_id: True
 
     data = ManualCheckinRequestDTO(
         user_id=str(user_id),
@@ -56,7 +86,8 @@ async def test_reservation_service_manual_checkin_success():
         trip_id=str(trip_id),
     )
 
-    result = await service.manual_checkin(data)
+    with patch.object(ReservationService, 'check_reservation', new=lambda self, trip_id, reservation_id: True):
+        result = await service.manual_checkin(data)
 
     assert result == {"message": "Checkin manual realizado com sucesso"}
     assert repo.updated is True
