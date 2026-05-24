@@ -1,9 +1,12 @@
 import base64
 from datetime import date, datetime
 import uuid
+from app.DTOs.reports import TripInsuranceReportDTO
 from app.services.dashboard_service import DashboardService
 from app.services.reports.weasyprint_generator import WeasyPrintGenerator
+from app.services.reports.csv_generator import CsvGenerator
 import logging
+
 
 
 logger = logging.getLogger(__name__)
@@ -21,14 +24,55 @@ class DashboardController:
         
         return result
     
-    async def trip_report(self, trip_id: uuid.UUID):
+    async def trip_report_PDF(self, report: TripInsuranceReportDTO):
+        log_data = {'timestamp':datetime.now(),'title':'trip_report'}
+        bytes = WeasyPrintGenerator().generate_pdf('insurance_report.html', report, log_data)
+
+        return base64.b64encode(bytes)
+    
+    async def trip_report_CSV(self, report: TripInsuranceReportDTO):
+        headers = [
+            "trip_id", "trip_date", "departure_time", "bus_license_plate", 
+            "driver_name", "boarding_point", "drop_off_point",
+            "name", "email", "registration_id", "user_role"
+        ]
+
+        dados = []
+
+        for passenger in report.passengers:
+            row = {
+                "trip_id": str(report.trip_id),
+                "trip_date": str(report.trip_date),
+                "departure_time": str(report.departure_time),
+                "bus_license_plate": report.bus_license_plate,
+                "driver_name": report.driver_name,
+                "boarding_point": report.boarding_point,
+                "drop_off_point": report.drop_off_point,
+                **passenger.model_dump() 
+            }
+            dados.append(row)
+
+        bytes = CsvGenerator().generate_csv(dados, headers)
+
+        return base64.b64encode(bytes)
+
+    async def trip_report(self, trip_id: uuid.UUID, file_format: str):
+        file_format = file_format.lower()
         try:
+
+            generators = {
+                "pdf": self.trip_report_PDF,
+                "csv": self.trip_report_CSV
+            }
+            
+            if file_format not in generators:
+                raise ValueError("Formato não suportado")
+            
             report = await self.service.get_trip_report(trip_id)
-            log_data = {'timestamp':datetime.now(),'title':'trip_report'}
-            bytes = WeasyPrintGenerator().generate_pdf('insurance_report.html', report, log_data)
-
-            return base64.b64encode(bytes)
-
+            
+            generate_report = generators[file_format]
+            return await generate_report(report)
+        
         except Exception as e:
             logger.error(f"Error generating trip report {trip_id}: {e}")
             raise

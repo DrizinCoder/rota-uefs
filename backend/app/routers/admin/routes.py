@@ -139,12 +139,13 @@ async def delete_account(
         raise NotFoundException("User not found")
     return ResponseHandler.ok("User account has been anonymized successfully")
 
-@router.get("/report/trip/{trip_id}")
-async def delete_account(
+@router.get("/report/audit")
+async def audit_report(
     trip_id: uuid.UUID,
+    format: str,
     controller: DashboardController = Depends(get_dashboard_controller)
 ):
-    result = await controller.trip_report(trip_id)
+    result = await controller.trip_report(trip_id, format)
     if not result:
         raise NotFoundException("Report could not be generated")
     return ResponseHandler.ok(data=result)
