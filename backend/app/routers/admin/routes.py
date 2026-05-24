@@ -142,9 +142,10 @@ async def delete_account(
 @router.get("/report/trip/{trip_id}")
 async def delete_account(
     trip_id: uuid.UUID,
-    controller: TripController = Depends(get_trip_controller)
+    controller: DashboardController = Depends(get_dashboard_controller)
 ):
     result = await controller.trip_report(trip_id)
     if not result:
         raise NotFoundException("Report could not be generated")
     return ResponseHandler.ok(data=result)
+    

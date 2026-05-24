@@ -1,8 +1,10 @@
 import uuid
 from datetime import date
 from sqlalchemy import and_, select, func, case, distinct
-from app.models.models import Bus, Trip
-from app.enums.enums import BusStatus
+from sqlalchemy.orm import aliased
+from app.models.models import Bus, Reservation, Route, Trip, User
+from app.DTOs.reports import PassengerInsuranceItem, TripInsuranceReportDTO
+from app.enums.enums import BoardingStatus, BusStatus
 from sqlalchemy.ext.asyncio import AsyncSession
 
 class DashboardRepository:
@@ -50,3 +52,67 @@ class DashboardRepository:
         buses = (await self.session.execute(buses_stmt)).all()
 
         return totals, buses
+    
+    async def get_trip_insurance_data(self, trip_id: uuid.UUID) -> TripInsuranceReportDTO | None:
+        DriverUser = aliased(User)
+
+        trip_statement = (
+            select(
+                Trip.trip_id,
+                Trip.trip_date,
+                Trip.departure_time,
+                Trip.bus_license_plate,
+                Route.boarding_point,
+                Route.drop_off_point,
+                DriverUser.full_name.label("driver_name")
+            )
+            .join(Route, Route.route_id == Trip.route_id)
+            .join(DriverUser, DriverUser.user_id == Trip.driver_id)
+            .where(Trip.trip_id == trip_id)
+        )
+
+        trip_result = await self.session.execute(trip_statement)
+        trip_row = trip_result.first()
+
+        if not trip_row:
+            return None
+        
+        passengers_statement = (
+            select(
+                User.full_name,
+                User.email,
+                User.registration_id,
+                User.profile.label("user_role")
+            )
+            .join(Reservation, Reservation.user_id == User.user_id)
+            .where(
+                Reservation.trip_id == trip_id,
+                Reservation.boarding_confirmation == BoardingStatus.BOARDED
+            )
+            .order_by(User.full_name)
+        )
+
+        passengers_result = await self.session.execute(passengers_statement)
+        passengers_rows = passengers_result.all()
+
+        passenger_list = [
+            PassengerInsuranceItem(
+                name=p.full_name,
+                email=p.email,
+                registration_id=str(p.registration_id),
+                user_role=p.user_role
+            )
+            for p in passengers_rows
+        ]
+
+        return TripInsuranceReportDTO(
+            trip_id=trip_row.trip_id,
+            trip_date=trip_row.trip_date,
+            departure_time=trip_row.departure_time,
+            bus_license_plate=trip_row.bus_license_plate,
+            driver_name=trip_row.driver_name,
+            boarding_point=trip_row.boarding_point,
+            drop_off_point=trip_row.drop_off_point,
+            total_passengers=len(passenger_list),
+            passengers=passenger_list
+        )

@@ -196,12 +196,3 @@ class TripService:
         logger.info(f"Driver trips retrieved | Driver ID: {driver_id} | Count: {len(trips)}")
         return trips
     
-    async def get_trip_report(self, trip_id: uuid.UUID) -> TripInsuranceReportDTO:
-        logger.info(f"Trip insurance report requested | Trip ID: {trip_id}")
-
-        report = await self.trip_repository.get_trip_insurance_data(trip_id)
-        if not report:
-            raise NotFoundException("Viagem não encontrada")
-
-        logger.info(f"Trip insurance report returned successfully | Trip ID: {trip_id}")
-        return report

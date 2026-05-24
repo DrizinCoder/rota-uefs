@@ -1,7 +1,10 @@
+import uuid
 from app.core.exceptions import NotFoundException
 from datetime import date
 from app.repositories.dashboard_repository import DashboardRepository
+from app.DTOs.reports import TripInsuranceReportDTO
 import logging
+
 
 logger = logging.getLogger(__name__)
 
@@ -34,3 +37,13 @@ class DashboardService:
                 for bus in buses
             ]
         }
+    
+    async def get_trip_report(self, trip_id: uuid.UUID) -> TripInsuranceReportDTO:
+        logger.info(f"Trip insurance report requested | Trip ID: {trip_id}")
+
+        report = await self.repository.get_trip_insurance_data(trip_id)
+        if not report:
+            raise NotFoundException("Viagem não encontrada")
+
+        logger.info(f"Trip insurance report returned successfully | Trip ID: {trip_id}")
+        return report
