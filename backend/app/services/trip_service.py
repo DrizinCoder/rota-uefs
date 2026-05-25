@@ -80,7 +80,7 @@ class TripService:
     async def get_all(self):
         logger.info("Trip list requested")
 
-        result = await self.trip_repository.get_all()
+        result = await self.trip_repository.get_all_with_reservation()
 
         logger.info(f"Trip list retrieved successfully | Count: {len(result) if result else 0}")
         return result

@@ -41,3 +41,23 @@ def test_update_phone_raises_not_found_when_missing():
 
     with pytest.raises(NotFoundException):
         asyncio.run(service.update_phone('00000000-0000-0000-0000-000000000000', SimpleNamespace(phone='+5511999999999')))
+
+
+def test_update_email_updates_user_when_user_exists():
+    repository = AsyncMock()
+    user = SimpleNamespace(email='old@test.com')
+    repository.get_by_id.return_value = user
+    repository.update = AsyncMock()
+    service = UserService(repository)
+
+    asyncio.run(service.update_email('00000000-0000-0000-0000-000000000000', 'new@test.com'))
+
+    repository.update.assert_awaited_once()
+
+
+def test_check_email_available_returns_none_when_email_is_free():
+    repository = AsyncMock()
+    repository.get_by_email.return_value = None
+    service = UserService(repository)
+
+    assert asyncio.run(service.check_email_available('new@test.com')) is None

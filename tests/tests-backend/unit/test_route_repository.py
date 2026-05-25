@@ -18,7 +18,7 @@ def test_get_all_returns_routes():
     assert routes == ['route1', 'route2']
 
 
-def test_get_by_id_returns_none_when_missing():
+def test_get_by_id_returns_none_when_route_not_found():
     session = AsyncMock()
     result = MagicMock()
     scalars = MagicMock()

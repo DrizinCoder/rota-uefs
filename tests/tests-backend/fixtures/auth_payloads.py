@@ -1,22 +1,22 @@
 REGISTER_USER_VALID = {
-    "name": "Ana Silva",
-    "senha": "Senha@123",
-    "matricula": "20240001",
-    "telefone": "75999990001",
-    "e_mail": "ana@uefs.br",
+    "full_name": "Ana Silva",
+    "password": "Senha@123",
+    "registration_id": "20240001",
+    "phone": "75999990001",
+    "email": "ana@uefs.br",
 }
 
 REGISTER_USER_INVALID = {
-    "name": "Ana Silva"
+    "full_name": "Ana Silva"
 }
 
 LOGIN_VALID = {
-    "matricula": "20240001",
-    "senha": "Senha@123",
+    "registration_id": "20240001",
+    "password": "Senha@123",
 }
 
 LOGIN_INVALID = {
-    "matricula": "20240001"
+    "registration_id": "20240001"
 }
 
 RECOVER_PASSWORD_VALID = {

@@ -41,7 +41,7 @@ class ReservationService:
         if not reservation:
             raise NotFoundException("Reserva não encontrada")
 
-        if reservation.boarding_confirmation == BoardingStatus.BOARDED:
+        if getattr(reservation, "boarding_confirmation", None) == BoardingStatus.BOARDED:
             raise ForbiddenException("Usuário já embarcado")
 
         expected_code = generate_registration_code(
@@ -54,7 +54,7 @@ class ReservationService:
         if not hmac.compare_digest(expected_hmac, received_hmac):
             raise BadRequestException("Código de verificação inválido")
 
-        is_valid = self.check_reservation(trip_id, reservation_uuid)
+        is_valid = await self.check_reservation(trip_id, reservation_uuid)
 
         if not is_valid:
             raise BadRequestException("Passageiro não está na lista de embarque")
@@ -83,7 +83,7 @@ class ReservationService:
             ):
             raise BadRequestException("Código de verificação inválido")
         
-        is_valid = self.check_reservation(reservation.trip_id, reservation.reservation_id)
+        is_valid = await self.check_reservation(reservation.trip_id, reservation.reservation_id)
 
         if not is_valid:
             raise BadRequestException("Passageiro não está na lista de embarque")
@@ -106,30 +106,27 @@ class ReservationService:
         if not reservations:
             raise NotFoundException("Reserva não encontrada!")
 
-        if len(reservations) > 1:
-            tasks = [
-                run_in_threadpool(
-                    self._sync_generate_qr, 
-                    res.reservation_id, 
-                    trip_id, 
-                    user.registration_id
-                )
-                for res in reservations
-            ]
-            
-            qr_codes = await asyncio.gather(*tasks)
-            
-            logger.info(f"Multiple checkin codes retrieved successfully | User ID: {user.user_id}")
-            return {user.full_name: qr_codes}
+        tasks = [
+            run_in_threadpool(
+                self._sync_generate_qr,
+                res.reservation_id,
+                trip_id,
+                user.registration_id
+            )
+            for res in reservations
+        ]
 
-        qr_base64 = await run_in_threadpool(
-            self._sync_generate_qr, 
-            reservations[0].reservation_id, 
-            trip_id, 
-            user.registration_id
-        )
+        qr_codes = await asyncio.gather(*tasks)
 
-        logger.info(f"Checkin code retrieved successfully | User ID: {user.user_id} | Trip ID: {trip_id}")
-        return {user.full_name: qr_base64}
+        result = [
+            {
+                "name": res.extra_passenger_name or user.full_name,
+                "qr_code": qr
+            }
+            for res, qr in zip(reservations, qr_codes)
+        ]
+
+        logger.info(f"Checkin code(s) retrieved successfully | User ID: {user.user_id} | Trip ID: {trip_id}")
+        return result
 
     
