@@ -9,7 +9,7 @@ import logging
 from app.DTOs.checkin import ManualCheckinRequestDTO
 from app.enums.enums import BoardingStatus
 from app.repositories.reservation_repository import ReservationRepository
-from app.core.exceptions import NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException
+from app.core.exceptions import NotFoundException, ForbiddenException, BadRequestException
 import hmac
 
 logger = logging.getLogger(__name__)
