@@ -34,7 +34,7 @@ jobs:
           python -m venv .venv
           .venv/bin/pip install --upgrade pip
           .venv/bin/pip install -r backend/requirements.txt
-          .venv/bin/pip install aiosqlite pytest pytest-cov anyio
+          .venv/bin/pip install aiosqlite pytest pytest-cov pytest-asyncio anyio
 
       - name: Run tests
         env:

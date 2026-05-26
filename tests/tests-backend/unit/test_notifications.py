@@ -62,7 +62,7 @@ async def test_notifications_subscribe_queues_boarding_qr_code_for_student(monke
     reservation = SimpleNamespace(extra_passenger_name=None, reservation_id=uuid.uuid4())
     tasks = DummyBackgroundTasks()
 
-    await notifications.subscribe_notifications(user, trip, reservation, tasks)
+    await notifications.subscribe_notifications(user, trip, reservation, tasks, 1)
 
     assert len(tasks.calls) == 1
     assert tasks.calls[0][0].__name__ == "send_boarding_qr_code"
@@ -89,7 +89,7 @@ async def test_notifications_cancel_subscription_schedules_staff_cancellation_fo
     reservation = SimpleNamespace(extra_passenger_name="Guest", reservation_id=uuid.uuid4())
     tasks = DummyBackgroundTasks()
 
-    await notifications.cancel_subscription_notifications(user, trip, reservation, tasks)
+    await notifications.cancel_subscription_notifications(user, UserProfile.STAFF, trip, reservation, tasks)
 
     assert len(tasks.calls) == 1
     assert tasks.calls[0][0].__name__ == "send_cancellation_confirmation_staff_for_extra_name"
