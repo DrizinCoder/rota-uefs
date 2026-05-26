@@ -115,7 +115,7 @@ class TestEstudanteCRUD:
         assert response.status_code == 200
 
     def test_update_password_estudante_senhas_nao_coincidem_retorna_400(self, client):
-        """Senhas que não coincidem devem retornar 400 (ou 422, ajuste conforme regra)"""
+        """Senhas que não coincidem devem retornar 400"""
         create_resp = client.post("/auth/register/student", json=ESTUDANTE_CREATE_VALID)
         assert create_resp.status_code == 201
         student_id = create_resp.json()["data"]["user_id"]
@@ -125,7 +125,7 @@ class TestEstudanteCRUD:
             json=ESTUDANTE_UPDATE_PASSWORD_INVALID,
         )
 
-        assert response.status_code in (400, 422)
+        assert response.status_code == 400
 
     def test_update_password_estudante_inexistente_retorna_404(self, client):
         """Atualização de senha de estudante inexistente deve retornar 404"""
@@ -194,27 +194,22 @@ class TestEstudanteErrosNegocio:
     """Testes de erros de negócio para operações de estudante"""
 
     def test_create_estudante_matricula_duplicada_retorna_409(self, client):
-        """Criação com matrícula duplicada deve retornar 409 ou 422"""
+        """Criação com matrícula duplicada deve retornar 409"""
         response1 = client.post("/auth/register/student", json=ESTUDANTE_CREATE_VALID)
         assert response1.status_code == 201
 
         response2 = client.post("/auth/register/student", json=ESTUDANTE_CREATE_VALID)
-        
-        # API pode retornar 409 (Conflict) ou 422 (Unprocessable Entity)
-        assert response2.status_code in (409, 422)
+        assert response2.status_code == 409
 
     def test_create_estudante_email_duplicado_retorna_409(self, client):
-        """Criação com email duplicado deve retornar 409 ou 422"""
+        """Criação com email duplicado deve retornar 409"""
         response1 = client.post("/auth/register/student", json=ESTUDANTE_CREATE_VALID)
         assert response1.status_code == 201
 
         duplicate_payload = ESTUDANTE_CREATE_VALID.copy()
-        duplicate_payload["registration_id"] = f"EST{uuid.uuid4().hex[:8]}"
 
         response2 = client.post("/auth/register/student", json=duplicate_payload)
-        
-        # API pode retornar 409 (Conflict) ou 422 (Unprocessable Entity)
-        assert response2.status_code in (409, 422)
+        assert response2.status_code == 409
 
 
 class TestEstudanteCRUDFluxoCompleto:

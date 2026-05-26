@@ -1,3 +1,4 @@
+import base64
 from unittest.mock import MagicMock
 
 from app.services.email.email_service import EmailService
@@ -14,6 +15,33 @@ def test_email_service_send_uses_smtp_connection(monkeypatch):
     service.send(subject='Teste', email_to='user@test.com', html_content='<p>Ok</p>')
 
     fake_server.sendmail.assert_called_once()
+    called_args = fake_server.sendmail.call_args.args
+    assert called_args[0] == service.from_email
+    assert called_args[1] == ['user@test.com']
+
+
+def test_email_service_send_with_inline_image_attaches_image(monkeypatch):
+    service = EmailService()
+    fake_server = MagicMock()
+    fake_server.sendmail.return_value = True
+    monkeypatch.setattr(service, '_connect', lambda: fake_server)
+
+    valid_png_base64 = base64.b64encode(
+        b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\x0cIDAT\x08\xd7c\xf8\x0f\x00\x01\x01\x01\x00\x18\xdd\x8d\xf7\x00\x00\x00\x00IEND\xaeB`\x82'
+    ).decode('ascii')
+
+    service.send_with_inline_image(
+        subject='Teste',
+        email_to='user@test.com',
+        html_content='<p><img src="cid:test"></p>',
+        image_base64=valid_png_base64,
+        image_cid='test'
+    )
+
+    fake_server.sendmail.assert_called_once()
+    payload = fake_server.sendmail.call_args.args[2]
+    assert 'Content-ID: <test>' in payload
+    assert 'Content-Type: multipart/related' in payload
 
 
 def test_email_use_cases_send_welcome_calls_render_and_send(monkeypatch):
@@ -28,3 +56,5 @@ def test_email_use_cases_send_welcome_calls_render_and_send(monkeypatch):
 
     template.render.assert_called_once()
     email_service.send.assert_called_once()
+    assert email_service.send.call_args.kwargs['email_to'] == 'user@test.com'
+    assert email_service.send.call_args.kwargs['html_content'] == '<html>Bem-vindo</html>'

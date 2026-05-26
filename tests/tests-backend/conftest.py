@@ -4,6 +4,8 @@ from contextlib import asynccontextmanager
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 
+pytest_plugins = ["pytest_asyncio"]
+
 os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
 os.environ.setdefault("SECRET_KEY", "test-secret")
 os.environ.setdefault("MAIL_USERNAME", "test@example.com")
@@ -11,6 +13,10 @@ os.environ.setdefault("MAIL_PASSWORD", "password")
 os.environ.setdefault("MAIL_FROM", "test@example.com")
 os.environ.setdefault("BASE_URL_FRONTEND", "https://rota-uefs/test")
 os.environ.setdefault("REFRESH_TOKEN_EXPIRE_DAYS", "30")
+os.environ.setdefault("MISFIRE_GRACE_TIME", "30")
+os.environ.setdefault("VAPID_PRIVATE_KEY", "test-private-key")
+os.environ.setdefault("VAPID_PUBLIC_KEY", "test-public-key")
+os.environ.setdefault("VAPID_CLAIMS_EMAIL", "test@example.com")
 
 import pytest
 from fastapi import HTTPException, Depends
@@ -212,21 +218,30 @@ class FakeAuthController:
             registration_id=registration_id
         )
 
-    async def register_staff(self, dados, background_tasks):
+    async def register_staff(self, dados, background_tasks=None):
         email = getattr(dados, "email", None)
         if email and email in self._created_emails:
             raise HTTPException(status_code=409, detail="Email já está em uso")
         if email:
             self._created_emails.add(email)
-        return ServidorRegisterResponseDTO(
-            user_id=uuid.UUID(str(uuid.uuid4())),
-            full_name=getattr(dados, "name", "Servidor"),
-            registration_id=getattr(dados, "registration_id", None),
-            email=email
-        )
+
+        return ServidorRegisterResponseDTO.model_validate({
+            "user_id": uuid.UUID(str(uuid.uuid4())),
+            "full_name": getattr(dados, "full_name", "Servidor"),
+            "registration_id": getattr(dados, "registration_id", None),
+            "email": email,
+            "staff_member": {
+                "department": getattr(dados, "department", "TI"),
+                "employment_type": getattr(dados, "employment", "efetivo"),
+            },
+        })
 
     async def login(self, dados):
-        return {"access_token": "fake-token", "token_type": "bearer"}
+        return {
+            "access_token": "fake-token",
+            "refresh_token": "fake-refresh-token",
+            "token_type": "bearer",
+        }
 
     async def recover_password(self, email: str):
         return {"message": "Email enviado"}

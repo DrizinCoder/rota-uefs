@@ -60,6 +60,7 @@ pydantic-settings==2.13.1
 pydantic_core==2.46.1
 Pygments==2.20.0
 pytest==8.4.0
+pytest-asyncio==0.23.8
 pytest-cov==4.1.0
 python-dotenv==1.2.2
 python-jose==3.3.0
@@ -87,7 +88,7 @@ typing_extensions==4.15.0
 tzlocal==5.3.1
 urllib3==2.6.3
 uvicorn==0.44.0
-uvloop==0.22.1
+uvloop==0.22.1 ; sys_platform != 'win32' # Windows não suporta uvloop
 watchfiles==1.1.1
 websockets==16.0
 yarl==1.23.0
