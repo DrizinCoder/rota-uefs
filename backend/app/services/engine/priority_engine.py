@@ -1,3 +1,4 @@
+from app.controllers.notification_controller import NotificationController
 import uuid
 
 from fastapi import BackgroundTasks
@@ -12,14 +13,13 @@ from app.core.config import Settings
 from .notifications import Notifications
 
 class PriorityEngine:
-    def __init__(self, user_repo: UserRepository, trip_repo: TripRepository, res_repo: ReservationRepository, bus_repo: BusRepository):
+    def __init__(self, user_repo: UserRepository, trip_repo: TripRepository, res_repo: ReservationRepository, bus_repo: BusRepository, notification_controller: NotificationController):
         self.user_repository = user_repo
         self.trip_repository = trip_repo
         self.reservation_repository = res_repo
         self.bus_repository = bus_repo
+        self.notification_controller = notification_controller
 
-        self.notifications = Notifications(user_repo, trip_repo, res_repo, bus_repo)
-    
     def get_priority(self, profile: UserProfile, boarding_status: BoardingStatus, extra_name: str = None):
         if boarding_status == BoardingStatus.BOARDED:
             return -1
@@ -247,5 +247,8 @@ class PriorityEngine:
         
         if not reservations:
             await self.notifications.send_quorum_not_reached_notification(trip, background_tasks)
+            await self.notification_controller.send_trip_cancellation(trip_id)
+        
+        await self.notification_controller.send_trip_confirmation(trip_id)
             
         
