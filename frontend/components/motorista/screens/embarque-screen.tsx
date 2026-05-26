@@ -27,6 +27,8 @@ function EmbarqueContent() {
   const [scannedData, setScannedData] = useState<string | null>(null);
   const requestRef = useRef<ReturnType<typeof requestAnimationFrame> | null>(null);
 
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const irParaPassageiros = () => {
     const qs = tripId ? `?trip_id=${encodeURIComponent(tripId)}` : "";
     router.push(`/motorista/passageiros${qs}`);
@@ -34,6 +36,10 @@ function EmbarqueContent() {
 
   // Função pra lidar com o QR Code
   const handleQRScanned = async (qrData: string) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
     setLoading(true);
     setFeedback(null);
 
@@ -47,10 +53,11 @@ function EmbarqueContent() {
         });
         
         // Espera 2 segundos, aí reseta pra escanear de novo
-        setTimeout(() => {
+        timeoutRef.current = setTimeout(() => {
           setScannedData(null);
           setIsScanning(true);
           setFeedback(null);
+          timeoutRef.current = null; // Limpa a ref depois
         }, 2000);
       }
     } catch (err: any) {
@@ -73,10 +80,11 @@ function EmbarqueContent() {
       }
 
       // Reseta após 2 segundos
-      setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         setScannedData(null);
         setIsScanning(true);
         setFeedback(null);
+        timeoutRef.current = null; // Limpa a ref depois
       }, 2000);
     } finally {
       setLoading(false);
