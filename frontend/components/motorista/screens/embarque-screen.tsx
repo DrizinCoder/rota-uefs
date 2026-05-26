@@ -28,6 +28,7 @@ function EmbarqueContent() {
   const requestRef = useRef<ReturnType<typeof requestAnimationFrame> | null>(null);
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isProcessing = useRef(false);
 
   const irParaPassageiros = () => {
     const qs = tripId ? `?trip_id=${encodeURIComponent(tripId)}` : "";
@@ -36,6 +37,7 @@ function EmbarqueContent() {
 
   // Função pra lidar com o QR Code
   const handleQRScanned = async (qrData: string) => {
+    
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
@@ -58,6 +60,7 @@ function EmbarqueContent() {
           setIsScanning(true);
           setFeedback(null);
           timeoutRef.current = null; // Limpa a ref depois
+          isProcessing.current = false;
         }, 2000);
       }
     } catch (err: any) {
@@ -85,6 +88,7 @@ function EmbarqueContent() {
         setIsScanning(true);
         setFeedback(null);
         timeoutRef.current = null; // Limpa a ref depois
+        isProcessing.current = false;
       }, 2000);
     } finally {
       setLoading(false);
@@ -154,9 +158,10 @@ function EmbarqueContent() {
       const code = jsQR(imageData.data, imageData.width, imageData.height);
 
       // Se encontrou QR code
-      if (code) {
+      if (code && !isProcessing.current) {
         setScannedData(code.data);
         setIsScanning(false);
+        isProcessing.current = true;
         handleQRScanned(code.data);
       }
 
