@@ -1,4 +1,3 @@
-from app.controllers.notification_controller import NotificationController
 import uuid
 
 from fastapi import BackgroundTasks
