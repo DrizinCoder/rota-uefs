@@ -2,6 +2,7 @@ import base64
 from datetime import date, datetime
 from typing import List
 import uuid
+from fastapi.concurrency import run_in_threadpool
 from app.DTOs.reports import TripInsuranceReportDTO
 from app.services.dashboard_service import DashboardService
 from app.services.reports.weasyprint_generator import WeasyPrintGenerator
@@ -28,7 +29,14 @@ class DashboardController:
     async def trip_report_PDF(self, reports: List[TripInsuranceReportDTO], title: str) -> str:
         log_data = {'timestamp': datetime.now(), 'title': title}
         context = {"reports": reports}
-        pdf_bytes = WeasyPrintGenerator().generate_pdf('insurance_report.html', context, log_data)
+        
+        pdf_bytes = await run_in_threadpool(
+            WeasyPrintGenerator().generate_pdf,
+            'insurance_report.html', 
+            context, 
+            log_data
+        )
+
         return base64.b64encode(pdf_bytes)
     
     async def trip_report_CSV(self, reports: List[TripInsuranceReportDTO], title: str) -> str:
@@ -54,7 +62,12 @@ class DashboardController:
                 }
                 dados.append(row)
 
-        csv_bytes = CsvGenerator().generate_csv(dados, headers)
+        csv_bytes = await run_in_threadpool(
+            CsvGenerator().generate_csv, 
+            dados, 
+            headers
+        )
+        
         return base64.b64encode(csv_bytes)
 
     async def trip_report(self, trip_id: uuid.UUID, file_format: str):
