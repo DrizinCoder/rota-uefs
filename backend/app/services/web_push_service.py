@@ -57,7 +57,7 @@ class PushSubscriptionService:
                     },
                     data=json.dumps({"title": title, "body": body}),
                     vapid_private_key=settings.VAPID_PRIVATE_KEY,
-                    vapid_claims={"sub": settings.VAPID_CLAIMS_EMAIL},
+                    vapid_claims={"sub": "mailto:admin@rota-uefs.com"},
                 )
             )
             logger.info(f"Push sent successfully | Endpoint: {sub.endpoint}")

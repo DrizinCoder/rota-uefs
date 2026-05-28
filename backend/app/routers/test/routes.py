@@ -25,7 +25,6 @@ router = APIRouter()
 class EmailRequest(BaseModel):
     target_email: str  
   
-# TODO: remover após a sessão - uso apenas pra teste
 @router.post("/enviar-push")
 async def testar_envio_push(
     current_user: TokenData = Depends(get_current_user),
@@ -38,7 +37,6 @@ async def testar_envio_push(
     )
     return ResponseHandler.ok("Notificação de teste enviada")
 
-# TODO: remover após a sessão - uso apenas pra teste
 @router.get("/enviar-push-publico")
 async def testar_envio_push_publico(
     registration_id: str,
