@@ -1,5 +1,7 @@
+from datetime import datetime
 import uuid
-
+import base64
+from app.services.reports.weasyprint_generator import WeasyPrintGenerator
 from fastapi import BackgroundTasks
 from app.services.engine.priority_engine import PriorityEngine
 from app.services.trip_service import TripService
