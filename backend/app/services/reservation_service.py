@@ -100,9 +100,9 @@ class ReservationService:
         return generate_qr_code_base64(code)
 
     async def get_checkin_code(self, user: User, trip_id: str):
-        logger.info(f"Checkin code lookup requested | User ID: {user.user_id} | Trip ID: {trip_id}")
+        logger.info(f"Checkin code lookup requested | User ID: {user.sub} | Trip ID: {trip_id}")
 
-        reservations = await self.repository.get_by_trip_and_user_id(user.user_id, trip_id)
+        reservations = await self.repository.get_by_trip_and_user_id(user.sub, trip_id)
         if not reservations:
             raise NotFoundException("Reserva não encontrada!")
 
@@ -126,7 +126,7 @@ class ReservationService:
             for res, qr in zip(reservations, qr_codes)
         ]
 
-        logger.info(f"Checkin code(s) retrieved successfully | User ID: {user.user_id} | Trip ID: {trip_id}")
+        logger.info(f"Checkin code(s) retrieved successfully | User ID: {user.sub} | Trip ID: {trip_id}")
         return result
 
     

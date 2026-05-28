@@ -192,9 +192,9 @@ export function Navigation({ tipoUsuario = "Student" }: NavigationProps) {
         {/* Desktop */}
         <motion.div
           animate={{
-            width: scrolled ? "min(98%, 1000px)" : "100%",
+            // width: scrolled ? "min(98%, 1000px)" : "100%",
             y: scrolled ? 14 : 0,
-            borderRadius: scrolled ? 9999 : 0,
+            // borderRadius: scrolled ? 9999 : 0,
             backgroundColor: scrolled
               ? "rgba(2, 6, 23, 0.92)"
               : "rgb(15, 23, 42)",

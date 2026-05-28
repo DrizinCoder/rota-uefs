@@ -1,3 +1,4 @@
+from app.core import scheduler
 from app.routers.users.dependencies import get_reservation_service
 from app.services.reservation_service import ReservationService
 from app.DTOs.users import CheckinCodeRequest
@@ -108,5 +109,6 @@ async def get_checkin_code(
     current_user: TokenData = Depends(get_current_user),
     service: ReservationService = Depends(get_reservation_service)
 ):
+
     result = await service.get_checkin_code(current_user, trip_id)
     return ResponseHandler.ok(result)

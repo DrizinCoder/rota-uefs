@@ -22,8 +22,8 @@ export function WeekDaysMenu({ dias, diaAtivo, onDiaChange }: WeekDaysMenuProps)
             onClick={() => onDiaChange(dia.id)}
             className={`flex-1 py-4 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all duration-200 relative ${
               dia.id === diaAtivo
-                ? "bg-[#103173] text-white shadow-lg"
-                : "bg-white text-[#103173]/70"
+                ? "bg-white text-[#103173] shadow-md ring-2 ring-[#103173]/30"
+                : "bg-white text-[#103173]/40 hover:text-[#103173]/60"
             }`}
           >
             {dia.label}
