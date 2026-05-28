@@ -1,5 +1,5 @@
 from app.models.models import PushSubscription
-from sqlalchemy.connectors import asyncio
+import asyncio
 from app.core.exceptions import NotFoundException
 from app.core.exceptions import ConflictException
 from app.repositories.web_push_repository import PushSubscriptionRepository
@@ -56,8 +56,8 @@ class PushSubscriptionService:
                         },
                     },
                     data=json.dumps({"title": title, "body": body}),
-                    vapid_private_key=settings.vapid_private_key,
-                    vapid_claims={"sub": settings.vapid_claims_email},
+                    vapid_private_key=settings.VAPID_PRIVATE_KEY,
+                    vapid_claims={"sub": settings.VAPID_CLAIMS_EMAIL},
                 )
             )
             logger.info(f"Push sent successfully | Endpoint: {sub.endpoint}")

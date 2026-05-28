@@ -160,7 +160,7 @@ class PriorityEngine:
         return ResponseHandler.created(message="Servidor(a) genérico inscrito na viagem.")   
     
     async def delete_reservation_staff_generic(self, reservation_id: str):
-        reservation = await self.reservation_repository.get_by_id(reservation_id)
+        reservation = await self.reservation_repository.get_id(reservation_id)
 
         if not reservation:
             raise NotFoundException("Reserva não encontrada")

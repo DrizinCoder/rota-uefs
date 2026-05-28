@@ -100,4 +100,3 @@ class Notifications:
                 EmailUseCases().send_trip_cancelled,
                 email, name, trip_id, trip_date.strftime("%d/%m/%Y")
             )
-        
