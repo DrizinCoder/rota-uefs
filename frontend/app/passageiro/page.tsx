@@ -145,10 +145,10 @@ export default function PaginaPassageiro() {
                     <ManageSubscriptionButton viagemId={viagem.trip_id} />
                   ) : (
                     <div className="space-y-3">
-                      <TripModeToggle
+                      {/* <TripModeToggle
                         modalidadeAtual={modalidadeAtual}
                         onChange={(nova) => selecionarModalidade(viagem.trip_id, nova)}
-                      />
+                      /> */}
                       <SubscribeButton viagemId={viagem.trip_id} />
                     </div>
                   )}

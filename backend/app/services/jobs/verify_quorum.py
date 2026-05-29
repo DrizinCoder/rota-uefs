@@ -1,3 +1,4 @@
+from app.services.jobs.dependencies import get_notification_controller
 import asyncio
 from datetime import datetime
 import logging
@@ -24,8 +25,15 @@ def verify_quorum_job(trip_id: str):
                 bus_repo=BusRepository(session),
             )
 
+            notification_controller = get_notification_controller(session)
+
             background_tasks = BackgroundTasks()
-            await priority_engine.verify_quorum(trip_id, background_tasks)
+            success = await priority_engine.verify_quorum(trip_id, background_tasks)
+
+            if success:
+                await notification_controller.send_trip_confirmation(trip_id)
+            else:
+                await notification_controller.send_trip_cancellation(trip_id)
             
     asyncio.run(async_block())
     logger.info(f"[JOB CONCLUDED] Alarme processado em: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")

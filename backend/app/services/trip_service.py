@@ -3,6 +3,7 @@ from app.DTOs.trip import TripFeedResponse
 from app.DTOs.trip import TripDetailFeedItem
 from app.DTOs.trip import TripFeedItem
 from app.DTOs.trip import DriverTripItem
+from app.DTOs.reports import TripInsuranceReportDTO
 from calendar import calendar, monthrange
 from datetime import datetime, timedelta, date
 from app.enums.enums import TripRecurrence
@@ -14,6 +15,7 @@ from app.core.scheduler import task_scheduler
 from app.services.jobs.verify_quorum import verify_quorum_job
 import logging
 from app.DTOs.trip import WEEKDAY_PT
+
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +82,7 @@ class TripService:
     async def get_all(self):
         logger.info("Trip list requested")
 
-        result = await self.trip_repository.get_all()
+        result = await self.trip_repository.get_all_with_reservation()
 
         logger.info(f"Trip list retrieved successfully | Count: {len(result) if result else 0}")
         return result
@@ -205,3 +207,4 @@ class TripService:
 
         logger.info(f"Driver trips retrieved | Driver ID: {driver_id} | Count: {len(trips)}")
         return trips
+    

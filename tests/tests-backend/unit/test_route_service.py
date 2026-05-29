@@ -17,6 +17,7 @@ def test_create_returns_json_payload():
     response = asyncio.run(service.create(MagicMock()))
 
     assert response == {'name': 'Rota Test'}
+    repository.create.assert_awaited_once()
 
 
 def test_get_all_raises_when_no_routes_found():
@@ -41,6 +42,15 @@ def test_get_by_id_returns_json_payload():
     assert result == {'route_id': '1'}
 
 
+def test_get_by_id_raises_not_found_when_missing():
+    repository = AsyncMock()
+    repository.get_by_id.return_value = None
+    service = RouteService(repository)
+
+    with pytest.raises(NotFoundException):
+        asyncio.run(service.get_by_id('00000000-0000-0000-0000-000000000000'))
+
+
 def test_update_full_returns_json_payload():
     route = MagicMock()
     route.model_dump.return_value = {'route_id': '1'}
@@ -52,6 +62,7 @@ def test_update_full_returns_json_payload():
     result = asyncio.run(service.update_full('00000000-0000-0000-0000-000000000000', MagicMock()))
 
     assert result == {'route_id': '1'}
+    repository.update_full.assert_awaited_once()
 
 
 def test_delete_returns_json_payload():

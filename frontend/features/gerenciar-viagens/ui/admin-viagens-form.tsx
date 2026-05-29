@@ -82,7 +82,7 @@ export function AdminViagensForm({
           <div className="grid md:grid-cols-2 gap-6 mb-6">
             <div>
               <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Modalidade</label>
-              <div className="flex gap-4">
+              {/* <div className="flex gap-4">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="radio" name="tipo" value="ida" checked={tipoViagem === "ida"} onChange={(e) => setTipoViagem(e.target.value)} className="accent-[#103173]" />
                   <span className="text-sm font-bold text-[#103173]">Somente Ida</span>
@@ -91,7 +91,7 @@ export function AdminViagensForm({
                   <input type="radio" name="tipo" value="ida_volta" checked={tipoViagem === "ida_volta"} onChange={(e) => setTipoViagem(e.target.value)} className="accent-[#103173]" />
                   <span className="text-sm font-bold text-[#103173]">Ida e Volta</span>
                 </label>
-              </div>
+              </div> */}
             </div>
           </div>
 

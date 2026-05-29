@@ -2,6 +2,7 @@
 
 # Dependências do Backend
 pytest==8.4.0
+pytest-asyncio==0.23.8
 pytest-cov==4.1.0
 requests==2.34.2
 
@@ -15,7 +16,7 @@ nodeenv==1.10.0
 
 # Como preparar todo o ambiente de testes
 # Execute a partir da raiz do repositório:
-#   pip install -r tests/requirements-test.txt
+#   pip install tests/requirements-qa.txt
 
 # Depois, rode os testes backend:
 #   pytest

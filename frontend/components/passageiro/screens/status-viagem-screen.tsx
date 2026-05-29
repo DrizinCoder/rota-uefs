@@ -224,7 +224,7 @@ export function StatusViagemScreen() {
               <div className="w-full h-px bg-slate-100 mb-2" />
 
               <Button
-                onClick={() => router.push("/passageiro/validar")}
+                onClick={() => router.push(`/passageiro/validar?trip_id=${searchParams.get("viagemId")}`)}
                 className="w-full h-16 bg-[#103173] hover:bg-[#103B73] text-white font-black text-lg rounded-2xl shadow-lg transition-all active:scale-95 flex items-center gap-3"
               >
                 <QrCode className="h-6 w-6 text-[#F2D022]" />
