@@ -150,7 +150,7 @@ export function AdminValidarProfessorList({
               <p className="text-slate-500 text-sm mt-1">
                 {busca
                   ? `Nenhum resultado para "${busca}".`
-                  : "Todas as contas de professores já foram validadas ou não existem novos cadastros."}
+                  : "Todas as contas de servidores já foram validadas ou não existem novos cadastros."}
               </p>
             </div>
           )}
