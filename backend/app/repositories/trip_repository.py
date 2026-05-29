@@ -453,3 +453,4 @@ class TripRepository:
             )
             for row in rows
         ]
+    

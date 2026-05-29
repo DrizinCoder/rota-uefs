@@ -17,5 +17,5 @@ async def test_trip_controller_subscribe_and_cancel():
     subscribe_result = await controller.subscriber("user-1", "trip-1", SimpleNamespace(), None)
     assert subscribe_result["subscribed"] is True
 
-    cancel_result = await controller.cancel_subscription("user-1", "trip-1", SimpleNamespace(), None)
+    cancel_result = await controller.cancel_subscription("user-1", "trip-1", SimpleNamespace())
     assert cancel_result["cancelled"] is True

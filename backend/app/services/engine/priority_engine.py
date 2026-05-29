@@ -18,9 +18,7 @@ class PriorityEngine:
         self.reservation_repository = res_repo
         self.bus_repository = bus_repo
 
-        self.notifications = Notifications(user_repo, trip_repo, res_repo, bus_repo)
-
-    def get_priority(self, profile: UserProfile, boarding_status: BoardingStatus = None, extra_name: str = None):
+    def get_priority(self, profile: UserProfile, boarding_status: BoardingStatus, extra_name: str = None):
         if boarding_status == BoardingStatus.BOARDED:
             return -1
 
@@ -160,7 +158,7 @@ class PriorityEngine:
         return ResponseHandler.created(message="Servidor(a) genérico inscrito na viagem.")   
     
     async def delete_reservation_staff_generic(self, reservation_id: str):
-        reservation = await self.reservation_repository.get_by_id(reservation_id)
+        reservation = await self.reservation_repository.get_id(reservation_id)
 
         if not reservation:
             raise NotFoundException("Reserva não encontrada")
@@ -247,5 +245,8 @@ class PriorityEngine:
         
         if not reservations:
             await self.notifications.send_quorum_not_reached_notification(trip, background_tasks)
+            return False
+        
+        return True
             
         

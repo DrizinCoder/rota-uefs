@@ -77,5 +77,5 @@ async def get_push_subscription_service(session: AsyncSession = Depends(get_sess
 
 async def get_reservation_service(session: AsyncSession = Depends(get_session)) -> ReservationService:
     repo = ReservationRepository(session)
-    priority_engine = get_priority_engine(session)
+    priority_engine = await get_priority_engine(session)
     return ReservationService(repo, priority_engine)

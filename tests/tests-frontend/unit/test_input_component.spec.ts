@@ -98,8 +98,8 @@ test.describe('Input Component - Unit Tests', () => {
     // Verify events were tracked
     const changeCount = await eventInput.getAttribute('data-change-count');
     const inputCount = await eventInput.getAttribute('data-input-count');
-    expect(parseInt(changeCount)).toBeGreaterThanOrEqual(0);
-    expect(parseInt(inputCount)).toBeGreaterThanOrEqual(0);
+    expect(parseInt(changeCount)).toBe(1);
+    expect(parseInt(inputCount)).toBeGreaterThan(0);
   });
 
   test('should handle disabled state correctly', async ({ page }) => {

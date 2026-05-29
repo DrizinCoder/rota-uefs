@@ -1,3 +1,7 @@
+from app.services.reservation_service import ReservationService
+from app.repositories.web_push_repository import PushSubscriptionRepository
+from app.services.web_push_service import PushSubscriptionService
+from app.controllers.notification_controller import NotificationController
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,5 +17,12 @@ def get_priority_engine(session: AsyncSession = Depends(get_session)) -> Priorit
         user_repo=UserRepository(session),
         trip_repo=TripRepository(session),
         res_repo=ReservationRepository(session),
-        bus_repo=BusRepository(session),
+        bus_repo=BusRepository(session)
+    )
+
+
+def get_notification_controller(session: AsyncSession = Depends(get_session)) -> NotificationController:
+    return NotificationController(
+        push_subscription_service=PushSubscriptionService(PushSubscriptionRepository(session)),
+        reservation_service=ReservationService(ReservationRepository(session)),
     )

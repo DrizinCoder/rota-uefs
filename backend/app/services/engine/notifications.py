@@ -35,7 +35,7 @@ class Notifications:
         trip: Trip, 
         reservation: Reservation, 
         background_tasks: BackgroundTasks, 
-        position: int = 0
+        position: int
     ):
             if user.profile == UserProfile.STAFF:
                 if reservation.extra_passenger_name not in (None, ""):
@@ -72,9 +72,7 @@ class Notifications:
                     user.email, user.full_name, trip.trip_id
                 )
 
-    async def cancel_subscription_notifications(self, user: User, trip: Trip, reservation: Reservation, background_tasks: BackgroundTasks, profile: UserProfile | None = None):
-            if profile is None:
-                profile = user.profile
+    async def cancel_subscription_notifications(self, user: User, profile: UserProfile ,trip: Trip, reservation: Reservation, background_tasks: BackgroundTasks):
             if profile == UserProfile.STAFF:
                 if reservation.extra_passenger_name not in (None, ""):
                     background_tasks.add_task(
@@ -102,4 +100,3 @@ class Notifications:
                 EmailUseCases().send_trip_cancelled,
                 email, name, trip_id, trip_date.strftime("%d/%m/%Y")
             )
-        

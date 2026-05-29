@@ -50,7 +50,8 @@ def test_checkin_with_invalid_hmac_raises_unauthorized():
     reservation = SimpleNamespace(
         reservation_id=reservation_id,
         trip_id=trip_id,
-        user=SimpleNamespace(registration_id="24123456")
+        user=SimpleNamespace(registration_id="24123456"),
+        boarding_confirmation=None
     )
     repository = AsyncMock()
     repository.get_by_id.return_value = reservation
@@ -69,7 +70,8 @@ def test_manual_checkin_success_with_valid_data():
     reservation = SimpleNamespace(
         reservation_id=reservation_id,
         trip_id=trip_id,
-        user=SimpleNamespace(user_id=user_id, registration_id="24123456")
+        user=SimpleNamespace(user_id=user_id, registration_id="24123456"),
+        boarding_confirmation=None
     )
     repository = AsyncMock()
     repository.get_by_id.return_value = reservation
@@ -82,7 +84,7 @@ def test_manual_checkin_success_with_valid_data():
         trip_id=str(trip_id)
     )
 
-    with patch.object(ReservationService, 'check_reservation', new=lambda self, *args, **kwargs: True):
+    with patch.object(ReservationService, 'check_reservation', new=AsyncMock(return_value=True)):
         result = asyncio.run(service.manual_checkin(manual_data))
 
     assert result["message"] == "Checkin manual realizado com sucesso"

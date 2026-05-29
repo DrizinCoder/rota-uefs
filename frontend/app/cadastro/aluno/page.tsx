@@ -38,9 +38,9 @@ function getPasswordStrength(password: string) {
   if (/[0-9]/.test(password)) score++;
   if (/[^A-Za-z0-9]/.test(password)) score++;
   if (score <= 1) return { score, label: "Fraca", colorClass: "bg-red-400" };
-  if (score === 2) return { score, label: "Regular", colorClass: "bg-yellow-400" };
+  if (score === 2) return { score, label: "Regular", colorClass: "bg-amber-400" };
   if (score === 3) return { score, label: "Boa", colorClass: "bg-blue-400" };
-  return { score, label: "Forte", colorClass: "bg-green-500" };
+  return { score, label: "Forte", colorClass: "bg-emerald-500" };
 }
 
 const CADASTRO_ALUNO_SUPPORT_PHRASES = [
@@ -97,41 +97,40 @@ export default function CadastroAlunoPage() {
   const passwordStrength = getPasswordStrength(formData.password);
 
   return (
-    <div className="min-h-screen w-full bg-white relative overflow-hidden">
+    <div className="min-h-screen w-full bg-[#f0f4f8] relative overflow-hidden">
       <DotPattern
         radialFade="edges"
         width={18}
         height={18}
         cr={1}
-        className="text-neutral-400/55"
+        className="text-[#103173]/[0.06]"
       />
-      <Button
+      <button
         type="button"
-        variant="outline"
-        onClick={() => router.push("/")}
-        className="absolute top-6 left-6 z-10 h-10 px-4 text-sm font-medium border-gray-200 text-gray-600 hover:text-[#103173] hover:border-[#103173]/40 hover:bg-[#103173]/5"
+        onClick={() => router.push("/login")}
+        className="absolute top-6 left-6 z-50 flex items-center gap-2 text-sm font-bold text-[#73AABF] hover:text-[#103173] transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
-        Voltar para Home
-      </Button>
+        Voltar para Login
+      </button>
 
-      <div className="relative z-10 flex justify-center px-6 py-20 sm:py-16">
-        <div className="w-full max-w-[440px]">
+      <div className="relative z-10 flex justify-center px-4 py-20 sm:py-16">
+        <div className="w-full max-w-2xl">
 
           {/* Logo */}
-          <div className="flex flex-col items-center mb-8">
+          <div className="flex flex-col items-center mb-8 sm:mb-10">
             <Image
               src="/images/logo_rota_no_bg.png"
               alt="Rota UEFS"
-              width={220}
-              height={93}
-              className="w-[170px] sm:w-[210px] h-auto object-contain mb-5"
+              width={360}
+              height={152}
+              className="w-[240px] sm:w-[280px] h-auto object-contain mb-6"
               priority
             />
-            <h1 className="w-full text-center text-xl font-semibold tracking-tight text-gray-900 sm:text-2xl sm:font-bold">
-              Cadastro de aluno
+            <h1 className="w-full text-center text-2xl font-extrabold tracking-tight text-[#103173] sm:text-3xl">
+              Cadastro de Aluno
             </h1>
-            <div className="mx-auto mt-1.5 min-h-[2.5rem] w-full max-w-[17.5rem] text-center text-[13px] leading-snug text-gray-500 sm:min-h-[2.85rem] sm:max-w-md sm:text-sm sm:leading-relaxed">
+            <div className="mx-auto mt-2 min-h-[2.5rem] w-full max-w-[17.5rem] text-center text-[13px] leading-snug text-[#73AABF] sm:mt-2.5 sm:min-h-[2.85rem] sm:max-w-md sm:text-sm sm:leading-relaxed">
               <Typewriter
                 words={CADASTRO_ALUNO_SUPPORT_PHRASES}
                 speed={72}
@@ -142,244 +141,242 @@ export default function CadastroAlunoPage() {
             </div>
           </div>
 
-          {/* Erro */}
-          {erro && (
-            <div className="flex items-center gap-2 bg-red-50 text-red-600 text-sm p-3 rounded-lg border border-red-100 mb-5">
-              <AlertCircle className="h-4 w-4 shrink-0" />
-              <span>{erro}</span>
-            </div>
-          )}
-
-          <TooltipProvider delayDuration={300}>
-            <form onSubmit={handleSubmit} className="space-y-4">
-
-              {/* Nome Completo */}
-              <div className="space-y-1.5">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Label htmlFor="full_name" className="text-sm font-semibold text-gray-700 cursor-default select-none">
-                      Nome Completo
-                    </Label>
-                  </TooltipTrigger>
-                  <TooltipContent side="right">
-                    <p>Seu nome como consta nos documentos oficiais</p>
-                  </TooltipContent>
-                </Tooltip>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-                  <Input
-                    id="full_name"
-                    name="full_name"
-                    placeholder="João da Silva"
-                    value={formData.full_name}
-                    onChange={handleChange}
-                    required
-                    autoComplete="name"
-                    className="pl-10 h-11 border-gray-200 rounded-lg text-sm focus-visible:ring-[#103173] focus-visible:border-[#103173] transition-colors"
-                  />
-                </div>
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-8">
+            {/* Erro */}
+            {erro && (
+              <div className="flex items-center gap-2.5 bg-red-50 text-red-600 text-sm p-3.5 rounded-xl border border-red-100 mb-5">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                <span className="font-medium">{erro}</span>
               </div>
+            )}
 
-              {/* Matrícula + Telefone */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1.5">
+            <TooltipProvider delayDuration={300}>
+              <form onSubmit={handleSubmit} className="space-y-5">
+
+                {/* Nome Completo */}
+                <div className="space-y-2">
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Label htmlFor="registration_id" className="text-sm font-semibold text-gray-700 cursor-default select-none">
-                        Matrícula
+                      <Label htmlFor="full_name" className="text-sm font-bold text-[#103173]/70 cursor-default select-none">
+                        Nome Completo
                       </Label>
                     </TooltipTrigger>
                     <TooltipContent side="right">
-                      <p>Número de matrícula da UEFS — 8 dígitos numéricos</p>
+                      <p>Seu nome como consta nos documentos oficiais</p>
                     </TooltipContent>
                   </Tooltip>
                   <div className="relative">
-                    <BadgeCheck className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#73AABF] pointer-events-none" />
                     <Input
-                      id="registration_id"
-                      name="registration_id"
-                      placeholder="23121111"
-                      value={formData.registration_id}
+                      id="full_name"
+                      name="full_name"
+                      placeholder="João da Silva"
+                      value={formData.full_name}
                       onChange={handleChange}
-                      maxLength={8}
                       required
-                      className="pl-10 h-11 border-gray-200 rounded-lg text-sm focus-visible:ring-[#103173] focus-visible:border-[#103173] transition-colors"
+                      autoComplete="name"
+                      className="pl-10 h-12 bg-[#f0f4f8] border-transparent rounded-xl text-sm font-medium text-[#103173] placeholder:text-[#73AABF]/50 focus-visible:ring-[#103173] focus-visible:border-[#103173] focus-visible:bg-white transition-all"
                     />
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
+                {/* Matrícula + Telefone */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-3">
+                  <div className="space-y-2">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Label htmlFor="registration_id" className="text-sm font-bold text-[#103173]/70 cursor-default select-none">
+                          Matrícula
+                        </Label>
+                      </TooltipTrigger>
+                      <TooltipContent side="right">
+                        <p>Número de matrícula da UEFS — 8 dígitos numéricos</p>
+                      </TooltipContent>
+                    </Tooltip>
+                    <div className="relative">
+                      <BadgeCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#73AABF] pointer-events-none" />
+                      <Input
+                        id="registration_id"
+                        name="registration_id"
+                        placeholder="23121111"
+                        value={formData.registration_id}
+                        onChange={handleChange}
+                        maxLength={8}
+                        required
+                        className="pl-10 h-12 bg-[#f0f4f8] border-transparent rounded-xl text-sm font-medium text-[#103173] placeholder:text-[#73AABF]/50 focus-visible:ring-[#103173] focus-visible:border-[#103173] focus-visible:bg-white transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Label htmlFor="phone" className="text-sm font-bold text-[#103173]/70 cursor-default select-none">
+                          Telefone
+                        </Label>
+                      </TooltipTrigger>
+                      <TooltipContent side="left">
+                        <p>DDD + número com 10 ou 11 dígitos</p>
+                      </TooltipContent>
+                    </Tooltip>
+                    <div className="relative">
+                      <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#73AABF] pointer-events-none" />
+                      <Input
+                        id="phone"
+                        name="phone"
+                        type="tel"
+                        placeholder="(75) 9 0000-0000"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        required
+                        autoComplete="tel"
+                        className="pl-10 h-12 bg-[#f0f4f8] border-transparent rounded-xl text-sm font-medium text-[#103173] placeholder:text-[#73AABF]/50 focus-visible:ring-[#103173] focus-visible:border-[#103173] focus-visible:bg-white transition-all"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* E-mail */}
+                <div className="space-y-2">
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Label htmlFor="phone" className="text-sm font-semibold text-gray-700 cursor-default select-none">
-                        Telefone
+                      <Label htmlFor="email" className="text-sm font-bold text-[#103173]/70 cursor-default select-none">
+                        E-mail Institucional
                       </Label>
                     </TooltipTrigger>
-                    <TooltipContent side="left">
-                      <p>DDD + número com 10 ou 11 dígitos</p>
+                    <TooltipContent side="right">
+                      <p>Use seu e-mail @discente.uefs.br</p>
                     </TooltipContent>
                   </Tooltip>
                   <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#73AABF] pointer-events-none" />
                     <Input
-                      id="phone"
-                      name="phone"
-                      type="tel"
-                      placeholder="(75) 9 0000-0000"
-                      value={formData.phone}
+                      id="email"
+                      name="email"
+                      type="email"
+                      placeholder="23121111@discente.uefs.br"
+                      value={formData.email}
                       onChange={handleChange}
                       required
-                      autoComplete="tel"
-                      className="pl-10 h-11 border-gray-200 rounded-lg text-sm focus-visible:ring-[#103173] focus-visible:border-[#103173] transition-colors"
+                      autoComplete="email"
+                      className="pl-10 h-12 bg-[#f0f4f8] border-transparent rounded-xl text-sm font-medium text-[#103173] placeholder:text-[#73AABF]/50 focus-visible:ring-[#103173] focus-visible:border-[#103173] focus-visible:bg-white transition-all"
                     />
                   </div>
                 </div>
-              </div>
 
-              {/* E-mail */}
-              <div className="space-y-1.5">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Label htmlFor="email" className="text-sm font-semibold text-gray-700 cursor-default select-none">
-                      E-mail Institucional
-                    </Label>
-                  </TooltipTrigger>
-                  <TooltipContent side="right">
-                    <p>Use seu e-mail @discente.uefs.br</p>
-                  </TooltipContent>
-                </Tooltip>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="23121111@discente.uefs.br"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    autoComplete="email"
-                    className="pl-10 h-11 border-gray-200 rounded-lg text-sm focus-visible:ring-[#103173] focus-visible:border-[#103173] transition-colors"
-                  />
+                {/* Senha */}
+                <div className="space-y-2">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Label htmlFor="password" className="text-sm font-bold text-[#103173]/70 cursor-default select-none">
+                        Senha
+                      </Label>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="max-w-xs">
+                      <p>Mínimo 8 caracteres. Use letras maiúsculas, números e símbolos para maior segurança.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  <div className="relative">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#73AABF] pointer-events-none" />
+                    <Input
+                      id="password"
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Crie uma senha forte"
+                      value={formData.password}
+                      onChange={handleChange}
+                      required
+                      autoComplete="new-password"
+                      className="pl-10 pr-10 h-12 bg-[#f0f4f8] border-transparent rounded-xl text-sm font-medium text-[#103173] placeholder:text-[#73AABF]/50 focus-visible:ring-[#103173] focus-visible:border-[#103173] focus-visible:bg-white transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      tabIndex={-1}
+                      aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#73AABF] hover:text-[#103173] transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+
+                  {/* Indicador de força */}
+                  {formData.password && (
+                    <div className="space-y-2 pt-2">
+                      <div className="flex gap-1.5">
+                        {[1, 2, 3, 4].map((i) => (
+                          <div
+                            key={i}
+                            className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${i <= passwordStrength.score
+                                ? passwordStrength.colorClass
+                                : "bg-slate-100"
+                              }`}
+                          />
+                        ))}
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs font-bold text-[#73AABF]">Força da senha</p>
+                        <p
+                          className={`text-xs font-bold ${passwordStrength.score <= 1
+                              ? "text-red-500"
+                              : passwordStrength.score === 2
+                                ? "text-amber-500"
+                                : passwordStrength.score === 3
+                                  ? "text-blue-500"
+                                  : "text-emerald-600"
+                            }`}
+                        >
+                          {passwordStrength.label}
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                        {PASSWORD_RULES.map(({ test, text }) => {
+                          const ok = test(formData.password);
+                          return (
+                            <div
+                              key={text}
+                              className={`flex items-center gap-1.5 text-xs transition-colors ${ok ? "text-emerald-600 font-medium" : "text-[#73AABF]/70 font-medium"
+                                }`}
+                            >
+                              <CheckCircle2
+                                className={`h-3 w-3 shrink-0 ${ok ? "text-emerald-500" : "text-[#73AABF]/30"
+                                  }`}
+                              />
+                              {text}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
 
-              {/* Senha */}
-              <div className="space-y-1.5">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Label htmlFor="password" className="text-sm font-semibold text-gray-700 cursor-default select-none">
-                      Senha
-                    </Label>
-                  </TooltipTrigger>
-                  <TooltipContent side="right" className="max-w-xs">
-                    <p>Mínimo 8 caracteres. Use letras maiúsculas, números e símbolos para maior segurança.</p>
-                  </TooltipContent>
-                </Tooltip>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-                  <Input
-                    id="password"
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Crie uma senha forte"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
-                    autoComplete="new-password"
-                    className="pl-10 pr-10 h-11 border-gray-200 rounded-lg text-sm focus-visible:ring-[#103173] focus-visible:border-[#103173] transition-colors"
-                  />
+                {/* Submit */}
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full h-13 bg-[#103173] hover:bg-[#0d2660] text-white font-extrabold text-base rounded-xl transition-all duration-200 active:scale-[0.97] mt-3 shadow-lg shadow-[#103173]/25 disabled:opacity-60"
+                >
+                  {isLoading ? "Criando conta..." : "Criar conta"}
+                </Button>
+
+                <p className="text-center text-sm text-[#73AABF] font-medium pt-2">
+                  Já tem conta?{" "}
                   <button
                     type="button"
-                    onClick={() => setShowPassword((v) => !v)}
-                    tabIndex={-1}
-                    aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    onClick={() => router.push("/login")}
+                    className="font-bold text-[#103173] hover:underline underline-offset-2 transition-colors"
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    Entrar
                   </button>
-                </div>
+                </p>
+              </form>
+            </TooltipProvider>
+          </div>
 
-                {/* Indicador de força */}
-                {formData.password && (
-                  <div className="space-y-2 pt-1">
-                    <div className="flex gap-1">
-                      {[1, 2, 3, 4].map((i) => (
-                        <div
-                          key={i}
-                          className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-                            i <= passwordStrength.score
-                              ? passwordStrength.colorClass
-                              : "bg-gray-100"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs text-gray-400">Força da senha</p>
-                      <p
-                        className={`text-xs font-semibold ${
-                          passwordStrength.score <= 1
-                            ? "text-red-500"
-                            : passwordStrength.score === 2
-                            ? "text-yellow-500"
-                            : passwordStrength.score === 3
-                            ? "text-blue-500"
-                            : "text-green-600"
-                        }`}
-                      >
-                        {passwordStrength.label}
-                      </p>
-                    </div>
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-                      {PASSWORD_RULES.map(({ test, text }) => {
-                        const ok = test(formData.password);
-                        return (
-                          <div
-                            key={text}
-                            className={`flex items-center gap-1.5 text-xs transition-colors ${
-                              ok ? "text-green-600" : "text-gray-400"
-                            }`}
-                          >
-                            <CheckCircle2
-                              className={`h-3 w-3 shrink-0 ${
-                                ok ? "text-green-500" : "text-gray-300"
-                              }`}
-                            />
-                            {text}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Submit */}
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="w-full h-11 bg-[#103173] hover:bg-[#0d2660] text-white font-semibold rounded-lg transition-all duration-150 active:scale-[0.98] mt-1 shadow-sm shadow-[#103173]/30"
-              >
-                {isLoading ? "Criando conta..." : "Criar conta"}
-              </Button>
-
-              <p className="text-center text-sm text-gray-500">
-                Já tem conta?{" "}
-                <button
-                  type="button"
-                  onClick={() => router.push("/login")}
-                  className="font-semibold text-[#103173] hover:underline underline-offset-2 transition-colors"
-                >
-                  Entrar
-                </button>
-              </p>
-            </form>
-          </TooltipProvider>
-
-          <div className="flex items-center justify-center gap-1.5 mt-8 text-gray-300">
+          <div className="flex items-center justify-center gap-1.5 mt-8 text-[#73AABF]/50">
             <ShieldCheck className="h-3.5 w-3.5" />
-            <span className="text-[11px] font-medium tracking-wide uppercase">
+            <span className="text-[11px] font-bold tracking-wide uppercase">
               Acesso restrito à comunidade acadêmica
             </span>
           </div>

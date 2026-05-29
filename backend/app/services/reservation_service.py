@@ -41,7 +41,7 @@ class ReservationService:
         if not reservation:
             raise NotFoundException("Reserva não encontrada")
 
-        if getattr(reservation, "boarding_confirmation", None) == BoardingStatus.BOARDED:
+        if reservation.boarding_confirmation == BoardingStatus.BOARDED:
             raise ForbiddenException("Usuário já embarcado")
 
         expected_code = generate_registration_code(
@@ -54,7 +54,7 @@ class ReservationService:
         if not hmac.compare_digest(expected_hmac, received_hmac):
             raise BadRequestException("Código de verificação inválido")
 
-        is_valid = await self.check_reservation(trip_id, reservation_uuid)
+        is_valid = self.check_reservation(trip_id, reservation_uuid)
 
         if not is_valid:
             raise BadRequestException("Passageiro não está na lista de embarque")
@@ -83,7 +83,7 @@ class ReservationService:
             ):
             raise BadRequestException("Código de verificação inválido")
         
-        is_valid = await self.check_reservation(reservation.trip_id, reservation.reservation_id)
+        is_valid = self.check_reservation(reservation.trip_id, reservation.reservation_id)
 
         if not is_valid:
             raise BadRequestException("Passageiro não está na lista de embarque")
@@ -100,9 +100,9 @@ class ReservationService:
         return generate_qr_code_base64(code)
 
     async def get_checkin_code(self, user: User, trip_id: str):
-        logger.info(f"Checkin code lookup requested | User ID: {user.user_id} | Trip ID: {trip_id}")
+        logger.info(f"Checkin code lookup requested | User ID: {user.sub} | Trip ID: {trip_id}")
 
-        reservations = await self.repository.get_by_trip_and_user_id(user.user_id, trip_id)
+        reservations = await self.repository.get_by_trip_and_user_id(user.sub, trip_id)
         if not reservations:
             raise NotFoundException("Reserva não encontrada!")
 
@@ -126,7 +126,7 @@ class ReservationService:
             for res, qr in zip(reservations, qr_codes)
         ]
 
-        logger.info(f"Checkin code(s) retrieved successfully | User ID: {user.user_id} | Trip ID: {trip_id}")
+        logger.info(f"Checkin code(s) retrieved successfully | User ID: {user.sub} | Trip ID: {trip_id}")
         return result
 
     
