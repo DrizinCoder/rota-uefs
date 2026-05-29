@@ -4,7 +4,7 @@ import { Suspense, useRef, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Scan, ClipboardList } from "lucide-react";
+import { ArrowLeft, Scan, ClipboardList, Loader2 } from "lucide-react";
 import { driverService } from "@/services/driverService";
 import jsQR from "jsqr";
 
@@ -19,6 +19,10 @@ function EmbarqueContent() {
     type: "success" | "error";
     message: string;
   } | null>(null);
+
+  const [routeName, setRouteName] = useState<string | null>(null);
+  const [screenLoading, setScreenLoading] = useState(true);
+  const [error404, setError404] = useState(false);
 
   // Área de QrCode
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -94,6 +98,36 @@ function EmbarqueContent() {
       setLoading(false);
     }
   };
+
+  // UseEffect para carregar o nome da rota
+  useEffect(() => {
+    if (!tripId) {
+      setError404(true);
+      setScreenLoading(false);
+      return;
+    }
+
+    const loadRouteInfo = async () => {
+      try {
+        setScreenLoading(true);
+        setError404(false);
+        const data = await driverService.getRouteName(tripId);
+        
+        if (!data || data.length === 0) {
+          setError404(true);
+        } else {
+          setRouteName(data[0].route_name);
+        }
+      } catch (err: any) {
+        console.warn("Erro ao obter nome da rota:", err);
+        setError404(true);
+      } finally {
+        setScreenLoading(false);
+      }
+    };
+
+    loadRouteInfo();
+  }, [tripId]);
 
   // UseEffect pra pedir permissão da Câmera e conectar com videoRef
   useEffect(() => {
@@ -178,7 +212,51 @@ function EmbarqueContent() {
     };
   }, [isScanning]);
 
-return (
+  if (screenLoading) {
+    return (
+      <div className="flex min-h-screen flex-col bg-[#E4F2F1] items-center justify-center p-4">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-10 w-10 text-[#103173] animate-spin" />
+          <p className="text-[#103173] font-bold text-lg">Carregando dados da rota...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error404) {
+    return (
+      <div className="flex min-h-screen flex-col bg-[#E4F2F1] items-center justify-center p-4">
+        <button
+          onClick={() => router.back()}
+          className="absolute top-8 left-6 flex items-center gap-2 bg-white py-2 px-4 rounded-full shadow-md text-[#103173] font-black uppercase text-sm hover:opacity-70 transition-all z-10"
+        >
+          <ArrowLeft className="h-5 w-5" /> Voltar
+        </button>
+
+        <Card className="w-full max-w-md border-none shadow-2xl bg-white overflow-hidden rounded-[40px] text-center p-10 flex flex-col items-center gap-6">
+          <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center border border-red-200">
+            <span className="text-3xl font-black text-red-600">404</span>
+          </div>
+          <div>
+            <h2 className="text-2xl font-black text-[#103173] uppercase tracking-tight mb-2">
+              Página Não Encontrada
+            </h2>
+            <p className="text-slate-500 font-medium text-sm sm:text-base px-2">
+              A viagem solicitada não foi encontrada ou a rota é inválida. Por favor, verifique os dados e tente novamente.
+            </p>
+          </div>
+          <Button
+            onClick={() => router.push("/motorista")}
+            className="w-full h-14 rounded-2xl font-black transition-all shadow-lg bg-[#103173] hover:bg-[#0b2251] text-white active:scale-95 uppercase"
+          >
+            Voltar para o Início
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
     <div className="flex min-h-screen flex-col bg-[#E4F2F1] items-center justify-center p-4">
       <button
         onClick={() => router.back()}
@@ -194,7 +272,7 @@ return (
           </CardTitle>
           <div className="mt-2 flex flex-col items-center space-y-2">
             <p className="text-[#F2D022] text-sm font-black tracking-widest uppercase">
-              Rota {tripLabel}
+              {routeName}
             </p>
             <p className="text-[#73AABF] text-sm sm:text-base font-bold uppercase tracking-wider px-4">
               Aponte a câmera para o QR Code do passageiro

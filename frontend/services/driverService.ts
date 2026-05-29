@@ -61,5 +61,9 @@ export const driverService = {
     async marcarFalta(reservation_id: string) {
         const response = await api.post(`/users/reservation/${reservation_id}/cancel`);
         return { success: response.status >= 200 && response.status < 300 };
+    },
+    async getRouteName(trip_id: string) {
+        const response = await api.get(`/trip/info/route/id/${trip_id}`);
+        return response.data.data;
     }
 }
