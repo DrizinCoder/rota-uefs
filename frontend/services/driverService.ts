@@ -64,6 +64,7 @@ export const driverService = {
     },
     async getRouteName(trip_id: string) {
         const response = await api.get(`/trip/info/route/id/${trip_id}`);
+        return response.data.data;
     },
     async obterCodigoEmbarque(trip_id: string): Promise<string> {
         const response = await api.get(`/users/trips/checkin_code/${trip_id}`);
