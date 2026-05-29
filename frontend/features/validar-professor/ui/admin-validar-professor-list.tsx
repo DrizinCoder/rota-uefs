@@ -13,6 +13,14 @@ export interface Servidor {
   registration_status: string;
 }
 
+const translateEmploymentType = (type: string): string => {
+  const map: Record<string, string> = {
+    Staff: "Servidor",
+    Faculty: "Professor",
+  };
+  return map[type] || type;
+};
+
 interface AdminValidarProfessorListProps {
   busca: string;
   onBuscaChange: (valor: string) => void;
@@ -95,7 +103,7 @@ export function AdminValidarProfessorList({
                         <span className="w-1 h-1 bg-slate-300 rounded-full" />
                         <span>{servidor.department}</span>
                         <span className="w-1 h-1 bg-slate-300 rounded-full" />
-                        <span>{servidor.employment_type}</span>
+                        <span>{translateEmploymentType(servidor.employment_type)}</span>
                         {servidor.email && (
                           <>
                             <span className="w-1 h-1 bg-slate-300 rounded-full" />
