@@ -15,6 +15,8 @@ from app.enums.enums import (
     UserProfile, AccessLevel, BusStatus, 
     RegistrationStatus, TripStatus, EmploymentType
 )
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 
 # Configuração do Hash de Senhas
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

@@ -15,6 +15,7 @@ import { CheckinButton } from "@/features/fazer-checkin/ui/CheckinButton";
 import { StartTripButton } from "@/features/iniciar-viagem/ui/StartTripButton";
 import { TripRouteHeader } from "@/entities/viagem/ui/TripRouteHeader";
 import { passengerService, type Home, type CardViagemFeed} from "@/services/homeService";
+import { NotificationToggle } from "@/features/gerenciar-notificacoes/ui/NotificationToggle";
 
 import {
   Bus,
@@ -145,7 +146,12 @@ export default function MotoristaPage() {
           title="Suas escalas"
           subtitle="Selecione o dia da semana para ver as viagens agendadas."
           dateRange={data ? `(${formatarData(data.start_date)} - ${formatarData(data.end_date)})` : ""}
-          rightContent={<CentralSuporte />}
+          rightContent={
+            <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center sm:gap-4">
+              <NotificationToggle />
+              <CentralSuporte />
+            </div>
+          }
         />
 
         <WeekDaysMenu 

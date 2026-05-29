@@ -4,6 +4,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from app.core.config import settings
+import logging
 
 class EmailService:
     def __init__(self):
@@ -14,6 +15,17 @@ class EmailService:
         self.from_email = settings.MAIL_FROM
 
     def _connect(self):
+        # If credentials are not provided, use a dummy server that logs emails (dev mode)
+        if not self.username or not self.password:
+            logger = logging.getLogger(__name__)
+            class DummyServer:
+                def sendmail(self, from_addr, to_addrs, msg):
+                    logger.info(f"[DEV EMAIL] sendmail from={from_addr} to={to_addrs}\n{msg[:200]}")
+                def quit(self):
+                    return None
+
+            return DummyServer()
+
         server = smtplib.SMTP(self.server, self.port)
         server.starttls()
         server.login(self.username, self.password)

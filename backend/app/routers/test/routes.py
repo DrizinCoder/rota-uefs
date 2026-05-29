@@ -14,11 +14,48 @@ from app.core.scheduler import task_scheduler
 
 
 
+from app.services.web_push_service import PushSubscriptionService
+from app.routers.users.dependencies import get_push_subscription_service
+from app.repositories.user_repository import UserRepository
+from app.database.db import get_session
+from sqlalchemy.ext.asyncio import AsyncSession
+
 router = APIRouter()
 
 class EmailRequest(BaseModel):
     target_email: str  
   
+@router.post("/enviar-push")
+async def testar_envio_push(
+    current_user: TokenData = Depends(get_current_user),
+    service: PushSubscriptionService = Depends(get_push_subscription_service)
+):
+    await service.send_to_user(
+        user_id=current_user.sub,
+        title="Notificação de Teste",
+        body="Se você recebeu isso, as notificações estão funcionando!"
+    )
+    return ResponseHandler.ok("Notificação de teste enviada")
+
+@router.get("/enviar-push-publico")
+async def testar_envio_push_publico(
+    registration_id: str,
+    session: AsyncSession = Depends(get_session),
+    service: PushSubscriptionService = Depends(get_push_subscription_service)
+):
+    user_repo = UserRepository(session)
+    user = await user_repo.get_by_registration_id(registration_id)
+    
+    if not user:
+        raise NotFoundException("Usuário não encontrado")
+
+    await service.send_to_user(
+        user_id=user.user_id,
+        title="Teste Público",
+        body=f"Olá {user.full_name}, teste sem autenticação funcionando!"
+    )
+    return ResponseHandler.ok(f"Notificação enviada para {user.full_name}")
+
 @router.get("/verify-token")
 async def test_verify_token(current_user: TokenData = Depends(get_current_user)):
     return {
