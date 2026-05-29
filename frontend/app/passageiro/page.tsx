@@ -17,6 +17,7 @@ import { GraduationCap } from "lucide-react";
 import { passengerService, type Home, type UserTrip } from "@/services/homeService";
 import { userService, type UserProfile } from "@/services/userService";
 import { EmptyDayCard } from "@/components/shared/empty-day-card";
+import { NotificationToggle } from "@/features/gerenciar-notificacoes/ui/NotificationToggle";
 
 const DIAS_SEMANA = [
   { id: "Segunda", label: "Seg", full: "Segunda-feira" },
@@ -107,6 +108,11 @@ export default function PaginaPassageiro() {
           title="Inscreva-se na sua rota"
           subtitle="Confira as viagens da semana."
           dateRange={data ? `(${formatarData(data.start_date)} - ${formatarData(data.end_date)})` : ""}
+          rightContent={
+            <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center sm:gap-4">
+              <NotificationToggle />
+            </div>
+          }
         />
         
         <WeekDaysMenu dias={DIAS_SEMANA} diaAtivo={diaAtivo} onDiaChange={setDiaAtivo} />
