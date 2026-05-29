@@ -14,6 +14,16 @@ export interface ViagemTela extends ViagemAdmin {
   checkIns: number;
 }
 
+const formatarDataBR = (dataStr: string): string => {
+  if (!dataStr) return "";
+  const partes = dataStr.split(/[-/]/);
+  if (partes.length === 3) {
+    const [ano, mes, dia] = partes;
+    return `${dia}/${mes}/${ano}`;
+  }
+  return dataStr;
+};
+
 interface AdminViagensListProps {
   viagens: ViagemTela[];
   busca: string;
@@ -85,7 +95,7 @@ export function AdminViagensList({
                         <div className="p-2.5 bg-[#103173]/5 rounded-xl shrink-0"><Calendar className="h-5 w-5 text-[#103173]"/></div>
                         <div>
                           <p className="text-[10px] font-bold text-slate-400 uppercase">Data</p>
-                          <p className="text-sm font-extrabold text-[#103173] mt-0.5">{viagem.trip_date}</p>
+                          <p className="text-sm font-extrabold text-[#103173] mt-0.5">{formatarDataBR(viagem.trip_date)}</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
