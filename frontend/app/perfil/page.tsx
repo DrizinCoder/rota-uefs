@@ -113,7 +113,7 @@ function PerfilContent() {
 
   const isMotorista = tipoUsuario === "Driver";
   const isAluno = tipoUsuario === "Student";
-  const isProfessor = tipoUsuario === "Staff";
+  const isServidor = tipoUsuario === "Staff";
   const isAdmin = tipoUsuario === "Admin";
 
   // --- Handlers ---
@@ -176,7 +176,7 @@ function PerfilContent() {
   const getBadgeConfig = () => {
     if (isAdmin) return { color: "bg-red-500 text-white", icon: ShieldAlert, label: "Admin" };
     if (isMotorista) return { color: "bg-[#F2D022] text-[#103173]", icon: BadgeCheck, label: "Motorista" };
-    if (isProfessor) return { color: "bg-[#103173] text-white", icon: Briefcase, label: "Professor" };
+    if (isServidor) return { color: "bg-[#103173] text-white", icon: Briefcase, label: "Servidor" };
     return { color: "bg-[#23B99A] text-white", icon: GraduationCap, label: "Aluno" };
   };
 
