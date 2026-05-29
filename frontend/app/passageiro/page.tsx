@@ -89,8 +89,8 @@ export default function PaginaPassageiro() {
   };
 
   const isStaff = user?.profile === "Staff";
-  const userTypeLabel = isStaff ? "professor" : "aluno";
-  const portalName = isStaff ? "Portal do Professor" : "Portal do Aluno";
+  const userTypeLabel = isStaff ? "servidor" : "aluno";
+  const portalName = isStaff ? "Portal do Servidor" : "Portal do Aluno";
 
   if (isLoading) {
     return <div className="flex min-h-screen bg-[#f0f4f8] items-center justify-center font-medium text-[#103173]">Carregando...</div>;
@@ -130,7 +130,7 @@ export default function PaginaPassageiro() {
                   userType={userTypeLabel}
                   vagasTotais={viagem.bus_capacity}
                   inscritosAlunos={viagem.student_count}
-                  inscritosProfessores={viagem.staff_count}
+                  inscritosServidores={viagem.staff_count}
                   totalInscritos={viagem.total_enrolled}
                 />
 
