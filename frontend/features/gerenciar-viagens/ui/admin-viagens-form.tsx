@@ -76,24 +76,8 @@ export function AdminViagensForm({
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
           <h2 className="text-lg font-extrabold text-[#103173] mb-4 flex items-center gap-2 border-b border-slate-100 pb-3">
             <ArrowRightLeft className="h-5 w-5 text-[#F2D022]" /> 
-            Roteiro e Tipo
+            Trajeto e Frequência
           </h2>
-          
-          <div className="grid md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Modalidade</label>
-              {/* <div className="flex gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="tipo" value="ida" checked={tipoViagem === "ida"} onChange={(e) => setTipoViagem(e.target.value)} className="accent-[#103173]" />
-                  <span className="text-sm font-bold text-[#103173]">Somente Ida</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="tipo" value="ida_volta" checked={tipoViagem === "ida_volta"} onChange={(e) => setTipoViagem(e.target.value)} className="accent-[#103173]" />
-                  <span className="text-sm font-bold text-[#103173]">Ida e Volta</span>
-                </label>
-              </div> */}
-            </div>
-          </div>
 
           <div className="grid md:grid-cols-2 gap-4">
             {/* SELECT DE RECORRÊNCIA */}
@@ -174,7 +158,7 @@ export function AdminViagensForm({
                   disabled={onibus.length === 0}
                   className="w-full pl-8 p-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#103173] focus:outline-none disabled:bg-slate-100 disabled:text-slate-400">
                   <option value="" disabled>
-                    {onibus.length === 0 ? "Carregando veículos..." : "Selecione o Veículo"}
+                    {onibus.length === 0 ? "Carregando veículos..." : "Selecione o veículo"}
                   </option>
                   
                   {onibus.map((onibus) => (
