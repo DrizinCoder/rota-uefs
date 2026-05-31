@@ -218,6 +218,16 @@ export const adminService = {
     return response.data.data;
   },
 
+  async atualizarRota(id: string, payload: Partial<CadastroRotaPayload>): Promise<Rota> {
+    const response = await api.put(`/routes/routes/update/${id}`, payload);
+    return response.data.data;
+  },
+
+  async excluirRota(id: string) {
+    const response = await api.delete(`/routes/routes/delete/${id}`);
+    return response.data;
+  },
+
   // Admins
   async listarAdmins(): Promise<Administrador[]> {
     const response = await api.get("/admin/");

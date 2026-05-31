@@ -1,14 +1,17 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useState, type FormEvent, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, MapPin, MapPinned, Route as RouteIcon } from "lucide-react";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { AdminTopbar } from "@/components/admin/admin-topbar";
 import { adminService } from "@/services/adminService";
 
-export default function CadastroRotaPage() {
+function CadastroRotaContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const routeId = searchParams.get("id");
+  const isEditMode = !!routeId;
 
   const [formData, setFormData] = useState({
     name: "",
@@ -18,6 +21,27 @@ export default function CadastroRotaPage() {
 
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState("");
+
+  useEffect(() => {
+    if (routeId) {
+      setLoading(true);
+      adminService.listarRotas()
+        .then(rotas => {
+          const rota = rotas.find(r => r.route_id === routeId);
+          if (rota) {
+            setFormData({
+              name: rota.name,
+              boarding_point: rota.boarding_point,
+              drop_off_point: rota.drop_off_point,
+            });
+          } else {
+            setErro("Rota não encontrada.");
+          }
+        })
+        .catch(() => setErro("Erro ao carregar dados da rota."))
+        .finally(() => setLoading(false));
+    }
+  }, [routeId]);
 
   const atualizarCampo = (campo: keyof typeof formData, valor: string) => {
     setFormData((prev) => ({ ...prev, [campo]: valor }));
@@ -34,11 +58,17 @@ export default function CadastroRotaPage() {
 
     setLoading(true);
     try {
-      await adminService.cadastrarRota({
+      const payload = {
         name: formData.name.trim(),
         boarding_point: formData.boarding_point.trim(),
         drop_off_point: formData.drop_off_point.trim(),
-      });
+      };
+      
+      if (isEditMode && routeId) {
+        await adminService.atualizarRota(routeId, payload);
+      } else {
+        await adminService.cadastrarRota(payload);
+      }
       router.push("/admin/rotas");
     } catch (err: any) {
       setErro(err.response?.data?.message || "Erro ao cadastrar rota. Verifique os dados e tente novamente.");
@@ -52,8 +82,8 @@ export default function CadastroRotaPage() {
       <AdminSidebar />
       <main className="flex-1 flex flex-col overflow-hidden">
         <AdminTopbar 
-          title="Cadastro de Rota" 
-          subtitle="Preencha os dados abaixo para criar uma nova rota." 
+          title={isEditMode ? "Editar Rota" : "Cadastro de Rota"} 
+          subtitle={isEditMode ? "Modifique os dados da rota abaixo." : "Preencha os dados abaixo para criar uma nova rota."} 
           buttonText="Voltar"
           buttonIcon={ArrowLeft}
           buttonVariant="outline"
@@ -132,7 +162,7 @@ export default function CadastroRotaPage() {
                   disabled={loading}
                   className="px-6 py-3 bg-[#103173] text-white font-bold rounded-xl text-sm hover:bg-[#0b245b] focus:ring-4 focus:ring-[#103173]/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? "Salvando..." : "Cadastrar Rota"}
+                  {loading ? "Salvando..." : (isEditMode ? "Salvar Alterações" : "Cadastrar Rota")}
                 </button>
               </div>
             </form>
@@ -140,5 +170,13 @@ export default function CadastroRotaPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function CadastroRotaPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center font-bold text-[#103173]">Carregando...</div>}>
+      <CadastroRotaContent />
+    </Suspense>
   );
 }
