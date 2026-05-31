@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter } from "next/navigation";
@@ -82,8 +82,8 @@ function PerfilContent() {
   const [usuario, setUsuario] = useState<UserProfile | null>(null);
   const [carregando, setCarregando] = useState(true);
 
-  const [senhaAtual, setSenhaAtual] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
+  const [confirmarSenha, setConfirmarSenha] = useState("");
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
 
@@ -121,10 +121,10 @@ function PerfilContent() {
   const handleSalvar = async () => {
     setErro("");
 
-    if (!novaSenha) return;
+    if (!novaSenha && !confirmarSenha) return;
 
-    if (!senhaAtual) {
-      setErro("Informe sua senha atual para definir uma nova senha.");
+    if (!novaSenha || !confirmarSenha) {
+      setErro("Preencha a nova senha e a confirmação dela.");
       return;
     }
 
@@ -132,20 +132,20 @@ function PerfilContent() {
       setErro("A nova senha deve ter pelo menos 8 caracteres.");
       return;
     }
-    
-    // if (novaSenha === senhaAtual) {
-    //   setErro("A nova senha deve ser diferente da senha atual.");
-    //   return;
-    // }
+
+    if (novaSenha !== confirmarSenha) {
+      setErro("As senhas não coincidem.");
+      return;
+    }
 
     setSalvando(true);
     try {
       await userService.updatePassword(usuario.user_id, {
         password: novaSenha,
-        confirm_password: novaSenha,
+        confirm_password: confirmarSenha,
       });
-      setSenhaAtual("");
       setNovaSenha("");
+      setConfirmarSenha("");
       alert("Senha atualizada com sucesso!");
     } catch (err: any) {
       setErro(
@@ -334,20 +334,7 @@ function PerfilContent() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-slate-50 rounded-2xl border border-slate-100">
                   <div className="space-y-2">
                     <Label className="text-xs font-black text-[#103173] uppercase tracking-widest flex items-center gap-2">
-                      <KeyRound className="h-4 w-4" /> Senha Atual
-                    </Label>
-                    <Input
-                      type="password"
-                      placeholder="••••••••"
-                      value={senhaAtual}
-                      onChange={(e) => setSenhaAtual(e.target.value)}
-                      className="h-12 bg-white border-[#73AABF]/30 focus-visible:ring-[#103173] font-medium"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-xs font-black text-[#103173] uppercase tracking-widest flex items-center gap-2">
-                      <Lock className="h-4 w-4" /> Nova Senha
+                      <KeyRound className="h-4 w-4" /> Nova Senha
                     </Label>
                     <Input
                       type="password"
@@ -359,6 +346,19 @@ function PerfilContent() {
                     <p className="text-[10px] text-[#73AABF] font-bold">
                       Mínimo de 8 caracteres.
                     </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-xs font-black text-[#103173] uppercase tracking-widest flex items-center gap-2">
+                      <Lock className="h-4 w-4" /> Confirmar Nova Senha
+                    </Label>
+                    <Input
+                      type="password"
+                      placeholder="••••••••"
+                      value={confirmarSenha}
+                      onChange={(e) => setConfirmarSenha(e.target.value)}
+                      className="h-12 bg-white border-[#73AABF]/30 focus-visible:ring-[#103173] font-medium"
+                    />
                   </div>
                 </div>
               </section>
@@ -398,7 +398,7 @@ function PerfilContent() {
             <CardFooter className="bg-slate-50 border-t border-slate-100 p-6 flex justify-end">
               <Button
                 onClick={handleSalvar}
-                disabled={salvando || !novaSenha}
+                disabled={salvando || !novaSenha || !confirmarSenha}
                 className="h-14 w-full sm:w-auto px-8 bg-[#103173] hover:bg-[#103B73] text-white font-black rounded-2xl shadow-lg shadow-[#103173]/20 transition-all active:scale-95 disabled:opacity-50"
               >
                 {salvando ? (
