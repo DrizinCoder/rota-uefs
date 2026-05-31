@@ -69,7 +69,7 @@ export function AdminViagensList({
                 <div className="p-5 md:p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50">
                   <div className="flex flex-wrap items-center gap-3">
                     <span className="text-xs font-black text-[#103173] uppercase tracking-wider bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm">
-                      {viagem.trip_id}
+                      {viagem.route_name}
                     </span>
                     <span className={`text-xs font-black uppercase px-3 py-1.5 rounded-lg ${
                       viagem.status === 'Confirmada' ? 'bg-[#23B99A]/10 text-[#23B99A]' : 'bg-[#F2D022]/20 text-[#b8960a]'
@@ -133,11 +133,11 @@ export function AdminViagensList({
                       <div className="flex items-end justify-between mb-5">
                         <div>
                           <p className="text-[11px] font-bold text-slate-500 uppercase mb-1">Reservas</p>
-                          <p className="text-3xl font-black text-[#103173]">{totalReservas}</p>
+                          <p className="text-3xl font-black text-[#103173]">{viagem.total_reservations}</p>
                         </div>
                         <div className="text-right">
                           <p className="text-[11px] font-bold text-slate-500 uppercase mb-1">Check-ins</p>
-                          <p className="text-3xl font-black text-[#23B99A]">{viagem.checkIns}</p>
+                          <p className="text-3xl font-black text-[#23B99A]">{viagem.total_checkins}</p>
                         </div>
                       </div>
                       
@@ -145,11 +145,11 @@ export function AdminViagensList({
                       <div className="grid grid-cols-2 gap-3 pt-4 border-t border-slate-200">
                         <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-100">
                           <GraduationCap className="h-4 w-4 text-slate-400" /> 
-                          <span className="text-xs font-bold text-slate-600">Profs: <span className="text-[#103173]">{viagem.reservasProfessores}</span></span>
+                          <span className="text-xs font-bold text-slate-600">Profs: <span className="text-[#103173]">{viagem.teachers_count}</span></span>
                         </div>
                         <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-100">
                           <Users className="h-4 w-4 text-slate-400" /> 
-                          <span className="text-xs font-bold text-slate-600">Alunos: <span className="text-[#103173]">{viagem.reservasAlunos}</span></span>
+                          <span className="text-xs font-bold text-slate-600">Alunos: <span className="text-[#103173]">{viagem.students_count}</span></span>
                         </div>
                       </div>
                     </div>
