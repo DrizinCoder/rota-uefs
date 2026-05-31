@@ -28,6 +28,21 @@ export default function AdminMotoristasPage() {
     fetchMotoristas();
   }, []);
 
+  const handleEditar = (id: string) => {
+    router.push(`/admin/motoristas/cadastro?id=${id}`);
+  };
+
+  const handleExcluir = async (id: string) => {
+    if (!window.confirm("Tem certeza que deseja excluir este motorista?")) return;
+    try {
+      await adminService.excluirMotorista(id);
+      setMotoristas((atual) => atual.filter((m) => m.user_id !== id));
+      window.alert("Motorista excluído com sucesso.");
+    } catch (e: any) {
+      window.alert("Erro ao remover o motorista. Tente novamente.");
+    }
+  };
+
   const motoristasFiltrados = motoristas.filter((m) =>
     m.full_name.toLowerCase().includes(busca.toLowerCase()) ||
     m.registration_id.toLowerCase().includes(busca.toLowerCase())
@@ -52,6 +67,8 @@ export default function AdminMotoristasPage() {
               busca={busca}
               setBusca={setBusca}
               loading={loading}
+              onEditar={handleEditar}
+              onRemover={handleExcluir}
             />
           </div>
         </div>

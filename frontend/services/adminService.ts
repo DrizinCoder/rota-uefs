@@ -207,6 +207,11 @@ export const adminService = {
     return response.data.data;
   },
 
+  async excluirMotorista(id: string) {
+    const response = await api.delete(`/admin/delete/account/${id}`);
+    return response.data;
+  },
+
   // Rotas
   async listarRotas(): Promise<Rota[]> {
     const response = await api.get("/routes/routes/");

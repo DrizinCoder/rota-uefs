@@ -20,13 +20,15 @@ interface AdminMotoristasFormProps {
   erros: any;
   atualizarCampo: <K extends keyof MotoristaFormState>(campo: K, valor: MotoristaFormState[K]) => void;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  isEditMode?: boolean;
 }
 
 export function AdminMotoristasForm({
   formData,
   erros,
   atualizarCampo,
-  onSubmit
+  onSubmit,
+  isEditMode
 }: AdminMotoristasFormProps) {
   const router = useRouter();
 
@@ -124,11 +126,11 @@ export function AdminMotoristasForm({
                 type="password"
                 value={formData.senha || ""}
                 onChange={(event) => atualizarCampo("senha", event.target.value)}
-                placeholder="Sua senha secreta"
+                placeholder={isEditMode ? "Deixe em branco para não alterar" : "Sua senha secreta"}
                 className={`h-11 focus:border-[#103173] focus:ring-[#103173] ${
                   erros.senha ? "border-red-300 bg-red-50" : "border-[#73AABF]/30"
                 }`}
-                required
+                required={!isEditMode}
               />
               {erros.senha && <p className="text-xs text-red-500 font-medium">{erros.senha}</p>}
             </div>
@@ -148,7 +150,7 @@ export function AdminMotoristasForm({
               className="w-full sm:w-auto h-11 bg-[#23B99A] hover:bg-[#1d957c] text-white font-black shadow-lg shadow-[#23B99A]/20"
             >
               <Plus className="h-4 w-4 mr-2" />
-              CADASTRAR MOTORISTA
+              {isEditMode ? "SALVAR ALTERAÇÕES" : "CADASTRAR MOTORISTA"}
             </Button>
           </CardFooter>
         </Card>
