@@ -8,11 +8,7 @@ import {
 } from "lucide-react";
 import type { ViagemAdmin } from "@/services/adminService";
 
-export interface ViagemTela extends ViagemAdmin {
-  reservasAlunos: number;
-  reservasProfessores: number;
-  checkIns: number;
-}
+export interface ViagemTela extends ViagemAdmin {}
 
 const formatarDataBR = (dataStr: string): string => {
   if (!dataStr) return "";
@@ -57,8 +53,7 @@ export function AdminViagensList({
       <div className="grid gap-8">
         {viagens.length > 0 ? (
           viagens.map((viagem) => {
-            const temProfessor = viagem.reservasProfessores > 0;
-            const totalReservas = viagem.reservasAlunos + viagem.reservasProfessores;
+            const temProfessor = viagem.teachers_count > 0;
 
             return (
               <div 
@@ -174,7 +169,7 @@ export function AdminViagensList({
                       <AlertTriangle className="h-5 w-5 text-red-600" /> 
                       <div>
                         <p className="text-sm font-bold text-red-700">Atenção ao Quórum</p>
-                        <p className="text-xs text-red-600">Nenhum professor/servidor reservou vaga para esta viagem ainda.</p>
+                        <p className="text-xs text-red-600">Nenhum professor/servidor reservou vaga para esta viagem.</p>
                       </div>
                     </>
                   )}
