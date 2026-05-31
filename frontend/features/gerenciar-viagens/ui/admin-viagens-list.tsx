@@ -8,11 +8,7 @@ import {
 } from "lucide-react";
 import type { ViagemAdmin } from "@/services/adminService";
 
-export interface ViagemTela extends ViagemAdmin {
-  reservasAlunos: number;
-  reservasProfessores: number;
-  checkIns: number;
-}
+export interface ViagemTela extends ViagemAdmin {}
 
 const formatarDataBR = (dataStr: string): string => {
   if (!dataStr) return "";
@@ -22,6 +18,23 @@ const formatarDataBR = (dataStr: string): string => {
     return `${dia}/${mes}/${ano}`;
   }
   return dataStr;
+};
+
+const getStatusStyles = (status: string): string => {
+  const normalized = status.toLowerCase();
+  if (normalized === "confirmada" || normalized === "confirmed") {
+    return "bg-[#23B99A]/10 text-[#23B99A]";
+  }
+  if (normalized === "pendente" || normalized === "pending") {
+    return "bg-[#F2D022]/20 text-[#b8960a]";
+  }
+  if (normalized === "cancelada" || normalized === "cancelled") {
+    return "bg-red-500/10 text-red-600";
+  }
+  if (normalized === "concluída" || normalized === "concluida" || normalized === "completed") {
+    return "bg-blue-500/10 text-blue-600";
+  }
+  return "bg-slate-100 text-slate-600";
 };
 
 interface AdminViagensListProps {
@@ -57,8 +70,7 @@ export function AdminViagensList({
       <div className="grid gap-8">
         {viagens.length > 0 ? (
           viagens.map((viagem) => {
-            const temProfessor = viagem.reservasProfessores > 0;
-            const totalReservas = viagem.reservasAlunos + viagem.reservasProfessores;
+            const temProfessor = viagem.teachers_count > 0;
 
             return (
               <div 
@@ -69,11 +81,9 @@ export function AdminViagensList({
                 <div className="p-5 md:p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50">
                   <div className="flex flex-wrap items-center gap-3">
                     <span className="text-xs font-black text-[#103173] uppercase tracking-wider bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm">
-                      {viagem.trip_id}
+                      {viagem.route_name}
                     </span>
-                    <span className={`text-xs font-black uppercase px-3 py-1.5 rounded-lg ${
-                      viagem.status === 'Confirmada' ? 'bg-[#23B99A]/10 text-[#23B99A]' : 'bg-[#F2D022]/20 text-[#b8960a]'
-                    }`}>
+                    <span className={`text-xs font-black uppercase px-3 py-1.5 rounded-lg ${getStatusStyles(viagem.status)}`}>
                       {viagem.status}
                     </span>
                   </div>
@@ -133,11 +143,11 @@ export function AdminViagensList({
                       <div className="flex items-end justify-between mb-5">
                         <div>
                           <p className="text-[11px] font-bold text-slate-500 uppercase mb-1">Reservas</p>
-                          <p className="text-3xl font-black text-[#103173]">{totalReservas}</p>
+                          <p className="text-3xl font-black text-[#103173]">{viagem.total_reservations}</p>
                         </div>
                         <div className="text-right">
                           <p className="text-[11px] font-bold text-slate-500 uppercase mb-1">Check-ins</p>
-                          <p className="text-3xl font-black text-[#23B99A]">{viagem.checkIns}</p>
+                          <p className="text-3xl font-black text-[#23B99A]">{viagem.total_checkins}</p>
                         </div>
                       </div>
                       
@@ -145,11 +155,11 @@ export function AdminViagensList({
                       <div className="grid grid-cols-2 gap-3 pt-4 border-t border-slate-200">
                         <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-100">
                           <GraduationCap className="h-4 w-4 text-slate-400" /> 
-                          <span className="text-xs font-bold text-slate-600">Profs: <span className="text-[#103173]">{viagem.reservasProfessores}</span></span>
+                          <span className="text-xs font-bold text-slate-600">Profs: <span className="text-[#103173]">{viagem.teachers_count}</span></span>
                         </div>
                         <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-100">
                           <Users className="h-4 w-4 text-slate-400" /> 
-                          <span className="text-xs font-bold text-slate-600">Alunos: <span className="text-[#103173]">{viagem.reservasAlunos}</span></span>
+                          <span className="text-xs font-bold text-slate-600">Alunos: <span className="text-[#103173]">{viagem.students_count}</span></span>
                         </div>
                       </div>
                     </div>
@@ -174,7 +184,7 @@ export function AdminViagensList({
                       <AlertTriangle className="h-5 w-5 text-red-600" /> 
                       <div>
                         <p className="text-sm font-bold text-red-700">Atenção ao Quórum</p>
-                        <p className="text-xs text-red-600">Nenhum professor/servidor reservou vaga para esta viagem ainda.</p>
+                        <p className="text-xs text-red-600">Nenhum professor/servidor reservou vaga para esta viagem.</p>
                       </div>
                     </>
                   )}
