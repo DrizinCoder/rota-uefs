@@ -49,9 +49,6 @@ export default function PaginaPassageiro() {
       return dia;
     };
 
-  // Estado para armazenar a modalidade escolhida para cada card de viagem
-  const [modalidades, setModalidades] = useState<Record<string, "ida" | "ida-volta">>({});
-
   // Busca os dados da home do passageiro e as viagens do usuário
   useEffect(() => {
     const fetchData = async () => {
@@ -85,10 +82,6 @@ export default function PaginaPassageiro() {
   // IDs das viagens em que o usuário já está inscrito
   const idsInscritos = new Set(minhasViagens.map(v => v.trip_id));
 
-  const selecionarModalidade = (viagemId: string, modalidade: "ida" | "ida-volta") => {
-    setModalidades(prev => ({ ...prev, [viagemId]: modalidade }));
-  };
-
   const isStaff = user?.profile === "Staff";
   const userTypeLabel = isStaff ? "servidor" : "aluno";
   const portalName = isStaff ? "Portal do Servidor" : "Portal do Aluno";
@@ -121,7 +114,6 @@ export default function PaginaPassageiro() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {viagensDoDia.map((viagem) => {
-            const modalidadeAtual = modalidades[viagem.trip_id] || "ida";
             const isSubscribed = idsInscritos.has(viagem.trip_id);
 
             return (
@@ -145,10 +137,6 @@ export default function PaginaPassageiro() {
                     <ManageSubscriptionButton viagemId={viagem.trip_id} />
                   ) : (
                     <div className="space-y-3">
-                      {/* <TripModeToggle
-                        modalidadeAtual={modalidadeAtual}
-                        onChange={(nova) => selecionarModalidade(viagem.trip_id, nova)}
-                      /> */}
                       <SubscribeButton viagemId={viagem.trip_id} />
                     </div>
                   )}
