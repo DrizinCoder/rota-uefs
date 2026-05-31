@@ -20,6 +20,23 @@ const formatarDataBR = (dataStr: string): string => {
   return dataStr;
 };
 
+const getStatusStyles = (status: string): string => {
+  const normalized = status.toLowerCase();
+  if (normalized === "confirmada" || normalized === "confirmed") {
+    return "bg-[#23B99A]/10 text-[#23B99A]";
+  }
+  if (normalized === "pendente" || normalized === "pending") {
+    return "bg-[#F2D022]/20 text-[#b8960a]";
+  }
+  if (normalized === "cancelada" || normalized === "cancelled") {
+    return "bg-red-500/10 text-red-600";
+  }
+  if (normalized === "concluída" || normalized === "concluida" || normalized === "completed") {
+    return "bg-blue-500/10 text-blue-600";
+  }
+  return "bg-slate-100 text-slate-600";
+};
+
 interface AdminViagensListProps {
   viagens: ViagemTela[];
   busca: string;
@@ -66,9 +83,7 @@ export function AdminViagensList({
                     <span className="text-xs font-black text-[#103173] uppercase tracking-wider bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm">
                       {viagem.route_name}
                     </span>
-                    <span className={`text-xs font-black uppercase px-3 py-1.5 rounded-lg ${
-                      viagem.status === 'Confirmada' ? 'bg-[#23B99A]/10 text-[#23B99A]' : 'bg-[#F2D022]/20 text-[#b8960a]'
-                    }`}>
+                    <span className={`text-xs font-black uppercase px-3 py-1.5 rounded-lg ${getStatusStyles(viagem.status)}`}>
                       {viagem.status}
                     </span>
                   </div>
