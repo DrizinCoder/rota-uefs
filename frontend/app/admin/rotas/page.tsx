@@ -87,7 +87,7 @@ export default function AdminRotasPage() {
             ) : (
               <div className="grid gap-4 md:grid-cols-1">
                 {rotasFiltradas.map((rota) => (
-                  <div key={rota.route_id} className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+                  <div key={rota.route_id} className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
                     <div className="p-5">
                       <h3 className="font-bold text-lg text-slate-800 mb-3">{rota.name}</h3>
                       <div className="space-y-2 text-sm text-slate-600">

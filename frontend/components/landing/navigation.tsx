@@ -92,17 +92,11 @@ function getNavItems(tipo: TipoUsuario): NavItem[] {
         },
       ];
 
-    case "Driver":
-    case "motorista":
-      return [
-        { label: "Escalas", href: "/motorista", real: true, icon: Map },
-        {
-          label: "Minhas Viagens",
-          href: "/minhas-viagens?tipo=motorista",
-          real: true,
-          icon: CalendarDays,
-        },
-      ];
+    // case "Driver":
+    // case "motorista":
+    //   return [
+
+    //   ];
 
     default:
       return [];
@@ -274,8 +268,8 @@ export function Navigation({ tipoUsuario = "Student" }: NavigationProps) {
           }}
           transition={SPRING}
           style={{ borderBottomColor: "rgba(255,255,255,0.08)" }}
-        className="mx-auto flex lg:hidden items-center justify-between h-16 px-4 relative"
-      >
+          className="mx-auto flex lg:hidden items-center justify-between h-16 px-4 relative"
+        >
           <Link href="/" aria-label="Rota UEFS — início" className="min-w-0 max-w-[64%]">
             <Image
               src="/images/logo_rota_horizontal.png"
