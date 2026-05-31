@@ -45,14 +45,10 @@ export default function AdminViagensPage() {
         setLoading(true);
         const data = await adminService.listarViagens();
         
-        // Mapeia os dados pra injetar o mock de reservas e check-ins
+        // Mapeia os dados pra ajustar o status
         const viagensMapeadas = data.map((viagem) => ({
           ...viagem, // Puxa tudo que veio do banco (id, rota, onibus, etc)
           status: tradutorStatus[viagem.status] || viagem.status,
-          // 👇 Injeta os dados mockados temporários
-          reservasAlunos: Math.floor(Math.random() * 30) + 10,
-          reservasProfessores: Math.floor(Math.random() * 3),
-          checkIns: Math.floor(Math.random() * 20),
         }));
         
         setViagens(viagensMapeadas);

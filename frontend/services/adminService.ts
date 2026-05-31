@@ -94,6 +94,10 @@ export interface ViagemAdmin {
   route_name: string;
   boarding_point: string;
   drop_off_point: string;
+  total_reservations: number;
+  total_checkins: number;
+  teachers_count: number;
+  students_count: number;
 }
 
 // ── Rotas ─────────────────────────────────────────────
