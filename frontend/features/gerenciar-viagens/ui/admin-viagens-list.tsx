@@ -41,8 +41,8 @@ interface AdminViagensListProps {
   viagens: ViagemTela[];
   busca: string;
   setBusca: (valor: string) => void;
-  activeTab: "futuras" | "passadas";
-  setActiveTab: (tab: "futuras" | "passadas") => void;
+  activeTab: "semana" | "futuras" | "passadas";
+  setActiveTab: (tab: "semana" | "futuras" | "passadas") => void;
   statusFilter: string;
   setStatusFilter: (status: string) => void;
   onEditar: (id: string) => void;
@@ -65,26 +65,36 @@ export function AdminViagensList({
       {/* Filtros e Abas */}
       <div className="flex flex-col gap-4 mb-6">
         {/* Abas */}
-        <div className="flex gap-2 p-1 bg-white rounded-xl shadow-sm border border-slate-100 w-full sm:max-w-sm">
+        <div className="flex flex-wrap gap-2 p-1 bg-white rounded-xl shadow-sm border border-slate-100 w-full lg:max-w-xl">
+          <button
+            onClick={() => setActiveTab("semana")}
+            className={`flex-1 min-w-[120px] py-2 text-sm font-bold rounded-lg transition-all ${
+              activeTab === "semana"
+                ? "bg-[#103173] text-white shadow-md"
+                : "text-slate-500 hover:text-[#103173] hover:bg-slate-50"
+            }`}
+          >
+            Viagens da Semana
+          </button>
           <button
             onClick={() => setActiveTab("futuras")}
-            className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${
+            className={`flex-1 min-w-[120px] py-2 text-sm font-bold rounded-lg transition-all ${
               activeTab === "futuras"
                 ? "bg-[#103173] text-white shadow-md"
                 : "text-slate-500 hover:text-[#103173] hover:bg-slate-50"
             }`}
           >
-            Próximas Viagens
+            Todas as Próximas
           </button>
           <button
             onClick={() => setActiveTab("passadas")}
-            className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${
+            className={`flex-1 min-w-[120px] py-2 text-sm font-bold rounded-lg transition-all ${
               activeTab === "passadas"
                 ? "bg-[#103173] text-white shadow-md"
                 : "text-slate-500 hover:text-[#103173] hover:bg-slate-50"
             }`}
           >
-            Viagens Anteriores
+            Anteriores
           </button>
         </div>
 

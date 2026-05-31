@@ -22,7 +22,7 @@ export default function AdminViagensPage() {
   const [loading, setLoading] = useState(true);
 
   const [busca, setBusca] = useState("");
-  const [activeTab, setActiveTab] = useState<"futuras" | "passadas">("futuras");
+  const [activeTab, setActiveTab] = useState<"semana" | "futuras" | "passadas">("semana");
   const [statusFilter, setStatusFilter] = useState<string>("Todos");
 
   const handleExcluir = (id: string) => {
@@ -67,11 +67,16 @@ export default function AdminViagensPage() {
     let filtradas = [...viagens];
 
     const agora = new Date();
+    const seteDiasDepois = new Date();
+    seteDiasDepois.setDate(agora.getDate() + 7);
+    seteDiasDepois.setHours(23, 59, 59, 999);
     
     // 1. Filtro de Abas (Futuras vs Passadas)
     filtradas = filtradas.filter((viagem) => {
       const tripDate = new Date(`${viagem.trip_date}T${viagem.departure_time}`);
-      if (activeTab === "futuras") {
+      if (activeTab === "semana") {
+        return tripDate >= agora && tripDate <= seteDiasDepois;
+      } else if (activeTab === "futuras") {
         return tripDate >= agora;
       } else {
         return tripDate < agora;
@@ -82,7 +87,7 @@ export default function AdminViagensPage() {
     filtradas.sort((a, b) => {
       const dateA = new Date(`${a.trip_date}T${a.departure_time}`).getTime();
       const dateB = new Date(`${b.trip_date}T${b.departure_time}`).getTime();
-      if (activeTab === "futuras") {
+      if (activeTab === "semana" || activeTab === "futuras") {
         return dateA - dateB; // Ascendente para o futuro
       } else {
         return dateB - dateA; // Descendente para o passado
