@@ -13,6 +13,7 @@ export interface Reservation {
 export interface Stats {
     capacity: number;
     total_reservations: number;
+    total_onboarded: number;
     waitlist_count: number;
 }
 
