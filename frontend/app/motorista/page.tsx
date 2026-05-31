@@ -79,7 +79,7 @@ function ViagemCard({ viagem }: { viagem: CardViagemFeed }) {
           userType="motorista" 
           vagasTotais={viagem.bus_capacity} 
           inscritosAlunos={viagem.student_count}
-          inscritosProfessores={viagem.staff_count}
+          inscritosServidores={viagem.staff_count}
           totalInscritos={viagem.total_enrolled}
         />
 

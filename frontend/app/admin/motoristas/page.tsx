@@ -40,7 +40,7 @@ export default function AdminMotoristasPage() {
       <main className="flex-1 flex flex-col overflow-hidden">
         <AdminTopbar 
           title="Gestão de Motoristas" 
-          subtitle="Gerencie cadastros, status e históricos dos motoristas da frota." 
+          subtitle="Gerencie cadastros, atualizações e status dos motoristas." 
           buttonText="Novo Motorista" 
           onAction={() => router.push('/admin/motoristas/cadastro')} 
         />

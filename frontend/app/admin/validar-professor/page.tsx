@@ -85,8 +85,8 @@ export default function AdminValidarProfessorPage() {
       <AdminSidebar />
       <main className="flex-1 flex flex-col overflow-hidden">
         <AdminTopbar 
-          title="Validar Acesso de Professor" 
-          subtitle="Aprove ou rejeite solicitações de cadastro enviadas por novos professores (Servidores)." 
+          title="Validar Acesso de Servidor" 
+          subtitle="Aprove ou rejeite solicitações de cadastro enviadas por novos servidores/professores."
           buttonText="Voltar"
           buttonIcon={ArrowLeft}
           buttonVariant="outline"

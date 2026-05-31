@@ -45,7 +45,7 @@ export function AdminSidebar() {
         </div>
         <div onClick={() => router.push("/admin/validar-professor")} className="flex items-center px-2 py-3 border-b border-slate-800 hover:text-white cursor-pointer transition-colors gap-3">
            <Users className="h-4 w-4 text-cyan-500" />
-           <span className="text-sm font-medium">Validar Prof.</span>
+           <span className="text-sm font-medium">Validar Servidor</span>
         </div>
       </nav>
     </aside>
