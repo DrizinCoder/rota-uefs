@@ -5,7 +5,7 @@ import pytest
 from types import SimpleNamespace
 from app.DTOs.checkin import ManualCheckinRequestDTO
 from app.services.reservation_service import ReservationService
-from app.core.exceptions import BadRequestException, NotFoundException, UnauthorizedException
+from app.core.exceptions import BadRequestException, NotFoundException
 
 
 class DummyRepository:
