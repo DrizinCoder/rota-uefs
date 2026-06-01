@@ -86,3 +86,6 @@ class DriverTripItem(BaseModel):
 
 class SubscribeData(BaseModel):
     extra_passenger_name: Optional[str] = None
+
+class ChangeTripStatusDTO(BaseModel):
+    status: TripStatus

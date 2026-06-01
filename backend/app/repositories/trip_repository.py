@@ -433,3 +433,8 @@ class TripRepository:
             for row in rows
         ]
     
+    async def update_status(self, trip: Trip, new_status: TripStatus) -> Trip:
+        trip.status = new_status
+        await self.session.commit()
+        await self.session.refresh(trip)
+        return trip
