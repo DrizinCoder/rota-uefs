@@ -7,42 +7,29 @@ import app.services.engine.notifications as notifications_module
 from app.services.engine.notifications import Notifications
 
 
-class DummyBackgroundTasks:
-    def __init__(self):
-        self.calls = []
-
-    def add_task(self, func, *args, **kwargs):
-        self.calls.append((func, args, kwargs))
-
-
-class DummyUserRepo:
-    async def list_all_admins_full(self):
-        return [SimpleNamespace(user=SimpleNamespace(email="admin@example.com", full_name="Admin"))]
-
-
 @pytest.mark.asyncio
-async def test_send_quorum_not_reached_notification_queues_email_tasks(monkeypatch):
-    dummy_email = SimpleNamespace(send_quorum_not_reached_notification=lambda *args, **kwargs: None)
-    monkeypatch.setattr(notifications_module, "EmailUseCases", lambda *args, **kwargs: dummy_email)
+async def test_send_quorum_not_reached_notification_queues_email_tasks(monkeypatch, dummy_background_tasks, dummy_user_repo, dummy_notification_email_use_cases):
+    monkeypatch.setattr(notifications_module, "EmailUseCases", lambda *args, **kwargs: dummy_notification_email_use_cases)
 
-    notifications = Notifications(DummyUserRepo(), None, None, None)
+    notifications = Notifications(dummy_user_repo, None, None, None)
     trip = SimpleNamespace(route=SimpleNamespace(name="Trip A"), trip_id=uuid.uuid4())
-    tasks = DummyBackgroundTasks()
+    tasks = dummy_background_tasks
 
     await notifications.send_quorum_not_reached_notification(trip, tasks)
 
     assert len(tasks.calls) == 1
-    assert tasks.calls[0][0] is dummy_email.send_quorum_not_reached_notification
+    assert tasks.calls[0][0].__self__ is dummy_notification_email_use_cases
+    assert tasks.calls[0][0].__func__ is dummy_notification_email_use_cases.send_quorum_not_reached_notification.__func__
     assert tasks.calls[0][1][0] == "admin@example.com"
 
 
 @pytest.mark.asyncio
-async def test_send_trip_cancelled_adds_email_task(monkeypatch):
+async def test_send_trip_cancelled_adds_email_task(monkeypatch, dummy_background_tasks):
     dummy_email = SimpleNamespace(send_trip_cancelled=lambda *args, **kwargs: None)
     monkeypatch.setattr(notifications_module, "EmailUseCases", lambda *args, **kwargs: dummy_email)
 
     notifications = Notifications(None, None, None, None)
-    tasks = DummyBackgroundTasks()
+    tasks = dummy_background_tasks
     await notifications.send_trip_cancelled(
         "user@example.com",
         "Test User",

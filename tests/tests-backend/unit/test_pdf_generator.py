@@ -2,6 +2,7 @@
 
 import app.services.reports.weasyprint_generator as generator_module
 from app.services.reports.weasyprint_generator import WeasyPrintGenerator
+from mocks.fake_test_helpers import DummyHTML
 
 
 def test_weasyprint_generator_renders_template_and_writes_pdf(monkeypatch):
@@ -9,13 +10,6 @@ def test_weasyprint_generator_renders_template_and_writes_pdf(monkeypatch):
     mock_template = MagicMock()
     mock_template.render.return_value = "<html>pdf</html>"
     monkeypatch.setattr(generator.env, "get_template", lambda name: mock_template)
-
-    class DummyHTML:
-        def __init__(self, string):
-            self.string = string
-
-        def write_pdf(self):
-            return b"%PDF-1.4"
 
     monkeypatch.setattr(generator_module, "HTML", DummyHTML)
 
