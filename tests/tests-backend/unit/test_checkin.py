@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from app.DTOs.checkin import CheckinRequestDTO, ManualCheckinRequestDTO
 from app.services.reservation_service import ReservationService
-from app.core.exceptions import NotFoundException, UnauthorizedException
+from app.core.exceptions import NotFoundException, BadRequestException
 
 
 def test_checkin_dto_validation():
@@ -30,7 +30,7 @@ def test_checkin_with_invalid_code_format_raises_unauthorized():
     repository = AsyncMock()
     service = ReservationService(repository, AsyncMock())
 
-    with pytest.raises(UnauthorizedException):
+    with pytest.raises(BadRequestException):
         asyncio.run(service.checkin(uuid.uuid4(), "bad.code"))
 
 
@@ -59,7 +59,7 @@ def test_checkin_with_invalid_hmac_raises_unauthorized():
 
     invalid_code = f"{reservation_id}.invalidhmac"
 
-    with pytest.raises(UnauthorizedException):
+    with pytest.raises(BadRequestException):
         asyncio.run(service.checkin(trip_id, invalid_code))
 
 
