@@ -87,7 +87,10 @@ async def test_reservation_service_manual_checkin_success():
         trip_id=str(trip_id),
     )
 
-    with patch.object(ReservationService, 'check_reservation', new=lambda self, trip_id, reservation_id: True):
+    async def mock_check_reservation(self, trip_id, reservation_id):
+        return True
+
+    with patch.object(ReservationService, 'check_reservation', new=mock_check_reservation):
         result = await service.manual_checkin(data)
 
     assert result == {"message": "Checkin manual realizado com sucesso"}

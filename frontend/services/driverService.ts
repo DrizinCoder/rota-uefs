@@ -48,13 +48,24 @@ export const driverService = {
         });
         return { success: response.status >= 200 && response.status < 300 };
     },
+    async embarcarQrcode(checkin_code: string, trip_id: string) {
+        const response = await api.post(`/checkin/`, {
+        trip_id,
+        checkin_code
+        });
+        return { success: response.status >= 200 && response.status < 300 };
+    },
     async desembarcar(reservation_id: string) {
         const response = await api.patch(`/users/driver/reservation/${reservation_id}/remove/boarding`);
         return { success: response.status >= 200 && response.status < 300 };
     },
-    async marcarFalta(reservation_id: string) { 
+    async marcarFalta(reservation_id: string) {
         const response = await api.post(`/users/reservation/${reservation_id}/cancel`);
         return { success: response.status >= 200 && response.status < 300 };
+    },
+    async getRouteName(trip_id: string) {
+        const response = await api.get(`/trip/info/route/id/${trip_id}`);
+        return response.data.data;
     },
     async obterCodigoEmbarque(trip_id: string): Promise<string> {
         const response = await api.get(`/users/trips/checkin_code/${trip_id}`);

@@ -11,7 +11,7 @@ from datetime import datetime, timedelta, date
 from app.enums.enums import TripRecurrence
 import uuid
 from app.core.exceptions import NotFoundException
-from app.repositories.trip_repository import TripRepository
+from app.repositories.trip_repository import TripRepository 
 from app.DTOs.trip import CreateTripDTO, UpdateTripDTO
 from app.core.scheduler import task_scheduler
 from app.services.jobs.verify_quorum import verify_quorum_job
@@ -93,6 +93,15 @@ class TripService:
         logger.info(f"Trip list retrieved successfully | Count: {len(result) if result else 0}")
         return result
 
+    async def get_name_route_by_trip_id(self, trip_id: uuid.UUID):
+        logger.info(f"Route info by trip ID requested | Trip ID: {trip_id}")
+        route_info = await self.trip_repository.get_name_route_by_trip_id(trip_id)
+        if not route_info:
+            raise NotFoundException("Route info not found for the given trip ID")
+        logger.info(f"Route info retrieved successfully | Trip ID: {trip_id}")
+        return route_info   
+    
+    
     async def get_by_id(self, trip_id: uuid.UUID):
         logger.info(f"Trip lookup requested | Trip ID: {trip_id}")
 
