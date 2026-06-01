@@ -37,7 +37,7 @@ import {
   EyeOff,
   CheckCircle2,
 } from "lucide-react";
-import { api } from "@/services/api";
+import { userService } from "@/services/userService";
 
 // --- Tipos ---
 
@@ -58,24 +58,7 @@ interface PasswordUpdateDTO {
   confirm_password: string;
 }
 
-// --- Serviço ---
 
-const userService = {
-  getMe: async (): Promise<UserProfile> => {
-    const response = await api.get("/users/me");
-    return response.data.data;
-  },
-
-
-  updatePassword: async (userId: string, data: PasswordUpdateDTO) => {
-    const response = await api.patch(`/users/update/password/${userId}`, data);
-    return response.data;
-  },
-
-  deleteAccount: async () => {
-    await api.delete("/users/delete/account/me");
-  },
-};
 
 // --- Componente principal ---
 
@@ -87,6 +70,7 @@ function PerfilContent() {
 
   const [novaSenha, setNovaSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
+  const [telefone, setTelefone] = useState("");
   const [salvando, setSalvando] = useState(false);
   const [alerta, setAlerta] = useState<{ tipo: "erro" | "warning" | "sucesso"; mensagem: string } | null>(null);
   const [showNovaSenha, setShowNovaSenha] = useState(false);
@@ -99,7 +83,10 @@ function PerfilContent() {
   useEffect(() => {
     userService
       .getMe()
-      .then((data) => setUsuario(data))
+      .then((data) => {
+        setUsuario(data);
+        setTelefone(data.phone || "");
+      })
       .catch(() => router.push("/login"))
       .finally(() => setCarregando(false));
   }, []);
@@ -169,6 +156,41 @@ function PerfilContent() {
         setAlerta({
           tipo: "erro",
           mensagem: err?.response?.data?.message ?? "Erro ao salvar. Tente novamente.",
+        });
+      }
+    } finally {
+      setSalvando(false);
+    }
+  };
+
+  const handleSalvarTelefone = async () => {
+    setAlerta(null);
+
+    if (!telefone) {
+      setAlerta({ tipo: "erro", mensagem: "O campo de telefone não pode estar vazio." });
+      return;
+    }
+
+    if (telefone === usuario.phone) {
+      setAlerta({ tipo: "warning", mensagem: "O novo telefone não pode ser igual ao telefone atual." });
+      return;
+    }
+
+    setSalvando(true);
+    try {
+      await userService.updatePhone(usuario.user_id, {
+        phone: telefone,
+      });
+
+      setUsuario((prev) => prev ? { ...prev, phone: telefone } : null);
+      setAlerta({ tipo: "sucesso", mensagem: "Telefone atualizado com sucesso!" });
+    } catch (err: any) {
+      if (err?.response?.status === 422) {
+        setAlerta({ tipo: "warning", mensagem: "O novo telefone não pode ser igual ao telefone atual." });
+      } else {
+        setAlerta({
+          tipo: "erro",
+          mensagem: err?.response?.data?.message ?? "Não foi possível alterar o telefone.",
         });
       }
     } finally {
@@ -305,17 +327,27 @@ function PerfilContent() {
                   </div>
                 )}
 
-                {/* Telefone — somente leitura */}
+                {/* Telefone — editável apenas para motorista */}
                 {!isAdmin && (
                   <div className="space-y-2">
                     <Label className="text-xs font-black text-[#73AABF] uppercase tracking-widest flex items-center gap-2">
                       <Phone className="h-4 w-4" /> Telefone / WhatsApp
                     </Label>
                     <Input
-                      value={usuario.phone}
-                      disabled
-                      className="h-14 bg-slate-50 border-slate-200 text-[#103173] font-bold disabled:opacity-70"
+                      value={isMotorista ? telefone : usuario.phone}
+                      onChange={isMotorista ? (e) => setTelefone(e.target.value) : undefined}
+                      disabled={!isMotorista}
+                      className={`h-14 font-bold text-[#103173] ${
+                        isMotorista
+                          ? "bg-white border-[#73AABF]/30 focus-visible:ring-[#103173]"
+                          : "bg-slate-50 border-slate-200 disabled:opacity-70"
+                      }`}
                     />
+                    {isMotorista && (
+                      <p className="text-[10px] text-[#73AABF] font-bold">
+                        Você pode editar seu telefone de contato.
+                      </p>
+                    )}
                   </div>
                 )}
 
@@ -400,20 +432,6 @@ function PerfilContent() {
                       </button>
                     </div>
                   </div>
-                  {alerta && (
-                    <div className={`col-span-2 text-sm font-bold p-3 rounded-xl border flex items-center gap-2 ${
-                      alerta.tipo === "sucesso"
-                        ? "bg-[#23B99A]/10 border-[#23B99A]/20 text-[#23B99A]"
-                        : alerta.tipo === "warning"
-                        ? "bg-[#F2D022]/10 border-[#F2D022]/20 text-[#b8960a]"
-                        : "bg-red-50 border-red-100 text-red-600"
-                    }`}>
-                      {alerta.tipo === "erro" && <AlertTriangle className="h-5 w-5 shrink-0" />}
-                      {alerta.tipo === "warning" && <AlertTriangle className="h-5 w-5 shrink-0 text-[#b8960a]" />}
-                      {alerta.tipo === "sucesso" && <CheckCircle2 className="h-5 w-5 shrink-0 text-[#23B99A]" />}
-                      <span>{alerta.mensagem}</span>
-                    </div>
-                  )}
                 </div>
               </section>
             )}
@@ -448,23 +466,42 @@ function PerfilContent() {
           </CardContent>
 
           {/* Rodapé do card */}
-          {!isMotorista && (
-            <CardFooter className="bg-slate-50 border-t border-slate-100 p-6 flex justify-end">
-              <Button
-                onClick={handleSalvar}
-                disabled={salvando || !novaSenha || !confirmarSenha}
-                className="h-14 w-full sm:w-auto px-8 bg-[#103173] hover:bg-[#103B73] text-white font-black rounded-2xl shadow-lg shadow-[#103173]/20 transition-all active:scale-95 disabled:opacity-50"
-              >
-                {salvando ? (
-                  "Processando..."
-                ) : (
-                  <span className="flex items-center gap-2">
-                    <Save className="h-5 w-5" /> SALVAR ALTERAÇÕES
-                  </span>
-                )}
-              </Button>
-            </CardFooter>
-          )}
+          <CardFooter className="bg-slate-50 border-t border-slate-100 p-6 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex-1 w-full sm:max-w-md">
+              {alerta && (
+                <div className={`text-sm font-bold p-3 rounded-xl border flex items-center gap-2 w-full ${
+                  alerta.tipo === "sucesso"
+                    ? "bg-[#23B99A]/10 border-[#23B99A]/20 text-[#23B99A]"
+                    : alerta.tipo === "warning"
+                    ? "bg-[#F2D022]/10 border-[#F2D022]/20 text-[#b8960a]"
+                    : "bg-red-50 border-red-100 text-red-600"
+                }`}>
+                  {alerta.tipo === "erro" && <AlertTriangle className="h-5 w-5 shrink-0" />}
+                  {alerta.tipo === "warning" && <AlertTriangle className="h-5 w-5 shrink-0 text-[#b8960a]" />}
+                  {alerta.tipo === "sucesso" && <CheckCircle2 className="h-5 w-5 shrink-0 text-[#23B99A]" />}
+                  <span>{alerta.mensagem}</span>
+                </div>
+              )}
+            </div>
+            <Button
+              onClick={isMotorista ? handleSalvarTelefone : handleSalvar}
+              disabled={
+                salvando ||
+                (isMotorista
+                  ? !telefone || telefone === usuario.phone
+                  : !novaSenha || !confirmarSenha)
+              }
+              className="h-14 w-full sm:w-auto px-8 bg-[#103173] hover:bg-[#103B73] text-white font-black rounded-2xl shadow-lg shadow-[#103173]/20 transition-all active:scale-95 disabled:opacity-50 shrink-0"
+            >
+              {salvando ? (
+                "Processando..."
+              ) : (
+                <span className="flex items-center gap-2">
+                  <Save className="h-5 w-5" /> SALVAR ALTERAÇÕES
+                </span>
+              )}
+            </Button>
+          </CardFooter>
         </Card>
       </main>
       {/* Modal de exclusão de conta */}

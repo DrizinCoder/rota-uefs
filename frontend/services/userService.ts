@@ -36,4 +36,10 @@ export const userService = {
   deleteAccount: async () => {
     await api.delete("/users/delete/account/me");
   },
+
+  // PATCH /users/update/phone/{id}
+  updatePhone: async (userId: string, data: PhoneUpdateDTO) => {
+    const response = await api.patch(`/users/update/phone/${userId}`, data);
+    return response.data;
+  },
 };
