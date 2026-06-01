@@ -1,4 +1,3 @@
-import asyncio
 import uuid
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
@@ -6,7 +5,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from app.DTOs.checkin import CheckinRequestDTO, ManualCheckinRequestDTO
 from app.services.reservation_service import ReservationService
-from app.core.exceptions import NotFoundException, UnauthorizedException
+from app.core.exceptions import BadRequestException, NotFoundException
 
 
 def test_checkin_dto_validation():
@@ -26,25 +25,28 @@ def test_checkin_dto_validation():
     assert manual_dto.trip_id
 
 
-def test_checkin_with_invalid_code_format_raises_unauthorized():
+@pytest.mark.asyncio
+async def test_checkin_with_invalid_code_format_raises_unauthorized():
     repository = AsyncMock()
     service = ReservationService(repository, AsyncMock())
 
-    with pytest.raises(UnauthorizedException):
-        asyncio.run(service.checkin(uuid.uuid4(), "bad.code"))
+    with pytest.raises(BadRequestException):
+        await service.checkin(uuid.uuid4(), "bad.code")
 
 
-def test_checkin_missing_reservation_raises_not_found():
+@pytest.mark.asyncio
+async def test_checkin_missing_reservation_raises_not_found():
     repository = AsyncMock()
     repository.get_by_id.return_value = None
     service = ReservationService(repository, AsyncMock())
     code = f"{uuid.uuid4()}.deadbeef"
 
     with pytest.raises(NotFoundException):
-        asyncio.run(service.checkin(uuid.uuid4(), code))
+        await service.checkin(uuid.uuid4(), code)
 
 
-def test_checkin_with_invalid_hmac_raises_unauthorized():
+@pytest.mark.asyncio
+async def test_checkin_with_invalid_hmac_raises_unauthorized():
     reservation_id = uuid.uuid4()
     trip_id = uuid.uuid4()
     reservation = SimpleNamespace(
@@ -59,11 +61,12 @@ def test_checkin_with_invalid_hmac_raises_unauthorized():
 
     invalid_code = f"{reservation_id}.invalidhmac"
 
-    with pytest.raises(UnauthorizedException):
-        asyncio.run(service.checkin(trip_id, invalid_code))
+    with pytest.raises(BadRequestException):
+        await service.checkin(trip_id, invalid_code)
 
 
-def test_manual_checkin_success_with_valid_data():
+@pytest.mark.asyncio
+async def test_manual_checkin_success_with_valid_data():
     user_id = uuid.uuid4()
     trip_id = uuid.uuid4()
     reservation_id = uuid.uuid4()
@@ -85,7 +88,7 @@ def test_manual_checkin_success_with_valid_data():
     )
 
     with patch.object(ReservationService, 'check_reservation', new=AsyncMock(return_value=True)):
-        result = asyncio.run(service.manual_checkin(manual_data))
+        result = await service.manual_checkin(manual_data)
 
     assert result["message"] == "Checkin manual realizado com sucesso"
     assert repository.update_boarding.await_count == 1

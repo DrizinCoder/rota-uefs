@@ -5,7 +5,7 @@ import pytest
 from types import SimpleNamespace
 from app.DTOs.checkin import ManualCheckinRequestDTO
 from app.services.reservation_service import ReservationService
-from app.core.exceptions import NotFoundException, UnauthorizedException
+from app.core.exceptions import BadRequestException, NotFoundException, UnauthorizedException
 
 
 class DummyRepository:
@@ -63,7 +63,7 @@ async def test_reservation_service_checkin_raises_unauthorized_for_invalid_code(
 
     invalid_code = f"{reservation_id}.badhash"
 
-    with pytest.raises(UnauthorizedException):
+    with pytest.raises(BadRequestException):
         await service.checkin(trip_id, invalid_code)
 
 
