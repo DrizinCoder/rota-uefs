@@ -210,12 +210,6 @@ function PerfilContent() {
         </header>
 
         <Card className="border-none shadow-xl bg-white overflow-hidden rounded-3xl">
-          {erro && (
-            <div className="mx-8 mt-8 bg-red-50 text-red-600 text-sm font-bold p-3 rounded-xl border border-red-100">
-              {erro}
-            </div>
-          )}
-
           {/* Cabeçalho do card */}
           <CardHeader className="bg-slate-50 border-b border-slate-100 pb-8 pt-8">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-6 w-full">
@@ -360,6 +354,11 @@ function PerfilContent() {
                       className="h-12 bg-white border-[#73AABF]/30 focus-visible:ring-[#103173] font-medium"
                     />
                   </div>
+                  {erro && (
+                    <div className="col-span-2 bg-red-50 text-red-600 text-sm font-bold p-3 rounded-xl border border-red-100">
+                      {erro}
+                    </div>
+                  )}
                 </div>
               </section>
             )}
