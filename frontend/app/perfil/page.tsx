@@ -33,6 +33,8 @@ import {
   AlertTriangle,
   Trash2,
   ShieldAlert,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { api } from "@/services/api";
 
@@ -86,6 +88,8 @@ function PerfilContent() {
   const [confirmarSenha, setConfirmarSenha] = useState("");
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
+  const [showNovaSenha, setShowNovaSenha] = useState(false);
+  const [showConfirmarSenha, setShowConfirmarSenha] = useState(false);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -98,6 +102,16 @@ function PerfilContent() {
       .catch(() => router.push("/login"))
       .finally(() => setCarregando(false));
   }, []);
+
+  // Limpa a mensagem de erro automaticamente após 5 segundos
+  useEffect(() => {
+    if (erro) {
+      const timer = setTimeout(() => {
+        setErro("");
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [erro]);
 
   if (carregando) {
     return (
@@ -146,7 +160,7 @@ function PerfilContent() {
       });
       setNovaSenha("");
       setConfirmarSenha("");
-      alert("Senha atualizada com sucesso!");
+      //alert("Senha atualizada com sucesso!");
     } catch (err: any) {
       setErro(
         err?.response?.data?.message ?? "Erro ao salvar. Tente novamente."
@@ -161,10 +175,10 @@ function PerfilContent() {
     try {
       await userService.deleteAccount();
       localStorage.removeItem("token");
-      alert("Conta excluída com sucesso.");
+      //alert("Conta excluída com sucesso.");
       router.push("/");
     } catch {
-      alert("Erro ao excluir conta. Tente novamente.");
+      //alert("Erro ao excluir conta. Tente novamente.");
     } finally {
       setIsDeleting(false);
       setShowDeleteModal(false);
@@ -330,13 +344,26 @@ function PerfilContent() {
                     <Label className="text-xs font-black text-[#103173] uppercase tracking-widest flex items-center gap-2">
                       <KeyRound className="h-4 w-4" /> Nova Senha
                     </Label>
-                    <Input
-                      type="password"
-                      placeholder="••••••••"
-                      value={novaSenha}
-                      onChange={(e) => setNovaSenha(e.target.value)}
-                      className="h-12 bg-white border-[#73AABF]/30 focus-visible:ring-[#103173] font-medium"
-                    />
+                    <div className="relative">
+                      <Input
+                        type={showNovaSenha ? "text" : "password"}
+                        placeholder="••••••••"
+                        value={novaSenha}
+                        onChange={(e) => setNovaSenha(e.target.value)}
+                        className="h-12 bg-white border-[#73AABF]/30 focus-visible:ring-[#103173] font-medium pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNovaSenha(!showNovaSenha)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#103173] transition-colors"
+                      >
+                        {showNovaSenha ? (
+                          <EyeOff className="h-5 w-5" />
+                        ) : (
+                          <Eye className="h-5 w-5" />
+                        )}
+                      </button>
+                    </div>
                     <p className="text-[10px] text-[#73AABF] font-bold">
                       Mínimo de 8 caracteres.
                     </p>
@@ -346,13 +373,26 @@ function PerfilContent() {
                     <Label className="text-xs font-black text-[#103173] uppercase tracking-widest flex items-center gap-2">
                       <Lock className="h-4 w-4" /> Confirmar Nova Senha
                     </Label>
-                    <Input
-                      type="password"
-                      placeholder="••••••••"
-                      value={confirmarSenha}
-                      onChange={(e) => setConfirmarSenha(e.target.value)}
-                      className="h-12 bg-white border-[#73AABF]/30 focus-visible:ring-[#103173] font-medium"
-                    />
+                    <div className="relative">
+                      <Input
+                        type={showConfirmarSenha ? "text" : "password"}
+                        placeholder="••••••••"
+                        value={confirmarSenha}
+                        onChange={(e) => setConfirmarSenha(e.target.value)}
+                        className="h-12 bg-white border-[#73AABF]/30 focus-visible:ring-[#103173] font-medium pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmarSenha(!showConfirmarSenha)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#103173] transition-colors"
+                      >
+                        {showConfirmarSenha ? (
+                          <EyeOff className="h-5 w-5" />
+                        ) : (
+                          <Eye className="h-5 w-5" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                   {erro && (
                     <div className="col-span-2 bg-red-50 text-red-600 text-sm font-bold p-3 rounded-xl border border-red-100">
