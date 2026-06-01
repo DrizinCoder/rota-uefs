@@ -35,6 +35,7 @@ import {
   ShieldAlert,
   Eye,
   EyeOff,
+  CheckCircle2,
 } from "lucide-react";
 import { api } from "@/services/api";
 
@@ -87,7 +88,7 @@ function PerfilContent() {
   const [novaSenha, setNovaSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
   const [salvando, setSalvando] = useState(false);
-  const [erro, setErro] = useState("");
+  const [alerta, setAlerta] = useState<{ tipo: "erro" | "warning" | "sucesso"; mensagem: string } | null>(null);
   const [showNovaSenha, setShowNovaSenha] = useState(false);
   const [showConfirmarSenha, setShowConfirmarSenha] = useState(false);
 
@@ -103,15 +104,15 @@ function PerfilContent() {
       .finally(() => setCarregando(false));
   }, []);
 
-  // Limpa a mensagem de erro automaticamente após 5 segundos
+  // Limpa a mensagem de erro/alerta automaticamente após 5 segundos
   useEffect(() => {
-    if (erro) {
+    if (alerta) {
       const timer = setTimeout(() => {
-        setErro("");
+        setAlerta(null);
       }, 5000);
       return () => clearTimeout(timer);
     }
-  }, [erro]);
+  }, [alerta]);
 
   if (carregando) {
     return (
@@ -133,22 +134,22 @@ function PerfilContent() {
   // --- Handlers ---
 
   const handleSalvar = async () => {
-    setErro("");
+    setAlerta(null);
 
     if (!novaSenha && !confirmarSenha) return;
 
     if (!novaSenha || !confirmarSenha) {
-      setErro("Preencha a nova senha e a confirmação dela.");
+      setAlerta({ tipo: "erro", mensagem: "Preencha a nova senha e a confirmação dela." });
       return;
     }
 
     if (novaSenha.length < 8) {
-      setErro("A nova senha deve ter pelo menos 8 caracteres.");
+      setAlerta({ tipo: "erro", mensagem: "A nova senha deve ter pelo menos 8 caracteres." });
       return;
     }
 
     if (novaSenha !== confirmarSenha) {
-      setErro("As senhas não coincidem.");
+      setAlerta({ tipo: "erro", mensagem: "As senhas não coincidem." });
       return;
     }
 
@@ -160,11 +161,16 @@ function PerfilContent() {
       });
       setNovaSenha("");
       setConfirmarSenha("");
-      //alert("Senha atualizada com sucesso!");
+      setAlerta({ tipo: "sucesso", mensagem: "Senha alterada com sucesso!" });
     } catch (err: any) {
-      setErro(
-        err?.response?.data?.message ?? "Erro ao salvar. Tente novamente."
-      );
+      if (err?.response?.status === 422) {
+        setAlerta({ tipo: "warning", mensagem: "A nova senha não pode ser igual à senha atual." });
+      } else {
+        setAlerta({
+          tipo: "erro",
+          mensagem: err?.response?.data?.message ?? "Erro ao salvar. Tente novamente.",
+        });
+      }
     } finally {
       setSalvando(false);
     }
@@ -394,9 +400,18 @@ function PerfilContent() {
                       </button>
                     </div>
                   </div>
-                  {erro && (
-                    <div className="col-span-2 bg-red-50 text-red-600 text-sm font-bold p-3 rounded-xl border border-red-100">
-                      {erro}
+                  {alerta && (
+                    <div className={`col-span-2 text-sm font-bold p-3 rounded-xl border flex items-center gap-2 ${
+                      alerta.tipo === "sucesso"
+                        ? "bg-[#23B99A]/10 border-[#23B99A]/20 text-[#23B99A]"
+                        : alerta.tipo === "warning"
+                        ? "bg-[#F2D022]/10 border-[#F2D022]/20 text-[#b8960a]"
+                        : "bg-red-50 border-red-100 text-red-600"
+                    }`}>
+                      {alerta.tipo === "erro" && <AlertTriangle className="h-5 w-5 shrink-0" />}
+                      {alerta.tipo === "warning" && <AlertTriangle className="h-5 w-5 shrink-0 text-[#b8960a]" />}
+                      {alerta.tipo === "sucesso" && <CheckCircle2 className="h-5 w-5 shrink-0 text-[#23B99A]" />}
+                      <span>{alerta.mensagem}</span>
                     </div>
                   )}
                 </div>
