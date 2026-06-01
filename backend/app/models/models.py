@@ -5,6 +5,8 @@ from datetime import date
 from datetime import datetime
 from typing import Optional, List
 from sqlmodel import SQLModel, Field, Relationship
+from sqlalchemy import Column, ForeignKey
+from sqlalchemy.dialects.postgresql import UUID
 
 from app.enums.enums import UserProfile, AccessLevel, BoardingStatus, BusStatus, EmploymentType, PassengerType, RegistrationStatus, TripStatus
 
@@ -96,16 +98,35 @@ class Trip(SQLModel, table=True):
     )
     
     bus_license_plate: str = Field(foreign_key="bus.bus_plate")
-    driver_id: uuid.UUID = Field(foreign_key="user.user_id")
-    route_id: uuid.UUID = Field(foreign_key="route.route_id")
+    
+    driver_id: Optional[uuid.UUID] = Field(
+        default=None,
+        sa_column=Column(
+            UUID(as_uuid=True),
+            ForeignKey("user.user_id", ondelete="SET NULL"),
+            nullable=True
+        )
+    )
+    route_id: Optional[uuid.UUID] = Field(
+        default=None,
+        sa_column=Column(
+            UUID(as_uuid=True),
+            ForeignKey("route.route_id", ondelete="SET NULL"),
+            nullable=True
+        )
+    )
     
     trip_date: date
     departure_time: time
     status: TripStatus = Field(default=TripStatus.PENDING)
 
     reservations: list["Reservation"] = Relationship(back_populates="trip")
-    driver: Optional["User"] = Relationship()
-    route: Optional["Route"] = Relationship()
+    driver: Optional["User"] = Relationship(
+        sa_relationship_kwargs={"passive_deletes": True}
+    )
+    route: Optional["Route"] = Relationship(
+        sa_relationship_kwargs={"passive_deletes": True}
+    )
 
 class Reservation(SQLModel, table=True):
     reservation_id: uuid.UUID = Field(
