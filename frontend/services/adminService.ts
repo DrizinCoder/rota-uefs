@@ -100,6 +100,38 @@ export interface ViagemAdmin {
   students_count: number;
 }
 
+export type RelatorioFormato = "pdf" | "csv";
+
+const RELATORIO_MIME: Record<RelatorioFormato, string> = {
+  pdf: "application/pdf",
+  csv: "text/csv",
+};
+
+function baixarArquivoBase64(base64: string, nomeArquivo: string, formato: RelatorioFormato) {
+  if (!base64) {
+    throw new Error("Relatorio vazio");
+  }
+
+  const conteudoBase64 = base64.includes(",") ? base64.split(",").pop() ?? "" : base64;
+  const binario = window.atob(conteudoBase64);
+  const bytes = new Uint8Array(binario.length);
+
+  for (let i = 0; i < binario.length; i += 1) {
+    bytes[i] = binario.charCodeAt(i);
+  }
+
+  const blob = new Blob([bytes], { type: RELATORIO_MIME[formato] });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = nomeArquivo;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
+}
+
 // ── Rotas ─────────────────────────────────────────────
 
 export interface Rota {
@@ -154,6 +186,39 @@ export const adminService = {
     const hoje = new Date().toISOString().split("T")[0];
     const response = await api.get(`/admin/home_info?today=${hoje}`);
     return response.data.data;
+  },
+
+  // Relatorios
+  async gerarRelatorioViagem(tripId: string, formato: RelatorioFormato): Promise<string> {
+    const response = await api.get("/admin/report/audit", {
+      params: {
+        trip_id: tripId,
+        format: formato,
+      },
+    });
+
+    return response.data.data;
+  },
+
+  async baixarRelatorioViagem(tripId: string, formato: RelatorioFormato) {
+    const base64 = await this.gerarRelatorioViagem(tripId, formato);
+    baixarArquivoBase64(base64, `relatorio-viagem-${tripId}.${formato}`, formato);
+  },
+
+  async gerarRelatorioMensal(monthDate: string, formato: RelatorioFormato): Promise<string> {
+    const response = await api.get("/admin/report/monthly", {
+      params: {
+        month: monthDate,
+        format: formato,
+      },
+    });
+
+    return response.data.data;
+  },
+
+  async baixarRelatorioMensal(monthDate: string, formato: RelatorioFormato) {
+    const base64 = await this.gerarRelatorioMensal(monthDate, formato);
+    baixarArquivoBase64(base64, `relatorio-mensal-${monthDate.slice(0, 7)}.${formato}`, formato);
   },
 
   // Ônibus
