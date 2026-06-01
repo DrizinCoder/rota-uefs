@@ -1,3 +1,5 @@
+from app.core.exceptions import BadRequestException
+from app.enums.enums import TripStatus
 from app.DTOs.trip import PassengerTripItem
 from app.DTOs.trip import TripFeedResponse
 from app.DTOs.trip import TripDetailFeedItem
@@ -18,7 +20,11 @@ from app.DTOs.trip import WEEKDAY_PT
 
 
 logger = logging.getLogger(__name__)
-
+    
+ALLOWED_TRANSITIONS = {
+    TripStatus.PENDING: TripStatus.CONFIRMED,
+    TripStatus.CONFIRMED: TripStatus.COMPLETED,
+}
 
 class TripService:
     def __init__(self, trip_repository: TripRepository):
@@ -207,4 +213,16 @@ class TripService:
 
         logger.info(f"Driver trips retrieved | Driver ID: {driver_id} | Count: {len(trips)}")
         return trips
+
+
+async def change_trip_status(self, trip_id: uuid.UUID, new_status: TripStatus):
+    trip = await self.trip_repository.get_by_id(trip_id)
+    if not trip:
+        raise NotFoundException("Viagem não encontrada")
+
+    allowed_next = ALLOWED_TRANSITIONS.get(trip.status)
+    if allowed_next != new_status:
+        raise BadRequestException(f"Transição inválida: '{trip.status}' → '{new_status}'")
+
+    return await self.trip_repository.update_status(trip, new_status)
     
