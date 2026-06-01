@@ -41,8 +41,8 @@ interface AdminViagensListProps {
   viagens: ViagemTela[];
   busca: string;
   setBusca: (valor: string) => void;
-  activeTab: "semana" | "futuras" | "passadas";
-  setActiveTab: (tab: "semana" | "futuras" | "passadas") => void;
+  activeTab: "hoje" | "semana" | "futuras" | "passadas";
+  setActiveTab: (tab: "hoje" | "semana" | "futuras" | "passadas") => void;
   statusFilter: string;
   setStatusFilter: (status: string) => void;
   onEditar: (id: string) => void;
@@ -57,7 +57,7 @@ export function AdminViagensList({
   setActiveTab,
   statusFilter,
   setStatusFilter,
-  onEditar,
+  onEditar, 
   onRemover,
 }: AdminViagensListProps) {
   return (
@@ -65,10 +65,20 @@ export function AdminViagensList({
       {/* Filtros e Abas */}
       <div className="flex flex-col gap-4 mb-6">
         {/* Abas */}
-        <div className="flex flex-wrap gap-2 p-1 bg-white rounded-xl shadow-sm border border-slate-100 w-full lg:max-w-xl">
+        <div className="flex flex-wrap gap-2 p-1 bg-white rounded-xl shadow-sm border border-slate-100 w-full lg:max-w-3xl">
+          <button
+            onClick={() => setActiveTab("hoje")}
+            className={`flex-1 min-w-[100px] py-2 text-sm font-bold rounded-lg transition-all ${
+              activeTab === "hoje"
+                ? "bg-[#103173] text-white shadow-md"
+                : "text-slate-500 hover:text-[#103173] hover:bg-slate-50"
+            }`}
+          >
+            Hoje
+          </button>
           <button
             onClick={() => setActiveTab("semana")}
-            className={`flex-1 min-w-[120px] py-2 text-sm font-bold rounded-lg transition-all ${
+            className={`flex-1 min-w-[100px] py-2 text-sm font-bold rounded-lg transition-all ${
               activeTab === "semana"
                 ? "bg-[#103173] text-white shadow-md"
                 : "text-slate-500 hover:text-[#103173] hover:bg-slate-50"
