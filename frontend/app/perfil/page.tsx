@@ -120,7 +120,7 @@ function PerfilContent() {
 
   // --- Handlers ---
 
-  const handleSalvar = async () => {
+  const handleSalvarSenha = async () => {
     setAlerta(null);
 
     if (!novaSenha && !confirmarSenha) return;
@@ -484,7 +484,7 @@ function PerfilContent() {
               )}
             </div>
             <Button
-              onClick={isMotorista ? handleSalvarTelefone : handleSalvar}
+              onClick={isMotorista ? handleSalvarTelefone : handleSalvarSenha}
               disabled={
                 salvando ||
                 (isMotorista
