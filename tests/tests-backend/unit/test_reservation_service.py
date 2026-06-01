@@ -5,27 +5,8 @@ import pytest
 from types import SimpleNamespace
 from app.DTOs.checkin import ManualCheckinRequestDTO
 from app.services.reservation_service import ReservationService
-from app.core.exceptions import NotFoundException, UnauthorizedException
-
-
-class DummyRepository:
-    def __init__(self, reservation):
-        self.reservation = reservation
-        self.updated = False
-
-    async def get_by_id(self, reservation_id):
-        return self.reservation
-
-    async def update_boarding(self, reservation):
-        self.updated = True
-
-
-class DummyPriorityEngine:
-    def __init__(self, valid_ids):
-        self.valid_ids = valid_ids
-
-    async def get_valid_reservation(self, trip_id):
-        return [SimpleNamespace(reservation_id=r) for r in self.valid_ids]
+from app.core.exceptions import BadRequestException, NotFoundException
+from mocks.fake_test_helpers import DummyReservationRepository, DummyPriorityEngine
 
 
 @pytest.mark.asyncio
@@ -63,7 +44,7 @@ async def test_reservation_service_checkin_raises_unauthorized_for_invalid_code(
 
     invalid_code = f"{reservation_id}.badhash"
 
-    with pytest.raises(UnauthorizedException):
+    with pytest.raises(BadRequestException):
         await service.checkin(trip_id, invalid_code)
 
 
@@ -78,7 +59,7 @@ async def test_reservation_service_manual_checkin_success():
         user=SimpleNamespace(user_id=user_id, registration_id="24123456"),
         boarding_confirmation=None
     )
-    repo = DummyRepository(reservation)
+    repo = DummyReservationRepository(reservation)
     service = ReservationService(repo, DummyPriorityEngine([reservation_id]))
 
     data = ManualCheckinRequestDTO(
@@ -87,7 +68,10 @@ async def test_reservation_service_manual_checkin_success():
         trip_id=str(trip_id),
     )
 
-    with patch.object(ReservationService, 'check_reservation', new=lambda self, trip_id, reservation_id: True):
+    async def mock_check_reservation(self, trip_id, reservation_id):
+        return True
+
+    with patch.object(ReservationService, 'check_reservation', new=mock_check_reservation):
         result = await service.manual_checkin(data)
 
     assert result == {"message": "Checkin manual realizado com sucesso"}

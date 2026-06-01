@@ -1,3 +1,5 @@
+from unittest import result
+
 from app.DTOs.trip import WEEKDAY_PT
 from app.DTOs.trip import PassengerTripItem
 from app.utils.utils import add_ninety_minutes
@@ -141,6 +143,25 @@ class TripRepository:
         
         result = await self.session.execute(statement)
         return result.scalars().first()
+    
+    async def get_name_route_by_trip_id(self, trip_id: uuid.UUID):
+        statement = (
+            select(
+                
+                Route.name.label("route_name"),
+                Route.route_id.label("route_id")
+            )
+            .join(Trip, Trip.route_id == Route.route_id)
+            .where(Trip.trip_id == trip_id)
+        )
+
+        result = await self.session.execute(statement)
+        result = await self.session.execute(statement)
+
+        return [{
+                "route_name": row.route_name,
+                "route_id": row.route_id
+            } for row in  result]
 
     async def get_by_date(self, trip_date: date):
         statement = select(Trip).where(Trip.trip_date == trip_date)
