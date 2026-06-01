@@ -145,6 +145,16 @@ export const adminService = {
     return response.data.data;
   },
 
+  async atualizarViagem(id: string, payload: Partial<CadastroViagemPayload>) {
+    const response = await api.patch(`/trip/${id}`, payload);
+    return response.data.data;
+  },
+
+  async excluirViagem(id: string) {
+    const response = await api.delete(`/trip/${id}`);
+    return response.data;
+  },
+
   async listarViagens(): Promise<ViagemAdmin[]> {
     const response = await api.get("/trip/");
     return response.data.data;

@@ -25,13 +25,14 @@ export default function AdminViagensPage() {
   const [activeTab, setActiveTab] = useState<"semana" | "futuras" | "passadas">("semana");
   const [statusFilter, setStatusFilter] = useState<string>("Todos");
 
-  const handleExcluir = (id: string) => {
+  const handleExcluir = async (id: string) => {
     const confirmado = window.confirm("Tem certeza que deseja excluir esta viagem?");
     if (!confirmado) return;
 
     try {
-      // Futuro: await adminService.deleteViagem(id);
+      await adminService.excluirViagem(id);
       setViagens((atual) => atual.filter((v) => v.trip_id !== id));
+      window.alert("Viagem excluída com sucesso.");
     } catch (err) {
       window.alert("Erro ao remover a viagem. Tente novamente.");
     }
