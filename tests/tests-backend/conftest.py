@@ -4,8 +4,6 @@ from contextlib import asynccontextmanager
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 
-pytest_plugins = ["pytest_asyncio"]
-
 os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
 os.environ.setdefault("SECRET_KEY", "test-secret")
 os.environ.setdefault("MAIL_USERNAME", "test@example.com")
@@ -247,11 +245,33 @@ class FakeAuthController:
         })
 
     async def login(self, dados):
-        return {
-            "access_token": "fake-token",
-            "refresh_token": "fake-refresh-token",
-            "token_type": "bearer",
-        }
+        registration_id = getattr(dados, "registration_id", None)
+        password = getattr(dados, "password", None)
+
+        if self._user_service:
+            try:
+                user = await self._user_service.get_student_by_registration(registration_id)
+            except HTTPException:
+                user = None
+
+            if user:
+                if user.get("password") != password:
+                    raise HTTPException(status_code=401, detail="Invalid credentials")
+                return {
+                    "access_token": "fake-token",
+                    "refresh_token": "fake-refresh-token",
+                    "token_type": "bearer",
+                }
+
+        # Fallback for default login fixture used by integration tests
+        if registration_id == "20240001" and password == "Senha@123":
+            return {
+                "access_token": "fake-token",
+                "refresh_token": "fake-refresh-token",
+                "token_type": "bearer",
+            }
+
+        raise HTTPException(status_code=401, detail="Invalid credentials")
 
     async def recover_password(self, email: str):
         return {"message": "Email enviado"}

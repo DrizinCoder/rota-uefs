@@ -1,11 +1,9 @@
-import json
 import uuid
 
 import pytest
 
 from app.main import app
 from app.routers.admin.routes import get_admin_controller
-from app.routers.auth.routes import get_auth_controller
 from app.routers.bus_routes.routes import get_route_service
 from app.routers.checkin.routes import get_reservation_service as get_checkin_reservation_service
 from app.routers.fleet.routes import get_bus_service as get_fleet_bus_service
@@ -76,7 +74,6 @@ from mocks.fake_api_services import (
 
 @pytest.fixture(autouse=True)
 def api_dependency_overrides():
-    # Create fresh instances for each test to avoid state pollution
     route_service = FakeRouteService()
     bus_service = FakeBusService()
     trip_service = FakeTripService()
@@ -114,7 +111,6 @@ def api_dependency_overrides():
         "admin_service": admin_service,
     }
 
-    # Clean up after each test
     for dependency in overrides:
         app.dependency_overrides.pop(dependency, None)
 
@@ -174,40 +170,41 @@ def test_tests_error_returns_not_found(client):
 
 
 def test_tests_crash_returns_internal_server_error(client):
-    # The endpoint raises an exception; we need to catch it using pytest.raises
-    # because raise_server_exceptions=False doesn't suppress generic exceptions
+    
     try:
         response = client.get("/tests/crash")
-        # If it somehow doesn't raise, check the status code
         assert response.status_code == 500
         body = response.json()
         assert body["error"]["code"] == "INTERNAL_SERVER_ERROR"
     except Exception as e:
-        # The exception is raised; verify it contains the expected message
         assert "Erro genérico de teste" in str(e)
 
 
-# ============================================================================
-# AUTENTICAÇÃO - Novos Testes (6 testes)
-# ============================================================================
-
-def test_auth_login_success(client):
+def test_auth_login_success(client, created_estudante):
     response = client.post("/auth/login", json={
-        "registration_id": "24100001",
-        "password": "Password123!",
+        "registration_id": created_estudante["registration_id"],
+        "password": "Senha@1234",
     })
     assert response.status_code == 200
 
-
-def test_auth_login_invalid_credentials(client):
-    response = client.post("/auth/login", json={
-        "registration_id": "24100001",
-        "password": "WrongPassword123!",
-    })
-    assert response.status_code == 200
     data = response.json()
+    assert data["success"] is True
     assert "access_token" in data.get("data", {})
     assert data["data"]["token_type"] == "bearer"
+
+
+def test_auth_login_invalid_credentials(client, created_estudante):
+    response = client.post("/auth/login", json={
+        "registration_id": created_estudante["registration_id"],
+        "password": "WrongPassword123!",
+    })
+    assert response.status_code == 401
+
+    data = response.json()
+    assert data["success"] is False
+    assert data["error"]["code"] == "HTTP_ERROR"
+    assert data["error"]["message"] == "Invalid credentials"
+
 
 def test_auth_login_invalid_payload(client):
     """Test login with invalid payload"""
@@ -218,7 +215,6 @@ def test_auth_login_invalid_payload(client):
 def test_auth_register_student_success(client):
     """Test student registration"""
     response = client.post("/auth/register/student", json=REGISTER_STUDENT_VALID)
-    # Note: Endpoint might not be fully mocked, but test the structure
     if response.status_code in [200, 201]:
         data = response.json()
         assert "user_id" in data.get("data", {}) or "user_id" in data
@@ -237,11 +233,6 @@ def test_auth_register_driver_success(client):
     if response.status_code in [200, 201]:
         data = response.json()
         assert "user_id" in data.get("data", {}) or "user_id" in data
-
-
-# ============================================================================
-# USUÁRIOS - Novos Testes (6 testes)
-# ============================================================================
 
 def test_users_get_profile(auth_student_client):
     """Test get user profile"""
@@ -294,11 +285,6 @@ def test_users_delete(auth_admin_client):
     if response.status_code == 200:
         assert response.json()["success"] is True
 
-
-# ============================================================================
-# ADMIN - Novos Testes (4 testes)
-# ============================================================================
-
 def test_admin_dashboard(auth_admin_client):
     """Test admin dashboard"""
     response = auth_admin_client.get("/admin/dashboard")
@@ -331,10 +317,6 @@ def test_admin_requires_authorization(client):
     body = response.json()
     assert body["error"]["code"] == "UNAUTHORIZED"
 
-
-# ============================================================================
-# ROTAS - Testes CRUD Completos (4 testes agora ativados)
-# ============================================================================
 
 def test_routes_create(auth_admin_client):
     """Test create route"""
@@ -378,10 +360,6 @@ def test_fleet_access_denied_for_student(client):
     assert response.json()["error"]["code"] == "UNAUTHORIZED"
 
 
-# ============================================================================
-# FROTA - Testes CRUD Completos (4 testes agora ativados)
-# ============================================================================
-
 def test_fleet_create(auth_admin_client):
     response = auth_admin_client.post("/fleet/", json=BUS_DETAILED_VALID)
     assert response.status_code in [200, 201]
@@ -414,10 +392,6 @@ def test_fleet_batch_operations(auth_admin_client):
     if response.status_code in [200, 201]:
         assert response.json()["success"] is True
 
-
-# ============================================================================
-# VIAGENS - Testes CRUD Completos (4 testes agora ativados)
-# ============================================================================
 
 def test_trips_create(auth_driver_client):
     """Test create trip"""
@@ -454,10 +428,6 @@ def test_trips_update_status(auth_driver_client):
         assert data["data"]["status"] == TRIP_UPDATE_STATUS["status"]
 
 
-# ============================================================================
-# INSCRIÇÕES - Testes CRUD Completos (3 testes agora ativados)
-# ============================================================================
-
 def test_trip_subscription_create(auth_student_client):
     """Test subscribe to trip"""
     response = auth_student_client.post(
@@ -484,9 +454,6 @@ def test_trip_subscription_delete(auth_student_client):
     )
     if response.status_code == 200:
         assert response.json()["success"] is True
-
-
-
 
 
 @pytest.mark.parametrize(
@@ -553,10 +520,6 @@ def test_checkin_invalid_payload_returns_validation_error(auth_driver_client, pa
     assert response.json()["error"]["code"] == "VALIDATION_ERROR"
 
 
-# ============================================================================
-# DRIVERS - Novos Testes (4 testes)
-# ============================================================================
-
 def test_driver_get_list(auth_admin_client):
     """Test get driver list (admin)"""
     response = auth_admin_client.get("/driver/")
@@ -589,10 +552,6 @@ def test_driver_stats(auth_driver_client):
         assert "trips_completed" in data.get("data", {}) or "total_trips" in data.get("data", {})
 
 
-# ============================================================================
-# NOTIFICAÇÕES - Novos Testes (3 testes)
-# ============================================================================
-
 def test_notifications_get_list(auth_student_client):
     """Test get notifications"""
     response = auth_student_client.get("/notifications/")
@@ -616,10 +575,6 @@ def test_notifications_delete(auth_student_client):
     if response.status_code == 200:
         assert response.json()["success"] is True
 
-
-# ============================================================================
-# VALIDAÇÕES DE PAYLOAD - Testes de Erro (5 testes)
-# ============================================================================
 
 @pytest.mark.parametrize(
     "payload",
@@ -666,10 +621,6 @@ def test_register_empty_payload(client):
     assert response.status_code == 422
 
 
-# ============================================================================
-# CONFLITOS E ERROS - Testes de Edge Cases (4 testes)
-# ============================================================================
-
 def test_routes_duplicate_returns_conflict(auth_admin_client):
     """Test creating duplicate route returns 409"""
     # Create first
@@ -693,19 +644,15 @@ def test_trip_not_found_returns_404(client):
     fake_trip_id = str(uuid.uuid4())
     response = client.get(f"/trip/{fake_trip_id}/feed")
     if response.status_code == 404:
-        assert response.json()["error"]["code"] == "NOT_FOUND"
+        assert response.json()["error"]["code"] == "HTTP_ERROR"
 
 
-def test_trip_not_found_returns_404(client):
+def test_trip_feed_not_found_returns_http_error(client):
     fake_trip_id = str(uuid.uuid4())
     response = client.get(f"/trip/{fake_trip_id}/feed")
     if response.status_code == 404:
         assert response.json()["error"]["code"] == "HTTP_ERROR"
 
-
-# ============================================================================
-# TESTES DE PERMISSIONS - Controle de Acesso (3 testes)
-# ============================================================================
 
 def test_driver_cannot_access_admin(auth_driver_client):
     response = auth_driver_client.get("/tests/admin-only")
@@ -721,4 +668,3 @@ def test_student_cannot_manage_fleet(auth_student_client):
     """Test student cannot manage fleet"""
     response = auth_student_client.post("/fleet/", json=BUS_DETAILED_VALID)
     assert response.status_code in [401, 403]
-
