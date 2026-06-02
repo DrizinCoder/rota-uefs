@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -16,6 +16,7 @@ import { StartTripButton } from "@/features/iniciar-viagem/ui/StartTripButton";
 import { TripRouteHeader } from "@/entities/viagem/ui/TripRouteHeader";
 import { passengerService, type Home, type CardViagemFeed} from "@/services/homeService";
 import { NotificationToggle } from "@/features/gerenciar-notificacoes/ui/NotificationToggle";
+import { driverService } from "@/services/driverService";
 
 import {
   Bus,
@@ -44,20 +45,45 @@ function CentralSuporte() {
       </Dialog>
   );
 }
+const mapStatus = (status?: string): "bloqueada" | "pronta" | "em_curso" | "finalizada" => {
+  if (status === "Confirmed") return "em_curso";
+  if (status === "Completed" || status === "Cancelled") return "finalizada";
+  return "pronta";
+};
 
 function ViagemCard({ viagem }: { viagem: CardViagemFeed }) {
   const router = useRouter();
-  const [statusViagem, setStatusViagem] = useState <"bloqueada" | "pronta" | "em_curso" | "finalizada">("pronta");
+  const [statusViagem, setStatusViagem] = useState <"bloqueada" | "pronta" | "em_curso" | "finalizada">(mapStatus(viagem.status));
 
   const handleCheckIn = () => {
     router.push(`/motorista/embarque?trip_id=${encodeURIComponent(viagem.trip_id)}`);
   };
 
-  const handleAcaoViagem = () => {
+  const handleAcaoViagem = async () => {
     if (statusViagem === "pronta") {
-      setStatusViagem("em_curso");
+      try {
+        const res = await driverService.iniciarViagem(viagem.trip_id);
+        if (res.success) {
+          setStatusViagem("em_curso");
+        } else {
+          alert("Não foi possível iniciar a viagem. Tente novamente.");
+        }
+      } catch (error) {
+        console.error("Erro ao iniciar viagem:", error);
+        alert("Erro ao iniciar viagem. Tente novamente.");
+      }
     } else if (statusViagem === "em_curso") {
-      setStatusViagem("finalizada");
+      try {
+        const res = await driverService.finalizarViagem(viagem.trip_id);
+        if (res.success) {
+          setStatusViagem("finalizada");
+        } else {
+          alert("Não foi possível finalizar a viagem. Tente novamente.");
+        }
+      } catch (error) {
+        console.error("Erro ao finalizar viagem:", error);
+        alert("Erro ao finalizar viagem. Tente novamente.");
+      }
     }
   };
 

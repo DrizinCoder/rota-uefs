@@ -216,6 +216,7 @@ class TripRepository:
             select(
                 Trip.trip_id,
                 Trip.trip_date,
+                Trip.status,
                 Route.boarding_point,
                 Route.drop_off_point,
                 Trip.departure_time,
@@ -236,6 +237,7 @@ class TripRepository:
         statement  = statement.group_by(
                 Trip.trip_id,
                 Trip.trip_date,
+                Trip.status,
                 Route.boarding_point,
                 Route.drop_off_point,
                 Trip.departure_time,
@@ -256,6 +258,7 @@ class TripRepository:
                 staff_count=row.staff_count,
                 bus_capacity=row.bus_capacity,
                 total_enrolled=row.student_count + row.staff_count,
+                status=row.status,
             )
             for row in rows
         ]

@@ -70,5 +70,17 @@ export const driverService = {
     async obterCodigoEmbarque(trip_id: string): Promise<string> {
         const response = await api.get(`/users/trips/checkin_code/${trip_id}`);
         return response.data.data;
-    }
+    },
+    async iniciarViagem(trip_id: string) {
+        const response = await api.patch(`/users/driver/trip/${trip_id}/change-status`, {
+            status: "Confirmed"
+        });
+        return { success: response.status >= 200 && response.status < 300 };
+    },
+    async finalizarViagem(trip_id: string) {
+        const response = await api.patch(`/users/driver/trip/${trip_id}/change-status`, {
+            status: "Completed"
+        });
+        return { success: response.status >= 200 && response.status < 300 };
+    },
 }
