@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { AdminTopbar } from "@/components/admin/admin-topbar";
 import { adminService, Rota } from "@/services/adminService";
-import { Search, MapPin, MapPinned, PencilLine, Trash2 } from "lucide-react";
+import { Search, MapPin, MapPinned, PencilLine, Trash2, Route } from "lucide-react";
 
 export default function AdminRotasPage() {
   const router = useRouter();
@@ -80,10 +80,12 @@ export default function AdminRotasPage() {
 
             {loading ? (
               <div className="text-center text-slate-500 py-10 font-medium">Carregando rotas...</div>
-            ) : erro ? (
-              <div className="text-center text-red-500 py-10 font-medium">{erro}</div>
-            ) : rotasFiltradas.length === 0 ? (
-              <div className="text-center text-slate-500 py-10 font-medium">Nenhuma rota encontrada.</div>
+            ) : (erro || rotasFiltradas.length === 0) ? (
+              <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-slate-300">
+                <Route className="h-12 w-12 text-slate-200 mx-auto mb-4" />
+                <p className="text-[#103173] font-bold text-lg">Nenhuma rota cadastrada</p>
+                <p className="text-slate-500 text-sm mt-1">Não há registros de rotas para exibir no momento.</p>
+              </div>
             ) : (
               <div className="grid gap-4 md:grid-cols-1">
                 {rotasFiltradas.map((rota) => (
