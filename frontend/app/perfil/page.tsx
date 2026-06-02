@@ -35,8 +35,11 @@ import {
   AlertTriangle,
   Trash2,
   ShieldAlert,
+  Eye,
+  EyeOff,
+  CheckCircle2,
 } from "lucide-react";
-import { api } from "@/services/api";
+import { userService } from "@/services/userService";
 
 // --- Tipos ---
 
@@ -57,24 +60,7 @@ interface PasswordUpdateDTO {
   confirm_password: string;
 }
 
-// --- Serviço ---
 
-const userService = {
-  getMe: async (): Promise<UserProfile> => {
-    const response = await api.get("/users/me");
-    return response.data.data;
-  },
-
-
-  updatePassword: async (userId: string, data: PasswordUpdateDTO) => {
-    const response = await api.patch(`/users/update/password/${userId}`, data);
-    return response.data;
-  },
-
-  deleteAccount: async () => {
-    await api.delete("/users/delete/account/me");
-  },
-};
 
 // --- Componente principal ---
 
@@ -84,10 +70,13 @@ function PerfilContent() {
   const [usuario, setUsuario] = useState<UserProfile | null>(null);
   const [carregando, setCarregando] = useState(true);
 
-  const [senhaAtual, setSenhaAtual] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
+  const [confirmarSenha, setConfirmarSenha] = useState("");
+  const [telefone, setTelefone] = useState("");
   const [salvando, setSalvando] = useState(false);
-  const [erro, setErro] = useState("");
+  const [alerta, setAlerta] = useState<{ tipo: "erro" | "warning" | "sucesso"; mensagem: string } | null>(null);
+  const [showNovaSenha, setShowNovaSenha] = useState(false);
+  const [showConfirmarSenha, setShowConfirmarSenha] = useState(false);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -96,10 +85,23 @@ function PerfilContent() {
   useEffect(() => {
     userService
       .getMe()
-      .then((data) => setUsuario(data))
+      .then((data) => {
+        setUsuario(data);
+        setTelefone(data.phone || "");
+      })
       .catch(() => router.push("/login"))
       .finally(() => setCarregando(false));
   }, []);
+
+  // Limpa a mensagem de erro/alerta automaticamente após 5 segundos
+  useEffect(() => {
+    if (alerta) {
+      const timer = setTimeout(() => {
+        setAlerta(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [alerta]);
 
   if (carregando) {
     return (
@@ -120,39 +122,79 @@ function PerfilContent() {
 
   // --- Handlers ---
 
-  const handleSalvar = async () => {
-    setErro("");
+  const handleSalvarSenha = async () => {
+    setAlerta(null);
 
-    if (!novaSenha) return;
+    if (!novaSenha && !confirmarSenha) return;
 
-    if (!senhaAtual) {
-      setErro("Informe sua senha atual para definir uma nova senha.");
+    if (!novaSenha || !confirmarSenha) {
+      setAlerta({ tipo: "erro", mensagem: "Preencha a nova senha e a confirmação dela." });
       return;
     }
 
     if (novaSenha.length < 8) {
-      setErro("A nova senha deve ter pelo menos 8 caracteres.");
+      setAlerta({ tipo: "erro", mensagem: "A nova senha deve ter pelo menos 8 caracteres." });
       return;
     }
-    
-    // if (novaSenha === senhaAtual) {
-    //   setErro("A nova senha deve ser diferente da senha atual.");
-    //   return;
-    // }
+
+    if (novaSenha !== confirmarSenha) {
+      setAlerta({ tipo: "erro", mensagem: "As senhas não coincidem." });
+      return;
+    }
 
     setSalvando(true);
     try {
       await userService.updatePassword(usuario.user_id, {
         password: novaSenha,
-        confirm_password: novaSenha,
+        confirm_password: confirmarSenha,
       });
-      setSenhaAtual("");
       setNovaSenha("");
-      alert("Senha atualizada com sucesso!");
+      setConfirmarSenha("");
+      setAlerta({ tipo: "sucesso", mensagem: "Senha alterada com sucesso!" });
     } catch (err: any) {
-      setErro(
-        err?.response?.data?.message ?? "Erro ao salvar. Tente novamente."
-      );
+      if (err?.response?.status === 422) {
+        setAlerta({ tipo: "warning", mensagem: "A nova senha não pode ser igual à senha atual." });
+      } else {
+        setAlerta({
+          tipo: "erro",
+          mensagem: err?.response?.data?.message ?? "Erro ao salvar. Tente novamente.",
+        });
+      }
+    } finally {
+      setSalvando(false);
+    }
+  };
+
+  const handleSalvarTelefone = async () => {
+    setAlerta(null);
+
+    if (!telefone) {
+      setAlerta({ tipo: "erro", mensagem: "O campo de telefone não pode estar vazio." });
+      return;
+    }
+
+    if (telefone === usuario.phone) {
+      setAlerta({ tipo: "warning", mensagem: "O novo telefone não pode ser igual ao telefone atual." });
+      return;
+    }
+
+    setSalvando(true);
+    try {
+      await userService.updatePhone(usuario.user_id, {
+        phone: telefone,
+      });
+
+      setUsuario((prev) => prev ? { ...prev, phone: telefone } : null);
+      setAlerta({ tipo: "sucesso", mensagem: "Telefone atualizado com sucesso!" });
+    } catch (err: any) {
+      if (err?.response?.status === 422) {
+        setAlerta({ tipo: "warning", mensagem: "O novo telefone não pode ser igual ao telefone atual." });
+      } else {
+        setAlerta({
+          tipo: "erro",
+          mensagem: err?.response?.data?.message ?? "Não foi possível alterar o telefone.",
+        });
+      }
     } finally {
       setSalvando(false);
     }
@@ -163,10 +205,10 @@ function PerfilContent() {
     try {
       await userService.deleteAccount();
       localStorage.removeItem("token");
-      alert("Conta excluída com sucesso.");
+      //alert("Conta excluída com sucesso.");
       router.push("/");
     } catch {
-      alert("Erro ao excluir conta. Tente novamente.");
+      //alert("Erro ao excluir conta. Tente novamente.");
     } finally {
       setIsDeleting(false);
       setShowDeleteModal(false);

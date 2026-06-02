@@ -1,3 +1,4 @@
+from app.DTOs.trip import ChangeTripStatusDTO
 import uuid
 from app.core.exceptions import NotFoundException
 from fastapi import APIRouter, Depends
@@ -82,3 +83,11 @@ async def delete_reservation_staff_generic(
 ):
    return await controller.delete_reservation_staff_generic(reservation_id)
    
+@drive_router.patch("/trip/{trip_id}/change-status")
+async def change_trip_status(
+    trip_id: uuid.UUID,
+    data: ChangeTripStatusDTO,
+    service: TripService = Depends(get_trip_service),
+    # _: TokenData = Depends(require_driver)
+):
+    return await service.change_trip_status(trip_id, data.status)
