@@ -17,6 +17,7 @@ os.environ.setdefault("MISFIRE_GRACE_TIME", "30")
 os.environ.setdefault("VAPID_PRIVATE_KEY", "test-private-key")
 os.environ.setdefault("VAPID_PUBLIC_KEY", "test-public-key")
 os.environ.setdefault("VAPID_CLAIMS_EMAIL", "test@example.com")
+os.environ.setdefault("SCHEDULER_DATA_DIR", "/tmp/scheduler_data")
 
 import pytest
 from fastapi import HTTPException, Depends
@@ -460,6 +461,44 @@ def auth_student_client(client, created_estudante):
     yield client
     
     # Limpar contexto após teste
+    ctx.clear()
+
+
+@pytest.fixture
+def auth_admin_client(client):
+    """Cliente autenticado como administrador."""
+    ctx = CurrentUserContext()
+    ctx.set_user({
+        "user_id": "test-admin-id",
+        "registration_id": "ADM-TEST-001",
+        "email": "admin@test.local",
+        "profile": UserProfile.ADMIN,
+        "full_name": "Test Admin",
+        "access_level": AccessLevel.OPERATOR,
+    })
+
+    client.headers.update({"Authorization": "Bearer fake-token-admin"})
+    yield client
+
+    ctx.clear()
+
+
+@pytest.fixture
+def auth_driver_client(client):
+    """Cliente autenticado como motorista."""
+    ctx = CurrentUserContext()
+    ctx.set_user({
+        "user_id": "test-driver-id",
+        "registration_id": "DRV-TEST-001",
+        "email": "driver@test.local",
+        "profile": UserProfile.DRIVER,
+        "full_name": "Test Driver",
+        "driver_id": "driver-0001",
+    })
+
+    client.headers.update({"Authorization": "Bearer fake-token-driver"})
+    yield client
+
     ctx.clear()
 
 

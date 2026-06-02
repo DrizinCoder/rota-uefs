@@ -5,6 +5,7 @@ pytest==8.4.0
 pytest-asyncio==0.23.8
 pytest-cov==4.1.0
 requests==2.34.2
+setuptools<81
 
 # Dependências de preparação para os testes do Frontend
 nodeenv==1.10.0
