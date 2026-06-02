@@ -10,6 +10,7 @@ export interface CardViagemFeed {
   staff_count: number;
   bus_capacity: number;
   total_enrolled: number;
+  status?: string;
   /** Quando o backend enviar, indica se o usuário já está inscrito nesta viagem */
   jaInscrito?: boolean;
 }

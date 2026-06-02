@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, UserCircle, ChevronRight, PencilLine, Trash2 } from "lucide-react";
+import { Search, UserCircle, ChevronRight, PencilLine, Trash2, UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { Motorista } from "@/services/adminService";
 
@@ -42,7 +42,11 @@ export function AdminMotoristasList({
         )}
 
         {!loading && motoristasFiltrados.length === 0 && (
-          <p className="text-center text-slate-400 text-sm py-10">Nenhum motorista encontrado.</p>
+          <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-slate-300">
+            <UserRound className="h-12 w-12 text-slate-200 mx-auto mb-4" />
+            <p className="text-[#103173] font-bold text-lg">Nenhum motorista cadastrado</p>
+            <p className="text-slate-500 text-sm mt-1">Não há registros de motoristas para exibir no momento.</p>
+          </div>
         )}
 
         {motoristasFiltrados.map((motorista) => (
