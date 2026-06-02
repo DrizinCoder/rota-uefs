@@ -41,6 +41,10 @@ interface AdminViagensListProps {
   viagens: ViagemTela[];
   busca: string;
   setBusca: (valor: string) => void;
+  activeTab: "hoje" | "semana" | "futuras" | "passadas";
+  setActiveTab: (tab: "hoje" | "semana" | "futuras" | "passadas") => void;
+  statusFilter: string;
+  setStatusFilter: (status: string) => void;
   onEditar: (id: string) => void;
   onRemover: (id: string) => void;
 }
@@ -49,21 +53,89 @@ export function AdminViagensList({
   viagens,
   busca,
   setBusca,
-  onEditar,
+  activeTab,
+  setActiveTab,
+  statusFilter,
+  setStatusFilter,
+  onEditar, 
   onRemover,
 }: AdminViagensListProps) {
   return (
     <>
-      {/* Barra de Pesquisa */}
-      <div className="bg-white p-2 rounded-2xl shadow-sm border border-slate-100 flex items-center mb-8">
-          <Search className="h-5 w-5 text-slate-400 ml-3 mr-2" />
-          <input 
-            type="text" 
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            placeholder="Buscar por rota, motorista ou ID da viagem..." 
-            className="flex-1 bg-transparent border-none focus:outline-none text-[#103173] placeholder:text-slate-400 text-sm py-2"
-          />
+      {/* Filtros e Abas */}
+      <div className="flex flex-col gap-4 mb-6">
+        {/* Abas */}
+        <div className="flex flex-wrap gap-2 p-1 bg-white rounded-xl shadow-sm border border-slate-100 w-full lg:max-w-3xl">
+          <button
+            onClick={() => setActiveTab("hoje")}
+            className={`flex-1 min-w-[100px] py-2 text-sm font-bold rounded-lg transition-all ${
+              activeTab === "hoje"
+                ? "bg-[#103173] text-white shadow-md"
+                : "text-slate-500 hover:text-[#103173] hover:bg-slate-50"
+            }`}
+          >
+            Hoje
+          </button>
+          <button
+            onClick={() => setActiveTab("semana")}
+            className={`flex-1 min-w-[100px] py-2 text-sm font-bold rounded-lg transition-all ${
+              activeTab === "semana"
+                ? "bg-[#103173] text-white shadow-md"
+                : "text-slate-500 hover:text-[#103173] hover:bg-slate-50"
+            }`}
+          >
+            Viagens da Semana
+          </button>
+          <button
+            onClick={() => setActiveTab("futuras")}
+            className={`flex-1 min-w-[120px] py-2 text-sm font-bold rounded-lg transition-all ${
+              activeTab === "futuras"
+                ? "bg-[#103173] text-white shadow-md"
+                : "text-slate-500 hover:text-[#103173] hover:bg-slate-50"
+            }`}
+          >
+            Todas as Próximas
+          </button>
+          <button
+            onClick={() => setActiveTab("passadas")}
+            className={`flex-1 min-w-[120px] py-2 text-sm font-bold rounded-lg transition-all ${
+              activeTab === "passadas"
+                ? "bg-[#103173] text-white shadow-md"
+                : "text-slate-500 hover:text-[#103173] hover:bg-slate-50"
+            }`}
+          >
+            Anteriores
+          </button>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+          {/* Barra de Pesquisa */}
+          <div className="flex-1 bg-white p-2 rounded-xl shadow-sm border border-slate-100 flex items-center w-full">
+            <Search className="h-5 w-5 text-slate-400 ml-2 mr-2" />
+            <input 
+              type="text" 
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              placeholder="Buscar por rota, motorista ou ID..." 
+              className="flex-1 bg-transparent border-none focus:outline-none text-[#103173] placeholder:text-slate-400 text-sm py-1.5"
+            />
+          </div>
+
+          {/* Filtro de Status */}
+          <div className="bg-white px-3 py-2.5 rounded-xl shadow-sm border border-slate-100 flex items-center w-full sm:w-auto">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="bg-transparent border-none focus:outline-none text-sm font-bold text-[#103173] w-full"
+            >
+              <option value="Todos">Todos os Status</option>
+              <option value="Pendente">Pendente</option>
+              <option value="Confirmada">Confirmada</option>
+              <option value="Cancelada">Cancelada</option>
+              <option value="Concluída">Concluída</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       {/* Listagem de Viagens */}

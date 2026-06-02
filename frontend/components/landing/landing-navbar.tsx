@@ -173,7 +173,7 @@ export function LandingNavbar() {
             isActive={pathname === "/login"}
           >
             <LogIn className="h-4 w-4 shrink-0" />
-            Entrar
+            Acesso ao Portal
           </NavbarRippleCtaLink>
         </div>
       </motion.div>

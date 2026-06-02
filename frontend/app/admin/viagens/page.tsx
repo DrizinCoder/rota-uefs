@@ -22,14 +22,17 @@ export default function AdminViagensPage() {
   const [loading, setLoading] = useState(true);
 
   const [busca, setBusca] = useState("");
+  const [activeTab, setActiveTab] = useState<"hoje" | "semana" | "futuras" | "passadas">("hoje");
+  const [statusFilter, setStatusFilter] = useState<string>("Todos");
 
-  const handleExcluir = (id: string) => {
+  const handleExcluir = async (id: string) => {
     const confirmado = window.confirm("Tem certeza que deseja excluir esta viagem?");
     if (!confirmado) return;
 
     try {
-      // Futuro: await adminService.deleteViagem(id);
+      await adminService.excluirViagem(id);
       setViagens((atual) => atual.filter((v) => v.trip_id !== id));
+      window.alert("Viagem excluída com sucesso.");
     } catch (err) {
       window.alert("Erro ao remover a viagem. Tente novamente.");
     }
@@ -62,19 +65,63 @@ export default function AdminViagensPage() {
   }, []);
 
   const viagensFiltradas = useMemo(() => {
-    const termo = busca.trim().toLowerCase();
-    
-    if (termo.length === 0) return viagens;
+    let filtradas = [...viagens];
 
-    return viagens.filter((viagem) => {
-      return (
-        viagem.bus_license_plate.toLowerCase().includes(termo) ||
-        viagem.driver_name.toLowerCase().includes(termo) ||
-        viagem.route_name.toLowerCase().includes(termo) ||
-        viagem.trip_id.toLowerCase().includes(termo)
-      );
+    const agora = new Date();
+    const seteDiasDepois = new Date();
+    seteDiasDepois.setDate(agora.getDate() + 7);
+    seteDiasDepois.setHours(23, 59, 59, 999);
+
+    const hojeInicio = new Date(agora);
+    hojeInicio.setHours(0, 0, 0, 0);
+    const hojeFim = new Date(agora);
+    hojeFim.setHours(23, 59, 59, 999);
+    
+    // 1. Filtro de Abas (Futuras vs Passadas)
+    filtradas = filtradas.filter((viagem) => {
+      const tripDate = new Date(`${viagem.trip_date}T${viagem.departure_time}`);
+      if (activeTab === "hoje") {
+        return tripDate >= hojeInicio && tripDate <= hojeFim;
+      } else if (activeTab === "semana") {
+        return tripDate >= agora && tripDate <= seteDiasDepois;
+      } else if (activeTab === "futuras") {
+        return tripDate >= agora;
+      } else {
+        return tripDate < agora;
+      }
     });
-  }, [viagens, busca]);
+
+    // 2. Ordenação (Mais recentes/próximas primeiro)
+    filtradas.sort((a, b) => {
+      const dateA = new Date(`${a.trip_date}T${a.departure_time}`).getTime();
+      const dateB = new Date(`${b.trip_date}T${b.departure_time}`).getTime();
+      if (activeTab === "hoje" || activeTab === "semana" || activeTab === "futuras") {
+        return dateA - dateB; // Ascendente para o futuro
+      } else {
+        return dateB - dateA; // Descendente para o passado
+      }
+    });
+
+    // 3. Filtro de Status
+    if (statusFilter !== "Todos") {
+      filtradas = filtradas.filter(v => v.status === statusFilter);
+    }
+
+    // 4. Busca em Texto
+    const termo = busca.trim().toLowerCase();
+    if (termo.length > 0) {
+      filtradas = filtradas.filter((viagem) => {
+        return (
+          viagem.bus_license_plate.toLowerCase().includes(termo) ||
+          viagem.driver_name.toLowerCase().includes(termo) ||
+          viagem.route_name.toLowerCase().includes(termo) ||
+          viagem.trip_id.toLowerCase().includes(termo)
+        );
+      });
+    }
+
+    return filtradas;
+  }, [viagens, busca, activeTab, statusFilter]);
 
   return (
     <div className="flex h-screen bg-slate-50 font-sans text-slate-800 selection:bg-cyan-100 selection:text-cyan-900">
@@ -94,6 +141,10 @@ export default function AdminViagensPage() {
               viagens={viagensFiltradas}
               busca={busca}
               setBusca={setBusca}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              statusFilter={statusFilter}
+              setStatusFilter={setStatusFilter}
               onEditar={handleEditar}
               onRemover={handleExcluir}
             />

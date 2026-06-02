@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Bus, UserCircle, Route, UserRound, BarChart3, Users, Signpost } from "lucide-react";
+import { Bus, UserCircle, Route, UserRound, BarChart3, Users, Signpost, UserRoundCheck } from "lucide-react";
 import { Logo } from "../landing/logo";
 
 export function AdminSidebar() {
@@ -46,6 +46,10 @@ export function AdminSidebar() {
         <div onClick={() => router.push("/admin/validar-professor")} className="flex items-center px-2 py-3 border-b border-slate-800 hover:text-white cursor-pointer transition-colors gap-3">
            <Users className="h-4 w-4 text-cyan-500" />
            <span className="text-sm font-medium">Validar Servidor</span>
+        </div>
+        <div onClick={() => router.push("/perfil")} className="flex items-center px-2 py-3 border-b border-slate-800 hover:text-white cursor-pointer transition-colors gap-3">
+           <UserRoundCheck className="h-4 w-4 text-cyan-500" />
+           <span className="text-sm font-medium">Meu Perfil</span>
         </div>
       </nav>
     </aside>

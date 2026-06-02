@@ -31,6 +31,7 @@ interface AdminViagensFormProps {
   sucesso: boolean;
   loading: boolean;
   onSalvar: (e: React.FormEvent) => void;
+  isEditMode?: boolean;
 }
 
 export function AdminViagensForm({
@@ -42,7 +43,7 @@ export function AdminViagensForm({
   horario, setHorario,
   recorrencia, setRecorrencia,
   tipoViagem, setTipoViagem,
-  erro, sucesso, loading, onSalvar
+  erro, sucesso, loading, onSalvar, isEditMode
 }: AdminViagensFormProps) {
   const router = useRouter();
 
@@ -65,7 +66,7 @@ export function AdminViagensForm({
           <CheckCircle2 className="h-5 w-5 text-[#23B99A] shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-bold text-[#1fa889]">Sucesso!</p>
-            <p className="text-sm text-[#23B99A] mt-1">Viagem cadastrada e associada ao veículo com sucesso. Redirecionando...</p>
+            <p className="text-sm text-[#23B99A] mt-1">Viagem {isEditMode ? "atualizada" : "cadastrada e associada ao veículo"} com sucesso. Redirecionando...</p>
           </div>
         </div>
       )}
@@ -202,7 +203,7 @@ export function AdminViagensForm({
             className="flex-1 bg-[#23B99A] text-white py-3.5 rounded-xl font-extrabold text-lg flex items-center justify-center gap-2 hover:bg-[#1fa889] transition-all active:scale-[0.98] shadow-md disabled:opacity-70 disabled:cursor-not-allowed"
           >
             <Save className="h-5 w-5" />
-            {loading ? "Salvando..." : "Salvar Viagem"}
+            {loading ? "Salvando..." : (isEditMode ? "Salvar Alterações" : "Salvar Viagem")}
           </button>
           <button 
             type="button" 

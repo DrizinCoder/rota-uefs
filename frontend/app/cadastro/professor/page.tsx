@@ -107,6 +107,8 @@ export default function CadastroProfessorPage() {
   const [isSucesso, setIsSucesso] = useState(false);
   const [erro, setErro] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [formData, setFormData] = useState<RegisterServidorDTO>({
     full_name: "",
@@ -128,6 +130,12 @@ export default function CadastroProfessorPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (formData.password !== confirmPassword) {
+      setErro("As senhas não coincidem.");
+      return;
+    }
+
     setIsLoading(true);
     setErro("");
 
@@ -454,6 +462,39 @@ export default function CadastroProfessorPage() {
                       </div>
                     </div>
                   )}
+                </div>
+
+                {/* Confirmar Senha */}
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword" className="text-sm font-bold text-[#103173]/70 cursor-default select-none">
+                    Confirmar Senha
+                  </Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#73AABF] pointer-events-none" />
+                    <Input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Digite a senha novamente"
+                      value={confirmPassword}
+                      onChange={(e) => {
+                        setConfirmPassword(e.target.value);
+                        if (erro) setErro("");
+                      }}
+                      required
+                      autoComplete="new-password"
+                      className="pl-10 pr-10 h-12 bg-[#f0f4f8] border-transparent rounded-xl text-sm font-medium text-[#103173] placeholder:text-[#73AABF]/50 focus-visible:ring-[#103173] focus-visible:border-[#103173] focus-visible:bg-white transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword((v) => !v)}
+                      tabIndex={-1}
+                      aria-label={showConfirmPassword ? "Ocultar senha" : "Mostrar senha"}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#73AABF] hover:text-[#103173] transition-colors"
+                    >
+                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
                 </div>
 
                 {/* Submit */}

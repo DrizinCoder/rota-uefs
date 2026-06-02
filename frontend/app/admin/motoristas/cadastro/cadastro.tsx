@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, useEffect } from "react";
 import { adminService } from "@/services/adminService";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { AdminTopbar } from "@/components/admin/admin-topbar";
 import { AdminMotoristasForm, type MotoristaFormState } from "@/features/gerenciar-motoristas/ui/admin-motoristas-form";
@@ -10,6 +10,10 @@ import { ArrowLeft } from "lucide-react";
 
 export default function CadastroEdicaoMotoristaPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const driverId = searchParams.get("id");
+  const isEditMode = !!driverId;
+
   const [erros, setErros] = useState({
     nome: "",
     matricula: "",
@@ -26,6 +30,25 @@ export default function CadastroEdicaoMotoristaPage() {
     email: "",
     senha: "",
   });
+
+  useEffect(() => {
+    if (driverId) {
+      adminService.listarMotoristas()
+        .then(motoristas => {
+          const m = motoristas.find(x => x.user_id === driverId);
+          if (m) {
+            setFormData({
+              nome: m.full_name,
+              matricula: m.registration_id,
+              telefone: m.phone,
+              email: m.email || "",
+              senha: "",
+            });
+          }
+        })
+        .catch(console.error);
+    }
+  }, [driverId]);
 
   const atualizarCampo = <K extends keyof MotoristaFormState>(
     campo: K,
@@ -68,8 +91,11 @@ export default function CadastroEdicaoMotoristaPage() {
       novosErros.email = "E-mail inválido.";
       temErro = true;
     }
-    if (senha.length < 8) {
+    if (!isEditMode && senha.length < 8) {
       novosErros.senha = "A senha deve ter pelo menos 8 caracteres.";
+      temErro = true;
+    } else if (isEditMode && senha && senha.length < 8) {
+      novosErros.senha = "A nova senha deve ter pelo menos 8 caracteres.";
       temErro = true;
     }
 
@@ -80,16 +106,25 @@ export default function CadastroEdicaoMotoristaPage() {
     }
 
     try {
-      await adminService.cadastrarMotorista({
+      const payload: any = {
         full_name: nome,
         registration_id: matricula,
         phone: telefoneNumeros,
         email: email,
-        password: senha,
-      });
+      };
+      
+      if (senha) {
+        payload.password = senha;
+      }
+
+      if (isEditMode && driverId) {
+        await adminService.atualizarMotorista(driverId, payload);
+      } else {
+        await adminService.cadastrarMotorista(payload);
+      }
       router.push("/admin/motoristas");
     } catch (error: any) {
-      const msg = error?.response?.data?.message || "Erro ao cadastrar motorista. Tente novamente.";
+      const msg = error?.response?.data?.message || "Erro ao salvar motorista. Tente novamente.";
       setErros((atual) => ({ ...atual, geral: msg }));
     }
   };
@@ -99,8 +134,8 @@ export default function CadastroEdicaoMotoristaPage() {
       <AdminSidebar />
       <main className="flex-1 flex flex-col overflow-hidden">
         <AdminTopbar 
-          title="Cadastro de Motorista" 
-          subtitle="Preencha os dados abaixo para cadastrar um novo condutor." 
+          title={isEditMode ? "Editar Motorista" : "Cadastro de Motorista"} 
+          subtitle={isEditMode ? "Atualize os dados do condutor." : "Preencha os dados abaixo para cadastrar um novo condutor."} 
           buttonText="Voltar"
           buttonIcon={ArrowLeft}
           buttonVariant="outline"
@@ -114,6 +149,7 @@ export default function CadastroEdicaoMotoristaPage() {
               erros={erros}
               atualizarCampo={atualizarCampo}
               onSubmit={handleSubmit}
+              isEditMode={isEditMode}
             />
           </div>
         </div>

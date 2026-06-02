@@ -145,6 +145,16 @@ export const adminService = {
     return response.data.data;
   },
 
+  async atualizarViagem(id: string, payload: Partial<CadastroViagemPayload>) {
+    const response = await api.patch(`/trip/${id}`, payload);
+    return response.data.data;
+  },
+
+  async excluirViagem(id: string) {
+    const response = await api.delete(`/trip/${id}`);
+    return response.data;
+  },
+
   async listarViagens(): Promise<ViagemAdmin[]> {
     const response = await api.get("/trip/");
     return response.data.data;
@@ -207,6 +217,11 @@ export const adminService = {
     return response.data.data;
   },
 
+  async excluirMotorista(id: string) {
+    const response = await api.delete(`/admin/delete/account/${id}`);
+    return response.data;
+  },
+
   // Rotas
   async listarRotas(): Promise<Rota[]> {
     const response = await api.get("/routes/routes/");
@@ -216,6 +231,16 @@ export const adminService = {
   async cadastrarRota(payload: CadastroRotaPayload): Promise<Rota> {
     const response = await api.post("/routes/routes/create", payload);
     return response.data.data;
+  },
+
+  async atualizarRota(id: string, payload: Partial<CadastroRotaPayload>): Promise<Rota> {
+    const response = await api.put(`/routes/routes/update/${id}`, payload);
+    return response.data.data;
+  },
+
+  async excluirRota(id: string) {
+    const response = await api.delete(`/routes/routes/delete/${id}`);
+    return response.data;
   },
 
   // Admins

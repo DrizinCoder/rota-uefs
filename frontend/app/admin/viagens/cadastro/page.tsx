@@ -1,15 +1,18 @@
 "use client";
 
 import { useState, useEffect, useMemo, Suspense } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { adminService, type CadastroViagemPayload, type Rota,type Motorista,type BusAdmin } from "@/services/adminService";
 import { ArrowLeft } from "lucide-react";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { AdminTopbar } from "@/components/admin/admin-topbar";
 import { AdminViagensForm } from "@/features/gerenciar-viagens/ui/admin-viagens-form";
 
-export default function CadastroViagemPage() {
+function CadastroViagemContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const tripId = searchParams.get("id");
+  const isEditMode = !!tripId;
 
   const [motoristas, setMotoristas] = useState<Motorista[]>([]);
   const [rotas, setRotas] = useState<Rota[]>([]);
@@ -34,6 +37,7 @@ useEffect(() => {
         adminService.listarMotoristas(),
         adminService.listarRotas(),
         adminService.listarOnibus(),
+        adminService.listarViagens(),
       ]);
 
       // Tratamos cada resultado individualmente
@@ -52,12 +56,24 @@ useEffect(() => {
         setOnibus(resultados[2].value);
       }
 
+      if (tripId && resultados[3].status === "fulfilled") {
+        const viagens = resultados[3].value;
+        const v = viagens.find(x => x.trip_id === tripId);
+        if (v) {
+          setRotaSelecionada(v.route_id);
+          setVeiculoSelecionado(v.bus_license_plate);
+          setMotoristaId(v.driver_id);
+          setData(v.trip_date);
+          setHorario(v.departure_time);
+        }
+      }
+
     } catch (err) {
       setErro("Erro inesperado ao carregar dados.");
     }
   };
   buscarDados();
-}, []);
+}, [tripId]);
 
   const handleSalvar = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,25 +99,28 @@ useEffect(() => {
 
     try {
       setLoading(true);
-      await adminService.cadastrarViagem(payload);
+      if (isEditMode && tripId) {
+        await adminService.atualizarViagem(tripId, payload);
+      } else {
+        await adminService.cadastrarViagem(payload);
+      }
       setSucesso(true);
       setTimeout(() => router.back(), 2000);
     } catch (err: any) {
-      setErro(err?.response?.data?.message ?? "Erro ao cadastrar viagem.");
+      setErro(err?.response?.data?.message ?? "Erro ao salvar viagem.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Carregando...</div>}>
       <div className="flex h-screen bg-slate-50 font-sans text-slate-800 selection:bg-cyan-100 selection:text-cyan-900">
         <AdminSidebar />
 
       <main className="flex-1 flex flex-col overflow-hidden">
         <AdminTopbar 
-          title="Nova Viagem" 
-          subtitle="Cadastre uma nova viagem" 
+          title={isEditMode ? "Editar Viagem" : "Nova Viagem"} 
+          subtitle={isEditMode ? "Atualize os dados da viagem" : "Cadastre uma nova viagem"} 
           buttonText="Voltar"
           buttonIcon={ArrowLeft}
           buttonVariant="outline"
@@ -132,11 +151,19 @@ useEffect(() => {
               sucesso={sucesso}
               loading={loading}
               onSalvar={handleSalvar}
+              isEditMode={isEditMode}
             />
           </div>
         </div>
       </main>
     </div>
+  );
+}
+
+export default function CadastroViagemPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Carregando...</div>}>
+      <CadastroViagemContent />
     </Suspense>
   );
 }

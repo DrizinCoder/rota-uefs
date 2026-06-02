@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, UserCircle, ChevronRight } from "lucide-react";
+import { Search, UserCircle, ChevronRight, PencilLine, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { Motorista } from "@/services/adminService";
 
@@ -9,13 +9,17 @@ interface AdminMotoristasListProps {
   busca: string;
   setBusca: (val: string) => void;
   loading: boolean;
+  onEditar: (id: string) => void;
+  onRemover: (id: string) => void;
 }
 
 export function AdminMotoristasList({
   motoristasFiltrados,
   busca,
   setBusca,
-  loading
+  loading,
+  onEditar,
+  onRemover
 }: AdminMotoristasListProps) {
   const router = useRouter();
 
@@ -44,8 +48,7 @@ export function AdminMotoristasList({
         {motoristasFiltrados.map((motorista) => (
           <div
             key={motorista.user_id}
-            className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:shadow-md transition-shadow group cursor-pointer"
-            onClick={() => router.push(`/admin/motoristas/${motorista.user_id}`)}
+            className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:shadow-md transition-shadow group"
           >
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-[#103173]/5 flex items-center justify-center shrink-0">
@@ -70,8 +73,21 @@ export function AdminMotoristasList({
               </div>
             </div>
 
-            <div className="flex items-center gap-4 md:gap-6 border-t md:border-t-0 md:border-l border-slate-100 pt-4 md:pt-0 md:pl-6">
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Editar</span>
+            <div className="flex items-center gap-3 border-t md:border-t-0 md:border-l border-slate-100 pt-4 md:pt-0 md:pl-6">
+              <button 
+                onClick={() => onEditar(motorista.user_id)}
+                className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-[#103173] bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors"
+              >
+                <PencilLine className="h-4 w-4" />
+                Editar
+              </button>
+              <button 
+                onClick={() => onRemover(motorista.user_id)}
+                className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 border border-red-100 rounded-lg hover:bg-red-100 transition-colors"
+              >
+                <Trash2 className="h-4 w-4" />
+                Excluir
+              </button>
             </div>
           </div>
         ))}
