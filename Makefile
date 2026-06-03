@@ -55,7 +55,7 @@ logs-db: ## 📜 Logs banco
 # =========================
 
 build: ## 🧱 Build geral
-	$(DOCKER_COMPOSE) build --no-cache
+	$(DOCKER_COMPOSE) build 
 
 rebuild: ## 🧱 Rebuild sem cache
 	$(DOCKER_COMPOSE) build --no-cache
