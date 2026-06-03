@@ -62,8 +62,8 @@ async def login(
     return response
 
 @router.post("/recover/password")
-async def recover_password(email: str, controller: AuthController = Depends(get_auth_controller)):
-    token = await controller.recover_password(email)
+async def recover_password(email: str, background_tasks: BackgroundTasks, controller: AuthController = Depends(get_auth_controller)):
+    token = await controller.recover_password(email, background_tasks)
 
     return ResponseHandler.ok(token)
 

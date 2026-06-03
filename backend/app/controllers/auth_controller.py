@@ -58,7 +58,7 @@ class AuthController:
         logger.info(f"Login successful | User ID: {user.user_id}")
         return token_data
     
-    async def recover_password(self, email: str) -> dict:
+    async def recover_password(self, email: str, background_tasks: BackgroundTasks) -> dict:
         logger.info(f"Password recovery requested | Email: {email}")
 
         user = await self.repository.get_by_email(email)
@@ -71,7 +71,7 @@ class AuthController:
         
         token_data = self.auth_service.create_token_recovery_password(user)
           
-        BackgroundTasks().add_task(EmailUseCases().send_recover_password,
+        background_tasks.add_task(EmailUseCases().send_recover_password,
             email, 
             user.full_name, 
             token_data["access_token"]
