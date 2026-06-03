@@ -98,8 +98,8 @@ class AuthController:
         if not user:
             raise NotFoundException("Usuário não encontrado")
         
-        if user.user_id != data.user_id:
-            raise UnauthorizedException("Usário inesperado")
+        # if user.user_id != data.sub:
+        #     raise UnauthorizedException("Usário inesperado")
         
         if data.password != data.password_confirmation:
             raise ForbiddenException("Valor diferente de senhas")
@@ -108,7 +108,7 @@ class AuthController:
         user.password = hashed_password
         await self.repository.update(user)
 
-        logger.info(f"Password reset successfully | User ID: {data.user_id}")
+        logger.info(f"Password reset successfully")
         return
 
     async def register_staff(self, dados: RegisterServidorDTO):
