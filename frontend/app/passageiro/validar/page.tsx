@@ -1,5 +1,10 @@
-import { EmbarqueScreen } from "@/components/passageiro/screens/embarque-screen";
+import { Suspense } from "react"
+import { EmbarqueScreen } from "@/components/passageiro/screens/embarque-screen"
 
 export default function TelaEmbarquePage() {
-  return <EmbarqueScreen />;
+  return (
+    <Suspense fallback={<div>Carregando...</div>}>
+      <EmbarqueScreen />
+    </Suspense>
+  )
 }
