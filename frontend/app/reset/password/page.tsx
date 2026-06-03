@@ -51,8 +51,8 @@ function ResetPasswordForm() {
     e.preventDefault();
     setErro("");
 
-    if (formData.password.length < 6) {
-      setErro("A senha deve ter pelo menos 6 caracteres.");
+    if (formData.password.length < 8) {
+      setErro("A senha deve ter pelo menos 8 caracteres.");
       return;
     }
 
@@ -170,7 +170,7 @@ function ResetPasswordForm() {
                     id="password"
                     name="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Mínimo 6 caracteres"
+                    placeholder="Mínimo 8 caracteres"
                     value={formData.password}
                     onChange={handleChange}
                     required
