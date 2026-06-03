@@ -48,4 +48,10 @@ export const authService = {
     });
     return response.data;
   },
+  forgotPassword: async (email: string) => {
+    const response = await api.post("/auth/recover/password", null, {
+      params: { email },
+    });
+    return response.data;
+  },
 };
