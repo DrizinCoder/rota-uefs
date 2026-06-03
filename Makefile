@@ -55,7 +55,7 @@ logs-db: ## 📜 Logs banco
 # =========================
 
 build: ## 🧱 Build geral
-	$(DOCKER_COMPOSE) build
+	$(DOCKER_COMPOSE) build --no-cache
 
 rebuild: ## 🧱 Rebuild sem cache
 	$(DOCKER_COMPOSE) build --no-cache
@@ -111,3 +111,7 @@ test-failed: ## ⚡ Roda apenas os que falharam por último
 seed: ## 📝 Popula o banco de dados dentro do container
 	docker cp backend/scripts/populate.py rota_uefs-backend-1:/app/scripts/populate.py
 	docker exec -it rota_uefs-backend-1 env PYTHONPATH=. python scripts/populate.py
+
+seed-simple: ## 📝 Popula o banco com apenas 1 ADM e 1 Staff avulso
+	docker cp backend/scripts/populate_simple.py rota_uefs-backend-1:/app/scripts/populate_simple.py
+	docker exec -it rota_uefs-backend-1 env PYTHONPATH=. python scripts/populate_simple.py
