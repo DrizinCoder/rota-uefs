@@ -81,8 +81,10 @@ class AuthController:
         return token_data
     
     async def reset_password(self, token: str, data: ResetPasswordDTO) -> None:
-        logger.info(f"Password reset requested | User ID: {data.user_id}")
+        logger.info(f"Password reset requested")
 
+        user = None
+        
         try:
             jwt_data = jwt.decode(token, settings.SECRET_KEY) 
             user = await self.repository.get_by_id(jwt_data["sub"])
