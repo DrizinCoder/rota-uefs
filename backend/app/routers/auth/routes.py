@@ -85,7 +85,6 @@ async def register_student(
         data=result.model_dump(mode="json")
     )
 
-
 @router.post("/activate/account/student")
 async def activate_account(
     token: str,

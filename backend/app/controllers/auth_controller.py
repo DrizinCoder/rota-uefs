@@ -10,7 +10,10 @@ from app.core.exceptions import ForbiddenException, UnauthorizedException, NotFo
 from app.enums.enums import RegistrationStatus
 from app.services.email.use_cases import EmailUseCases
 from fastapi import BackgroundTasks
+from passlib.context import CryptContext
 import logging
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 logger = logging.getLogger(__name__)
 
@@ -101,7 +104,8 @@ class AuthController:
         if data.password != data.password_confirmation:
             raise ForbiddenException("Valor diferente de senhas")
         
-        user.password = data.password
+        hashed_password = pwd_context.hash(data.password)
+        user.password = hashed_password
         await self.repository.update(user)
 
         logger.info(f"Password reset successfully | User ID: {data.user_id}")
