@@ -1,33 +1,27 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
-import { Navigation } from "@/components/landing/navigation";
-import { FooterSection } from "@/components/landing/footer-section";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  ArrowLeft,
-  Plus,
-  Save,
-  UserRound,
-  UserCircle,
-  Bus,
-  ShieldAlert
-} from "lucide-react";
-
-interface MotoristaFormState {
-  nome: string;
-  matricula: string;
-  telefone: string;
-  email: string;
-  senha?: string;
-}
+import { useState, type FormEvent, useEffect } from "react";
+import { adminService } from "@/services/adminService";
+import { useRouter, useSearchParams } from "next/navigation";
+import { AdminSidebar } from "@/components/admin/admin-sidebar";
+import { AdminTopbar } from "@/components/admin/admin-topbar";
+import { AdminMotoristasForm, type MotoristaFormState } from "@/features/gerenciar-motoristas/ui/admin-motoristas-form";
+import { ArrowLeft } from "lucide-react";
 
 export default function CadastroEdicaoMotoristaPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const driverId = searchParams.get("id");
+  const isEditMode = !!driverId;
+
+  const [erros, setErros] = useState({
+    nome: "",
+    matricula: "",
+    telefone: "",
+    email: "",
+    senha: "",
+    geral: "",
+  });
 
   const [formData, setFormData] = useState<MotoristaFormState>({
     nome: "",
@@ -37,6 +31,25 @@ export default function CadastroEdicaoMotoristaPage() {
     senha: "",
   });
 
+  useEffect(() => {
+    if (driverId) {
+      adminService.listarMotoristas()
+        .then(motoristas => {
+          const m = motoristas.find(x => x.user_id === driverId);
+          if (m) {
+            setFormData({
+              nome: m.full_name,
+              matricula: m.registration_id,
+              telefone: m.phone,
+              email: m.email || "",
+              senha: "",
+            });
+          }
+        })
+        .catch(console.error);
+    }
+  }, [driverId]);
+
   const atualizarCampo = <K extends keyof MotoristaFormState>(
     campo: K,
     valor: MotoristaFormState[K],
@@ -45,157 +58,102 @@ export default function CadastroEdicaoMotoristaPage() {
       ...atual,
       [campo]: valor,
     }));
+    if (erros[campo as keyof typeof erros]) {
+      setErros((atual) => ({ ...atual, [campo]: "", geral: "" }));
+    }
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setErros({ nome: "", matricula: "", telefone: "", email: "", senha: "", geral: "" });
 
-    if (!formData.nome.trim() || !formData.matricula.trim() || !formData.telefone.trim()) {
-      window.alert("Preencha ao menos Nome, Guia de matrícula e Telefone.");
+    const nome = formData.nome.trim();
+    const matricula = formData.matricula.trim();
+    const telefoneNumeros = formData.telefone.replace(/\D/g, "");
+    const email = formData.email.trim().toLowerCase();
+    const senha = formData.senha || "";
+    const novosErros = { nome: "", matricula: "", telefone: "", email: "", senha: "", geral: "" };
+    let temErro = false;
+
+    if (nome.length < 3) {
+      novosErros.nome = "Nome completo deve ter pelo menos 3 caracteres.";
+      temErro = true;
+    }
+    if (!/^[A-Za-z0-9-]{4,20}$/.test(matricula)) {
+      novosErros.matricula = "Guia de matrícula inválido (4 a 20 caracteres alfanuméricos).";
+      temErro = true;
+    }
+    if (telefoneNumeros.length < 10 || telefoneNumeros.length > 11) {
+      novosErros.telefone = "Telefone inválido. Informe DDD + número com 10 ou 11 dígitos.";
+      temErro = true;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      novosErros.email = "E-mail inválido.";
+      temErro = true;
+    }
+    if (!isEditMode && senha.length < 8) {
+      novosErros.senha = "A senha deve ter pelo menos 8 caracteres.";
+      temErro = true;
+    } else if (isEditMode && senha && senha.length < 8) {
+      novosErros.senha = "A nova senha deve ter pelo menos 8 caracteres.";
+      temErro = true;
+    }
+
+    if (temErro) {
+      novosErros.geral = "Corrija os campos destacados para continuar.";
+      setErros(novosErros);
       return;
     }
 
-    const mensagem = `Protótipo: motorista ${formData.nome} cadastrado com sucesso.`;
+    try {
+      const payload: any = {
+        full_name: nome,
+        registration_id: matricula,
+        phone: telefoneNumeros,
+        email: email,
+      };
+      
+      if (senha) {
+        payload.password = senha;
+      }
 
-    window.alert(mensagem);
-    router.push("/admin/motoristas");
+      if (isEditMode && driverId) {
+        await adminService.atualizarMotorista(driverId, payload);
+      } else {
+        await adminService.cadastrarMotorista(payload);
+      }
+      router.push("/admin/motoristas");
+    } catch (error: any) {
+      const msg = error?.response?.data?.message || "Erro ao salvar motorista. Tente novamente.";
+      setErros((atual) => ({ ...atual, geral: msg }));
+    }
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#E4F2F1] pb-24">
-      <Navigation tipoUsuario="admin"/>
+    <div className="flex h-screen bg-slate-50 font-sans text-slate-800 selection:bg-cyan-100 selection:text-cyan-900">
+      <AdminSidebar />
+      <main className="flex-1 flex flex-col overflow-hidden">
+        <AdminTopbar 
+          title={isEditMode ? "Editar Motorista" : "Cadastro de Motorista"} 
+          subtitle={isEditMode ? "Atualize os dados do condutor." : "Preencha os dados abaixo para cadastrar um novo condutor."} 
+          buttonText="Voltar"
+          buttonIcon={ArrowLeft}
+          buttonVariant="outline"
+          onAction={() => router.back()}
+        />
 
-      <main className="flex-1 w-full max-w-4xl mx-auto py-10 px-4 space-y-6">
-        <Button
-          variant="ghost"
-          className="w-fit text-[#103173] font-black hover:bg-[#103173]/10"
-          onClick={() => router.push("/admin/motoristas")}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          VOLTAR PARA GESTÃO DE MOTORISTAS
-        </Button>
-
-        <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="space-y-2">
-            <h1 className="text-3xl md:text-4xl font-black text-[#103173] flex items-center gap-3 tracking-tight">
-              <div className="bg-[#103173] p-2 rounded-xl shadow-lg shadow-[#103173]/20">
-                <UserRound className="h-7 w-7 text-[#F2D022]" />
-              </div>
-              Cadastro de Motorista
-            </h1>
-            <p className="text-[#73AABF] font-bold text-sm md:text-base">
-              Preencha os dados abaixo para cadastrar um novo condutor.
-            </p>
+        <div className="flex-1 overflow-auto p-4 sm:p-6 bg-slate-50/50">
+          <div className="max-w-4xl mx-auto pb-10">
+            <AdminMotoristasForm
+              formData={formData}
+              erros={erros}
+              atualizarCampo={atualizarCampo}
+              onSubmit={handleSubmit}
+              isEditMode={isEditMode}
+            />
           </div>
-        </header>
-
-        <form className="gap-6" onSubmit={handleSubmit}>
-          <div className="space-y-6">
-            <Card className="border-none shadow-lg bg-white">
-              <CardHeader className="pb-4 border-b border-slate-100">
-                <CardTitle className="text-[#103173] font-black text-xl">
-                  Dados do Condutor
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 grid sm:grid-cols-2 gap-4">
-                
-                <div className="sm:col-span-2 space-y-2">
-                  <Label htmlFor="nome" className="text-[#103173] font-bold">
-                    Nome Completo
-                  </Label>
-                  <Input
-                    id="nome"
-                    value={formData.nome}
-                    onChange={(event) => atualizarCampo("nome", event.target.value)}
-                    placeholder="Ex: João Silva"
-                    className="h-11 border-[#73AABF]/30 focus:border-[#103173] focus:ring-[#103173]"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-[#103173] font-bold">
-                    E-mail
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(event) => atualizarCampo("email", event.target.value)}
-                    placeholder="nome@uefs.br"
-                    className="h-11 border-[#73AABF]/30 focus:border-[#103173] focus:ring-[#103173]"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="telefone" className="text-[#103173] font-bold">
-                    Telefone
-                  </Label>
-                  <Input
-                    id="telefone"
-                    value={formData.telefone}
-                    onChange={(event) => atualizarCampo("telefone", event.target.value)}
-                    placeholder="(75) 99999-9999"
-                    className="h-11 border-[#73AABF]/30 focus:border-[#103173] focus:ring-[#103173]"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="matricula" className="text-[#103173] font-bold">
-                    Guia de Matrícula
-                  </Label>
-                  <Input
-                    id="matricula"
-                    value={formData.matricula}
-                    onChange={(event) => atualizarCampo("matricula", event.target.value)}
-                    placeholder="Ex: 2021001"
-                    className="h-11 border-[#73AABF]/30 focus:border-[#103173] focus:ring-[#103173]"
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="senha" className="text-[#103173] font-bold">
-                    Senha
-                  </Label>
-                  <Input
-                    id="senha"
-                    type="password"
-                    value={formData.senha}
-                    onChange={(event) => atualizarCampo("senha", event.target.value)}
-                    placeholder="Sua senha secreta"
-                    className="h-11 border-[#73AABF]/30 focus:border-[#103173] focus:ring-[#103173]"
-                    required
-                  />
-                </div>
-
-              </CardContent>
-              <CardFooter className="p-6 border-t border-slate-100 flex flex-col gap-3 sm:flex-row sm:justify-end">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full sm:w-auto h-11 border-2 border-[#103173] text-[#103173] font-black hover:bg-[#103173] hover:text-white"
-                  onClick={() => router.push("/admin/motoristas")}
-                >
-                  CANCELAR
-                </Button>
-                <Button
-                  type="submit"
-                  className="w-full sm:w-auto h-11 bg-[#23B99A] hover:bg-[#1d957c] text-white font-black shadow-lg shadow-[#23B99A]/20"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  CADASTRAR MOTORISTA
-                </Button>
-              </CardFooter>
-            </Card>
-          </div>
-        </form>
+        </div>
       </main>
-
-      <FooterSection />
-
     </div>
   );
 }

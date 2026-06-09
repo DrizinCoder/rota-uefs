@@ -1,38 +1,47 @@
-services:
-  db:
-    image: postgres:15-alpine
-    container_name: postgres_db
-    restart: always
-    environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=meu_banco
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+name: rota_uefs
 
+services:
   backend:
     build: ./backend
-    container_name: fastapi_backend
+    image: rota_uefs_backend
     ports:
       - "8000:8000"
     volumes:
-      - ./backend:/code
-    env_file:
-      - ./backend/.env
+      - ./backend:/app
+      - ./backend/app/database/scheduler_data:/app/app/database/scheduler_data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      DATABASE_URL: postgresql+asyncpg://user:password@db:5432/meu_banco
     depends_on:
       - db
 
   frontend:
     build: ./frontend
-    container_name: nextjs_frontend
+    image: rota_uefs_frontend
+    command: npm start
     ports:
       - "3000:3000"
-    env_file:
-      - ./frontend/.env.local
-    depends_on:
-      - backend
+    volumes:
+      - ./frontend:/app
+      - node_modules:/app/node_modules
+    environment:
+      NODE_ENV: development
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
+      CHOKIDAR_INTERVAL: "100" 
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: meu_banco
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
 
 volumes:
-  postgres_data:
+  pgdata:
+  node_modules:
+  scheduler_data:

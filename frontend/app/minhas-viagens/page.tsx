@@ -3,20 +3,10 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { Navigation } from "@/components/landing/navigation";
 import { Bus, MapPin, Calendar, Clock, Ticket, ArrowLeft, ClipboardList } from "lucide-react";
-import { FooterSection } from "@/components/landing/footer-section";
-import { Suspense } from "react";
+import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
-
-// Dados simulados baseados na visão de cada usuário
-const VIAGENS_PASSAGEIRO = [
-  { id: "VG-0042", origem: "Salvador", destino: "Feira de Santana", data: "15/04/2026", horario: "08:30", status: "Confirmada" },
-  { id: "VG-0045", origem: "Feira de Santana", destino: "Salvador", data: "17/04/2026", horario: "14:00", status: "Pendente" },
-];
-
-const VIAGENS_MOTORISTA = [
-  { id: "VG-0042", origem: "Salvador", destino: "Feira de Santana", data: "15/04/2026", horario: "08:30", onibus: "Volare Fly 10 (ABC-1234)", status: "Escalado" },
-  { id: "VG-0043", origem: "Feira de Santana", destino: "Salvador", data: "15/04/2026", horario: "18:00", onibus: "Volare Fly 10 (ABC-1234)", status: "Escalado" },
-];
+import { passengerService, UserTrip } from "@/services/homeService";
+import { userService } from "@/services/userService";
 
 function ViagensContent() {
   const searchParams = useSearchParams();
@@ -24,16 +14,97 @@ function ViagensContent() {
   const tipo = searchParams.get("tipo") || "aluno";
   const isMotorista = tipo === "motorista";
 
-  // Define qual lista mostrar baseando-se no tipo de usuário
-  const viagens = isMotorista ? VIAGENS_MOTORISTA : VIAGENS_PASSAGEIRO;
+  const [viagens, setViagens] = useState<UserTrip[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<"futuras" | "passadas">("futuras");
+
+  useEffect(() => {
+    async function fetchTrips() {
+      try {
+        const user = await userService.getMe();
+        const trips = await passengerService.getUserTrips(user.user_id);
+        setViagens(trips);
+      } catch (error) {
+        console.error("Erro ao buscar viagens", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchTrips();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#f0f4f8] flex items-center justify-center p-10 text-center font-bold text-[#103173]">
+        Carregando viagens...
+      </div>
+    );
+  }
+
+  const agora = new Date();
+  
+  const viagensFuturas = viagens.filter(v => {
+    const tripDateTime = new Date(`${v.trip_date}T${v.departure_time}`);
+    return tripDateTime >= agora;
+  });
+
+  const viagensPassadas = viagens.filter(v => {
+    const tripDateTime = new Date(`${v.trip_date}T${v.departure_time}`);
+    return tripDateTime < agora;
+  });
+
+  const renderViagemCard = (viagem: UserTrip, idx: number) => (
+    <div key={`${viagem.trip_id}-${idx}`} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:shadow-md transition-shadow">
+      <div className="flex items-start gap-4">
+        <div className={`p-3 rounded-xl shrink-0 ${isMotorista ? 'bg-[#F2D022]/20 text-[#b8960a]' : 'bg-[#103173]/10 text-[#103173]'}`}>
+          {isMotorista ? <Bus className="h-6 w-6" /> : <Ticket className="h-6 w-6" />}
+        </div>
+        
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[10px] font-black uppercase text-[#103173] bg-slate-100 px-2 py-0.5 rounded-full tracking-wider">
+              {viagem.trip_id.substring(0, 8)}
+            </span>
+            <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full tracking-wider ${viagem.status === 'Confirmed' || viagem.status === 'Escalado' ? 'bg-[#23B99A]/10 text-[#23B99A]' : 'bg-[#F2D022]/20 text-[#b8960a]'}`}>
+              {viagem.status === 'Confirmed' ? 'Confirmada' : viagem.status || viagem.status === 'Pending' ? 'Pendente' : viagem.status}
+            </span>
+          </div>
+          
+          <div className="flex items-center gap-2 text-[#103173] font-bold text-lg mt-1">
+            {viagem.boarding_point} <MapPin className="h-4 w-4 text-[#F2D022]" /> {viagem.drop_off_point}
+          </div>
+          
+          <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-slate-500 font-medium">
+            <div className="flex items-center gap-1.5">
+              <Calendar className="h-4 w-4 text-slate-400" /> {viagem.trip_date.split('-').reverse().join('/')}
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Clock className="h-4 w-4 text-slate-400" /> {viagem.departure_time.substring(0, 5)}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Botão de visualizar inscrição da viagem para passageiros confirmados */}
+      {!isMotorista && viagem.status === "Pending" && (
+        <Link 
+          href={`/passageiro/status?viagemId=${viagem.trip_id}`}
+          className="flex items-center justify-center gap-2 text-sm font-bold bg-white text-[#103173] border border-[#103173]/20 px-4 py-2 rounded-xl shadow-sm hover:bg-slate-50 transition-all active:scale-[0.98] whitespace-nowrap mt-2 md:mt-0"
+        >
+          <ClipboardList className="h-4 w-4" />
+          Visualizar inscrição
+        </Link>
+      )}
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-[#f0f4f8]">
       <Navigation tipoUsuario={tipo as any} />
 
-      <main className="max-w-3xl mx-auto px-4 pt-6 pb-20">
+      <main className="max-w-6xl mx-auto px-4 pt-6 pb-20">
         
-        {/* Barra de Ações Rápidas: Voltar e Visualizar Inscrição */}
+        {/* Barra de ações rápidas: voltar e visualizar inscrição */}
         <div className="flex items-center mb-8">
           <button 
             onClick={() => router.back()}
@@ -55,66 +126,52 @@ function ViagensContent() {
           </p>
         </header>
 
-        <div className="grid gap-4">
-          {viagens.map((viagem, idx) => (
-            <div key={idx} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:shadow-md transition-shadow">
-              <div className="flex items-start gap-4">
-                <div className={`p-3 rounded-xl shrink-0 ${isMotorista ? 'bg-[#F2D022]/20 text-[#b8960a]' : 'bg-[#103173]/10 text-[#103173]'}`}>
-                  {isMotorista ? <Bus className="h-6 w-6" /> : <Ticket className="h-6 w-6" />}
-                </div>
-                
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[10px] font-black uppercase text-[#103173] bg-slate-100 px-2 py-0.5 rounded-full tracking-wider">
-                      {viagem.id}
-                    </span>
-                    <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full tracking-wider ${viagem.status === 'Confirmada' || viagem.status === 'Escalado' ? 'bg-[#23B99A]/10 text-[#23B99A]' : 'bg-[#F2D022]/20 text-[#b8960a]'}`}>
-                      {viagem.status}
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 text-[#103173] font-bold text-lg mt-1">
-                    {viagem.origem} <MapPin className="h-4 w-4 text-[#F2D022]" /> {viagem.destino}
-                  </div>
-                  
-                  <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-slate-500 font-medium">
-                    <div className="flex items-center gap-1.5">
-                      <Calendar className="h-4 w-4 text-slate-400" /> {viagem.data}
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Clock className="h-4 w-4 text-slate-400" /> {viagem.horario}
-                    </div>
-                    {isMotorista && (
-                      <div className="flex items-center gap-1.5">
-                        <Bus className="h-4 w-4 text-slate-400" /> {(viagem as any).onibus}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
+        {/* Tabs */}
+        <div className="flex gap-2 p-1 bg-white rounded-xl shadow-sm border border-slate-100 mb-6 w-full max-w-sm">
+          <button
+            onClick={() => setActiveTab("futuras")}
+            className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all ${
+              activeTab === "futuras"
+                ? "bg-[#103173] text-white shadow-md"
+                : "text-slate-500 hover:text-[#103173] hover:bg-slate-50"
+            }`}
+          >
+            Próximas Viagens
+          </button>
+          <button
+            onClick={() => setActiveTab("passadas")}
+            className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all ${
+              activeTab === "passadas"
+                ? "bg-[#103173] text-white shadow-md"
+                : "text-slate-500 hover:text-[#103173] hover:bg-slate-50"
+            }`}
+          >
+            Viagens Anteriores
+          </button>
+        </div>
 
-              {/* Botão de visualizar inscrição da viagem para passageiros confirmados */}
-              {!isMotorista && viagem.status === "Confirmada" && (
-                <Link 
-                  href="/passageiro/status"
-                  className="flex items-center justify-center gap-2 text-sm font-bold bg-white text-[#103173] border border-[#103173]/20 px-4 py-2 rounded-xl shadow-sm hover:bg-slate-50 transition-all active:scale-[0.98] whitespace-nowrap mt-2 md:mt-0"
-                >
-                  <ClipboardList className="h-4 w-4" />
-                  Visualizar inscrição
-                </Link>
+        <div>
+          {activeTab === "futuras" ? (
+            <div className="grid gap-4">
+              {viagensFuturas.map(renderViagemCard)}
+              {viagensFuturas.length === 0 && (
+                <div className="text-center py-8 bg-white rounded-2xl shadow-sm border border-slate-100 text-slate-500 font-medium">
+                  Nenhuma viagem futura programada.
+                </div>
               )}
             </div>
-          ))}
-          
-          {viagens.length === 0 && (
-            <div className="text-center py-10 bg-white rounded-2xl shadow-sm border border-slate-100 text-slate-500 font-medium">
-              Nenhuma viagem encontrada.
+          ) : (
+            <div className="grid gap-4 opacity-90">
+              {viagensPassadas.map(renderViagemCard)}
+              {viagensPassadas.length === 0 && (
+                <div className="text-center py-8 bg-white rounded-2xl shadow-sm border border-slate-100 text-slate-500 font-medium">
+                  Nenhum histórico de viagens.
+                </div>
+              )}
             </div>
           )}
         </div>
-      </main>
-      <FooterSection />
-    </div>
+      </main>    </div>
   );
 }
 
