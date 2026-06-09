@@ -14,6 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Mail, ArrowLeft, KeyRound, Send, CheckCircle2 } from "lucide-react";
+import { authService } from "@/services/authService";
 
 export default function RecuperarSenha() {
   const router = useRouter();
@@ -22,7 +23,7 @@ export default function RecuperarSenha() {
   const [isEnviado, setIsEnviado] = useState(false);
   const [erro, setErro] = useState("");
 
-  const handleRecuperar = (e: React.FormEvent) => {
+  const handleRecuperar = async (e: React.FormEvent) => {
     e.preventDefault();
     setErro("");
     const emailNormalizado = email.trim().toLowerCase();
@@ -34,11 +35,18 @@ export default function RecuperarSenha() {
 
     setIsLoading(true);
 
-    // Simulando a requisição para o backend
-    setTimeout(() => {
+    try {
+      await authService.forgotPassword(emailNormalizado);
+      setIsEnviado(true);
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { detail?: string } } };
+      setErro(
+        err?.response?.data?.detail ||
+          "Não foi possível enviar o e-mail. Verifique o endereço e tente novamente."
+      );
+    } finally {
       setIsLoading(false);
-      setIsEnviado(true); // Muda para a tela de sucesso
-    }, 1500);
+    }
   };
 
   return (

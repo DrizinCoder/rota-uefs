@@ -131,11 +131,14 @@ function EmbarqueContent() {
 
   // UseEffect pra pedir permissão da Câmera e conectar com videoRef
   useEffect(() => {
+    let localStream: MediaStream | null = null;
+
     const startCamera = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: "environment" },
         });
+        localStream = stream;
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           setIsScanning(true);
@@ -149,14 +152,10 @@ function EmbarqueContent() {
     startCamera();
 
     return () => {
-      // Parar TODAS as tracks de vídeo
-      if (videoRef.current?.srcObject) {
-        const stream = videoRef.current.srcObject as MediaStream;
-        stream.getTracks().forEach((track) => {
-          track.stop();
-        });
+      // Para todas as tracks usando a referência local — funciona mesmo se videoRef.current já foi zerado
+      if (localStream) {
+        localStream.getTracks().forEach((track) => track.stop());
       }
-      // Garante que zera
       if (videoRef.current) {
         videoRef.current.srcObject = null;
       }
