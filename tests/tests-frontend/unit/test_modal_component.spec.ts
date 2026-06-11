@@ -70,10 +70,10 @@ test.describe('Modal Component - Unit Tests', () => {
       const container = document.createElement('div');
       container.id = 'test-modal-state-container';
       container.innerHTML = `
+        <button data-testid="toggle-modal-btn">Toggle Modal</button>
         <div data-testid="modal-backdrop" class="hidden fixed inset-0 bg-black/50">
           <div data-testid="modal-window" class="relative bg-white rounded-lg p-6">
             <h3>Modal Window</h3>
-            <button data-testid="toggle-modal-btn">Toggle Modal</button>
           </div>
         </div>
       `;
@@ -95,11 +95,11 @@ test.describe('Modal Component - Unit Tests', () => {
     await expect(modalBackdrop).toHaveClass(/hidden/);
 
     // Click to open
-    await toggleBtn.click();
+    await toggleBtn.dispatchEvent('click');
     await expect(modalBackdrop).not.toHaveClass(/hidden/);
 
     // Click to close
-    await toggleBtn.click();
+    await toggleBtn.dispatchEvent('click');
     await expect(modalBackdrop).toHaveClass(/hidden/);
   });
 

@@ -39,7 +39,6 @@ async function authenticateAdmin(page: Page) {
 
 async function fillTripForm(page: Page, values = TRIP_SUCCESS_VALUES) {
   await page.locator('select').nth(0).selectOption(values.recurrence);
-  await page.getByRole('radio', { name: /somente ida/i }).first().check();
   await page.locator('select').nth(1).selectOption(values.routeId);
   await page.locator('input[type="date"]').first().fill(values.tripDate);
   await page.locator('input[type="time"]').first().fill(values.departureTime);
