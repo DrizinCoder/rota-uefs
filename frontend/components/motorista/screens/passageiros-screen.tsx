@@ -126,8 +126,6 @@ function PassageirosContent() {
       p.matricula.toLowerCase().includes(termoBusca),
   );
 
-  const embarcados = passageiros.filter((p) => p.status === "embarcou").length;
-
   const handleAdicionarAvulso = async () => {
     try {
       const resultado = await driverService.adicionarAvulso(tripId!);
@@ -156,11 +154,7 @@ function PassageirosContent() {
     try {
       const resultado = await driverService.embarcar(user_id, reservation_id, trip_id);
       if (resultado.success) {
-        setPassageiros(
-          passageiros.map((p) =>
-            p.reservation_id === reservation_id ? { ...p, status: "embarcou" } : p
-          )
-        );
+        await carregarPassageiros();
       }
     } catch (erro) {
       console.error("Erro ao embarcar:", erro);
@@ -171,14 +165,10 @@ function PassageirosContent() {
     try{
       const resultado = await driverService.desembarcar(reservation_id);
       if (resultado.success) {
-        setPassageiros(
-          passageiros.map((p) =>
-            p.reservation_id === reservation_id ? { ...p, status: "pendente" } : p
-          )
-        );
+        await carregarPassageiros();
       }
     } catch (erro) {
-      console.error("Erro ao desembarcar:", erro);status
+      console.error("Erro ao desembarcar:", erro);
     }
   }
 
@@ -229,7 +219,7 @@ function PassageirosContent() {
           boardingPoint={dadosViagem?.boarding_point ?? "Origem"}
           dropOffPoint={dadosViagem?.drop_off_point ?? "Destino"}
           totalReservations={dadosViagem?.stats.total_reservations ?? 0}
-          embarcados={embarcados}
+          embarcados={dadosViagem?.stats.total_onboarded ?? 0}
         />
 
         <div className="flex flex-col md:flex-row gap-4 mb-6">

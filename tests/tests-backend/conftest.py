@@ -30,6 +30,15 @@ sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(BACKEND_DIR))
 sys.path.insert(0, str(TESTS_BACKEND_DIR))
 
+from mocks.fake_test_helpers import (
+    FakeDashboardController,
+    FakePushSubscriptionService,
+    FakeEmailUseCases,
+    DummyBackgroundTasks,
+    DummyUserRepo,
+    DummyNotificationEmailUseCases,
+)
+
 from app.main import app
 from app.database.db import get_session
 from app.routers.admin.routes import get_admin_controller
@@ -367,6 +376,36 @@ def mock_require_profile(*profiles):
     async def _mock_require_profile(current_user: TokenData = Depends(mock_get_current_user)) -> TokenData:
         return current_user
     return _mock_require_profile
+
+
+@pytest.fixture
+def fake_dashboard_controller():
+    return FakeDashboardController()
+
+
+@pytest.fixture
+def fake_push_subscription_service():
+    return FakePushSubscriptionService()
+
+
+@pytest.fixture
+def fake_email_use_cases():
+    return FakeEmailUseCases()
+
+
+@pytest.fixture
+def dummy_notification_email_use_cases():
+    return DummyNotificationEmailUseCases()
+
+
+@pytest.fixture
+def dummy_background_tasks():
+    return DummyBackgroundTasks()
+
+
+@pytest.fixture
+def dummy_user_repo():
+    return DummyUserRepo()
 
 
 @pytest.fixture

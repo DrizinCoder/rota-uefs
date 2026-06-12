@@ -21,6 +21,12 @@ trip_router = APIRouter(
     #dependencies=[Depends(require_admin)]
 )
 
+
+@trip_router.get("/info/route/id/{trip_id}")
+async def get_name_route_by_trip_id(trip_id: uuid.UUID, service: TripService = Depends(get_trip_service)):
+    result = await service.get_name_route_by_trip_id(trip_id)
+    return ResponseHandler.ok(result)
+
 @trip_router.get("/")
 async def get_all_trips(service: TripService = Depends(get_trip_service)):
     result = await service.get_all()

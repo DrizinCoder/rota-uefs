@@ -1,3 +1,5 @@
+from app.core.exceptions import BadRequestException
+from app.enums.enums import TripStatus
 from app.DTOs.trip import PassengerTripItem
 from app.DTOs.trip import TripFeedResponse
 from app.DTOs.trip import TripDetailFeedItem
@@ -9,7 +11,7 @@ from datetime import datetime, timedelta, date
 from app.enums.enums import TripRecurrence
 import uuid
 from app.core.exceptions import NotFoundException
-from app.repositories.trip_repository import TripRepository
+from app.repositories.trip_repository import TripRepository 
 from app.DTOs.trip import CreateTripDTO, UpdateTripDTO
 from app.core.scheduler import task_scheduler
 from app.services.jobs.verify_quorum import verify_quorum_job
@@ -18,7 +20,11 @@ from app.DTOs.trip import WEEKDAY_PT
 
 
 logger = logging.getLogger(__name__)
-
+    
+ALLOWED_TRANSITIONS = {
+    TripStatus.PENDING: TripStatus.CONFIRMED,
+    TripStatus.CONFIRMED: TripStatus.COMPLETED,
+}
 
 class TripService:
     def __init__(self, trip_repository: TripRepository):
@@ -87,6 +93,15 @@ class TripService:
         logger.info(f"Trip list retrieved successfully | Count: {len(result) if result else 0}")
         return result
 
+    async def get_name_route_by_trip_id(self, trip_id: uuid.UUID):
+        logger.info(f"Route info by trip ID requested | Trip ID: {trip_id}")
+        route_info = await self.trip_repository.get_name_route_by_trip_id(trip_id)
+        if not route_info:
+            raise NotFoundException("Route info not found for the given trip ID")
+        logger.info(f"Route info retrieved successfully | Trip ID: {trip_id}")
+        return route_info   
+    
+    
     async def get_by_id(self, trip_id: uuid.UUID):
         logger.info(f"Trip lookup requested | Trip ID: {trip_id}")
 
@@ -207,4 +222,16 @@ class TripService:
 
         logger.info(f"Driver trips retrieved | Driver ID: {driver_id} | Count: {len(trips)}")
         return trips
+
+
+async def change_trip_status(self, trip_id: uuid.UUID, new_status: TripStatus):
+    trip = await self.trip_repository.get_by_id(trip_id)
+    if not trip:
+        raise NotFoundException("Viagem não encontrada")
+
+    allowed_next = ALLOWED_TRANSITIONS.get(trip.status)
+    if allowed_next != new_status:
+        raise BadRequestException(f"Transição inválida: '{trip.status}' → '{new_status}'")
+
+    return await self.trip_repository.update_status(trip, new_status)
     

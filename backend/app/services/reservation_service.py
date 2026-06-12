@@ -9,7 +9,7 @@ import logging
 from app.DTOs.checkin import ManualCheckinRequestDTO
 from app.enums.enums import BoardingStatus
 from app.repositories.reservation_repository import ReservationRepository
-from app.core.exceptions import NotFoundException, UnauthorizedException, ForbiddenException
+from app.core.exceptions import NotFoundException, ForbiddenException, BadRequestException
 import hmac
 
 logger = logging.getLogger(__name__)
@@ -29,13 +29,13 @@ class ReservationService:
 
         parts = checkIn_code.split(".")
         if len(parts) != 2:
-            raise UnauthorizedException("Código inválido")
+            raise BadRequestException("Código inválido")
         reservation_id_str, received_hmac = parts
 
         try:
             reservation_uuid = uuid.UUID(reservation_id_str)
         except ValueError:
-            raise UnauthorizedException("Código inválido")
+            raise BadRequestException("Código inválido")
 
         reservation = await self.repository.get_by_id(reservation_uuid)
         if not reservation:
@@ -52,12 +52,12 @@ class ReservationService:
         _, expected_hmac = expected_code.split(".")
 
         if not hmac.compare_digest(expected_hmac, received_hmac):
-            raise UnauthorizedException("Código de verificação inválido")
+            raise BadRequestException("Código de verificação inválido")
 
-        is_valid = self.check_reservation(trip_id, reservation_uuid)
+        is_valid = await self.check_reservation(trip_id, reservation_uuid)
 
         if not is_valid:
-            raise UnauthorizedException("Passageiro não está na lista de embarque")
+            raise BadRequestException("Passageiro não está na lista de embarque")
 
         await self.repository.update_boarding(reservation)
 
@@ -81,12 +81,12 @@ class ReservationService:
                 data.trip_id        == str(reservation.trip_id)        and 
                 data.user_id        == str(reservation.user.user_id)
             ):
-            raise UnauthorizedException("Código de verificação inválido")
+            raise BadRequestException("Código de verificação inválido")
         
-        is_valid = self.check_reservation(reservation.trip_id, reservation.reservation_id)
+        is_valid = await self.check_reservation(reservation.trip_id, reservation.reservation_id)
 
         if not is_valid:
-            raise UnauthorizedException("Passageiro não está na lista de embarque")
+            raise BadRequestException("Passageiro não está na lista de embarque")
 
         await self.repository.update_boarding(reservation)
 
