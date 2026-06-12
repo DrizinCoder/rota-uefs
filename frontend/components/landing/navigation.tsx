@@ -187,7 +187,7 @@ export function Navigation({ tipoUsuario = "Student" }: NavigationProps) {
         <motion.div
           animate={{
             // width: scrolled ? "min(98%, 1000px)" : "100%",
-            y: scrolled ? 14 : 0,
+            y: 0,
             // borderRadius: scrolled ? 9999 : 0,
             backgroundColor: scrolled
               ? "rgba(2, 6, 23, 0.92)"
@@ -196,16 +196,15 @@ export function Navigation({ tipoUsuario = "Student" }: NavigationProps) {
             boxShadow: scrolled
               ? "0 4px 32px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.08)"
               : "none",
-            paddingLeft: scrolled ? 450 : 450,
-            paddingRight: scrolled ? 460 : 460,
             borderBottomWidth: scrolled ? 0 : 1,
           }}
           transition={SPRING}
           style={{
             borderBottomColor: "rgba(255,255,255,0.08)",
           }}
-          className="mx-auto hidden lg:grid lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center lg:gap-4 h-16 relative max-w-[100vw]"
+          className="mx-auto hidden lg:flex items-center justify-center h-16 relative w-full"
         >
+          <div className="w-full max-w-[1050px] mx-auto px-6 lg:px-8 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 h-full">
           <Link
             href="/"
             aria-label="Rota UEFS — início"
@@ -248,6 +247,7 @@ export function Navigation({ tipoUsuario = "Student" }: NavigationProps) {
               <User className="h-4 w-4 shrink-0" />
               Perfil
             </NavbarRippleCtaLink>
+          </div>
           </div>
         </motion.div>
 

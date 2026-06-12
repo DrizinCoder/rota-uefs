@@ -46,10 +46,10 @@ export function LandingHero() {
               ROTA UEFS: TRANSPORTE SEGURO E EFICIENTE
             </h2>
 
-            <p className="text-base text-slate-300 max-w-md leading-relaxed">
+            <p className="text-base text-slate-300 max-w-xl leading-relaxed">
               Transporte <strong className="text-white/90">gratuito</strong> com horários fixos entre{" "}
               <strong className="text-white/90">Feira de Santana</strong> e{" "}
-              <strong className="text-white/90">Salvador</strong>, exclusivo para
+              <strong className="text-white/90">Salvador</strong>,<br className="hidden sm:block" /> exclusivo para
               docentes e discentes da UEFS. Viaje com conforto e segurança.
             </p>
 
