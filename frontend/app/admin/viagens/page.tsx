@@ -10,7 +10,7 @@ import { adminService } from "@/services/adminService";
 
 const tradutorStatus: Record<string, string> = {
   "Pending": "Pendente",
-  "Confirmed": "Confirmada",
+  "Confirmed": "Em Trânsito",
   "Cancelled": "Cancelada",
   "Completed": "Concluída"
 };

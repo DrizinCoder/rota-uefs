@@ -92,6 +92,7 @@ export function AdminFleetForm({
             >
               <option value="Active">Ativo</option>
               <option value="Inactive">Inativo</option>
+              <option value="Maintenance">Manutenção</option>
             </select>
           </div>
         </CardContent>

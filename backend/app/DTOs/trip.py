@@ -42,6 +42,7 @@ class TripFeedItem(BaseModel):
     staff_count: int
     bus_capacity: int
     total_enrolled: int
+    status: TripStatus
 
 class TripFeedResponse(BaseModel):
     reference_date: date

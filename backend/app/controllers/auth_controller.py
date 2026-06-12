@@ -10,7 +10,10 @@ from app.core.exceptions import ForbiddenException, UnauthorizedException, NotFo
 from app.enums.enums import RegistrationStatus
 from app.services.email.use_cases import EmailUseCases
 from fastapi import BackgroundTasks
+from passlib.context import CryptContext
 import logging
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +61,7 @@ class AuthController:
         logger.info(f"Login successful | User ID: {user.user_id}")
         return token_data
     
-    async def recover_password(self, email: str) -> dict:
+    async def recover_password(self, email: str, background_tasks: BackgroundTasks) -> dict:
         logger.info(f"Password recovery requested | Email: {email}")
 
         user = await self.repository.get_by_email(email)
@@ -71,7 +74,7 @@ class AuthController:
         
         token_data = self.auth_service.create_token_recovery_password(user)
           
-        BackgroundTasks().add_task(EmailUseCases().send_recover_password,
+        background_tasks.add_task(EmailUseCases().send_recover_password,
             email, 
             user.full_name, 
             token_data["access_token"]
@@ -81,8 +84,10 @@ class AuthController:
         return token_data
     
     async def reset_password(self, token: str, data: ResetPasswordDTO) -> None:
-        logger.info(f"Password reset requested | User ID: {data.user_id}")
+        logger.info(f"Password reset requested")
 
+        user = None
+        
         try:
             jwt_data = jwt.decode(token, settings.SECRET_KEY) 
             user = await self.repository.get_by_id(jwt_data["sub"])
@@ -93,16 +98,17 @@ class AuthController:
         if not user:
             raise NotFoundException("Usuário não encontrado")
         
-        if user.user_id != data.user_id:
-            raise UnauthorizedException("Usário inesperado")
+        # if user.user_id != data.sub:
+        #     raise UnauthorizedException("Usário inesperado")
         
         if data.password != data.password_confirmation:
             raise ForbiddenException("Valor diferente de senhas")
         
-        user.password = data.password
+        hashed_password = pwd_context.hash(data.password)
+        user.password = hashed_password
         await self.repository.update(user)
 
-        logger.info(f"Password reset successfully | User ID: {data.user_id}")
+        logger.info(f"Password reset successfully")
         return
 
     async def register_staff(self, dados: RegisterServidorDTO):

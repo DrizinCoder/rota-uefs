@@ -48,4 +48,23 @@ export const authService = {
     });
     return response.data;
   },
+  forgotPassword: async (email: string) => {
+    const response = await api.post("/auth/recover/password", null, {
+      params: { email },
+    });
+    return response.data;
+  },
+
+  resetPassword: async (token: string, data: ResetPasswordDTO) => {
+    const response = await api.post("/auth/reset/password", data, {
+      params: { token },
+    });
+    return response.data;
+  },
 };
+
+// DTO de redefinição de senha
+export interface ResetPasswordDTO {
+  password: string;
+  password_confirmation: string;
+}

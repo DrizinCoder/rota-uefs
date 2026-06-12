@@ -22,7 +22,7 @@ const formatarDataBR = (dataStr: string): string => {
 
 const getStatusStyles = (status: string): string => {
   const normalized = status.toLowerCase();
-  if (normalized === "confirmada" || normalized === "confirmed") {
+  if (normalized === "em trânsito" || normalized === "em transito") {
     return "bg-[#23B99A]/10 text-[#23B99A]";
   }
   if (normalized === "pendente" || normalized === "pending") {

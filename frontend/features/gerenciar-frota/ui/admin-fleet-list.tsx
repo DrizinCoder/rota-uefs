@@ -45,13 +45,14 @@ export function AdminFleetList({
           <div
             role="tablist"
             aria-label="Filtrar onibus por status"
-            className="h-9 bg-slate-100 p-1 w-full sm:w-auto grid grid-cols-3 rounded-lg gap-0"
+            className="h-9 bg-slate-100 p-1 w-full sm:w-auto grid grid-cols-4 rounded-lg gap-0"
           >
             {(
               [
                 { value: "todos" as const, label: "Todos" },
                 { value: "Active" as const, label: "Ativos" },
                 { value: "Inactive" as const, label: "Inativos" },
+                { value: "Maintenance" as const, label: "Manutenção" },
               ] as const
             ).map(({ value, label }) => (
               <button

@@ -3,8 +3,9 @@ import uuid
 import pytest
 from types import SimpleNamespace
 from jose import jwt
+from fastapi import BackgroundTasks
 
-from app.controllers.auth_controller import AuthController
+from app.controllers.auth_controller import AuthController, pwd_context
 from app.core.config import settings
 from app.core.exceptions import NotFoundException
 from app.enums.enums import RegistrationStatus
@@ -123,7 +124,8 @@ async def test_recover_password_returns_recovery_token(monkeypatch):
     controller = AuthController(repo)
     controller.auth_service = DummyAuthService()
 
-    result = await controller.recover_password(user.email)
+    background_tasks = BackgroundTasks()
+    result = await controller.recover_password(user.email, background_tasks)
 
     assert result["access_token"] == "recovery-token"
     assert result["token_type"] == "bearer"
@@ -150,7 +152,8 @@ async def test_reset_password_updates_password():
     await controller.reset_password(token, data)
 
     assert repo.updated is True
-    assert repo.user.password == "newpassword"
+    assert user.password != "newpassword"
+    assert pwd_context.verify("newpassword", user.password)
 
 
 @pytest.mark.asyncio
@@ -174,3 +177,4 @@ async def test_register_staff_returns_servidor_response():
     assert result.email == payload.email
     assert result.department == payload.department
     assert result.employment == payload.employment
+    

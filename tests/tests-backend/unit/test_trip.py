@@ -26,6 +26,7 @@ def test_trip_dtos_validate_expected_fields_and_router_endpoints():
         staff_count=2,
         bus_capacity=40,
         total_enrolled=12,
+        status=TripStatus.CONFIRMED,
         reference_date=date.today()
     )
 

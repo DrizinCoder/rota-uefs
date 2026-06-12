@@ -1,3 +1,4 @@
+from zoneinfo import ZoneInfo
 from app.core.exceptions import BadRequestException
 from app.enums.enums import TripStatus
 from app.DTOs.trip import PassengerTripItem
@@ -25,6 +26,8 @@ ALLOWED_TRANSITIONS = {
     TripStatus.PENDING: TripStatus.CONFIRMED,
     TripStatus.CONFIRMED: TripStatus.COMPLETED,
 }
+
+BRAZIL_TZ = ZoneInfo("America/Sao_Paulo")
 
 class TripService:
     def __init__(self, trip_repository: TripRepository):
@@ -141,7 +144,8 @@ class TripService:
         return trip.model_dump(mode='json')
     
     async def get_trips_for_feed(self, driver_id: uuid.UUID | None = None) -> TripFeedResponse:
-        today = date.today()
+        now_sp = datetime.now(tz=BRAZIL_TZ)
+        today = now_sp.date()
         weekday = today.weekday()
         if weekday < 5:  # Segunda a Sexta
             start_date = today
@@ -224,14 +228,14 @@ class TripService:
         return trips
 
 
-async def change_trip_status(self, trip_id: uuid.UUID, new_status: TripStatus):
-    trip = await self.trip_repository.get_by_id(trip_id)
-    if not trip:
-        raise NotFoundException("Viagem não encontrada")
-
-    allowed_next = ALLOWED_TRANSITIONS.get(trip.status)
-    if allowed_next != new_status:
-        raise BadRequestException(f"Transição inválida: '{trip.status}' → '{new_status}'")
-
-    return await self.trip_repository.update_status(trip, new_status)
+    async def change_trip_status(self, trip_id: uuid.UUID, new_status: TripStatus):
+        trip = await self.trip_repository.get_by_id(trip_id)
+        if not trip:
+            raise NotFoundException("Viagem não encontrada")
+    
+        allowed_next = ALLOWED_TRANSITIONS.get(trip.status)
+        if allowed_next != new_status:
+            raise BadRequestException(f"Transição inválida: '{trip.status}' → '{new_status}'")
+    
+        return await self.trip_repository.update_status(trip, new_status)
     

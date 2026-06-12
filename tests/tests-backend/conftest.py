@@ -4,8 +4,6 @@ from contextlib import asynccontextmanager
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 
-pytest_plugins = ["pytest_asyncio"]
-
 os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
 os.environ.setdefault("SECRET_KEY", "test-secret")
 os.environ.setdefault("MAIL_USERNAME", "test@example.com")
@@ -17,6 +15,7 @@ os.environ.setdefault("MISFIRE_GRACE_TIME", "30")
 os.environ.setdefault("VAPID_PRIVATE_KEY", "test-private-key")
 os.environ.setdefault("VAPID_PUBLIC_KEY", "test-public-key")
 os.environ.setdefault("VAPID_CLAIMS_EMAIL", "test@example.com")
+os.environ.setdefault("SCHEDULER_DATA_DIR", "/tmp/scheduler_data")
 
 import pytest
 from fastapi import HTTPException, Depends
@@ -246,13 +245,35 @@ class FakeAuthController:
         })
 
     async def login(self, dados):
-        return {
-            "access_token": "fake-token",
-            "refresh_token": "fake-refresh-token",
-            "token_type": "bearer",
-        }
+        registration_id = getattr(dados, "registration_id", None)
+        password = getattr(dados, "password", None)
 
-    async def recover_password(self, email: str):
+        if self._user_service:
+            try:
+                user = await self._user_service.get_student_by_registration(registration_id)
+            except HTTPException:
+                user = None
+
+            if user:
+                if user.get("password") != password:
+                    raise HTTPException(status_code=401, detail="Invalid credentials")
+                return {
+                    "access_token": "fake-token",
+                    "refresh_token": "fake-refresh-token",
+                    "token_type": "bearer",
+                }
+
+        # Fallback for default login fixture used by integration tests
+        if registration_id == "20240001" and password == "Senha@123":
+            return {
+                "access_token": "fake-token",
+                "refresh_token": "fake-refresh-token",
+                "token_type": "bearer",
+            }
+
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    async def recover_password(self, email: str, background_tasks):
         return {"message": "Email enviado"}
 
     async def reset_password(self, token: str, new_password: str):
@@ -460,6 +481,44 @@ def auth_student_client(client, created_estudante):
     yield client
     
     # Limpar contexto após teste
+    ctx.clear()
+
+
+@pytest.fixture
+def auth_admin_client(client):
+    """Cliente autenticado como administrador."""
+    ctx = CurrentUserContext()
+    ctx.set_user({
+        "user_id": "test-admin-id",
+        "registration_id": "ADM-TEST-001",
+        "email": "admin@test.local",
+        "profile": UserProfile.ADMIN,
+        "full_name": "Test Admin",
+        "access_level": AccessLevel.OPERATOR,
+    })
+
+    client.headers.update({"Authorization": "Bearer fake-token-admin"})
+    yield client
+
+    ctx.clear()
+
+
+@pytest.fixture
+def auth_driver_client(client):
+    """Cliente autenticado como motorista."""
+    ctx = CurrentUserContext()
+    ctx.set_user({
+        "user_id": "test-driver-id",
+        "registration_id": "DRV-TEST-001",
+        "email": "driver@test.local",
+        "profile": UserProfile.DRIVER,
+        "full_name": "Test Driver",
+        "driver_id": "driver-0001",
+    })
+
+    client.headers.update({"Authorization": "Bearer fake-token-driver"})
+    yield client
+
     ctx.clear()
 
 
