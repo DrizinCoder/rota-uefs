@@ -89,7 +89,7 @@ export default function MapaTrajeto({
         <MapMarker longitude={coordOrigem.lng} latitude={coordOrigem.lat}>
           <MarkerContent>
             <div className="relative">
-              <div className="w-5 h-5 rounded-full bg-[#F2D022] border-[3px] border-[#103173] shadow-[0_0_10px_rgba(242,208,34,0.6)]" />
+              <div className="w-5 h-5 rounded-full bg-[#0891B2] border-[3px] border-[#103173] shadow-[0_0_10px_rgba(242,208,34,0.6)]" />
               <div className="absolute inset-0 w-5 h-5 rounded-full bg-[#F2D022]/40 animate-ping" />
             </div>
           </MarkerContent>
@@ -101,7 +101,7 @@ export default function MapaTrajeto({
         {/* Marcador de Destino */}
         <MapMarker longitude={coordDestino.lng} latitude={coordDestino.lat}>
           <MarkerContent>
-            <div className="w-5 h-5 rounded-full bg-[#103173] border-[3px] border-[#F2D022] shadow-[0_0_10px_rgba(16,49,115,0.6)]" />
+            <div className="w-5 h-5 rounded-full bg-[#103173] border-[3px] border-[#0891B2] shadow-[0_0_10px_rgba(16,49,115,0.6)]" />
           </MarkerContent>
           <MarkerLabel position="bottom" className="text-[#103173] font-bold text-[11px] drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]">
             {destinoLabel}

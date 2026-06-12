@@ -143,7 +143,7 @@ export function StatusViagemScreen() {
     <div className="flex min-h-screen flex-col bg-[#E4F2F1]">
       <Navigation />
 
-      <main className="flex-1 w-full max-w-2xl mx-auto py-10 px-4">
+      <main className="flex-1 w-full max-w-5xl mx-auto py-10 px-4">
         <div className="flex items-center justify-between mb-8">
           <Button
             variant="ghost"
@@ -157,14 +157,11 @@ export function StatusViagemScreen() {
         <div className="space-y-6">
           <Card className="border-none shadow-xl bg-white overflow-hidden">
             <CardHeader className="bg-[#103173] text-white p-6">
-              <div className="flex justify-between items-center">
+              <div className="flex justify-center items-center">
                 <div className="flex items-center gap-3">
-                  <div className="bg-[#F2D022] p-2 rounded-lg">
-                    <Bus className="h-6 w-6 text-[#103173]" />
-                  </div>
                   <div>
-                    <CardTitle className="text-xl font-black">Detalhes da Rota</CardTitle>
-                    <p className="text-white/70 text-xs font-bold uppercase">{viagemInscrita.id}</p>
+                    <CardTitle className="text-3xl font-black">Detalhes da Rota</CardTitle>
+                    <p className="text-white/70 text-xs font-bold uppercase text-center">{viagemInscrita.id}</p>
                   </div>
                 </div>
               </div>
