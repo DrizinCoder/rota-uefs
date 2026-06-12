@@ -1,3 +1,4 @@
+from app.enums.enums import UserProfile
 from datetime import date
 import uuid
 from fastapi import APIRouter, Depends
@@ -19,7 +20,7 @@ from app.controllers.admin_controller import AdminController
 from app.database.db import get_session
 from app.core.responses import ResponseHandler
 from app.core.exceptions import NotFoundException
-from app.middleware import require_admin
+from app.middleware import require_profile
 from app.middleware.auth_middleware import TokenData
 from app.controllers.dashboard_controller import DashboardController
 from app.services.dashboard_service import DashboardService
@@ -49,7 +50,7 @@ async def get_trip_controller(session: AsyncSession = Depends(get_session)) -> T
 async def register_motorista(
     dados: RegisterMotoristaDTO,
     controller: AdminController = Depends(get_admin_controller),
-    _: TokenData = Depends(require_admin)
+    _: TokenData = Depends(require_profile(UserProfile.ADMIN))
 ):
     result = await controller.register_motorista(dados)
     return ResponseHandler.created(data=result)
@@ -60,7 +61,7 @@ async def register_motorista(
 async def create_admin(
     dados: RegisterAdminDTO,
     controller: AdminController = Depends(get_admin_controller),
-    _: TokenData = Depends(require_admin)
+    _: TokenData = Depends(require_profile(UserProfile.ADMIN))
 ):
     result = await controller.create(dados)
     return ResponseHandler.created(result, "Administrador criado com sucesso")
@@ -69,7 +70,7 @@ async def create_admin(
 @router.get("/")
 async def list_admins(
     controller: AdminController = Depends(get_admin_controller),
-    _: TokenData = Depends(require_admin)
+    _: TokenData = Depends(require_profile(UserProfile.ADMIN))
 ):
     result = await controller.list_all()
     
@@ -82,7 +83,7 @@ async def list_admins(
 async def get_home_info(
     today: date,
     controller: DashboardController = Depends(get_dashboard_controller),
-    _: TokenData = Depends(require_admin)
+    _: TokenData = Depends(require_profile(UserProfile.ADMIN))
 ):
     result = await controller.get_home_info(today)
 
@@ -96,7 +97,7 @@ async def get_home_info(
 async def get_admin(
     admin_id: uuid.UUID,
     controller: AdminController = Depends(get_admin_controller),
-    _: TokenData = Depends(require_admin)
+    _: TokenData = Depends(require_profile(UserProfile.ADMIN))
 ):
     result = await controller.get_by_id(admin_id)
     
@@ -111,7 +112,7 @@ async def update_admin(
     admin_id: uuid.UUID,
     update_data: dict,
     controller: AdminController = Depends(get_admin_controller),
-    _: TokenData = Depends(require_admin)
+    _: TokenData = Depends(require_profile(UserProfile.ADMIN))
 ):
     result = await controller.update(admin_id, update_data)
     
@@ -125,7 +126,7 @@ async def update_admin(
 async def delete_admin(
     admin_id: uuid.UUID,
     controller: AdminController = Depends(get_admin_controller),
-    _: TokenData = Depends(require_admin)
+    _: TokenData = Depends(require_profile(UserProfile.ADMIN))
 ):
     result = await controller.delete(admin_id)
     
@@ -138,7 +139,7 @@ async def delete_admin(
 async def delete_account(
     id: uuid.UUID,
     controller: AdminController = Depends(get_admin_controller),
-    _: TokenData = Depends(require_admin)
+    _: TokenData = Depends(require_profile(UserProfile.ADMIN))
 ):
     result = await controller.delete_account(id)
     if not result:
@@ -150,7 +151,7 @@ async def audit_report(
     trip_id: uuid.UUID,
     format: str,
     controller: DashboardController = Depends(get_dashboard_controller),
-    _: TokenData = Depends(require_admin)
+    _: TokenData = Depends(require_profile(UserProfile.ADMIN))
 ):
     result = await controller.trip_report(trip_id, format)
     if not result:
@@ -162,7 +163,7 @@ async def monthly_report(
     month: date,
     format: str,
     controller: DashboardController = Depends(get_dashboard_controller),
-    _: TokenData = Depends(require_admin)
+    _: TokenData = Depends(require_profile(UserProfile.ADMIN))
 ):
     result = await controller.monthly_report(month, format)
     if not result:
