@@ -110,7 +110,7 @@ export function LandingNavbar() {
       {/* ── Desktop ─────────────────────────────────────────────── */}
       <motion.div
         animate={{
-          width: visible ? "58%" : "100%",
+          width: visible ? "65%" : "100%",
           y: visible ? 14 : 0,
           borderRadius: visible ? 9999 : 0,
           backgroundColor: visible
