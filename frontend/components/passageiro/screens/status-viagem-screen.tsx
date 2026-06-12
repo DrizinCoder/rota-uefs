@@ -155,7 +155,7 @@ export function StatusViagemScreen() {
         </div>
 
         <div className="space-y-6">
-          <Card className="border-none shadow-xl bg-white overflow-hidden">
+          <Card className="border-none rounded-2xl shadow-xl bg-white overflow-hidden p-0">
             <CardHeader className="bg-[#103173] text-white p-6">
               <div className="flex justify-center items-center">
                 <div className="flex items-center gap-3">
