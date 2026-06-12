@@ -63,7 +63,7 @@ async def get_driver_trips(
 async def subscribe_staff_generic_to_trip(
     trip_id: str,
     controller: TripController = Depends(get_trip_controller),
-    # _: TokenData = Depends(require_driver)
+    _: TokenData = Depends(require_driver)
 ):
     return await controller.subscriber_staff_generic(trip_id)
 
@@ -71,7 +71,7 @@ async def subscribe_staff_generic_to_trip(
 async def remove_boarding_confirmation(
     reservation_id: str,
     controller: TripController = Depends(get_trip_controller),
-    # _: TokenData = Depends(require_driver)
+    _: TokenData = Depends(require_driver)
 ):
     return await controller.remove_boarding_confirmation(reservation_id)
 
@@ -79,7 +79,7 @@ async def remove_boarding_confirmation(
 async def delete_reservation_staff_generic(
     reservation_id: str,
     controller: TripController = Depends(get_trip_controller),
-    # _: TokenData = Depends(require_driver)
+    _: TokenData = Depends(require_driver)
 ):
    return await controller.delete_reservation_staff_generic(reservation_id)
    
@@ -88,6 +88,6 @@ async def change_trip_status(
     trip_id: uuid.UUID,
     data: ChangeTripStatusDTO,
     service: TripService = Depends(get_trip_service),
-    # _: TokenData = Depends(require_driver)
+    _: TokenData = Depends(require_driver)
 ):
     return await service.change_trip_status(trip_id, data.status)

@@ -9,8 +9,7 @@ from app.repositories.route_repository import RouteRepository
 from app.DTOs.routes import CreateRouteDTO, UpdateRouteDTO
 
 router = APIRouter(
-    prefix="/routes", tags=["Routes"],
-    #dependencies=[Depends(require_admin)]
+    prefix="/routes", tags=["Routes"]
 )
 
 async def get_route_service(session: AsyncSession = Depends(get_session)) -> RouteService:
@@ -19,31 +18,31 @@ async def get_route_service(session: AsyncSession = Depends(get_session)) -> Rou
 
 
 @router.post("/create")
-async def create_route(dados: CreateRouteDTO, service: RouteService = Depends(get_route_service)):
+async def create_route(dados: CreateRouteDTO, service: RouteService = Depends(get_route_service), _: TokenData = Depends(require_admin)):
     result = await service.create(dados)
     return ResponseHandler.created(result)
 
 @router.get("/")
-async def get_all_routes(service: RouteService = Depends(get_route_service)):
+async def get_all_routes(service: RouteService = Depends(get_route_service), _: TokenData = Depends(require_admin)):
     result = await service.get_all()
     return ResponseHandler.ok(result)
 
 @router.get("/{id}")
-async def get_route(id: uuid.UUID, service: RouteService = Depends(get_route_service)):
+async def get_route(id: uuid.UUID, service: RouteService = Depends(get_route_service), _: TokenData = Depends(require_admin)):
     result = await service.get_by_id(id)
     return ResponseHandler.ok(result)
 
 @router.patch("/update/{id}")
-async def patch_route(id: uuid.UUID, dados: UpdateRouteDTO, service: RouteService = Depends(get_route_service)):
+async def patch_route(id: uuid.UUID, dados: UpdateRouteDTO, service: RouteService = Depends(get_route_service), _: TokenData = Depends(require_admin)):
     result = await service.patch(id, dados)
     return ResponseHandler.ok(result)
 
 @router.put("/update/{id}")
-async def put_route(id: uuid.UUID, dados: CreateRouteDTO, service: RouteService = Depends(get_route_service)):
+async def put_route(id: uuid.UUID, dados: CreateRouteDTO, service: RouteService = Depends(get_route_service), _: TokenData = Depends(require_admin)):
     result = await service.update_full(id, dados)
     return ResponseHandler.ok(result)
 
 @router.delete("/delete/{id}")
-async def delete_route(id: uuid.UUID, service: RouteService = Depends(get_route_service)):
+async def delete_route(id: uuid.UUID, service: RouteService = Depends(get_route_service), _: TokenData = Depends(require_admin)):
     result = await service.delete(id)
     return ResponseHandler.ok(result)

@@ -25,9 +25,7 @@ from app.controllers.dashboard_controller import DashboardController
 from app.services.dashboard_service import DashboardService
 from app.repositories.dashboard_repository import DashboardRepository
 
-router = APIRouter(
-    dependencies=[Depends(require_admin)]
-)
+router = APIRouter()
 
 async def get_admin_controller(session: AsyncSession = Depends(get_session)) -> AdminController:
     user_repo = UserRepository(session)
@@ -50,7 +48,8 @@ async def get_trip_controller(session: AsyncSession = Depends(get_session)) -> T
 @router.post("/register/motorista")
 async def register_motorista(
     dados: RegisterMotoristaDTO,
-    controller: AdminController = Depends(get_admin_controller)
+    controller: AdminController = Depends(get_admin_controller),
+    _: TokenData = Depends(require_admin)
 ):
     result = await controller.register_motorista(dados)
     return ResponseHandler.created(data=result)
@@ -60,7 +59,8 @@ async def register_motorista(
 @router.post("/")
 async def create_admin(
     dados: RegisterAdminDTO,
-    controller: AdminController = Depends(get_admin_controller)
+    controller: AdminController = Depends(get_admin_controller),
+    _: TokenData = Depends(require_admin)
 ):
     result = await controller.create(dados)
     return ResponseHandler.created(result, "Administrador criado com sucesso")
@@ -68,7 +68,8 @@ async def create_admin(
 
 @router.get("/")
 async def list_admins(
-    controller: AdminController = Depends(get_admin_controller)
+    controller: AdminController = Depends(get_admin_controller),
+    _: TokenData = Depends(require_admin)
 ):
     result = await controller.list_all()
     
@@ -80,7 +81,8 @@ async def list_admins(
 @router.get("/home_info")
 async def get_home_info(
     today: date,
-    controller: DashboardController = Depends(get_dashboard_controller)
+    controller: DashboardController = Depends(get_dashboard_controller),
+    _: TokenData = Depends(require_admin)
 ):
     result = await controller.get_home_info(today)
 
@@ -93,7 +95,8 @@ async def get_home_info(
 @router.get("/{admin_id}")
 async def get_admin(
     admin_id: uuid.UUID,
-    controller: AdminController = Depends(get_admin_controller)
+    controller: AdminController = Depends(get_admin_controller),
+    _: TokenData = Depends(require_admin)
 ):
     result = await controller.get_by_id(admin_id)
     
@@ -107,7 +110,8 @@ async def get_admin(
 async def update_admin(
     admin_id: uuid.UUID,
     update_data: dict,
-    controller: AdminController = Depends(get_admin_controller)
+    controller: AdminController = Depends(get_admin_controller),
+    _: TokenData = Depends(require_admin)
 ):
     result = await controller.update(admin_id, update_data)
     
@@ -120,7 +124,8 @@ async def update_admin(
 @router.delete("/{admin_id}")
 async def delete_admin(
     admin_id: uuid.UUID,
-    controller: AdminController = Depends(get_admin_controller)
+    controller: AdminController = Depends(get_admin_controller),
+    _: TokenData = Depends(require_admin)
 ):
     result = await controller.delete(admin_id)
     
@@ -132,7 +137,8 @@ async def delete_admin(
 @router.delete("/delete/account/{id}")
 async def delete_account(
     id: uuid.UUID,
-    controller: AdminController = Depends(get_admin_controller)
+    controller: AdminController = Depends(get_admin_controller),
+    _: TokenData = Depends(require_admin)
 ):
     result = await controller.delete_account(id)
     if not result:
@@ -143,7 +149,8 @@ async def delete_account(
 async def audit_report(
     trip_id: uuid.UUID,
     format: str,
-    controller: DashboardController = Depends(get_dashboard_controller)
+    controller: DashboardController = Depends(get_dashboard_controller),
+    _: TokenData = Depends(require_admin)
 ):
     result = await controller.trip_report(trip_id, format)
     if not result:
@@ -154,7 +161,8 @@ async def audit_report(
 async def monthly_report(
     month: date,
     format: str,
-    controller: DashboardController = Depends(get_dashboard_controller)
+    controller: DashboardController = Depends(get_dashboard_controller),
+    _: TokenData = Depends(require_admin)
 ):
     result = await controller.monthly_report(month, format)
     if not result:
