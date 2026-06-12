@@ -1,8 +1,14 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+import { useEffect, useState } from "react";
+import {
+  Map,
+  MapMarker,
+  MarkerContent,
+  MarkerLabel,
+  MapRoute,
+  MapControls,
+} from "@/components/ui/map";
 
 interface Coordenadas {
   lat: number;
@@ -16,124 +22,95 @@ interface MapaTrajetoProps {
   destinoLabel?: string;
 }
 
-// Ícone customizado para a origem (bolinha amarela)
-function criarIconeOrigem() {
-  return L.divIcon({
-    className: "",
-    html: `
-      <div style="
-        width: 20px; height: 20px;
-        background: #F2D022;
-        border: 3px solid #103173;
-        border-radius: 50%;
-        box-shadow: 0 0 8px rgba(242, 208, 34, 0.6);
-      "></div>
-    `,
-    iconSize: [20, 20],
-    iconAnchor: [10, 10],
-    popupAnchor: [0, -14],
-  });
-}
-
-// Ícone customizado para o destino (bolinha azul)
-function criarIconeDestino() {
-  return L.divIcon({
-    className: "",
-    html: `
-      <div style="
-        width: 20px; height: 20px;
-        background: #103173;
-        border: 3px solid #F2D022;
-        border-radius: 50%;
-        box-shadow: 0 0 8px rgba(16, 49, 115, 0.6);
-      "></div>
-    `,
-    iconSize: [20, 20],
-    iconAnchor: [10, 10],
-    popupAnchor: [0, -14],
-  });
-}
-
 export default function MapaTrajeto({
   coordOrigem,
   coordDestino,
   origemLabel = "Origem",
   destinoLabel = "Destino",
 }: MapaTrajetoProps) {
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
+  const [routeCoordinates, setRouteCoordinates] = useState<[number, number][]>(
+    []
+  );
+  const [isLoadingRoute, setIsLoadingRoute] = useState(true);
 
+  // Calcula centro entre os dois pontos
+  const centerLng = (coordOrigem.lng + coordDestino.lng) / 2;
+  const centerLat = (coordOrigem.lat + coordDestino.lat) / 2;
+
+  // Busca a rota real pelo OSRM (gratuito, sem API key)
   useEffect(() => {
-    if (!mapContainerRef.current || mapInstanceRef.current) return;
+    async function fetchRoute() {
+      setIsLoadingRoute(true);
+      try {
+        const response = await fetch(
+          `https://router.project-osrm.org/route/v1/driving/${coordOrigem.lng},${coordOrigem.lat};${coordDestino.lng},${coordDestino.lat}?overview=full&geometries=geojson`
+        );
+        const data = await response.json();
 
-    // Calcula o centro entre os dois pontos
-    const centerLat = (coordOrigem.lat + coordDestino.lat) / 2;
-    const centerLng = (coordOrigem.lng + coordDestino.lng) / 2;
-
-    // Cria o mapa
-    const map = L.map(mapContainerRef.current, {
-      center: [centerLat, centerLng],
-      zoom: 10,
-      zoomControl: false,
-      attributionControl: false,
-      scrollWheelZoom: false,
-      dragging: true,
-    });
-
-    // Tiles do OpenStreetMap
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    }).addTo(map);
-
-    // Controle de zoom no canto inferior direito
-    L.control.zoom({ position: "bottomright" }).addTo(map);
-
-    // Attribution pequena no canto inferior esquerdo
-    L.control.attribution({ position: "bottomleft", prefix: false }).addTo(map);
-
-    // Marcador de origem
-    L.marker([coordOrigem.lat, coordOrigem.lng], { icon: criarIconeOrigem() })
-      .bindPopup(`<strong>${origemLabel}</strong>`)
-      .addTo(map);
-
-    // Marcador de destino
-    L.marker([coordDestino.lat, coordDestino.lng], { icon: criarIconeDestino() })
-      .bindPopup(`<strong>${destinoLabel}</strong>`)
-      .addTo(map);
-
-    // Linha tracejada conectando origem e destino
-    L.polyline(
-      [
-        [coordOrigem.lat, coordOrigem.lng],
-        [coordDestino.lat, coordDestino.lng],
-      ],
-      {
-        color: "#103173",
-        weight: 3,
-        dashArray: "8, 8",
-        opacity: 0.7,
+        if (data.routes?.length > 0) {
+          setRouteCoordinates(data.routes[0].geometry.coordinates);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar rota OSRM:", error);
+        // Fallback: linha reta entre os dois pontos
+        setRouteCoordinates([
+          [coordOrigem.lng, coordOrigem.lat],
+          [coordDestino.lng, coordDestino.lat],
+        ]);
+      } finally {
+        setIsLoadingRoute(false);
       }
-    ).addTo(map);
+    }
 
-    // Ajustar o zoom para caber os dois pontos
-    const bounds = L.latLngBounds(
-      [coordOrigem.lat, coordOrigem.lng],
-      [coordDestino.lat, coordDestino.lng]
-    );
-    map.fitBounds(bounds, { padding: [40, 40] });
-
-    mapInstanceRef.current = map;
-
-    return () => {
-      map.remove();
-      mapInstanceRef.current = null;
-    };
-  }, [coordOrigem, coordDestino, origemLabel, destinoLabel]);
+    fetchRoute();
+  }, [coordOrigem.lng, coordOrigem.lat, coordDestino.lng, coordDestino.lat]);
 
   return (
-    <div
-      ref={mapContainerRef}
-      style={{ width: "100%", height: "100%", borderRadius: "inherit" }}
-    />
+    <div className="h-full w-full">
+      <Map
+        center={[centerLng, centerLat]}
+        zoom={9}
+        theme="light"
+        loading={isLoadingRoute}
+      >
+        {/* Rota tracejada */}
+        {routeCoordinates.length > 0 && (
+          <MapRoute
+            coordinates={routeCoordinates}
+            color="#103173"
+            width={4}
+            opacity={0.8}
+            dashArray={[6, 4]}
+            interactive={false}
+          />
+        )}
+
+        {/* Marcador de Origem */}
+        <MapMarker longitude={coordOrigem.lng} latitude={coordOrigem.lat}>
+          <MarkerContent>
+            <div className="relative">
+              <div className="w-5 h-5 rounded-full bg-[#F2D022] border-[3px] border-[#103173] shadow-[0_0_10px_rgba(242,208,34,0.6)]" />
+              <div className="absolute inset-0 w-5 h-5 rounded-full bg-[#F2D022]/40 animate-ping" />
+            </div>
+          </MarkerContent>
+          <MarkerLabel position="bottom" className="text-[#103173] font-bold text-[11px] drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]">
+            {origemLabel}
+          </MarkerLabel>
+        </MapMarker>
+
+        {/* Marcador de Destino */}
+        <MapMarker longitude={coordDestino.lng} latitude={coordDestino.lat}>
+          <MarkerContent>
+            <div className="w-5 h-5 rounded-full bg-[#103173] border-[3px] border-[#F2D022] shadow-[0_0_10px_rgba(16,49,115,0.6)]" />
+          </MarkerContent>
+          <MarkerLabel position="bottom" className="text-[#103173] font-bold text-[11px] drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]">
+            {destinoLabel}
+          </MarkerLabel>
+        </MapMarker>
+
+        {/* Controles do mapa */}
+        <MapControls position="bottom-right" showZoom />
+      </Map>
+    </div>
   );
 }

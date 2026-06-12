@@ -22,7 +22,7 @@ import {
   MapPin,
 } from "lucide-react";
 
-// Leaflet precisa do DOM do navegador, então carregamos sem SSR
+// MapLibre (mapcn) precisa do DOM do navegador, então carregamos sem SSR
 const MapaTrajeto = dynamic(() => import("@/components/passageiro/mapa-trajeto"), {
   ssr: false,
   loading: () => (
@@ -108,7 +108,6 @@ export function StatusViagemScreen() {
           quorum: 1,
           vagasTotais: tripFromHome?.bus_capacity || 44,
           placa: tripData.placa || "A DEFINIR",
-          status: "Pending",
           reservationId: reservationId,
         });
       } catch (error) {
@@ -167,10 +166,6 @@ export function StatusViagemScreen() {
                     <CardTitle className="text-xl font-black">Detalhes da Rota</CardTitle>
                     <p className="text-white/70 text-xs font-bold uppercase">{viagemInscrita.id}</p>
                   </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-[10px] font-black opacity-70 uppercase">Status</p>
-                  <p className="text-sm font-black text-[#F2D022]">{viagemInscrita.status}</p>
                 </div>
               </div>
             </CardHeader>
