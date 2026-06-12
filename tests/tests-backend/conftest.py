@@ -273,7 +273,7 @@ class FakeAuthController:
 
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    async def recover_password(self, email: str):
+    async def recover_password(self, email: str, background_tasks):
         return {"message": "Email enviado"}
 
     async def reset_password(self, token: str, new_password: str):

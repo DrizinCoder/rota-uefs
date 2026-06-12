@@ -100,6 +100,5 @@ class MotoristaRegisterResponseDTO(SQLModel):
     phone: str
 
 class ResetPasswordDTO(SQLModel):
-    user_id: uuid.UUID
     password: str
     password_confirmation: str
