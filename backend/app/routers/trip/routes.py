@@ -45,7 +45,15 @@ async def get_trips_for_feed(
     return ResponseHandler.ok(result)
 
 @trip_router.get("/me/{user_id}")
-async def get_all_trips_by_user_id(user_id: uuid.UUID, controller: TripController = Depends(get_trip_controller), _: TokenData = Depends(require_profile(UserProfile.ADMIN, UserProfile.DRIVER, UserProfile.STAFF, UserProfile.STUDENT))):
+async def get_all_trips_by_user_id(
+    user_id: uuid.UUID, controller: TripController = Depends(get_trip_controller),
+    _: TokenData = Depends(
+        require_profile(
+            UserProfile.ADMIN, 
+            UserProfile.DRIVER, 
+            UserProfile.STAFF, 
+            UserProfile.STUDENT
+        ))):
     result = await controller.get_all_trips_by_user_id(user_id)
     return ResponseHandler.ok(result)
 
