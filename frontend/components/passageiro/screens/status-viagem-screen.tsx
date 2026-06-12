@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { passengerService } from "@/services/homeService";
 import { userService } from "@/services/userService";
 import { Navigation } from "@/components/landing/navigation";
@@ -18,7 +19,18 @@ import {
   Users,
   AlertCircle,
   Calendar,
+  MapPin,
 } from "lucide-react";
+
+// Leaflet precisa do DOM do navegador, então carregamos sem SSR
+const MapaTrajeto = dynamic(() => import("@/components/passageiro/mapa-trajeto"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[250px] bg-[#E4F2F1] rounded-2xl animate-pulse flex items-center justify-center">
+      <MapPin className="h-8 w-8 text-[#103173]/30" />
+    </div>
+  ),
+});
 
 export function StatusViagemScreen() {
   const router = useRouter();
@@ -216,6 +228,22 @@ export function StatusViagemScreen() {
                   <p className="font-bold text-[#103173]">
                     <span className="text-[#73AABF]">{viagemInscrita.placa}</span>
                   </p>
+                </div>
+              </div>
+
+              {/* Mapa do Trajeto */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <MapPin className="h-4 w-4 text-[#73AABF]" />
+                  <span className="text-[10px] font-black text-[#73AABF] uppercase tracking-widest">Trajeto</span>
+                </div>
+                <div className="w-full h-[250px] rounded-2xl overflow-hidden border border-[#103173]/10 shadow-sm">
+                  <MapaTrajeto
+                    coordOrigem={{ lat: -12.98562778642921, lng: -38.46607975724334 }}
+                    coordDestino={{ lat: -12.200249542620588, lng: -38.97194902208819 }}
+                    origemLabel={viagemInscrita.origem}
+                    destinoLabel={viagemInscrita.destino}
+                  />
                 </div>
               </div>
             </CardContent>
