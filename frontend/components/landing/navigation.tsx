@@ -196,8 +196,8 @@ export function Navigation({ tipoUsuario = "Student" }: NavigationProps) {
             boxShadow: scrolled
               ? "0 4px 32px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.08)"
               : "none",
-            paddingLeft: scrolled ? 20 : 28,
-            paddingRight: scrolled ? 20 : 28,
+            paddingLeft: scrolled ? 450 : 450,
+            paddingRight: scrolled ? 460 : 460,
             borderBottomWidth: scrolled ? 0 : 1,
           }}
           transition={SPRING}
