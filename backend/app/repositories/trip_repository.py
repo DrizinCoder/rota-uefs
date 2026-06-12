@@ -340,6 +340,7 @@ class TripRepository:
             .join(Route, Route.route_id == Trip.route_id)
             .join(Reservation, Reservation.trip_id == Trip.trip_id)
             .where(Reservation.user_id == user_id)
+            .where(Reservation.boarding_confirmation != BoardingStatus.CANCELLED)
             .order_by(Trip.trip_date, Trip.departure_time)
         )
 
@@ -374,7 +375,8 @@ class TripRepository:
             )       
             .join(Route, Route.route_id == Trip.route_id)
             .join(Reservation, Reservation.trip_id == Trip.trip_id)
-            .where(Reservation.user_id == user_id)  
+            .where(Reservation.user_id == user_id)
+            .where(Reservation.boarding_confirmation != BoardingStatus.CANCELLED)
             .order_by(Trip.trip_date, Trip.departure_time)
         )
 
