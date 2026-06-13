@@ -25,3 +25,11 @@ export async function mockUpdateUserProfileSuccess(page: Page) {
 export async function mockDeleteUserAccountSuccess(page: Page) {
   await mockJsonRoute(page, '**/users/delete/account/me', null, 204);
 }
+
+export async function mockUserMe(page: Page, data: any) {
+  await mockJsonRoute(page, '**/users/me', { data });
+}
+
+export async function mockUserMeFailure(page: Page) {
+  await mockJsonRoute(page, '**/users/me', { detail: 'Unauthorized' }, 401);
+}

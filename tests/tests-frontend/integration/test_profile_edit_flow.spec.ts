@@ -57,6 +57,7 @@ test.describe('Profile Edit Flow', () => {
     await expect(confirmButton).toBeVisible();
     await confirmButton.click();
 
+    await page.waitForURL("http://127.0.0.1:3000/", { timeout: 10000 });
     await expect(page).toHaveURL("http://127.0.0.1:3000/");
   });
 });

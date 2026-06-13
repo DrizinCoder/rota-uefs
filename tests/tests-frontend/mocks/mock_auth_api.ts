@@ -69,4 +69,8 @@ export async function mockAuthRecoveryFailure(page: Page) {
   await mockJsonRoute(page, '**/auth/recover/password**', { detail: AUTH_RECOVERY_ERROR_MESSAGE }, 404);
 }
 
+export async function mockAuthLogoutSuccess(page: Page) {
+  await mockJsonRoute(page, '**/auth/logout', { message: 'Logged out successfully' }, 200);
+}
+
 export { AUTH_REGISTER_STAFF_SUCCESS, AUTH_REGISTER_STUDENT_SUCCESS };
