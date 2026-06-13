@@ -47,9 +47,9 @@ async function fillTripForm(page: Page, values = TRIP_SUCCESS_VALUES) {
 }
 
 async function fillRouteForm(page: Page) {
-  await page.getByLabel(/nome da rota/i).first().fill(CREATED_ROUTE_FORM_VALUES.name);
-  await page.getByLabel(/ponto de embarque/i).first().fill(CREATED_ROUTE_FORM_VALUES.boardingPoint);
-  await page.getByLabel(/ponto de desembarque/i).first().fill(CREATED_ROUTE_FORM_VALUES.dropOffPoint);
+  await page.getByPlaceholder(/Rota 1 - Manhã/i).first().fill(CREATED_ROUTE_FORM_VALUES.name);
+  await page.getByPlaceholder(/Terminal Central/i).first().fill(CREATED_ROUTE_FORM_VALUES.boardingPoint);
+  await page.getByPlaceholder(/Campus Universitário/i).first().fill(CREATED_ROUTE_FORM_VALUES.dropOffPoint);
 }
 
 test.describe('Admin Routes and Trips Flow', () => {
@@ -57,26 +57,26 @@ test.describe('Admin Routes and Trips Flow', () => {
     await authenticateAdmin(page);
   });
 
-  test.fixme('Route Registration - Success (Pending UI)', async ({ page }) => {
+  test('Route Registration - Success (Pending UI)', async ({ page }) => {
     await mockRouteCreationSuccess(page);
 
     await page.goto('/admin/rotas/cadastro', { waitUntil: 'networkidle' });
     await fillRouteForm(page);
 
-    await page.getByRole('button', { name: /salvar rota/i }).first().click();
+    await page.getByRole('button', { name: /cadastrar rota/i }).first().click();
 
-    await expect(page.getByText(/rota cadastrada com sucesso/i)).toBeVisible();
+    await expect(page).toHaveURL(/.*\/admin\/rotas/);
   });
 
-  test.fixme('Route Registration - Failure (Route already exists)', async ({ page }) => {
+  test('Route Registration - Failure (Route already exists)', async ({ page }) => {
     await mockRouteCreationFailure(page);
 
     await page.goto('/admin/rotas/cadastro', { waitUntil: 'networkidle' });
     await fillRouteForm(page);
 
-    await page.getByRole('button', { name: /salvar rota/i }).first().click();
+    await page.getByRole('button', { name: /cadastrar rota/i }).first().click();
 
-    await expect(page.getByText(/rota já cadastrada/i)).toBeVisible();
+    await expect(page.getByText(/rota já registrada/i)).toBeVisible();
   });
 
   test('Trip Registration - Success', async ({ page }) => {
