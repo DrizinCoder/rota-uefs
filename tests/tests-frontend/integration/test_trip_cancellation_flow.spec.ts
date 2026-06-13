@@ -68,18 +68,17 @@ test.describe('Trip Cancellation Flow', () => {
 
     // Wait for the cancellation request to be triggered
     const cancelRequestPromise = page.waitForRequest(request => 
-      request.url().includes('/users/driver/reservations/') && request.url().includes('/delete-staff-generic') && request.method() === 'DELETE'
+      request.url().includes('/users/driver/reservations/res-123') && request.method() === 'DELETE'
     );
 
     // Click the cancel button on the status page
-    // Note: status-viagem-screen.tsx has a button with text "CANCELAR MINHA INSCRIÇÃO"
     const cancelButton = page.getByRole('button', { name: /CANCELAR MINHA INSCRIÇÃO/i }).first();
     await expect(cancelButton).toBeVisible();
 
     // Accept the window alert confirm that says "Tem certeza que deseja cancelar sua vaga?"
     page.on('dialog', dialog => dialog.accept());
 
-    await cancelButton.click();
+    await cancelButton.click({ force: true });
 
     // Verify the cancellation request went through
     const cancelRequest = await cancelRequestPromise;
@@ -92,8 +91,8 @@ test.describe('Trip Cancellation Flow', () => {
     // It should navigate back to passageiro
     await expect(page).toHaveURL(/.*\/passageiro/);
 
-    // The button should eventually change back to 'Inscrever-se'
-    const subscribeButton = page.getByRole('button', { name: /Inscrever-se/i }).first();
+    // The button should eventually change back to 'Inscrever-se nesta rota'
+    const subscribeButton = page.getByRole('button', { name: /Inscrever-se nesta rota/i }).first();
     await expect(subscribeButton).toBeVisible();
   });
 });

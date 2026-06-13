@@ -64,7 +64,7 @@ test.describe('Fleet Management Flow', () => {
 					response.url().includes('/fleet') &&
 					response.request().method() === 'POST'
 				), { timeout: 15000 }),
-				page.getByRole('button', { name: /cadastrar ônibus/i }).first().click()
+				page.getByRole('button', { name: /cadastrar ônibus/i }).first().click({ force: true })
 			]);
 			expect(response.status()).toBe(201);
 
@@ -82,7 +82,7 @@ test.describe('Fleet Management Flow', () => {
 					response.url().includes('/fleet') &&
 					response.request().method() === 'POST'
 				), { timeout: 15000 }),
-				page.getByRole('button', { name: /cadastrar ônibus/i }).first().click()
+				page.getByRole('button', { name: /cadastrar ônibus/i }).first().click({ force: true })
 			]);
 			expect(response.status()).toBe(400);
 

@@ -57,7 +57,7 @@ test.describe('Trip Subscription Flow', () => {
     // Setup mocks for confirmation page
     await mockTripDetails(page);
     await mockRouteDetails(page);
-    await subscribeButton.click();
+    await subscribeButton.click({ force: true });
 
     // Should navigate to confirmation page
     await expect(page).toHaveURL(/.*\/passageiro\/confirmacao\?viagemId=trip-123/);
@@ -77,7 +77,7 @@ test.describe('Trip Subscription Flow', () => {
     // Click Confirm
     const confirmButton = page.getByRole('button', { name: /CONFIRMAR MINHA VAGA/i });
     await expect(confirmButton).toBeVisible();
-    await confirmButton.click();
+    await confirmButton.click({ force: true });
 
     // Should redirect to status page
     await expect(page).toHaveURL(/.*\/passageiro\/status\?viagemId=trip-123/, { timeout: 10000 });

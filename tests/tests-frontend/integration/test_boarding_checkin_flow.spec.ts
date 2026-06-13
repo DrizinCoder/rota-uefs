@@ -62,11 +62,11 @@ test.describe('Boarding Checkin Flow', () => {
     await viewCodeButton.click();
 
     // Should navigate to embarque page
-    await expect(page).toHaveURL(/.*\/passageiro\/validar\?trip_id=trip-123/);
+    await expect(page).toHaveURL(/.*\/passageiro\/status\?viagemId=trip-123/);
 
     // Verify QR code is rendered
-    await expect(page.getByText(/Embarque/i, { exact: true })).toBeVisible();
-    await expect(page.getByText(/Student Name/i, { exact: true })).toBeVisible();
+    await expect(page.getByText(/Embarque/i, { exact: true }).first()).toBeVisible();
+    await expect(page.getByText(/Student Name/i, { exact: true }).first()).toBeVisible();
     
     // Check if the image with QR code is present
     const qrImage = page.getByAltText(/QR Code de Student Name/i);

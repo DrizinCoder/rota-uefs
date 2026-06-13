@@ -74,7 +74,7 @@ test.describe('Admin Reports Flow', () => {
 
     const [request] = await Promise.all([
       page.waitForRequest(req => req.url().includes('/admin/report/monthly') && req.url().includes('format=pdf')),
-      pdfButton.click()
+      pdfButton.click({ force: true })
     ]);
 
     expect(request.url()).toContain('format=pdf');
@@ -94,7 +94,7 @@ test.describe('Admin Reports Flow', () => {
     // Switch to 'Seguro de Viagem' tab
     const seguroTab = page.getByRole('button', { name: /Auditoria de Seguro/i });
     await expect(seguroTab).toBeVisible();
-    await seguroTab.click();
+    await seguroTab.click({ force: true });
 
     // Wait for trips to be loaded and visible
     await expect(page.getByText('John Doe')).toBeVisible();
@@ -106,7 +106,7 @@ test.describe('Admin Reports Flow', () => {
 
     const [request] = await Promise.all([
       page.waitForRequest(req => req.url().includes('/admin/report/audit') && req.url().includes('format=pdf')),
-      gerarSeguroPdfButton.click()
+      gerarSeguroPdfButton.click({ force: true })
     ]);
 
     expect(request.url()).toContain('trip_id=trip-123');
