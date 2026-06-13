@@ -4,8 +4,8 @@ export const TEST_PROFILE_COOKIE_NAME = 'user_profile';
 
 export const PROFILE_REDIRECTS: Record<UserProfile, string> = {
   Student: '/passageiro',
-  Staff: '/professor',
-  Faculty: '/professor',
+  Staff: '/passageiro',
+  Faculty: '/passageiro',
   Driver: '/motorista',
   Admin: '/admin',
 };
@@ -17,3 +17,5 @@ export const PROFILE_LABELS: Record<UserProfile, string> = {
   Driver: 'Motorista',
   Admin: 'Administrador',
 };
+
+export const PROFILE_EDIT_SUCCESS_MESSAGE = 'Dados atualizados com sucesso.';
