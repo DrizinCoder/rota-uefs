@@ -69,6 +69,14 @@ test.describe('Mobile Component - Unit Tests', () => {
       const container = document.createElement('div');
       container.id = 'test-mobile-content';
       container.innerHTML = `
+        <style>
+          .hidden { display: none !important; }
+          .block { display: block !important; }
+          @media (min-width: 640px) {
+            .sm\\:block { display: block !important; }
+            .sm\\:hidden { display: none !important; }
+          }
+        </style>
         <div data-testid="mobile-content-wrapper">
           <div data-testid="desktop-only" class="hidden sm:block">
             Desktop Only Content
@@ -98,6 +106,14 @@ test.describe('Mobile Component - Unit Tests', () => {
       const container = document.createElement('div');
       container.id = 'test-desktop-content';
       container.innerHTML = `
+        <style>
+          .hidden { display: none !important; }
+          .block { display: block !important; }
+          @media (min-width: 640px) {
+            .sm\\:block { display: block !important; }
+            .sm\\:hidden { display: none !important; }
+          }
+        </style>
         <div data-testid="desktop-content-wrapper">
           <div data-testid="desktop-only" class="hidden sm:block">
             Desktop Only Content

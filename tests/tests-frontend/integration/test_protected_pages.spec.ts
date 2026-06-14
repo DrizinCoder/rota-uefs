@@ -13,7 +13,7 @@ test.describe('Protected pages access control', () => {
 
   test('unauthenticated user cannot directly access protected routes', async ({ page }) => {
     // Tenta acessar múltiplas rotas protegidas
-    const protectedRoutes = ['/professor', '/motorista', '/admin'];
+    const protectedRoutes = ['/passageiro', '/motorista', '/admin'];
     
     for (const route of protectedRoutes) {
       await page.goto(route, { waitUntil: 'networkidle' });
