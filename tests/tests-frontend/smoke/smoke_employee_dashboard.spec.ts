@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 
 import { TEST_PROFILE_COOKIE_NAME } from '../fixtures/profile_payloads';
 
-const EMPLOYEE_ROUTES = ['/professor'];
+const EMPLOYEE_ROUTES = ['/passageiro'];
 
 async function authenticateEmployee(page) {
   await page.context().addCookies([

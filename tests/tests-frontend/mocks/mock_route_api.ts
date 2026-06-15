@@ -13,6 +13,11 @@ export async function mockJsonRoute(
     'Access-Control-Allow-Headers': '*',
   };
 
+  // Switch for real backend integration
+  if (process.env.USE_MOCKS === 'false') {
+    return;
+  }
+
   await page.route(urlPattern, async (route) => {
     const request = route.request();
     if (request.method() === 'OPTIONS') {

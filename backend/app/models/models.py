@@ -76,6 +76,10 @@ class Route(SQLModel, table=True):
     name: str
     boarding_point: str
     drop_off_point: str
+    city_of_origin: Optional[str]
+    destination_city: Optional[str]
+    boarding_point_coordinates: Optional[str]
+    drop_off_point_coordinates: Optional[str]
 
 class AuditLog(SQLModel, table=True):
     log_id: uuid.UUID = Field(
