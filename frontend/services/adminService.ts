@@ -139,12 +139,20 @@ export interface Rota {
   route_id: string;
   boarding_point: string;
   drop_off_point: string;
+  city_of_origin?: string | null;
+  destination_city?: string | null;
+  boarding_point_coordinates?: string | null;
+  drop_off_point_coordinates?: string | null;
 }
 
 export interface CadastroRotaPayload {
   name: string;
   boarding_point: string;
   drop_off_point: string;
+  city_of_origin?: string | null;
+  destination_city?: string | null;
+  boarding_point_coordinates?: string | null;
+  drop_off_point_coordinates?: string | null;
 }
 
 // ── Administrador ─────────────────────────────────────

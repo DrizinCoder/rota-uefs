@@ -282,7 +282,8 @@ export function StatusViagemScreen() {
             </p>
           </div>
         </div>
-      </main>    </div>
+      </main>    
+      </div>
   );
 }
 

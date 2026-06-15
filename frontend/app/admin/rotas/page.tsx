@@ -96,11 +96,23 @@ export default function AdminRotasPage() {
                         <div className="flex items-center gap-2">
                           <MapPin className="h-4 w-4 text-cyan-600" />
                           <span className="font-medium text-slate-700">Origem:</span> {rota.boarding_point}
+                          {rota.city_of_origin && <span className="text-slate-500 text-xs">({rota.city_of_origin})</span>}
                         </div>
+                        {rota.boarding_point_coordinates && (
+                          <div className="flex items-center gap-2 pl-6">
+                             <span className="text-slate-400 text-xs">Coord: {rota.boarding_point_coordinates}</span>
+                          </div>
+                        )}
                         <div className="flex items-center gap-2">
                           <MapPinned className="h-4 w-4 text-cyan-600" />
                           <span className="font-medium text-slate-700">Destino:</span> {rota.drop_off_point}
+                          {rota.destination_city && <span className="text-slate-500 text-xs">({rota.destination_city})</span>}
                         </div>
+                        {rota.drop_off_point_coordinates && (
+                          <div className="flex items-center gap-2 pl-6">
+                             <span className="text-slate-400 text-xs">Coord: {rota.drop_off_point_coordinates}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className="bg-slate-50 border-t border-slate-100 px-5 py-3 flex justify-end gap-3">

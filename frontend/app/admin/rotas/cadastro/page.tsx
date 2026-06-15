@@ -17,6 +17,10 @@ function CadastroRotaContent() {
     name: "",
     boarding_point: "",
     drop_off_point: "",
+    city_of_origin: "",
+    destination_city: "",
+    boarding_point_coordinates: "",
+    drop_off_point_coordinates: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -33,6 +37,10 @@ function CadastroRotaContent() {
               name: rota.name,
               boarding_point: rota.boarding_point,
               drop_off_point: rota.drop_off_point,
+              city_of_origin: rota.city_of_origin || "",
+              destination_city: rota.destination_city || "",
+              boarding_point_coordinates: rota.boarding_point_coordinates || "",
+              drop_off_point_coordinates: rota.drop_off_point_coordinates || "",
             });
           } else {
             setErro("Rota não encontrada.");
@@ -62,6 +70,10 @@ function CadastroRotaContent() {
         name: formData.name.trim(),
         boarding_point: formData.boarding_point.trim(),
         drop_off_point: formData.drop_off_point.trim(),
+        city_of_origin: formData.city_of_origin.trim() || null,
+        destination_city: formData.destination_city.trim() || null,
+        boarding_point_coordinates: formData.boarding_point_coordinates.trim() || null,
+        drop_off_point_coordinates: formData.drop_off_point_coordinates.trim() || null,
       };
       
       if (isEditMode && routeId) {
@@ -91,7 +103,7 @@ function CadastroRotaContent() {
         />
 
         <div className="flex-1 overflow-auto p-4 sm:p-6 bg-slate-50/50">
-          <div className="max-w-2xl mx-auto pb-10">
+          <div className="max-w-6xl mx-auto pb-10">
             <form onSubmit={handleSubmit} className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
               
               {erro && (
@@ -137,6 +149,44 @@ function CadastroRotaContent() {
                   </div>
                 </div>
 
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">
+                      Cidade de Origem 
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <MapPin className="h-5 w-5 text-slate-400" />
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Ex: Salvador"
+                        value={formData.city_of_origin}
+                        onChange={(e) => atualizarCampo("city_of_origin", e.target.value)}
+                        className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all placeholder:text-slate-400"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">
+                      Coordenadas de Embarque (Opcional)
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <MapPin className="h-5 w-5 text-slate-400" />
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Ex: -12.9714, -38.5014"
+                        value={formData.boarding_point_coordinates}
+                        onChange={(e) => atualizarCampo("boarding_point_coordinates", e.target.value)}
+                        className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all placeholder:text-slate-400"
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">
                     Ponto de Desembarque
@@ -152,6 +202,44 @@ function CadastroRotaContent() {
                       onChange={(e) => atualizarCampo("drop_off_point", e.target.value)}
                       className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all placeholder:text-slate-400"
                     />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">
+                      Cidade de Destino
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <MapPinned className="h-5 w-5 text-slate-400" />
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Ex: Feira de Santana"
+                        value={formData.destination_city}
+                        onChange={(e) => atualizarCampo("destination_city", e.target.value)}
+                        className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all placeholder:text-slate-400"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">
+                      Coordenadas de Desembarque (Opcional)
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <MapPinned className="h-5 w-5 text-slate-400" />
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Ex: -12.2667, -38.9667"
+                        value={formData.drop_off_point_coordinates}
+                        onChange={(e) => atualizarCampo("drop_off_point_coordinates", e.target.value)}
+                        className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all placeholder:text-slate-400"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
