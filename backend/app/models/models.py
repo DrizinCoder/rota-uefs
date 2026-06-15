@@ -1,3 +1,4 @@
+from decimal import Decimal
 import uuid
 
 from datetime import time
@@ -78,8 +79,10 @@ class Route(SQLModel, table=True):
     drop_off_point: str
     city_of_origin: Optional[str]
     destination_city: Optional[str]
-    boarding_point_coordinates: Optional[str]
-    drop_off_point_coordinates: Optional[str]
+    boarding_latitude: Optional[Decimal] = Field(default=None, max_digits=10, decimal_places=7)
+    boarding_longitude: Optional[Decimal] = Field(default=None, max_digits=11, decimal_places=7)
+    drop_off_latitude: Optional[Decimal] = Field(default=None, max_digits=10, decimal_places=7)
+    drop_off_longitude: Optional[Decimal] = Field(default=None, max_digits=11, decimal_places=7)
 
 class AuditLog(SQLModel, table=True):
     log_id: uuid.UUID = Field(
