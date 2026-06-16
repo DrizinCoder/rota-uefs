@@ -37,7 +37,7 @@ async def get_user(
 @user_router.delete("/delete/account/me")
 async def delete_account(
     service: UserService = Depends(get_user_service),
-    current_user: TokenData = Depends(get_current_user)
+    current_user: TokenData = Depends(require_profile(UserProfile.ADMIN, UserProfile.STAFF, UserProfile.STUDENT))
 ):
     await service.delete_account(current_user.sub)
     return ResponseHandler.no_content()

@@ -226,7 +226,7 @@ class TripRepository:
             )
             .join(Route, Route.route_id == Trip.route_id)
             .join(Bus, Bus.bus_plate == Trip.bus_license_plate)
-            .outerjoin(Reservation, Reservation.trip_id == Trip.trip_id)
+            .outerjoin(Reservation, and_(Reservation.trip_id == Trip.trip_id, Reservation.boarding_confirmation != BoardingStatus.CANCELLED))
             .outerjoin(User, User.user_id == Reservation.user_id)
             .where(Trip.trip_date.between(start_date, end_date))
         )
@@ -340,6 +340,7 @@ class TripRepository:
             .join(Route, Route.route_id == Trip.route_id)
             .join(Reservation, Reservation.trip_id == Trip.trip_id)
             .where(Reservation.user_id == user_id)
+            .where(Reservation.boarding_confirmation != BoardingStatus.CANCELLED)
             .order_by(Trip.trip_date, Trip.departure_time)
         )
 
@@ -374,7 +375,8 @@ class TripRepository:
             )       
             .join(Route, Route.route_id == Trip.route_id)
             .join(Reservation, Reservation.trip_id == Trip.trip_id)
-            .where(Reservation.user_id == user_id)  
+            .where(Reservation.user_id == user_id)
+            .where(Reservation.boarding_confirmation != BoardingStatus.CANCELLED)
             .order_by(Trip.trip_date, Trip.departure_time)
         )
 
