@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -8,10 +8,23 @@ interface CheckinButtonProps {
   viagemId: string;
   onClick?: () => void;
   disabled?: boolean;
+  travado?: boolean;
   className?: string;
 }
 
-export function CheckinButton({ viagemId, onClick, disabled, className }: CheckinButtonProps) {
+export function CheckinButton({ viagemId, onClick, disabled, travado = false, className }: CheckinButtonProps) {
+  if (travado) {
+    return (
+      <Button
+        disabled
+        className={cn("w-full bg-slate-200 text-slate-400 font-extrabold py-6 text-lg rounded-2xl flex items-center justify-center gap-3", className)}
+      >
+        <Lock className="h-5 w-5" />
+        Fazer Check-in
+      </Button>
+    );
+  }
+
   return (
     <Button
       onClick={onClick}

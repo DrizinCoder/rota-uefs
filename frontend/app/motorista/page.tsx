@@ -15,6 +15,7 @@ import { CheckinButton } from "@/features/fazer-checkin/ui/CheckinButton";
 import { StartTripButton } from "@/features/iniciar-viagem/ui/StartTripButton";
 import { TripRouteHeader } from "@/entities/viagem/ui/TripRouteHeader";
 import { passengerService, type Home, type CardViagemFeed} from "@/services/homeService";
+import { isTripButtonLocked } from "@/entities/viagem/lib/tripTimeUtils";
 import { NotificationToggle } from "@/features/gerenciar-notificacoes/ui/NotificationToggle";
 import { driverService } from "@/services/driverService";
 
@@ -51,9 +52,12 @@ const mapStatus = (status?: string): "bloqueada" | "pronta" | "em_curso" | "fina
   return "pronta";
 };
 
-function ViagemCard({ viagem }: { viagem: CardViagemFeed }) {
+function ViagemCard({ viagem, referenceWeekday }: { viagem: CardViagemFeed; referenceWeekday: string }) {
   const router = useRouter();
   const [statusViagem, setStatusViagem] = useState <"bloqueada" | "pronta" | "em_curso" | "finalizada">(mapStatus(viagem.status));
+
+  const travadoIniciar = isTripButtonLocked(viagem.weekday, referenceWeekday, viagem.departure_time, 10);
+  const travadoCheckin = isTripButtonLocked(viagem.weekday, referenceWeekday, viagem.departure_time, 60);
 
   const handleCheckIn = () => {
     router.push(`/motorista/embarque?trip_id=${encodeURIComponent(viagem.trip_id)}`);
@@ -114,11 +118,13 @@ function ViagemCard({ viagem }: { viagem: CardViagemFeed }) {
             <CheckinButton 
               viagemId={viagem.trip_id} 
               onClick={handleCheckIn} 
+              travado={travadoCheckin}
               className="py-10 rounded-2xl text-lg font-extrabold"
             />
           )}
           <StartTripButton 
             status={statusViagem} 
+            travado={travadoIniciar}
             onClick={handleAcaoViagem} 
             className="py-8 rounded-2xl text-lg font-extrabold "
           />
@@ -160,6 +166,8 @@ export default function MotoristaPage() {
     }, [data]);
 
     const viagensDoDia = (data?.trips || []).filter(viagem => viagem.weekday === diaAtivo);
+    //console.log("VIAGENS DO DIA: ", viagensDoDia);  
+    //console.log("departure_time: ", viagensDoDia[0].departure_time, "weekday: ", viagensDoDia[0].weekday);
   
   return (
     <div className="flex flex-col min-h-screen bg-[#f0f4f8]">
@@ -190,7 +198,7 @@ export default function MotoristaPage() {
 
         {viagensDoDia.length > 0 ? (
           viagensDoDia.map((viagem) => (
-            <ViagemCard key={viagem.trip_id} viagem={viagem} />
+            <ViagemCard key={viagem.trip_id} viagem={viagem} referenceWeekday={data?.reference_weekday ?? ""} />
           ))
         ) : (
           <EmptyDayCard 
