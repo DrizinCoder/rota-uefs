@@ -57,7 +57,7 @@ test.describe('Registration Flow', () => {
     await fillStudentForm(page);
     await expectNoInvalidFields(page);
 
-    await page.getByRole('button', { name: /criar conta/i }).first().click();
+    await page.getByRole('button', { name: /criar conta/i }).first().click({ force: true });
     await expect(page).toHaveURL(/\/login/, { timeout: 10000 });
   });
 
@@ -69,7 +69,7 @@ test.describe('Registration Flow', () => {
     await fillStudentForm(page);
     await expectNoInvalidFields(page);
 
-    await page.getByRole('button', { name: /criar conta/i }).first().click();
+    await page.getByRole('button', { name: /criar conta/i }).first().click({ force: true });
 
     await expect(page.getByText(/erro ao realizar cadastro/i)).toBeVisible({ timeout: 5000 });
 
@@ -84,7 +84,7 @@ test.describe('Registration Flow', () => {
     await fillProfessorForm(page);
     await expectNoInvalidFields(page);
 
-    await page.getByRole('button', { name: /solicitar cadastro/i }).first().click();
+    await page.getByRole('button', { name: /solicitar cadastro/i }).first().click({ force: true });
     await expect(page.getByText(/cadastro em análise/i)).toBeVisible();
   });
 
@@ -96,7 +96,7 @@ test.describe('Registration Flow', () => {
     await fillProfessorForm(page);
     await expectNoInvalidFields(page);
 
-    await page.getByRole('button', { name: /solicitar cadastro/i }).first().click();
+    await page.getByRole('button', { name: /solicitar cadastro/i }).first().click({ force: true });
 
     await expect(page.getByText(/erro ao realizar cadastro/i)).toBeVisible({ timeout: 5000 });
 

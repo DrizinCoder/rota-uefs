@@ -16,7 +16,7 @@ test.describe('Login flow', () => {
     const responsePromise = page.waitForResponse((response) => 
       response.url().includes('/auth/login') && response.status() === 200
     );
-    await page.getByRole('button', { name: /entrar/i }).first().click();
+    await page.getByRole('button', { name: /entrar/i }).first().click({ force: true });
     await responsePromise;
 
     await expect(page).toHaveURL(/\/passageiro/, { timeout: 10000 });

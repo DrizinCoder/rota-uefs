@@ -71,3 +71,6 @@ export const AUTH_REGISTER_STAFF_SUCCESS: AuthRegisterSuccessBody = {
     },
   },
 };
+
+export const AUTH_RECOVERY_SUCCESS_MESSAGE = 'E-mail de recuperação enviado com sucesso.';
+export const AUTH_RECOVERY_ERROR_MESSAGE = 'E-mail não encontrado no sistema.';
