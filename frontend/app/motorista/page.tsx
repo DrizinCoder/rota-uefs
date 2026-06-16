@@ -56,8 +56,22 @@ function ViagemCard({ viagem, referenceWeekday }: { viagem: CardViagemFeed; refe
   const router = useRouter();
   const [statusViagem, setStatusViagem] = useState <"bloqueada" | "pronta" | "em_curso" | "finalizada">(mapStatus(viagem.status));
 
-  const travadoIniciar = isTripButtonLocked(viagem.weekday, referenceWeekday, viagem.departure_time, 10);
-  const travadoCheckin = isTripButtonLocked(viagem.weekday, referenceWeekday, viagem.departure_time, 60);
+  const [travadoIniciar, setTravadoIniciar] = useState(() =>
+    isTripButtonLocked(viagem.weekday, referenceWeekday, viagem.departure_time, 10)
+  );
+  const [travadoCheckin, setTravadoCheckin] = useState(() =>
+    isTripButtonLocked(viagem.weekday, referenceWeekday, viagem.departure_time, 60)
+  );
+
+  // Recalcula o estado de travamento a cada 30 segundos
+  useEffect(() => {
+    const tick = () => {
+      setTravadoIniciar(isTripButtonLocked(viagem.weekday, referenceWeekday, viagem.departure_time, 10));
+      setTravadoCheckin(isTripButtonLocked(viagem.weekday, referenceWeekday, viagem.departure_time, 60));
+    };
+    const interval = setInterval(tick, 30_000);
+    return () => clearInterval(interval);
+  }, [viagem.weekday, referenceWeekday, viagem.departure_time]);
 
   const handleCheckIn = () => {
     router.push(`/motorista/embarque?trip_id=${encodeURIComponent(viagem.trip_id)}`);
