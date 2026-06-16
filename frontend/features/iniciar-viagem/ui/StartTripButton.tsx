@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { Lock } from "lucide-react";
 
 interface StartTripButtonProps {
-  status: "bloqueada" | "pronta" | "em_curso" | "finalizada";
+  status: "bloqueada" | "pronta" | "em_curso" | "finalizada" | "cancelada";
   travado?: boolean;
   onClick?: () => void;
   className?: string;
@@ -34,13 +34,13 @@ export function StartTripButton({ status, travado = false, onClick, className }:
     );
   }
 
-  if (status === "finalizada") {
+  if (status === "finalizada" || status === "cancelada") {
     return (
       <Button 
         disabled 
         className={cn("w-full bg-slate-100 text-slate-400 font-bold py-6 text-lg rounded-2xl", className)}
       >
-        Viagem Concluída
+        {status === "cancelada" ? "Viagem Cancelada" : "Viagem Concluída"}
       </Button>
     );
   }
