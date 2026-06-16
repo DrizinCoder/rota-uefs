@@ -5,8 +5,8 @@ from fixtures.auth_payloads import (
     LOGIN_INVALID,
 )
 
-def test_auth_registro_motorista_sucesso(client):
-    response = client.post("/admin/register/motorista", json=REGISTER_USER_VALID)
+def test_auth_registro_motorista_sucesso(auth_admin_client):
+    response = auth_admin_client.post("/admin/register/motorista", json=REGISTER_USER_VALID)
     assert response.status_code == 201
 
     data = response.json()
@@ -15,12 +15,12 @@ def test_auth_registro_motorista_sucesso(client):
     assert "email" in data["data"]
     assert "registration_id" in data["data"]
 
-def test_auth_registro_motorista_payload_invalido(client):
-    response = client.post("/admin/register/motorista", json=REGISTER_USER_INVALID)
+def test_auth_registro_motorista_payload_invalido(auth_admin_client):
+    response = auth_admin_client.post("/admin/register/motorista", json=REGISTER_USER_INVALID)
     assert response.status_code == 422
 
-def test_auth_login_sucesso(client):
-    response = client.post("/auth/login", json=LOGIN_VALID)
+def test_auth_login_sucesso(auth_admin_client):
+    response = auth_admin_client.post("/auth/login", json=LOGIN_VALID)
     assert response.status_code == 200
 
     data = response.json()
@@ -28,6 +28,6 @@ def test_auth_login_sucesso(client):
     assert "access_token" in data["data"]
     assert data["data"]["token_type"] == "bearer"
 
-def test_auth_login_payload_invalido(client):
-    response = client.post("/auth/login", json=LOGIN_INVALID)
+def test_auth_login_payload_invalido(auth_admin_client):
+    response = auth_admin_client.post("/auth/login", json=LOGIN_INVALID)
     assert response.status_code == 422
