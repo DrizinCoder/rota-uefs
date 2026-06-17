@@ -1,3 +1,4 @@
+from app.enums.enums import UserProfile
 import asyncio
 from asyncio.log import logger
 
@@ -8,7 +9,7 @@ from pydantic import BaseModel
 from app.core.exceptions import NotFoundException
 from app.services.email.use_cases import EmailUseCases
 from app.core.responses import ResponseHandler
-from app.middleware.auth_middleware import TokenData, get_current_user, require_student, require_admin
+from app.middleware.auth_middleware import TokenData, get_current_user, require_profile
 from app.core.scheduler import task_scheduler
 
 
@@ -77,7 +78,7 @@ async def test_verify_token(current_user: TokenData = Depends(get_current_user))
     }
 
 @router.get("/student-only")
-async def test_student_only(current_user: TokenData = Depends(require_student)):
+async def test_student_only(current_user: TokenData = Depends(require_profile(UserProfile.STUDENT))):
     return {
         "success": True,
         "message": "Acesso permitido! Você é um aluno.",
@@ -89,7 +90,7 @@ async def test_student_only(current_user: TokenData = Depends(require_student)):
     }
 
 @router.get("/admin-only")
-async def test_admin_only(current_user: TokenData = Depends(require_admin)):
+async def test_admin_only(current_user: TokenData = Depends(require_profile(UserProfile.ADMIN))):
     return {
         "success": True,
         "message": "Acesso permitido! Você é um administrador.",

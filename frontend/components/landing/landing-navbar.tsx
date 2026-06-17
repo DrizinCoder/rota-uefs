@@ -110,7 +110,7 @@ export function LandingNavbar() {
       {/* ── Desktop ─────────────────────────────────────────────── */}
       <motion.div
         animate={{
-          width: visible ? "58%" : "100%",
+          width: visible ? "65%" : "100%",
           y: visible ? 14 : 0,
           borderRadius: visible ? 9999 : 0,
           backgroundColor: visible
@@ -120,15 +120,14 @@ export function LandingNavbar() {
           boxShadow: visible
             ? "0 4px 32px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.08)"
             : "none",
-          paddingLeft: visible ? 24 : 32,
-          paddingRight: visible ? 24 : 32,
           borderBottomWidth: visible ? 0 : 1,
         }}
         transition={springTransition}
         style={{ minWidth: 760, borderBottomColor: "rgba(255,255,255,0.08)" }}
-        className="mx-auto hidden lg:flex items-center justify-between h-16 relative"
+        className="mx-auto hidden lg:flex items-center justify-center h-16 relative"
       >
-        {/* Logo */}
+        <div className="w-full max-w-7xl mx-auto px-6 lg:px-8 flex items-center justify-between h-full relative">
+          {/* Logo */}
         <Link href="/" aria-label="Rota UEFS — início" className="relative z-10 shrink-0 max-w-[min(42vw,260px)]">
           <Image
             src="/images/logo_rota_horizontal.png"
@@ -175,6 +174,7 @@ export function LandingNavbar() {
             <LogIn className="h-4 w-4 shrink-0" />
             Acesso ao Portal
           </NavbarRippleCtaLink>
+        </div>
         </div>
       </motion.div>
 

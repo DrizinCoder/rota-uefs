@@ -1,3 +1,4 @@
+from app.enums.enums import UserProfile
 import uuid
 
 from fastapi.responses import RedirectResponse
@@ -5,7 +6,7 @@ from fastapi.responses import RedirectResponse
 from app.routers.admin.routes import get_admin_controller
 from app.controllers.admin_controller import AdminController
 from fastapi import APIRouter, BackgroundTasks, Depends, Query, Request
-from app.middleware.auth_middleware import TokenData, get_current_user, require_admin
+from app.middleware.auth_middleware import TokenData, get_current_user, require_profile
 from fastapi import APIRouter
 from app.DTOs.email import RequestEmailChangeDTO
 from app.controllers.user_controller import UserController
@@ -21,7 +22,7 @@ from app.core.responses import ResponseHandler
 @staff_router.get("/")
 async def get_all_servidores(
     controller: AdminController = Depends(get_admin_controller),
-    _: TokenData = Depends(require_admin)
+    _: TokenData = Depends(require_profile(UserProfile.ADMIN))
 ):
     result = await controller.list_staff_status_pending()
     serialized = jsonable_encoder(result)   
@@ -32,7 +33,7 @@ async def get_all_servidores(
 async def confirm_access(
     id: uuid.UUID,
     controller: AdminController = Depends(get_admin_controller),
-    _: TokenData = Depends(require_admin)
+    _: TokenData = Depends(require_profile(UserProfile.ADMIN))
 ):
     result = await controller.update_status_staff(id, True)
     serialized = jsonable_encoder(result)
@@ -42,7 +43,7 @@ async def confirm_access(
 async def reject_access(
     id: uuid.UUID,
     controller: AdminController = Depends(get_admin_controller),
-    _: TokenData = Depends(require_admin)
+    _: TokenData = Depends(require_profile(UserProfile.ADMIN))
 ):
     result = await controller.update_status_staff(id, False)
     serialized = jsonable_encoder(result)
