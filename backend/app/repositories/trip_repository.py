@@ -156,7 +156,6 @@ class TripRepository:
         )
 
         result = await self.session.execute(statement)
-        result = await self.session.execute(statement)
 
         return [{
                 "route_name": row.route_name,
