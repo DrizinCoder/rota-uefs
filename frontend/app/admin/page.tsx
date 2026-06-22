@@ -147,6 +147,7 @@ export default function AdminViagensPage() {
               setStatusFilter={setStatusFilter}
               onEditar={handleEditar}
               onRemover={handleExcluir}
+              onCancelar={() => {}}
             />
           </div>
         </div>
