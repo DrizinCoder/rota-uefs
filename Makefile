@@ -108,6 +108,7 @@ test-failed: ## ⚡ Roda apenas os que falharam por último
 # 📜 SCRIPTS
 # =========================
 
+
 seed: ## 📝 Popula o banco de dados dentro do container
 	docker cp backend/scripts/populate.py rota_uefs-backend-1:/app/scripts/populate.py
 	docker exec -it rota_uefs-backend-1 env PYTHONPATH=. python scripts/populate.py
