@@ -21,7 +21,7 @@ trip_router = APIRouter()
 
 
 @trip_router.get("/info/route/id/{trip_id}")
-async def get_name_route_by_trip_id(trip_id: uuid.UUID, service: TripService = Depends(get_trip_service), _: TokenData = Depends(require_profile(UserProfile.ADMIN))):
+async def get_name_route_by_trip_id(trip_id: uuid.UUID, service: TripService = Depends(get_trip_service), _: TokenData = Depends(require_profile(UserProfile.ADMIN, UserProfile.DRIVER))):
     result = await service.get_name_route_by_trip_id(trip_id)
     return ResponseHandler.ok(result)
 

@@ -141,7 +141,7 @@ const PRODUCT_LINKS: FooterLink[] = [
   },
   {
     label: 'Gestão de viagens',
-    href: '/admin/viagens',
+    href: '/admin',
     real: true,
     audiences: ['admin'],
   },
@@ -224,7 +224,7 @@ export function FooterSection() {
       />
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-10 pt-14 pb-8">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-8 mb-12">
+        <div className="flex justify-between md:grid-cols-12 gap-10 md:gap-8 mb-12">
           <div className="md:col-span-6 flex flex-col gap-6 items-center md:items-start text-center md:text-left">
             <Link href="/" className="group w-fit mx-auto md:mx-0" aria-label="Rota UEFS — página inicial">
               <Image
@@ -237,7 +237,7 @@ export function FooterSection() {
               />
             </Link>
 
-            <p className="text-xs text-slate-500 leading-relaxed max-w-md">
+            <p className="text-xs text-slate-500 leading-relaxed max-w-lg">
               Mais previsibilidade, segurança e transparência para a mobilidade
               acadêmica da UEFS.
             </p>
@@ -260,7 +260,7 @@ export function FooterSection() {
             </ul>
           </div>
 
-          <div className="md:col-span-3 flex flex-col gap-4 min-w-0">
+          {/* <div className="md:col-span-3 flex flex-col gap-4 min-w-0">
             <h4 className="text-[10px] font-mono font-semibold text-slate-500 uppercase tracking-[0.15em]">
               Suporte
             </h4>
@@ -271,7 +271,7 @@ export function FooterSection() {
                 </li>
               ))}
             </ul>
-          </div>
+          </div> */}
         </div>
 
         <div className="h-px bg-gradient-to-r from-transparent via-white/8 to-transparent mb-6" />
@@ -281,12 +281,7 @@ export function FooterSection() {
             © 2025 Rota UEFS — Sistema de Gestão de Viagens Universitárias
           </p>
 
-          <div className="flex items-center gap-5">
-            <div className="flex items-center gap-4 border-r border-white/8 pr-5">
-              <SocialIcon icon={Github} label="GitHub do projeto" />
-              <SocialIcon icon={Instagram} label="Instagram do projeto" />
-              <SocialIcon icon={Linkedin} label="LinkedIn do projeto" />
-            </div>
+          <div className="flex items-center gap-5"> 
 
             <Tooltip>
               <TooltipTrigger asChild>

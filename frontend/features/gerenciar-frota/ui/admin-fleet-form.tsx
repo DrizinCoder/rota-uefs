@@ -119,7 +119,7 @@ export function AdminFleetForm({
           type="button"
           variant="outline"
           className="flex-1 h-12 border-2 border-[#103173] text-[#103173] font-black hover:bg-[#103173] hover:text-white"
-          onClick={() => router.push("/admin")}
+          onClick={() => router.push("/admin/onibus")}
         >
           CANCELAR
         </Button>
