@@ -43,11 +43,11 @@ export default function PaginaPassageiro() {
 
   const diaAtual = DIAS_SEMANA.find((d) => d.id === diaAtivo);
   const normalizarDia = (dia: string) => {
-      if (dia === "Sábado" || dia === "Domingo") {
-        return "Segunda";
-      }
-      return dia;
-    };
+    if (dia === "Sábado" || dia === "Domingo") {
+      return "Segunda";
+    }
+    return dia;
+  };
 
   // Busca os dados da home do passageiro e as viagens do usuário
   useEffect(() => {
@@ -107,7 +107,7 @@ export default function PaginaPassageiro() {
             </div>
           }
         />
-        
+
         <WeekDaysMenu dias={DIAS_SEMANA} diaAtivo={diaAtivo} onDiaChange={setDiaAtivo} />
 
         <CurrentDayHeader dayName={diaAtual?.full} />
@@ -175,9 +175,9 @@ export default function PaginaPassageiro() {
       </main>
 
       {isStaff && (
-        <GuestSubscribeModal 
-          viagemId={modalConvidado} 
-          onClose={() => setModalConvidado(null)} 
+        <GuestSubscribeModal
+          viagemId={modalConvidado}
+          onClose={() => setModalConvidado(null)}
         />
       )}
 

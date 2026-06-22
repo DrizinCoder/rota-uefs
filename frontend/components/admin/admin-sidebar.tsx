@@ -19,7 +19,7 @@ export function AdminSidebar() {
       {/* Navigation */}
       <div className="px-6 py-6 text-xs font-semibold text-cyan-500 tracking-widest mb-2">MENU</div>
       <nav className="flex-1 px-4 space-y-2">
-        <div onClick={() => router.push("/admin")} className="flex items-center px-2 py-3 border-b border-slate-800 hover:text-white cursor-pointer transition-colors gap-3">
+        <div onClick={() => router.push("/admin/onibus")} className="flex items-center px-2 py-3 border-b border-slate-800 hover:text-white cursor-pointer transition-colors gap-3">
            <Bus className="h-4 w-4 text-cyan-500" />
            <span className="text-sm font-medium">Frotas</span>
         </div>
@@ -27,7 +27,7 @@ export function AdminSidebar() {
            <UserCircle className="h-4 w-4 text-cyan-500" />
            <span className="text-sm font-medium">Motoristas</span>
         </div>
-        <div onClick={() => router.push("/admin/viagens")} className="flex items-center px-2 py-3 border-b border-slate-800 hover:text-white cursor-pointer transition-colors gap-3">
+        <div onClick={() => router.push("/admin")} className="flex items-center px-2 py-3 border-b border-slate-800 hover:text-white cursor-pointer transition-colors gap-3">
            <Route className="h-4 w-4 text-cyan-500" />
            <span className="text-sm font-medium">Viagens</span>
         </div>

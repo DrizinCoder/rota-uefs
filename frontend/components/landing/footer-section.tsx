@@ -141,7 +141,7 @@ const PRODUCT_LINKS: FooterLink[] = [
   },
   {
     label: 'Gestão de viagens',
-    href: '/admin/viagens',
+    href: '/admin',
     real: true,
     audiences: ['admin'],
   },
