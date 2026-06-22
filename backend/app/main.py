@@ -52,3 +52,7 @@ app.include_router(router)
 @app.get("/")
 async def health_check():
     return RedirectResponse(url=f"{settings.BASE_URL_FRONTEND}")
+
+@app.get("/ping")
+async def ping_pong():
+    return {"ping": "pong!"}
