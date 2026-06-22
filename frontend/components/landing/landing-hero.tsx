@@ -70,15 +70,6 @@ export function LandingHero() {
               </button>
             </div>
 
-            {/* Stats */}
-            <div className="flex gap-8 pt-4">
-              {HERO_STATS.map((s) => (
-                <div key={s.label} className="text-center">
-                  <p className="text-2xl font-black text-cyan-500">{s.num}</p>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{s.label}</p>
-                </div>
-              ))}
-            </div>
           </div>
 
           {/* Bus Image */}

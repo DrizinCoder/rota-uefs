@@ -1,131 +1,153 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 
-// Importações dos novos componentes extraídos
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { AdminTopbar } from "@/components/admin/admin-topbar";
-import { AdminMetrics } from "@/features/gerenciar-frota/ui/admin-metrics";
-import { AdminFleetList, type FiltroStatus } from "@/features/gerenciar-frota/ui/admin-fleet-list";
-import { adminService, type HomeAdmin, type BusHomeAdmin } from "@/services/adminService";
+import { AdminViagensList, type ViagemTela } from "@/features/gerenciar-viagens/ui/admin-viagens-list";
+import { adminService } from "@/services/adminService";
 
-export default function PaginaAdmin() {
+const tradutorStatus: Record<string, string> = {
+  "Pending": "Pendente",
+  "Confirmed": "Em Trânsito",
+  "Cancelled": "Cancelada",
+  "Completed": "Concluída"
+};
+
+export default function AdminViagensPage() {
   const router = useRouter();
-  const [homeData, setHomeData] = useState<HomeAdmin | null>(null);
+  const [viagens, setViagens] = useState<ViagemTela[]>([]);
+  
   const [loading, setLoading] = useState(true);
 
   const [busca, setBusca] = useState("");
-  const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>("todos");
-  
-  useEffect(() => {
-  async function carregarDados() {
+  const [activeTab, setActiveTab] = useState<"hoje" | "semana" | "futuras" | "passadas">("hoje");
+  const [statusFilter, setStatusFilter] = useState<string>("Todos");
+
+  const handleExcluir = async (id: string) => {
+    const confirmado = window.confirm("Tem certeza que deseja excluir esta viagem?");
+    if (!confirmado) return;
+
     try {
-      setLoading(true);
-      const data = await adminService.getHomeAdmin();
-      setHomeData(data);
+      await adminService.excluirViagem(id);
+      setViagens((atual) => atual.filter((v) => v.trip_id !== id));
+      window.alert("Viagem excluída com sucesso.");
     } catch (err) {
-      console.error("Erro ao carregar dados:", err);
-    } finally {
-      setLoading(false);
+      window.alert("Erro ao remover a viagem. Tente novamente.");
     }
-  }
-  carregarDados();
-}, []);
-
-  const metricas = {
-    onibusAtivos: homeData?.summary.active_buses ?? 0,
-    viagensHoje: homeData?.summary.total_trips_today ?? 0,
-    totalFrota: homeData?.summary.total_buses ?? 0,
   };
 
-  const frotaFiltrada = useMemo(() => {
-  const buses = homeData?.buses ?? [];
-  const termo = busca.trim().toLowerCase();
-
-  return buses.filter((onibus) => {
-    const correspondeStatus = filtroStatus === "todos" || onibus.status === filtroStatus;
-    const correspondeBusca = termo.length === 0 || onibus.plate.toLowerCase().includes(termo);
-
-    return correspondeStatus && correspondeBusca;
-  });
-}, [homeData, busca, filtroStatus]);
-
-  const abrirTelaCadastro = (onibus?: BusHomeAdmin) => {
-    if (!onibus) {
-      router.push("/admin/onibus?modo=novo");
-      return;
-    }
-    router.push(`/admin/onibus?id=${onibus.plate}`);
+  const handleEditar = (id: string) => {
+    router.push(`/admin/viagens/cadastro?id=${id}`);
   };
 
-  const handleRemover = async (onibus: BusHomeAdmin) => {
-  if (onibus.status === "Active" && onibus.trips_today > 0) {
-    window.alert(
-      `O ônibus ${onibus.plate} está com viagens em andamento/programadas hoje. Realoque as rotas antes de remover.`,
-    );
-    return;
-  }
+  useEffect(() => {
+    async function carregarDados() {
+      try {
+        setLoading(true);
+        const data = await adminService.listarViagens();
+        
+        // Mapeia os dados pra ajustar o status
+        const viagensMapeadas = data.map((viagem) => ({
+          ...viagem, // Puxa tudo que veio do banco (id, rota, onibus, etc)
+          status: tradutorStatus[viagem.status] || viagem.status,
+        }));
+        
+        setViagens(viagensMapeadas);
+      } catch (err) {
+        console.error("Erro ao carregar viagens:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    carregarDados();
+  }, []);
 
-  const confirmado = window.confirm(`Remover o ônibus ${onibus.plate} do sistema?`);
-  if (!confirmado) return;
+  const viagensFiltradas = useMemo(() => {
+    let filtradas = [...viagens];
 
-  try {
-    await adminService.deleteOnibus(onibus.plate);
-    setHomeData((atual) => {
-      if (!atual) return atual;
-      return {
-        ...atual,
-        summary: {
-          ...atual.summary,
-          total_buses: atual.summary.total_buses - 1,
-          active_buses: onibus.status === "Active"
-            ? atual.summary.active_buses - 1
-            : atual.summary.active_buses,
-        },
-        buses: atual.buses.filter((item) => item.plate !== onibus.plate),
-      };
+    const agora = new Date();
+    const seteDiasDepois = new Date();
+    seteDiasDepois.setDate(agora.getDate() + 7);
+    seteDiasDepois.setHours(23, 59, 59, 999);
+
+    const hojeInicio = new Date(agora);
+    hojeInicio.setHours(0, 0, 0, 0);
+    const hojeFim = new Date(agora);
+    hojeFim.setHours(23, 59, 59, 999);
+    
+    // 1. Filtro de Abas (Futuras vs Passadas)
+    filtradas = filtradas.filter((viagem) => {
+      const tripDate = new Date(`${viagem.trip_date}T${viagem.departure_time}`);
+      if (activeTab === "hoje") {
+        return tripDate >= hojeInicio && tripDate <= hojeFim;
+      } else if (activeTab === "semana") {
+        return tripDate >= agora && tripDate <= seteDiasDepois;
+      } else if (activeTab === "futuras") {
+        return tripDate >= agora;
+      } else {
+        return tripDate < agora;
+      }
     });
-  } catch (err) {
-    window.alert(`Erro ao remover o ônibus ${onibus.plate}. Tente novamente.`);
-  }
-};
+
+    // 2. Ordenação (Mais recentes/próximas primeiro)
+    filtradas.sort((a, b) => {
+      const dateA = new Date(`${a.trip_date}T${a.departure_time}`).getTime();
+      const dateB = new Date(`${b.trip_date}T${b.departure_time}`).getTime();
+      if (activeTab === "hoje" || activeTab === "semana" || activeTab === "futuras") {
+        return dateA - dateB; // Ascendente para o futuro
+      } else {
+        return dateB - dateA; // Descendente para o passado
+      }
+    });
+
+    // 3. Filtro de Status
+    if (statusFilter !== "Todos") {
+      filtradas = filtradas.filter(v => v.status === statusFilter);
+    }
+
+    // 4. Busca em Texto
+    const termo = busca.trim().toLowerCase();
+    if (termo.length > 0) {
+      filtradas = filtradas.filter((viagem) => {
+        return (
+          viagem.bus_license_plate.toLowerCase().includes(termo) ||
+          viagem.driver_name.toLowerCase().includes(termo) ||
+          viagem.route_name.toLowerCase().includes(termo) ||
+          viagem.trip_id.toLowerCase().includes(termo)
+        );
+      });
+    }
+
+    return filtradas;
+  }, [viagens, busca, activeTab, statusFilter]);
 
   return (
-     <div className="flex h-screen bg-slate-50 font-sans text-slate-800 selection:bg-cyan-100 selection:text-cyan-900">
-      
+    <div className="flex h-screen bg-slate-50 font-sans text-slate-800 selection:bg-cyan-100 selection:text-cyan-900">
       <AdminSidebar />
 
-      {/* MAIN CONTENT */}
       <main className="flex-1 flex flex-col overflow-hidden">
-        
-        {/* HEADER (Componente Extraído) */}
-        <AdminTopbar onNovoOnibus={() => abrirTelaCadastro()} />
+        <AdminTopbar 
+          title="Gestão de Viagens" 
+          subtitle="Visualize escalas, controle quórum e acompanhe embarques em tempo real." 
+          buttonText="Nova Viagem" 
+          onAction={() => router.push('/admin/viagens/cadastro')} 
+        />
 
-        {/* DASHBOARD GRID E LISTA */}
         <div className="flex-1 overflow-auto p-4 sm:p-6 bg-slate-50/50">
-          <div className="max-w-7xl mx-auto space-y-6">
-            
-            {/* GRÁFICOS / MÉTRICAS (Feature Extraída) */}
-            <AdminMetrics 
-              totalFrota={metricas.totalFrota}
-              onibusAtivos={metricas.onibusAtivos}
-              viagensHoje={metricas.viagensHoje}
+          <div className="max-w-lg md:max-w-4xl lg:max-w-5xl mx-auto w-full space-y-6 pb-32">
+            <AdminViagensList 
+              viagens={viagensFiltradas}
+              busca={busca}
+              setBusca={setBusca}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              statusFilter={statusFilter}
+              setStatusFilter={setStatusFilter}
+              onEditar={handleEditar}
+              onRemover={handleExcluir}
             />
-
-            {/* LISTA DE FROTA (Feature Original) */}
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out mt-8">
-              <AdminFleetList 
-                frota={frotaFiltrada}
-                busca={busca}
-                setBusca={setBusca}
-                filtroStatus={filtroStatus}
-                setFiltroStatus={setFiltroStatus}
-                onEditar={abrirTelaCadastro}
-                onRemover={handleRemover}
-              />
-            </div>
-            
           </div>
         </div>
       </main>

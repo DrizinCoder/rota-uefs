@@ -507,7 +507,7 @@ function PerfilContent() {
     <div className="flex min-h-screen flex-col bg-[#E4F2F1] relative">
       <Navigation tipoUsuario={tipoUsuario} />
 
-      <main className="flex-1 w-full max-w-3xl mx-auto py-10 px-4">
+      <main className="flex-1 w-full max-w-7xl mx-auto py-10 px-4">
         <button
           onClick={() => router.back()}
           className="flex items-center gap-2 bg-white py-2 px-4 rounded-full shadow-md text-[#103173] font-black uppercase text-sm hover:opacity-70 transition-all mb-8 w-fit"

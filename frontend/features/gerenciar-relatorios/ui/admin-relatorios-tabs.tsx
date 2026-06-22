@@ -70,24 +70,6 @@ export function AdminRelatoriosTabs({
 }: AdminRelatoriosTabsProps) {
   return (
     <>
-      <div className="flex gap-6 mb-8 border-b border-slate-200">
-        <button
-          onClick={() => setAbaAtiva("gestao")}
-          className={`pb-4 font-extrabold text-sm border-b-2 transition-all ${
-            abaAtiva === "gestao" ? "border-[#103173] text-[#103173]" : "border-transparent text-slate-400 hover:text-slate-600"
-          }`}
-        >
-          Gestão Logística e Faturamento
-        </button>
-        <button
-          onClick={() => setAbaAtiva("seguro")}
-          className={`pb-4 font-extrabold text-sm border-b-2 transition-all ${
-            abaAtiva === "seguro" ? "border-[#103173] text-[#103173]" : "border-transparent text-slate-400 hover:text-slate-600"
-          }`}
-        >
-          Auditoria de Seguro (Lista Nominal)
-        </button>
-      </div>
 
       {erroRelatorio && (
         <div className="mb-6 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
