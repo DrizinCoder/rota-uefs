@@ -191,7 +191,7 @@ export default function MotoristaPage() {
     <div className="flex flex-col min-h-screen bg-[#f0f4f8]">
       <Navigation tipoUsuario="Driver" />
 
-      <main className="flex-1 max-w-lg md:max-w-3xl lg:max-w-5xl mx-auto w-full px-4 pt-10 pb-32">
+      <main className="flex-1 md:max-w-3xl lg:max-w-7xl mx-auto w-full px-4 pt-10 pb-32">
         <RoleHeader
           icon={<Bus className="h-4 w-4 text-[#103173]" />}
           portalName="Painel do Motorista"

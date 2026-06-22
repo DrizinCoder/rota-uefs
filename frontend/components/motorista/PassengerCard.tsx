@@ -1,7 +1,7 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+"use client";
+
 import { Button } from "@/components/ui/button";
-import { User, UserCheck, Clock, UserX, Trash2 } from "lucide-react";
+import { UserCheck, Clock, UserX, Trash2, ChevronRight } from "lucide-react";
 
 interface PassengerCardProps {
   reservation_id: string;
@@ -32,104 +32,145 @@ export function PassengerCard({
   onMarcarFalta,
   onRemoverAvulso,
 }: PassengerCardProps) {
+  const initials = nome
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase();
+
+  const statusConfig = {
+    embarcou: {
+      label: "Embarcou",
+      icon: <UserCheck className="w-3.5 h-3.5" />,
+      bg: "bg-[#23B99A]/10",
+      text: "text-[#23B99A]",
+      ring: "ring-[#23B99A]/20",
+      avatarBg: "bg-[#23B99A]",
+    },
+    pendente: {
+      label: "Pendente",
+      icon: <Clock className="w-3.5 h-3.5" />,
+      bg: "bg-[#F2D022]/10",
+      text: "text-[#b39912]",
+      ring: "ring-[#F2D022]/20",
+      avatarBg: "bg-[#103173]",
+    },
+    espera: {
+      label: "Em Espera",
+      icon: <Clock className="w-3.5 h-3.5" />,
+      bg: "bg-orange-50",
+      text: "text-orange-500",
+      ring: "ring-orange-200",
+      avatarBg: "bg-orange-400",
+    },
+  };
+
+  const currentStatus = isWaitlist ? statusConfig.espera : statusConfig[status];
+
   return (
-    <Card
-      className={`border-none shadow-sm hover:shadow-md transition-shadow rounded-2xl overflow-hidden ${
-        isWaitlist ? "bg-slate-50 opacity-75" : "bg-white"
+    <div
+      className={`group relative flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 px-4 sm:px-5 py-4 rounded-2xl transition-all duration-200 hover:scale-[1.005] ${
+        isWaitlist
+          ? "bg-white/60 border border-dashed border-orange-200"
+          : status === "embarcou"
+            ? "bg-white border border-[#23B99A]/15 shadow-[0_2px_12px_rgba(35,185,154,0.08)]"
+            : "bg-white border border-slate-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
       }`}
     >
-      <CardContent className="p-0 flex items-center">
+      <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto flex-1 min-w-0">
+        {/* Avatar */}
         <div
-          className={`w-3 h-full min-h-[80px] shrink-0 ${
-            status === "embarcou"
-              ? "bg-[#23B99A]"
-              : isWaitlist
-                ? "bg-orange-400"
-                : "bg-[#F2D022]"
+          className={`relative h-11 w-11 rounded-full flex items-center justify-center text-white font-black text-sm shrink-0 ${currentStatus.avatarBg} ${
+            status === "embarcou" && !isWaitlist ? "ring-2 ring-offset-2 ring-[#23B99A]/30" : ""
           }`}
-        />
+        >
+          {initials}
+          {status === "embarcou" && !isWaitlist && (
+            <div className="absolute -bottom-0.5 -right-0.5 h-4 w-4 bg-[#23B99A] rounded-full flex items-center justify-center ring-2 ring-white">
+              <UserCheck className="h-2.5 w-2.5 text-white" />
+            </div>
+          )}
+        </div>
 
-        <div className="flex-1 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className={`h-12 w-12 ${isWaitlist ? "bg-slate-200" : "bg-slate-100"} rounded-full flex items-center justify-center shrink-0`}>
-              <User className={`h-6 w-6 ${isWaitlist ? "text-slate-400" : "text-[#103173]/50"}`} />
-            </div>
-            <div>
-              <h3 className="font-black text-[#103173] text-base md:text-lg leading-tight">
-                {nome}
-              </h3>
-              <p className="text-xs font-bold text-[#73AABF]">{tipo}</p>
-            </div>
+        {/* Info */}
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="font-bold text-[#103173] text-[15px] truncate">
+              {nome}
+            </h3>
+            {isAvulso && (
+              <span className="text-[10px] font-bold uppercase tracking-wider bg-[#103173]/5 text-[#103173]/60 px-2 py-0.5 rounded-full shrink-0">
+                Avulso
+              </span>
+            )}
           </div>
+          <p className="text-xs font-semibold text-[#73AABF] mt-0.5">{tipo}</p>
+        </div>
+      </div>
 
-          <div className="flex items-center justify-between sm:justify-end gap-3 ml-16 sm:ml-0 flex-wrap">
-            <Badge
-              variant="outline"
-              className={`font-black uppercase tracking-wider text-[10px] py-1 border-2 ${
-                status === "embarcou"
-                  ? "border-[#23B99A] text-[#23B99A]"
-                  : isWaitlist
-                    ? "border-orange-400 text-orange-500"
-                    : "border-[#F2D022] text-[#b39912]"
-              }`}
-            >
-              {status === "embarcou" && <UserCheck className="w-3 h-3 mr-1" />}
-              {status === "pendente" && <Clock className="w-3 h-3 mr-1" />}
-              {isWaitlist && <Clock className="w-3 h-3 mr-1" />}
-              {status === "embarcou" ? "embarcou" : isWaitlist ? "espera" : "pendente"}
-            </Badge>
+      <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto mt-1 sm:mt-0 pl-14 sm:pl-0">
+        {/* Status Pill */}
+        <div
+          className={`flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider ring-1 shrink-0 ${currentStatus.bg} ${currentStatus.text} ${currentStatus.ring}`}
+        >
+          {currentStatus.icon}
+          {currentStatus.label}
+        </div>
 
-            {/* BOTÕES - LISTA DE ESPERA (SEM BOTÕES) */}
-            {isWaitlist ? null : (
+        {/* Actions */}
+        {!isWaitlist && (
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {isAvulso ? (
+              <Button
+                onClick={() => onRemoverAvulso(reservation_id)}
+                variant="ghost"
+                size="sm"
+                className="h-9 px-3 rounded-xl text-xs font-bold text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all flex items-center gap-1"
+                title="Remover avulso"
+              >
+                <Trash2 className="h-4 w-4" />
+                <span className="hidden sm:inline">Remover</span>
+              </Button>
+            ) : (
               <>
-                {/* BOTÕES - SERVIDOR AVULSO */}
-                {isAvulso ? (
+                {status === "embarcou" ? (
                   <Button
-                    onClick={() => onRemoverAvulso(reservation_id)}
+                    onClick={() => onCancelarEmbarque(reservation_id)}
                     variant="ghost"
-                    className="h-10 px-4 rounded-xl font-bold text-red-500 hover:text-red-600 hover:bg-red-50 transition-all"
+                    size="sm"
+                    className="h-9 px-3 rounded-xl text-xs font-bold text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all"
                   >
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Remover
+                    Desfazer
                   </Button>
                 ) : (
                   <>
-                    {/* BOTÕES - PASSAGEIRO NORMAL */}
-                    {status === "embarcou" ? (
-                      <Button
-                        onClick={() => onCancelarEmbarque(reservation_id)}
-                        variant="ghost"
-                        className="h-10 px-4 rounded-xl font-bold text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all"
-                      >
-                        Cancelar Embarque
-                      </Button>
-                    ) : (
-                      <>
-                        {/* FALTA À ESQUERDA */}
-                        <Button
-                          onClick={() => onMarcarFalta(reservation_id)}
-                          variant="ghost"
-                          className="h-10 px-4 rounded-xl font-bold text-red-500 hover:text-red-600 hover:bg-red-50 transition-all"
-                        >
-                          <UserX className="h-4 w-4 mr-1" />
-                          Falta
-                        </Button>
-                        {/* EMBARCAR À DIREITA */}
-                        <Button
-                          onClick={() => onEmbarcar(user_id, reservation_id, trip_id)}
-                          className="h-10 px-4 rounded-xl font-bold bg-[#103173] text-white hover:bg-[#103B73] shadow-md transition-all"
-                        >
-                          Embarcar
-                        </Button>
-                      </>
-                    )}
+                    <Button
+                      onClick={() => onMarcarFalta(reservation_id)}
+                      variant="ghost"
+                      size="sm"
+                      className="h-9 px-3 rounded-xl text-xs font-bold text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all flex items-center gap-1"
+                      title="Marcar falta"
+                    >
+                      <UserX className="h-4 w-4" />
+                      <span className="hidden sm:inline">Falta</span>
+                    </Button>
+                    <Button
+                      onClick={() => onEmbarcar(user_id, reservation_id, trip_id)}
+                      size="sm"
+                      className="h-9 px-3 sm:px-4 rounded-xl font-bold text-xs bg-[#103173] text-white hover:bg-[#1a4a9e] shadow-sm transition-all flex items-center gap-1"
+                    >
+                      Embarcar
+                      <ChevronRight className="h-3.5 w-3.5 hidden sm:block" />
+                    </Button>
                   </>
                 )}
               </>
             )}
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        )}
+      </div>
+    </div>
   );
 }
