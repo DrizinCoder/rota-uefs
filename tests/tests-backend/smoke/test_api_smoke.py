@@ -424,8 +424,8 @@ def test_fleet_batch_operations(auth_admin_client):
         assert response.json()["success"] is True
 
 
-def test_trips_create(auth_driver_client):
-    response = auth_driver_client.post("/trip/", json=TRIP_DETAILED_VALID)
+def test_trips_create(auth_admin_client):
+    response = auth_admin_client.post("/trip/", json=TRIP_DETAILED_VALID)
 
     assert response.status_code in [200, 201, 422]
     if response.status_code in [200, 201]:
@@ -433,8 +433,8 @@ def test_trips_create(auth_driver_client):
         assert "trip_id" in data.get("data", {})
 
 
-def test_trips_list(auth_driver_client):
-    response = auth_driver_client.get("/trip/")
+def test_trips_list(auth_admin_client):
+    response = auth_admin_client.get("/trip/")
 
     assert response.status_code in [200, 404]
     if response.status_code == 200:
@@ -648,8 +648,8 @@ def test_fleet_invalid_payload_returns_validation_error(auth_admin_client, paylo
     "payload",
     [TRIP_CREATE_INVALID, {"driver_id": "invalid"}, {"route_id": "invalid"}],
 )
-def test_trip_invalid_payload_returns_validation_error(auth_driver_client, payload):
-    response = auth_driver_client.post("/trip/", json=payload)
+def test_trip_invalid_payload_returns_validation_error(auth_admin_client, payload):
+    response = auth_admin_client.post("/trip/", json=payload)
 
     assert response.status_code == 422
     assert response.json()["error"]["code"] == "VALIDATION_ERROR"

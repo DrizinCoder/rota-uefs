@@ -1,6 +1,7 @@
+from app.enums.enums import UserProfile
 from app.core.responses import ResponseHandler
 from app.services.bus_service import BusService
-from app.middleware import require_admin
+from app.middleware import require_profile
 from fastapi import Body
 from app.DTOs.fleet import BusCreateBatchDTO, BusCreateDTO, BusUpdateBatchDTO, BusUpdateDTO, BusBatchDeleteDTO
 from fastapi import Depends
@@ -11,7 +12,7 @@ from fastapi import APIRouter
 from fastapi.encoders import jsonable_encoder
 
 router = APIRouter(
-    dependencies=[Depends(require_admin)]
+    dependencies=[Depends(require_profile(UserProfile.ADMIN))]
 )
 
 async def get_bus_service(session: AsyncSession = Depends(get_session)) -> BusService:
