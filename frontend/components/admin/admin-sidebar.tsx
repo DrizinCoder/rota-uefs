@@ -37,7 +37,7 @@ export function AdminSidebar() {
         </div>
         <div onClick={() => router.push("/admin/usuarios")} className="flex items-center px-2 py-3 border-b border-slate-800 hover:text-white cursor-pointer transition-colors gap-3">
            <UserRound className="h-4 w-4 text-cyan-500" />
-           <span className="text-sm font-medium">Usuários</span>
+           <span className="text-sm font-medium">Administradores</span>
         </div>
         <div onClick={() => router.push("/admin/relatorios")} className="flex items-center px-2 py-3 border-b border-slate-800 hover:text-white cursor-pointer transition-colors gap-3">
            <BarChart3 className="h-4 w-4 text-cyan-500" />

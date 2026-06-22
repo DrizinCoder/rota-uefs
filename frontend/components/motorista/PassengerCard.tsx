@@ -84,7 +84,7 @@ export function PassengerCard({
         <div
           className={`relative h-11 w-11 rounded-full flex items-center justify-center text-white font-black text-sm shrink-0 ${currentStatus.avatarBg} ${
             status === "embarcou" && !isWaitlist ? "ring-2 ring-offset-2 ring-[#23B99A]/30" : ""
-          }`}
+          }`} 
         >
           {initials}
           {status === "embarcou" && !isWaitlist && (
