@@ -5,8 +5,8 @@ from app.repositories.user_repository import UserRepository
 from app.repositories.reservation_repository import ReservationRepository
 from app.repositories.trip_repository import TripRepository
 from app.repositories.bus_repository import BusRepository
-from app.core.exceptions import InternalServerException, NotFoundException
-from app.enums.enums import BoardingStatus, UserProfile
+from app.core.exceptions import ForbiddenException, InternalServerException, NotFoundException
+from app.enums.enums import BoardingStatus, TripStatus, UserProfile
 from app.core.responses import ResponseHandler
 from app.core.config import Settings
 from .notifications import Notifications
@@ -171,6 +171,7 @@ class PriorityEngine:
     async def subscribe_user_to_trip(self, user_id: str, trip_id: str, background_tasks: BackgroundTasks, extra_name: str = None):
         trip = await self.trip_repository.get_by_id(uuid.UUID(trip_id))
         if not trip: raise NotFoundException("Viagem não encontrada")
+        if trip.status != TripStatus.PENDING: raise ForbiddenException("Viagem inválida para inscrição")
         
         user = await self.user_repository.get_by_id(uuid.UUID(user_id))
         if not user: raise NotFoundException("Usuário não encontrado")

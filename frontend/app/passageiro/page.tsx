@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { Navigation } from "@/components/landing/navigation";
@@ -43,11 +43,11 @@ export default function PaginaPassageiro() {
 
   const diaAtual = DIAS_SEMANA.find((d) => d.id === diaAtivo);
   const normalizarDia = (dia: string) => {
-      if (dia === "Sábado" || dia === "Domingo") {
-        return "Segunda";
-      }
-      return dia;
-    };
+    if (dia === "Sábado" || dia === "Domingo") {
+      return "Segunda";
+    }
+    return dia;
+  };
 
   // Busca os dados da home do passageiro e as viagens do usuário
   useEffect(() => {
@@ -107,7 +107,7 @@ export default function PaginaPassageiro() {
             </div>
           }
         />
-        
+
         <WeekDaysMenu dias={DIAS_SEMANA} diaAtivo={diaAtivo} onDiaChange={setDiaAtivo} />
 
         <CurrentDayHeader dayName={diaAtual?.full} />
@@ -133,18 +133,34 @@ export default function PaginaPassageiro() {
                 />
 
                 <div className="flex flex-col gap-3">
-                  {isSubscribed ? (
-                    <ManageSubscriptionButton viagemId={viagem.trip_id} />
+                  {viagem.status === "Confirmed" ? (
+                    <button disabled className="w-full bg-slate-100 text-slate-400 font-bold py-3.5 text-sm rounded-xl">
+                      Viagem em Andamento
+                    </button>
+                  ) : viagem.status === "Completed" ? (
+                    <button disabled className="w-full bg-slate-100 text-slate-400 font-bold py-3.5 text-sm rounded-xl">
+                      Viagem Concluída
+                    </button>
+                  ) : viagem.status === "Cancelled" ? (
+                    <button disabled className="w-full bg-slate-100 text-slate-400 font-bold py-3.5 text-sm rounded-xl">
+                      Viagem Cancelada
+                    </button>
                   ) : (
-                    <div className="space-y-3">
-                      <SubscribeButton viagemId={viagem.trip_id} />
-                    </div>
-                  )}
-
-                  {isStaff && (
                     <>
-                      <div className="w-full h-px bg-[#103173]/5 my-0" />
-                      <GuestSubscribeButton onClick={() => setModalConvidado(viagem.trip_id)} />
+                      {isSubscribed ? (
+                        <ManageSubscriptionButton viagemId={viagem.trip_id} />
+                      ) : (
+                        <div className="space-y-3">
+                          <SubscribeButton viagemId={viagem.trip_id} />
+                        </div>
+                      )}
+
+                      {isStaff && (
+                        <>
+                          <div className="w-full h-px bg-[#103173]/5 my-0" />
+                          <GuestSubscribeButton onClick={() => setModalConvidado(viagem.trip_id)} />
+                        </>
+                      )}
                     </>
                   )}
                 </div>
@@ -159,9 +175,9 @@ export default function PaginaPassageiro() {
       </main>
 
       {isStaff && (
-        <GuestSubscribeModal 
-          viagemId={modalConvidado} 
-          onClose={() => setModalConvidado(null)} 
+        <GuestSubscribeModal
+          viagemId={modalConvidado}
+          onClose={() => setModalConvidado(null)}
         />
       )}
 

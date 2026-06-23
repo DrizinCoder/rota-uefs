@@ -26,8 +26,8 @@ export function LandingHero() {
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-slate-950/30" />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pb-20 pt-32">
-        <div className="grid lg:grid-cols-2 gap-8 items-end">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pb-32 lg:pb-40 pt-32">
+        <div className="grid lg:grid-cols-2 gap-8 items-center">
           {/* Text */}
           <div className="space-y-6">
             <div className="inline-flex items-center gap-2 bg-cyan-500/15 backdrop-blur-sm border border-cyan-500/30 px-4 py-1.5 rounded-full">
@@ -46,10 +46,10 @@ export function LandingHero() {
               ROTA UEFS: TRANSPORTE SEGURO E EFICIENTE
             </h2>
 
-            <p className="text-base text-slate-300 max-w-md leading-relaxed">
+            <p className="text-base text-slate-300 max-w-xl leading-relaxed">
               Transporte <strong className="text-white/90">gratuito</strong> com horários fixos entre{" "}
               <strong className="text-white/90">Feira de Santana</strong> e{" "}
-              <strong className="text-white/90">Salvador</strong>, exclusivo para
+              <strong className="text-white/90">Salvador</strong>,<br className="hidden sm:block" /> exclusivo para
               docentes e discentes da UEFS. Viaje com conforto e segurança.
             </p>
 
@@ -70,15 +70,6 @@ export function LandingHero() {
               </button>
             </div>
 
-            {/* Stats */}
-            <div className="flex gap-8 pt-4">
-              {HERO_STATS.map((s) => (
-                <div key={s.label} className="text-center">
-                  <p className="text-2xl font-black text-cyan-500">{s.num}</p>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{s.label}</p>
-                </div>
-              ))}
-            </div>
           </div>
 
           {/* Bus Image */}

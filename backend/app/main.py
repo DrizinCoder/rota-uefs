@@ -38,7 +38,7 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"], 
+    allow_origins=[settings.BASE_URL_FRONTEND], 
     allow_credentials=True,                 
     allow_methods=["*"],
     allow_headers=["*"],
@@ -52,3 +52,7 @@ app.include_router(router)
 @app.get("/")
 async def health_check():
     return RedirectResponse(url=f"{settings.BASE_URL_FRONTEND}")
+
+@app.get("/ping")
+async def ping_pong():
+    return {"ping": "pong!"}

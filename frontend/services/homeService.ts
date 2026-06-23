@@ -64,7 +64,7 @@ export const passengerService = {
         return response.data.data;
     },
     async cancelSubscription(reservationId: string) {
-        const response = await api.delete(`/users/driver/reservations/${reservationId}/delete-staff-generic`);
+        const response = await api.post(`/users/reservation/${reservationId}/cancel`);
         return response.data;
     },
 }

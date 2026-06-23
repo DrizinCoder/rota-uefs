@@ -21,6 +21,7 @@ import pytest
 from fastapi import HTTPException, Depends
 from fastapi.testclient import TestClient
 
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 BACKEND_DIR = PROJECT_ROOT / "backend"
 TESTS_BACKEND_DIR = Path(__file__).resolve().parent
@@ -38,17 +39,27 @@ from mocks.fake_test_helpers import (
     DummyNotificationEmailUseCases,
 )
 
+import app.routers.trip.routes as trip_routes
+import app.middleware.auth_middleware as auth_middleware
+
 from app.main import app
 from app.database.db import get_session
 from app.routers.admin.routes import get_admin_controller
 from app.routers.auth.routes import get_auth_controller
 from app.routers.users.student.route_student import get_user_service as get_student_service
 from app.routers.users.dependencies import get_user_service as get_users_service
-from app.middleware.auth_middleware import get_current_user, require_profile
 from app.services.email.email_service import EmailService
 from app.DTOs.auth import AlunoRegisterResponseDTO, ServidorRegisterResponseDTO
 from app.middleware.auth_middleware import TokenData
 from app.enums.enums import AccessLevel, UserProfile
+from app.middleware.auth_middleware import (
+    get_current_user,
+    require_profile,
+    require_admin,
+    require_driver,
+    require_staff,
+    require_student,
+)
 
 
 @asynccontextmanager
@@ -440,20 +451,36 @@ def fake_email_service():
 
 
 @pytest.fixture
-def client(fake_email_service):
+def client(fake_email_service, monkeypatch):
     admin_controller = FakeAdminController()
     user_service = FakeUserService()
     auth_controller = FakeAuthController(user_service=user_service)
-    
-    app.dependency_overrides[get_session]          = override_get_session
+
+    monkeypatch.setattr("app.routers.admin.routes.require_profile", mock_require_profile)
+    monkeypatch.setattr("app.middleware.auth_middleware.require_profile", mock_require_profile)
+    monkeypatch.setattr(trip_routes, "require_profile", mock_require_profile, raising=False)
+    monkeypatch.setattr(auth_middleware, "require_profile", mock_require_profile, raising=False)
+
+    monkeypatch.setattr(trip_routes, "get_current_user", mock_get_current_user, raising=False)
+    monkeypatch.setattr(trip_routes, "require_driver", mock_get_current_user, raising=False)
+    monkeypatch.setattr(auth_middleware, "require_driver", mock_get_current_user, raising=False)
+    monkeypatch.setattr(auth_middleware, "get_current_user", mock_get_current_user, raising=False)
+
+    app.dependency_overrides[get_session] = override_get_session
     app.dependency_overrides[get_admin_controller] = lambda: admin_controller
-    app.dependency_overrides[get_auth_controller]  = lambda: auth_controller
-    app.dependency_overrides[get_student_service]  = lambda: user_service
-    app.dependency_overrides[get_users_service]    = lambda: user_service
-    app.dependency_overrides[get_current_user]     = mock_get_current_user
-    app.dependency_overrides[require_profile]      = mock_require_profile
-    app.dependency_overrides[EmailService]         = lambda: fake_email_service
-    
+    app.dependency_overrides[get_auth_controller] = lambda: auth_controller
+    app.dependency_overrides[get_student_service] = lambda: user_service
+    app.dependency_overrides[get_users_service] = lambda: user_service
+
+    # Auth / RBAC
+    app.dependency_overrides[get_current_user] = mock_get_current_user
+    app.dependency_overrides[require_admin] = mock_get_current_user
+    app.dependency_overrides[require_driver] = mock_get_current_user
+    app.dependency_overrides[require_student] = mock_get_current_user
+    app.dependency_overrides[require_staff] = mock_get_current_user
+
+    app.dependency_overrides[EmailService] = lambda: fake_email_service
+
     original_lifespan = app.router.lifespan_context
     app.router.lifespan_context = fake_lifespan
     try:
@@ -479,8 +506,7 @@ def auth_student_client(client, created_estudante):
     
     client.headers.update({"Authorization": "Bearer fake-token-estudante"})
     yield client
-    
-    # Limpar contexto após teste
+    client.headers.pop("Authorization", None)
     ctx.clear()
 
 
@@ -500,12 +526,12 @@ def auth_admin_client(client):
     client.headers.update({"Authorization": "Bearer fake-token-admin"})
     yield client
 
+    client.headers.pop("Authorization", None)
     ctx.clear()
 
 
 @pytest.fixture
 def auth_driver_client(client):
-    """Cliente autenticado como motorista."""
     ctx = CurrentUserContext()
     ctx.set_user({
         "user_id": "test-driver-id",
@@ -515,10 +541,9 @@ def auth_driver_client(client):
         "full_name": "Test Driver",
         "driver_id": "driver-0001",
     })
-
     client.headers.update({"Authorization": "Bearer fake-token-driver"})
     yield client
-
+    client.headers.pop("Authorization", None)
     ctx.clear()
 
 

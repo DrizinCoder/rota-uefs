@@ -1,3 +1,4 @@
+from app.enums.enums import UserProfile
 from app.repositories.bus_repository import BusRepository
 from app.repositories.trip_repository import TripRepository
 from app.repositories.user_repository import UserRepository
@@ -12,10 +13,10 @@ from app.middleware import TokenData
 from fastapi import Depends
 from fastapi import APIRouter
 
-from app.middleware import require_driver
+from app.middleware import require_profile
 
 checkin_router = APIRouter(
-    dependencies=[Depends(require_driver)]
+    dependencies=[Depends(require_profile(UserProfile.DRIVER))]
 )
 
 async def get_priority_engine(session: AsyncSession = Depends(get_session)) -> PriorityEngine:
