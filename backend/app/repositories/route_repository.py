@@ -1,5 +1,6 @@
 import uuid
 from sqlmodel import select
+from sqlalchemy import update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.models import Route
 from app.DTOs.routes import CreateRouteDTO, UpdateRouteDTO
@@ -39,23 +40,29 @@ class RouteRepository:
         return db_route
 
     async def patch(self, route_id: uuid.UUID, update_data: UpdateRouteDTO):
-        db_route = await self.get_by_id(route_id)
-        if not db_route:
-            return None
-
         update_dict = update_data.model_dump(exclude_none=True)
-        db_route.sqlmodel_update(update_dict)
 
-        self.session.add(db_route)
+        stmt = (
+            update(Route)
+            .where(Route.route_id == route_id)
+            .values(**update_dict)
+            .returning(Route)
+        )
+
+        result = await self.session.execute(stmt)
+
         await self.session.commit()
-        await self.session.refresh(db_route)
-        return db_route
+
+        return result.scalar_one_or_none()
 
     async def delete(self, route_id: uuid.UUID):
-        db_route = await self.get_by_id(route_id)
-        if not db_route:
-            return None
-        
-        await self.session.delete(db_route)
+        stmt = (
+            delete(Route)
+            .where(Route.route_id == route_id)
+        )
+
+        result = await self.session.execute(stmt)
+
         await self.session.commit()
-        return db_route
+
+        return result.rowcount > 0
