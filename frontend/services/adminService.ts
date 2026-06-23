@@ -141,8 +141,10 @@ export interface Rota {
   drop_off_point: string;
   city_of_origin?: string | null;
   destination_city?: string | null;
-  boarding_point_coordinates?: string | null;
-  drop_off_point_coordinates?: string | null;
+  boarding_latitude?: number | string | null;
+  boarding_longitude?: number | string | null;
+  drop_off_latitude?: number | string | null;
+  drop_off_longitude?: number | string | null;
 }
 
 export interface CadastroRotaPayload {
@@ -151,8 +153,10 @@ export interface CadastroRotaPayload {
   drop_off_point: string;
   city_of_origin?: string | null;
   destination_city?: string | null;
-  boarding_point_coordinates?: string | null;
-  drop_off_point_coordinates?: string | null;
+  boarding_latitude?: number | string | null;
+  boarding_longitude?: number | string | null;
+  drop_off_latitude?: number | string | null;
+  drop_off_longitude?: number | string | null;
 }
 
 // ── Administrador ─────────────────────────────────────

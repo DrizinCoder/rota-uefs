@@ -19,8 +19,10 @@ function CadastroRotaContent() {
     drop_off_point: "",
     city_of_origin: "",
     destination_city: "",
-    boarding_point_coordinates: "",
-    drop_off_point_coordinates: "",
+    boarding_latitude: "",
+    boarding_longitude: "",
+    drop_off_latitude: "",
+    drop_off_longitude: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -39,8 +41,10 @@ function CadastroRotaContent() {
               drop_off_point: rota.drop_off_point,
               city_of_origin: rota.city_of_origin || "",
               destination_city: rota.destination_city || "",
-              boarding_point_coordinates: rota.boarding_point_coordinates || "",
-              drop_off_point_coordinates: rota.drop_off_point_coordinates || "",
+              boarding_latitude: rota.boarding_latitude?.toString() || "",
+              boarding_longitude: rota.boarding_longitude?.toString() || "",
+              drop_off_latitude: rota.drop_off_latitude?.toString() || "",
+              drop_off_longitude: rota.drop_off_longitude?.toString() || "",
             });
           } else {
             setErro("Rota não encontrada.");
@@ -72,8 +76,10 @@ function CadastroRotaContent() {
         drop_off_point: formData.drop_off_point.trim(),
         city_of_origin: formData.city_of_origin.trim() || null,
         destination_city: formData.destination_city.trim() || null,
-        boarding_point_coordinates: formData.boarding_point_coordinates.trim() || null,
-        drop_off_point_coordinates: formData.drop_off_point_coordinates.trim() || null,
+        boarding_latitude: formData.boarding_latitude ? parseFloat(formData.boarding_latitude) : null,
+        boarding_longitude: formData.boarding_longitude ? parseFloat(formData.boarding_longitude) : null,
+        drop_off_latitude: formData.drop_off_latitude ? parseFloat(formData.drop_off_latitude) : null,
+        drop_off_longitude: formData.drop_off_longitude ? parseFloat(formData.drop_off_longitude) : null,
       };
       
       if (isEditMode && routeId) {
@@ -168,20 +174,29 @@ function CadastroRotaContent() {
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">
-                      Coordenadas de Embarque (Opcional)
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <MapPin className="h-5 w-5 text-slate-400" />
-                      </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2">
+                        Lat. de Embarque
+                      </label>
                       <input
                         type="text"
-                        placeholder="Ex: -12.9714, -38.5014"
-                        value={formData.boarding_point_coordinates}
-                        onChange={(e) => atualizarCampo("boarding_point_coordinates", e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all placeholder:text-slate-400"
+                        placeholder="Ex: -12.9714"
+                        value={formData.boarding_latitude}
+                        onChange={(e) => atualizarCampo("boarding_latitude", e.target.value)}
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all placeholder:text-slate-400"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2">
+                        Lon. de Embarque
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Ex: -38.5014"
+                        value={formData.boarding_longitude}
+                        onChange={(e) => atualizarCampo("boarding_longitude", e.target.value)}
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all placeholder:text-slate-400"
                       />
                     </div>
                   </div>
@@ -224,20 +239,29 @@ function CadastroRotaContent() {
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">
-                      Coordenadas de Desembarque (Opcional)
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <MapPinned className="h-5 w-5 text-slate-400" />
-                      </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2">
+                        Lat. de Desembarque
+                      </label>
                       <input
                         type="text"
-                        placeholder="Ex: -12.2667, -38.9667"
-                        value={formData.drop_off_point_coordinates}
-                        onChange={(e) => atualizarCampo("drop_off_point_coordinates", e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all placeholder:text-slate-400"
+                        placeholder="Ex: -12.2667"
+                        value={formData.drop_off_latitude}
+                        onChange={(e) => atualizarCampo("drop_off_latitude", e.target.value)}
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all placeholder:text-slate-400"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2">
+                        Lon. de Desembarque
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Ex: -38.9667"
+                        value={formData.drop_off_longitude}
+                        onChange={(e) => atualizarCampo("drop_off_longitude", e.target.value)}
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all placeholder:text-slate-400"
                       />
                     </div>
                   </div>

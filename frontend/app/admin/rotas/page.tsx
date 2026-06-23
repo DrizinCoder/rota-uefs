@@ -98,9 +98,9 @@ export default function AdminRotasPage() {
                           <span className="font-medium text-slate-700">Origem:</span> {rota.boarding_point}
                           {rota.city_of_origin && <span className="text-slate-500 text-xs">({rota.city_of_origin})</span>}
                         </div>
-                        {rota.boarding_point_coordinates && (
+                        {(rota.boarding_latitude != null && rota.boarding_longitude != null) && (
                           <div className="flex items-center gap-2 pl-6">
-                             <span className="text-slate-400 text-xs">Coord: {rota.boarding_point_coordinates}</span>
+                             <span className="text-slate-400 text-xs">Coord: {rota.boarding_latitude}, {rota.boarding_longitude}</span>
                           </div>
                         )}
                         <div className="flex items-center gap-2">
@@ -108,9 +108,9 @@ export default function AdminRotasPage() {
                           <span className="font-medium text-slate-700">Destino:</span> {rota.drop_off_point}
                           {rota.destination_city && <span className="text-slate-500 text-xs">({rota.destination_city})</span>}
                         </div>
-                        {rota.drop_off_point_coordinates && (
+                        {(rota.drop_off_latitude != null && rota.drop_off_longitude != null) && (
                           <div className="flex items-center gap-2 pl-6">
-                             <span className="text-slate-400 text-xs">Coord: {rota.drop_off_point_coordinates}</span>
+                             <span className="text-slate-400 text-xs">Coord: {rota.drop_off_latitude}, {rota.drop_off_longitude}</span>
                           </div>
                         )}
                       </div>
