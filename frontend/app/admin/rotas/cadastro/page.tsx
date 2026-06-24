@@ -2,10 +2,20 @@
 
 import { useState, type FormEvent, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import dynamic from "next/dynamic";
 import { ArrowLeft, MapPin, MapPinned, Route as RouteIcon } from "lucide-react";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { AdminTopbar } from "@/components/admin/admin-topbar";
 import { adminService } from "@/services/adminService";
+
+const MapaSeletor = dynamic(() => import("@/components/admin/mapa-seletor"), { 
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full bg-slate-100 animate-pulse flex items-center justify-center">
+      <span className="text-slate-400 font-bold">Carregando mapa...</span>
+    </div>
+  )
+});
 
 function CadastroRotaContent() {
   const router = useRouter();
@@ -25,6 +35,7 @@ function CadastroRotaContent() {
     drop_off_longitude: "",
   });
 
+  const [selectingPoint, setSelectingPoint] = useState<"boarding" | "drop_off">("boarding");
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState("");
 
@@ -265,6 +276,48 @@ function CadastroRotaContent() {
                       />
                     </div>
                   </div>
+                </div>
+
+                <div className="mt-8 space-y-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <label className="text-sm font-bold text-slate-700">Selecione as Coordenadas no Mapa</label>
+                    <div className="flex gap-2">
+                      <button 
+                        type="button" 
+                        onClick={() => setSelectingPoint('boarding')}
+                        className={`px-4 py-2 text-xs font-bold rounded-xl transition-colors ${selectingPoint === 'boarding' ? 'bg-[#103173] text-white shadow-md' : 'bg-slate-200 text-slate-600 hover:bg-slate-300'}`}
+                      >
+                        Ponto de Embarque
+                      </button>
+                      <button 
+                        type="button" 
+                        onClick={() => setSelectingPoint('drop_off')}
+                        className={`px-4 py-2 text-xs font-bold rounded-xl transition-colors ${selectingPoint === 'drop_off' ? 'bg-[#103173] text-white shadow-md' : 'bg-slate-200 text-slate-600 hover:bg-slate-300'}`}
+                      >
+                        Ponto de Desembarque
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="h-[350px] w-full rounded-2xl overflow-hidden border border-slate-200 shadow-inner">
+                    <MapaSeletor 
+                      boarding_latitude={formData.boarding_latitude}
+                      boarding_longitude={formData.boarding_longitude}
+                      drop_off_latitude={formData.drop_off_latitude}
+                      drop_off_longitude={formData.drop_off_longitude}
+                      selectingPoint={selectingPoint}
+                      onSelectCoordinate={(pointType, lat, lng) => {
+                        if (pointType === "boarding") {
+                          atualizarCampo("boarding_latitude", lat.toFixed(7));
+                          atualizarCampo("boarding_longitude", lng.toFixed(7));
+                        } else {
+                          atualizarCampo("drop_off_latitude", lat.toFixed(7));
+                          atualizarCampo("drop_off_longitude", lng.toFixed(7));
+                        }
+                      }}
+                    />
+                  </div>
+                  <p className="text-xs text-slate-500 italic mt-2">Clique no mapa para preencher as coordenadas automaticamente de acordo com o botão selecionado acima.</p>
                 </div>
               </div>
 
