@@ -66,8 +66,8 @@ export function StatusViagemScreen() {
 
         let origem = "Não informada";
         let destino = "Não informada";
-        let coordOrigem = { lat: -12.98562778642921, lng: -38.46607975724334 };
-        let coordDestino = { lat: -12.200249542620588, lng: -38.97194902208819 };
+        let coordOrigem = null;
+        let coordDestino = null;
 
         if (tripData.route_id) {
           const routeData = await passengerService.getRouteById(tripData.route_id);
