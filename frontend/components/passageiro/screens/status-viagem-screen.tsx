@@ -66,30 +66,37 @@ export function StatusViagemScreen() {
 
         let origem = "Não informada";
         let destino = "Não informada";
+        let coordOrigem = { lat: -12.98562778642921, lng: -38.46607975724334 };
+        let coordDestino = { lat: -12.200249542620588, lng: -38.97194902208819 };
 
         if (tripData.route_id) {
           const routeData = await passengerService.getRouteById(tripData.route_id);
-          origem = routeData.boarding_point;
-          destino = routeData.drop_off_point;
+          
+          origem = routeData.city_of_origin 
+            ? `${routeData.city_of_origin} - ${routeData.boarding_point}` 
+            : routeData.boarding_point;
+            
+          destino = routeData.destination_city 
+            ? `${routeData.destination_city} - ${routeData.drop_off_point}` 
+            : routeData.drop_off_point;
+            
+          if (routeData.boarding_latitude && routeData.boarding_longitude) {
+            coordOrigem = {
+              lat: parseFloat(routeData.boarding_latitude),
+              lng: parseFloat(routeData.boarding_longitude)
+            };
+          }
+          
+          if (routeData.drop_off_latitude && routeData.drop_off_longitude) {
+            coordDestino = {
+              lat: parseFloat(routeData.drop_off_latitude),
+              lng: parseFloat(routeData.drop_off_longitude)
+            };
+          }
         } else {
           // Fallback caso a rota venha vazia
           origem = tripData.boarding_point || origem;
           destino = tripData.drop_off_point || destino;
-        }
-
-        // Se a viagem for Salvador-Feira ou Feira-Salvador, adiciona 2 horas ao horário de término
-        const isSalvadorFeira =
-          (origem.toLowerCase().includes("salvador") && destino.toLowerCase().includes("feira")) ||
-          (origem.toLowerCase().includes("feira") && destino.toLowerCase().includes("salvador"));
-
-        let horarioFim = "--:--";
-        if (isSalvadorFeira && tripData.departure_time) {
-          const [hoursStr, minutesStr] = tripData.departure_time.split(":");
-          if (hoursStr && minutesStr) {
-            let hours = parseInt(hoursStr, 10);
-            hours = (hours + 2) % 24;
-            horarioFim = `${hours.toString().padStart(2, "0")}:${minutesStr.substring(0, 2)}`;
-          }
         }
 
         const inscritos = tripFromHome?.total_enrolled !== undefined 
@@ -102,8 +109,9 @@ export function StatusViagemScreen() {
           data: dataFormatada,
           origem,
           destino,
+          coordOrigem,
+          coordDestino,
           horarioInicio: tripData.departure_time ? tripData.departure_time.substring(0, 5) : "",
-          horarioFim,
           inscritos: inscritos,
           quorum: 1,
           vagasTotais: tripFromHome?.bus_capacity || 44,
@@ -197,7 +205,7 @@ export function StatusViagemScreen() {
                     <span className="text-[10px] font-black uppercase">Horário</span>
                   </div>
                   <p className="text-xl font-black text-[#103173]">
-                    {viagemInscrita.horarioInicio} - {viagemInscrita.horarioFim}
+                    {viagemInscrita.horarioInicio}
                   </p>
                 </div>
                 <div className="bg-[#E4F2F1] p-4 rounded-2xl col-span-2">
@@ -231,8 +239,8 @@ export function StatusViagemScreen() {
                 </div>
                 <div className="w-full h-[250px] rounded-2xl overflow-hidden border border-[#103173]/10 shadow-sm">
                   <MapaTrajeto
-                    coordOrigem={{ lat: -12.98562778642921, lng: -38.46607975724334 }}
-                    coordDestino={{ lat: -12.200249542620588, lng: -38.97194902208819 }}
+                    coordOrigem={viagemInscrita.coordOrigem}
+                    coordDestino={viagemInscrita.coordDestino}
                     origemLabel={viagemInscrita.origem}
                     destinoLabel={viagemInscrita.destino}
                   />
