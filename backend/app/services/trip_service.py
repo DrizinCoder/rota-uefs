@@ -1,3 +1,5 @@
+from zoneinfo import ZoneInfo
+from datetime import timezone
 from app.core.exceptions import BadRequestException
 from app.enums.enums import TripStatus
 from app.DTOs.trip import PassengerTripItem
@@ -17,6 +19,7 @@ from app.core.scheduler import task_scheduler
 from app.services.jobs.verify_quorum import verify_quorum_job
 import logging
 from app.DTOs.trip import WEEKDAY_PT
+from zoneinfo import ZoneInfo
 
 
 logger = logging.getLogger(__name__)
@@ -25,6 +28,8 @@ ALLOWED_TRANSITIONS = {
     TripStatus.PENDING: TripStatus.CONFIRMED,
     TripStatus.CONFIRMED: TripStatus.COMPLETED,
 }
+
+BRAZIL_TZ = ZoneInfo("America/Sao_Paulo")
 
 class TripService:
     def __init__(self, trip_repository: TripRepository):
@@ -141,7 +146,8 @@ class TripService:
         return trip.model_dump(mode='json')
     
     async def get_trips_for_feed(self, driver_id: uuid.UUID | None = None) -> TripFeedResponse:
-        today = date.today()
+        now_sp = datetime.now(tz=BRAZIL_TZ)
+        today = now_sp.date()
         weekday = today.weekday()
         if weekday < 5:  # Segunda a Sexta
             start_date = today
@@ -233,5 +239,16 @@ class TripService:
         if allowed_next != new_status:
             raise BadRequestException(f"Transição inválida: '{trip.status}' → '{new_status}'")
     
+        if new_status == TripStatus.CONFIRMED and trip.status == TripStatus.PENDING:
+            now = datetime.now(ZoneInfo("America/Sao_Paulo"))  
+            departure_dt = datetime.combine(trip.trip_date, trip.departure_time).replace(tzinfo=ZoneInfo("America/Sao_Paulo"))
+            minutes_until_departure = (departure_dt - now).total_seconds() / 60
+
+            if minutes_until_departure > 10:
+                raise BadRequestException(
+                    f"A viagem só pode ser confirmada com até 10 minutos de antecedência. "
+                    f"Faltam {int(minutes_until_departure)} minutos para a partida."
+                )
+
         return await self.trip_repository.update_status(trip, new_status)
     

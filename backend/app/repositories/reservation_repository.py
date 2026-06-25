@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, insert 
+from sqlalchemy import select, insert, update, delete
 from sqlalchemy.orm import joinedload, selectinload
 from app.models.models import Reservation
 from app.enums.enums import BoardingStatus
@@ -71,89 +71,73 @@ class ReservationRepository:
     
     async def cancel_reservation(self, reservation_id: str): 
         stmt = (
-            select(Reservation)
+            update(Reservation)
             .where(Reservation.reservation_id == reservation_id)
+            .values(
+                boarding_confirmation=BoardingStatus.CANCELLED
+            )
         )
 
         result = await self.session.execute(stmt)
-        reservation = result.scalar_one_or_none()
+        await self.session.commit()
 
-        if reservation:
-            reservation.boarding_confirmation = BoardingStatus.CANCELLED            
-            await self.session.commit()
-            return True 
-        
-        return False
+        return result.rowcount > 0
     
     async def remove_boarding_confirmation(self, reservation_id: str):
         stmt = (
-            select(Reservation)
+            update(Reservation)
             .where(Reservation.reservation_id == reservation_id)
+            .values(
+                boarding_confirmation=BoardingStatus.NOT_BOARDED,
+                boarding_timestamp=None
+            )
         )
 
         result = await self.session.execute(stmt)
-        reservation = result.scalar_one_or_none()
+        await self.session.commit()
 
-        if reservation:
-            reservation.boarding_confirmation = BoardingStatus.NOT_BOARDED
-            reservation.boarding_timestamp = None
-            await self.session.commit()
-            return True 
-        
-        return False
+        return result.rowcount > 0
         
     async def confirm_boarding(self, reservation_id: str):
         stmt = (
-            select(Reservation)
+            update(Reservation)
             .where(Reservation.reservation_id == reservation_id)
+            .values(
+                boarding_confirmation=BoardingStatus.BOARDED,
+                boarding_timestamp=datetime.now()
+            )
         )
 
         result = await self.session.execute(stmt)
-        reservation = result.scalar_one_or_none()
+        await self.session.commit()
 
-        if reservation:
-            reservation.boarding_confirmation = BoardingStatus.BOARDED
-            reservation.boarding_timestamp = datetime.now()
-            await self.session.commit()
-            return True 
-        
-        return False
+        return result.rowcount > 0 
 
     async def activate_reservation(self, reservation_id: str):
-        timestamp = datetime.now()
-
         stmt = (
-            select(Reservation)
+            update(Reservation)
             .where(Reservation.reservation_id == reservation_id)
+            .values(
+                boarding_confirmation=BoardingStatus.NOT_BOARDED,
+                reservation_timestamp=datetime.now()
+            )
         )
 
         result = await self.session.execute(stmt)
-        reservation = result.scalar_one_or_none()
+        await self.session.commit()
 
-        if reservation:
-            reservation.boarding_confirmation = BoardingStatus.NOT_BOARDED
-            reservation.reservation_timestamp = timestamp
-            
-            await self.session.commit()
-            return True 
-        
-        return False
+        return result.rowcount > 0
         
     async def delete(self, reservation_id: str):
         stmt = (
-            select(Reservation)
+            delete(Reservation)
             .where(Reservation.reservation_id == reservation_id)
         )
 
         result = await self.session.execute(stmt)
-        reservation = result.scalar_one_or_none()
+        await self.session.commit()
 
-        if reservation:
-            await self.session.delete(reservation)
-            await self.session.commit()
-            return True
-    
-        return False        
+        return result.rowcount > 0      
 
     async def get_by_trip_id(self, trip_ID: str):
         stmt = (

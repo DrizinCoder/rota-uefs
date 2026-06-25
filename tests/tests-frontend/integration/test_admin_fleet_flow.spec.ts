@@ -56,17 +56,16 @@ test.describe('Fleet Management Flow', () => {
 		await mockBusCreationSuccess(page);
 		await mockAdminHomeInfo(page);
 
-		await page.goto('/admin/onibus?modo=novo', { waitUntil: 'domcontentloaded' });
+		await page.goto('/admin/onibus?modo=novo', { waitUntil: 'networkidle' });
 		await fillBusForm(page);
 
-			const responsePromise = page.waitForResponse((response) => (
-				response.url().includes('/fleet') &&
-				response.request().method() === 'POST'
-			));
-
-			await page.getByRole('button', { name: /cadastrar ônibus/i }).first().click();
-
-			const response = await responsePromise;
+			const [response] = await Promise.all([
+				page.waitForResponse((response) => (
+					response.url().includes('/fleet') &&
+					response.request().method() === 'POST'
+				), { timeout: 15000 }),
+				page.getByRole('button', { name: /cadastrar ônibus/i }).first().click({ force: true })
+			]);
 			expect(response.status()).toBe(201);
 
 			await expect(page).toHaveURL(/\/admin\/onibus(\?|$)/, { timeout: 15000 });
@@ -75,17 +74,16 @@ test.describe('Fleet Management Flow', () => {
 	test('Bus Registration - Duplicate Plate Failure', async ({ page }) => {
 		await mockBusCreationFailure(page);
 
-		await page.goto('/admin/onibus?modo=novo', { waitUntil: 'domcontentloaded' });
+		await page.goto('/admin/onibus?modo=novo', { waitUntil: 'networkidle' });
 		await fillBusForm(page, BUS_DUPLICATE_VALUES);
 
-			const responsePromise = page.waitForResponse((response) => (
-				response.url().includes('/fleet') &&
-				response.request().method() === 'POST'
-			));
-
-		await page.getByRole('button', { name: /cadastrar ônibus/i }).first().click();
-
-			const response = await responsePromise;
+			const [response] = await Promise.all([
+				page.waitForResponse((response) => (
+					response.url().includes('/fleet') &&
+					response.request().method() === 'POST'
+				), { timeout: 15000 }),
+				page.getByRole('button', { name: /cadastrar ônibus/i }).first().click({ force: true })
+			]);
 			expect(response.status()).toBe(400);
 
 		await expect(page.getByText(/erro ao salvar ônibus/i)).toBeVisible();

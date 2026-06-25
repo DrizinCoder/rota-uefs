@@ -4,12 +4,12 @@ import { useState, useEffect } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Bell, BellOff } from "lucide-react";
-import { 
-  registerServiceWorker, 
-  getSubscription, 
-  subscribeUser, 
-  unsubscribeUser, 
-  checkNotificationPermission 
+import {
+  registerServiceWorker,
+  getSubscription,
+  subscribeUser,
+  unsubscribeUser,
+  checkNotificationPermission
 } from "../services/pushManager";
 import { toast } from "react-toastify";
 
@@ -62,9 +62,6 @@ export function NotificationToggle() {
       ) : (
         <BellOff className="h-4 w-4 text-gray-400" />
       )}
-      <Label htmlFor="notifications-toggle" className="text-xs font-medium text-[#103173]">
-        {isEnabled ? "Ativadas" : "Desativadas"}
-      </Label>
       <Switch
         id="notifications-toggle"
         checked={isEnabled}

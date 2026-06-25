@@ -1,3 +1,4 @@
+from app.core.config import settings
 from app.utils.utils import generate_qr_code_base64
 from app.utils.utils import generate_registration_code
 import uuid
@@ -75,7 +76,7 @@ class EmailUseCases:
                 "recover_password.html",
                 {
                     "name": name,
-                    "link": f"https://rota-uefs/reset/password?token={token}"
+                    "link": f"{settings.BASE_URL_FRONTEND}/reset/password?token={token}"
                 }
             )
 

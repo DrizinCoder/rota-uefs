@@ -6,6 +6,8 @@ import {
   AUTH_LOGIN_STUDENT_SUCCESS,
   AUTH_REGISTER_STAFF_SUCCESS,
   AUTH_REGISTER_STUDENT_SUCCESS,
+  AUTH_RECOVERY_SUCCESS_MESSAGE,
+  AUTH_RECOVERY_ERROR_MESSAGE,
 } from '../fixtures/auth_payloads';
 import { mockJsonRoute } from './mock_route_api';
 
@@ -57,6 +59,18 @@ export async function mockRegisterRoute(page: Page, status: number, body?: unkno
 
     await route.continue();
   });
+}
+
+export async function mockAuthRecoverySuccess(page: Page) {
+  await mockJsonRoute(page, '**/auth/recover/password**', { detail: AUTH_RECOVERY_SUCCESS_MESSAGE }, 200);
+}
+
+export async function mockAuthRecoveryFailure(page: Page) {
+  await mockJsonRoute(page, '**/auth/recover/password**', { detail: AUTH_RECOVERY_ERROR_MESSAGE }, 404);
+}
+
+export async function mockAuthLogoutSuccess(page: Page) {
+  await mockJsonRoute(page, '**/auth/logout', { message: 'Logged out successfully' }, 200);
 }
 
 export { AUTH_REGISTER_STAFF_SUCCESS, AUTH_REGISTER_STUDENT_SUCCESS };

@@ -19,7 +19,6 @@ services:
   frontend:
     build: ./frontend
     image: rota_uefs_frontend
-    command: npm run dev -- --hostname 0.0.0.0 --port 3000
     ports:
       - "3000:3000"
     volumes:
