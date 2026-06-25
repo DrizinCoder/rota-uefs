@@ -1,47 +1,38 @@
-from email.mime.image import MIMEImage
 import base64
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from app.core.config import settings
 import logging
+import resend
+from app.core.config import settings
 
 class EmailService:
     def __init__(self):
-        self.server = settings.MAIL_SERVER
-        self.port = settings.MAIL_PORT
-        self.username = settings.MAIL_USERNAME
-        self.password = settings.MAIL_PASSWORD
+        resend.api_key = settings.RESEND_API_KEY 
         self.from_email = settings.MAIL_FROM
 
     def _connect(self):
-        # If credentials are not provided, use a dummy server that logs emails (dev mode)
-        if not self.username or not self.password:
+        if not resend.api_key:
             logger = logging.getLogger(__name__)
             class DummyServer:
-                def sendmail(self, from_addr, to_addrs, msg):
-                    logger.info(f"[DEV EMAIL] sendmail from={from_addr} to={to_addrs}\n{msg[:200]}")
-                def quit(self):
-                    return None
-
+                def send_mock(self, from_addr, to_addr, subject):
+                    logger.info(f"[EMAIL - RESEND] from={from_addr} to={to_addr} subject='{subject}'")
+            
             return DummyServer()
-
-        server = smtplib.SMTP(self.server, self.port)
-        server.starttls()
-        server.login(self.username, self.password)
-        return server
+            
+        return None
 
     def send(self, subject: str, email_to: str, html_content: str):
-        msg = MIMEMultipart("alternative")
-        msg["Subject"] = subject
-        msg["From"] = self.from_email
-        msg["To"] = email_to
+        dev_server = self._connect()
+        if dev_server:
+            dev_server.send_mock(self.from_email, email_to, subject)
+            return
 
-        msg.attach(MIMEText(html_content, "html"))
+        params = {
+            "from": self.from_email,
+            "to": email_to,
+            "subject": subject,
+            "html": html_content,
+        }
 
-        server = self._connect()
-        server.sendmail(self.from_email, [email_to], msg.as_string())
-        server.quit()
+        resend.Emails.send(params)
 
     def send_with_inline_image(
         self,
@@ -51,21 +42,25 @@ class EmailService:
         image_base64: str,
         image_cid: str,
     ):
-        msg = MIMEMultipart("related")
-        msg["Subject"] = subject
-        msg["From"] = self.from_email
-        msg["To"] = email_to
+        dev_server = self._connect()
+        if dev_server:
+            dev_server.send_mock(self.from_email, email_to, f"{subject} [IMG CID: {image_cid}]")
+            return
 
-        msg_alternative = MIMEMultipart("alternative")
-        msg.attach(msg_alternative)
-        msg_alternative.attach(MIMEText(html_content, "html"))
+        image_data = list(base64.b64decode(image_base64))
 
-        image_data = base64.b64decode(image_base64)
-        image = MIMEImage(image_data, _subtype="png")
-        image.add_header("Content-ID", f"<{image_cid}>")
-        image.add_header("Content-Disposition", "inline", filename=f"{image_cid}.png")
-        msg.attach(image)
+        params = {
+            "from": self.from_email,
+            "to": email_to,
+            "subject": subject,
+            "html": html_content,
+            "attachments": [
+                {
+                    "filename": f"{image_cid}.png",
+                    "content": image_data,
+                    "content_id": image_cid
+                }
+            ]
+        }
 
-        server = self._connect()
-        server.sendmail(self.from_email, [email_to], msg.as_string())
-        server.quit()
+        resend.Emails.send(params)
