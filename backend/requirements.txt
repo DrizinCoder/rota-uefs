@@ -127,4 +127,5 @@ websockets==16.0
 zopfli==0.4.1
 websockets==16.0
 yarl==1.23.0
+resend
 setuptools

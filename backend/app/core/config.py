@@ -13,14 +13,8 @@ class Settings(BaseSettings):
     SECRET_KEY: str = os.getenv("SECRET_KEY")
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "360"))
-    MAIL_USERNAME: str
-    MAIL_PASSWORD: str
+    RESEND_API_KEY: str
     MAIL_FROM: str
-    MAIL_PORT: int = 587
-    MAIL_SERVER: str = "smtp.gmail.com"
-    MAIL_FROM_NAME: str = "Rota UEFS"
-    MAIL_STARTTLS: bool = True
-    MAIL_SSL_TLS: bool = False
     USE_CREDENTIALS: bool = True
     MISFIRE_GRACE_TIME: int 
     MINUTES_NOTICE: int = 120
