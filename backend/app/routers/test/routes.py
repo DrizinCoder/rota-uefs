@@ -15,7 +15,7 @@ from app.core.scheduler import task_scheduler
 
 
 
-from app.services.web_push_service import PushSubscriptionService
+from app.services.push_notification.web_push_service import PushSubscriptionService
 from app.routers.users.dependencies import get_push_subscription_service
 from app.repositories.user_repository import UserRepository
 from app.database.db import get_session

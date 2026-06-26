@@ -1,6 +1,6 @@
 from app.DTOs.web_push import DeleteWebPushSubscriptionDTO
 from app.routers.users.dependencies import get_push_subscription_service
-from app.services.web_push_service import PushSubscriptionService
+from app.services.push_notification.web_push_service import PushSubscriptionService
 from app.DTOs.web_push import CreateWebPushSubscriptionDTO
 from fastapi import APIRouter
 from app.middleware import get_current_user

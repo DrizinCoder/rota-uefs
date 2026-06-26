@@ -1,6 +1,6 @@
 from app.services.reservation_service import ReservationService
 from app.repositories.web_push_repository import PushSubscriptionRepository
-from app.services.web_push_service import PushSubscriptionService
+from app.services.push_notification.web_push_service import PushSubscriptionService
 from app.controllers.notification_controller import NotificationController
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
