@@ -16,7 +16,7 @@ export function LandingHero() {
       {/* Background */}
       <div className="absolute inset-0">
         <Image
-          src="/images/campus-bg.png"
+          src="/images/reitoria2.jpg"
           alt="Campus UEFS"
           fill
           className="object-cover"
@@ -77,8 +77,8 @@ export function LandingHero() {
             <div className="relative w-full max-w-lg">
               <div className="absolute -inset-4 bg-cyan-500/10 rounded-3xl blur-2xl" />
               <Image
-                src="/images/hero-bus.png"
-                alt="Ônibus Rota UEFS"
+                src="/images/generic_moving_bus.png"
+                alt="Ônibus Rota UEFS em movimento"
                 width={600}
                 height={400}
                 className="relative rounded-2xl shadow-2xl object-cover"

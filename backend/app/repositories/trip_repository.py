@@ -123,11 +123,7 @@ class TripRepository:
             for trip in trips
         ]
 
-    async def cancel_trip(self, trip_id: str):
-        trip = await self.get_by_id(trip_id)
-        if not trip:
-            return None
-        
+    async def cancel_trip(self, trip: Trip):
         trip.status = TripStatus.CANCELLED
         self.session.add(trip)
         await self.session.commit()

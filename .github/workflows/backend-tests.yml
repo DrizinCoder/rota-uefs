@@ -43,6 +43,7 @@ jobs:
           VAPID_CLAIMS_EMAIL: ${{ secrets.VAPID_CLAIMS_EMAIL }}
           MISFIRE_GRACE_TIME: ${{ secrets.MISFIRE_GRACE_TIME }}
           SCHEDULER_DATA_DIR: /tmp/scheduler
+          RESEND_API_KEY: test_key
         run: |
           export PYTHONPATH=$PYTHONPATH:$(pwd)/backend
           .venv/bin/pytest tests/tests-backend -v --tb=short

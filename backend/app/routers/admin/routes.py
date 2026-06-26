@@ -169,4 +169,14 @@ async def monthly_report(
     if not result:
         raise NotFoundException("Report could not be generated")
     return ResponseHandler.ok(data=result)
-    
+
+@router.patch("/cancel/trip/{id}")
+async def cancel_trip(
+    id: uuid.UUID,
+    controller: TripController = Depends(get_trip_controller),
+    _: TokenData = Depends(require_profile(UserProfile.ADMIN))
+):
+    result = await controller.cancel_trip(id)
+    if not result:
+        raise NotFoundException("Trip not found")
+    return ResponseHandler.ok(result, "Trip cancelled successfully")
