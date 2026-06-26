@@ -8,6 +8,7 @@ from fastapi import Depends
 from app.middleware import TokenData
 from app.core.responses import ResponseHandler
 from app.core.exceptions import InternalServerException
+from app.services.push_notification.use_cases import PushNotificationUseCases
 
 web_push_router = APIRouter(
 )
@@ -20,7 +21,7 @@ async def subscribe_web_push(
 ):
     try:
         result = await service.subscribe(current_user.sub, data)
-        await service.send_to_user(current_user.sub, "Bem-vindo ao Rota UEFS 🚍", "Aproveite!")
+        PushNotificationUseCases().send_welcome(current_user.sub)
     except:
         return InternalServerException("Erro na inscricao de notificacao push-up")
     

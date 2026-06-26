@@ -230,8 +230,7 @@ class PriorityEngine:
         for user in users:
             if user.user_id != "STAFF_UNREGISTERED":
                 await self.notifications.send_trip_cancelled(
-                    user.email, user.full_name, trip.id, trip.date.strftime("%d/%m/%Y"),
-                    background_tasks
+                    user, trip, background_tasks
                 )
 
         return ResponseHandler.ok(message="Viagem cancelada e usuários notificados.")
