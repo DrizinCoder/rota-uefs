@@ -38,10 +38,18 @@ export function ConfirmacaoInscricaoScreen() {
         let origem = "Não informada";
         let destino = "Não informada";
 
+        
         if (tripData.route_id) {
           const routeData = await passengerService.getRouteById(tripData.route_id);
-          origem = routeData.boarding_point;
-          destino = routeData.drop_off_point;
+          
+          origem = routeData.city_of_origin 
+            ? `${routeData.city_of_origin} - ${routeData.boarding_point}` 
+            : routeData.boarding_point;
+            
+          destino = routeData.destination_city 
+            ? `${routeData.destination_city} - ${routeData.drop_off_point}` 
+            : routeData.drop_off_point;
+            
         } else {
           // Fallback caso a rota venha vazia
           origem = tripData.boarding_point || origem;
@@ -49,26 +57,10 @@ export function ConfirmacaoInscricaoScreen() {
         }
 
 
-        // Se a viagem for Salvador-Feira ou Feira-Salvador, adiciona 2 horas ao horário de término
-        const isSalvadorFeira =
-          (origem.toLowerCase().includes("salvador") && destino.toLowerCase().includes("feira")) ||
-          (origem.toLowerCase().includes("feira") && destino.toLowerCase().includes("salvador"));
-
-        let horarioFim = "--:--";
-        if (isSalvadorFeira && tripData.departure_time) {
-          const [hoursStr, minutesStr] = tripData.departure_time.split(":");
-          if (hoursStr && minutesStr) {
-            let hours = parseInt(hoursStr, 10);
-            hours = (hours + 2) % 24;
-            horarioFim = `${hours.toString().padStart(2, "0")}:${minutesStr.substring(0, 2)}`;
-          }
-        }
-
         setViagemSelecionada({
           origem,
           destino,
           horarioInicio: tripData.departure_time ? tripData.departure_time.substring(0, 5) : "",
-          horarioFim,
         });
       } catch (error) {
         console.error("Erro ao buscar detalhes da viagem:", error);
@@ -174,14 +166,6 @@ export function ConfirmacaoInscricaoScreen() {
                   <p className="text-[10px] font-black text-[#73AABF] uppercase tracking-widest">Saída</p>
                 </div>
                 <p className="text-2xl font-black text-[#103173]">{viagemSelecionada.horarioInicio}</p>
-              </div>
-
-              <div className="bg-[#E4F2F1] p-4 rounded-2xl">
-                <div className="flex items-center gap-2 mb-1">
-                  <CheckCircle2 className="h-4 w-4 text-[#23B99A]" />
-                  <p className="text-[10px] font-black text-[#73AABF] uppercase tracking-widest">Previsão</p>
-                </div>
-                <p className="text-2xl font-black text-[#103173]">{viagemSelecionada.horarioFim}</p>
               </div>
             </div>
 

@@ -64,3 +64,10 @@ class TripController:
         except Exception as e:
             logger.error(f"Error canceling subscription for reservation {reservation_id}: {e}")
             raise
+
+    async def cancel_trip(self, trip_id: uuid.UUID):
+        try:
+            return await self.trip_service.cancel_trip(trip_id)
+        except Exception as e:
+            logger.error(f"Error canceling trip {trip_id}: {e}")
+            raise
