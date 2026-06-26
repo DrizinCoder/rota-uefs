@@ -1,6 +1,7 @@
 from app.core.config import settings
 import uuid
 from app.models.models import Admin, User
+from app.repositories.web_push_repository import PushSubscriptionRepository
 from .web_push_service import PushSubscriptionService
 from app.core.exceptions import InternalServerException
 import logging
@@ -8,8 +9,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 class PushNotificationUseCases:
-    def __init__(self):
-        self.push_sub_service = PushSubscriptionService()
+    def __init__(self, pushup_repo: PushSubscriptionRepository):
+        self.push_sub_service = PushSubscriptionService(pushup_repo)
 
     def send_quorum_not_reached_notification(self, user_id: uuid.UUID, trip_name: str):
         try:

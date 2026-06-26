@@ -17,7 +17,8 @@ def get_priority_engine(session: AsyncSession = Depends(get_session)) -> Priorit
         user_repo=UserRepository(session),
         trip_repo=TripRepository(session),
         res_repo=ReservationRepository(session),
-        bus_repo=BusRepository(session)
+        bus_repo=BusRepository(session),
+        pushup_repo=PushSubscriptionRepository(session)
     )
 
 
