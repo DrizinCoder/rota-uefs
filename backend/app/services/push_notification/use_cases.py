@@ -24,19 +24,19 @@ class PushNotificationUseCases:
                 message=f"Erro ao enviar notificação push de quórum: {str(e)}"
             )
 
-    # def send_welcome(self, user: User, link: str):
-    #     try:
+    def send_welcome(self, user_id: uuid.UUID):
+        try:
 
-    #         self.push_sub_service.send_to_user(
-    #             User.user_id, 
-    #             "Bem-vindo ao Rota UEFS 🚍", 
-    #             f"Aproveite!"
-    #         )
+            self.push_sub_service.send_to_user(
+                user_id, 
+                "Bem-vindo ao Rota UEFS 🚍", 
+                f"Aproveite!"
+            )
 
-    #     except Exception as e:
-    #         return InternalServerException(
-    #             message=f"Erro ao enviar notificação push: {str(e)}"
-    #         )
+        except Exception as e:
+            return InternalServerException(
+                message=f"Erro ao enviar notificação push: {str(e)}"
+            )
         
     def send_cancellation_confirmation_driver(self, user_id: uuid.UUID, trip_name: str):
         try:
@@ -158,7 +158,7 @@ class PushNotificationUseCases:
         except Exception as e:
             logger.error(f"Erro notificacao reativação staff: {e}")
 
-    def send_reactivation_confirmation_staff_for_extra_name(self, user_id: uuid.UUID, name: str, trip_name: str, extra_name: str):
+    def send_reactivation_confirmation_staff_for_extra_name(self, user_id: uuid.UUID, trip_name: str, extra_name: str):
         try:
 
             self.push_sub_service.send_to_user(
@@ -170,7 +170,7 @@ class PushNotificationUseCases:
         except Exception as e:
             logger.error(f"Erro notificacao reativação extra: {e}")
 
-    def send_reactivation_confirmation_student(self, user_id: uuid.UUID, name: str, trip_name: str):
+    def send_reactivation_confirmation_student(self, user_id: uuid.UUID, trip_name: str):
         try:
             self.push_sub_service.send_to_user(
                 user_id, 
@@ -181,37 +181,36 @@ class PushNotificationUseCases:
         except Exception as e:
             logger.error(f"Erro notificacao reativação estudante: {e}")
 
-    # def send_cancellation_confirmation_staff(self, email: str, name: str, trip_name: str):
-    #     try:
-    #         html = self.template_service.render(
-    #             "cancellation_staff.html",
-    #             {"name": name.split(" ")[0], "trip_name": trip_name}
-    #         )
-    #         self.email_service.send("Reserva cancelada - Rota UEFS 🚍", email, html)
-    #     except Exception as e:
-    #         logger.error(f"Erro e-mail cancelamento staff: {e}")
+    def send_cancellation_confirmation_staff(self, user_id: uuid.UUID, trip_name: str):
+        try:
+            self.push_sub_service.send_to_user(
+                user_id, 
+                "Reserva cancelada - Rota UEFS 🚍"
+                f"Confirmamos o cancelamento da sua reserva para a viagem { trip_name }."
+            )
+        except Exception as e:
+            logger.error(f"Erro notificacao cancelamento staff: {e}")
 
-    # async def send_cancellation_confirmation_staff_for_extra_name(self, email: str, name: str, trip_name: str, extra_name: str):
-    #     try:
-    #         html = self.template_service.render(
-    #             "cancellation_staff_extra.html",
-    #             {"name": name.split(" ")[0], "trip_name": trip_name, "extra_name": extra_name}
-    #         )
-    #         self.email_service.send("Reserva de convidado cancelada - Rota UEFS 🚍", email, html)
-    #     except Exception as e:
-    #         logger.error(f"Erro e-mail cancelamento extra: {e}")
+    async def send_cancellation_confirmation_staff_for_extra_name(self, user_id: uuid.UUID, trip_name: str, extra_name: str):
+        try:
+            self.push_sub_service.send_to_user(
+                user_id, 
+                "Reserva cancelada - Rota UEFS 🚍"
+                f"Confirmamos o cancelamento da reserva de {extra_name} para a viagem { trip_name }."
+            )
+        except Exception as e:
+            logger.error(f"Erro notificacao cancelamento staff: {e}")
         
-    # async def send_cancellation_confirmation_student(self, email: str, name: str, trip_name: str):
-    #     try:
-    #         html = self.template_service.render(
-    #             "cancellation_student.html",
-    #             {"name": name.split(" ")[0], "trip_name": trip_name}
-    #         )
-    #         print(f"Enviando e-mail de cancelamento para estudante {name} email {email}")
-    #         await self.email_service.send("Confirmação de cancelamento - Rota UEFS 🚍", email, html)
-    #         print(f"E-mail de cancelamento enviado para estudante {name} email {email}")
-    #     except Exception as e:
-    #         logger.error(f"Erro e-mail cancelamento estudante: {e}")
+    async def send_cancellation_confirmation_student(self, user_id: uuid.UUID, trip_name: str):
+        try:
+            self.push_sub_service.send_to_user(
+                user_id, 
+                "Reserva cancelada - Rota UEFS 🚍"
+                f"Sua reserva para { trip_name } foi cancelada com sucesso."
+            )
+
+        except Exception as e:
+            logger.error(f"Erro notificacao cancelamento estudante: {e}")
         
     # def send_boarding_qr_code(
     #     self,
