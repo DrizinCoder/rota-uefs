@@ -39,9 +39,9 @@ class PushNotificationUseCases:
                 message=f"Erro ao enviar notificação push: {str(e)}"
             )
         
-    def send_cancellation_confirmation_driver(self, user_id: uuid.UUID, trip_name: str):
+    async def send_cancellation_confirmation_driver(self, user_id: uuid.UUID, trip_name: str):
         try:
-            self.push_sub_service.send_to_user(
+            await self.push_sub_service.send_to_user(
                 user_id, 
                 "Confirmação de cancelamento - Rota UEFS 🚍", 
                 f"Informamos que sua participação na viagem {trip_name} cancelada pelo motorista devido à ausência no momento do embarque. \nSe o cancelamento ocorreu de forma indevida, entre em contato com a equipe responsável."
@@ -194,7 +194,7 @@ class PushNotificationUseCases:
 
     async def send_cancellation_confirmation_staff_for_extra_name(self, user_id: uuid.UUID, trip_name: str, extra_name: str):
         try:
-            self.push_sub_service.send_to_user(
+            await self.push_sub_service.send_to_user(
                 user_id, 
                 "Reserva cancelada - Rota UEFS 🚍"
                 f"Confirmamos o cancelamento da reserva de {extra_name} para a viagem { trip_name }."
@@ -203,12 +203,16 @@ class PushNotificationUseCases:
             logger.error(f"Erro notificacao cancelamento staff: {e}")
         
     async def send_cancellation_confirmation_student(self, user_id: uuid.UUID, trip_name: str):
+        print("Ollllllllllllllllllllllll888888888888888888888888")
         try:
-            self.push_sub_service.send_to_user(
+            print("Ollllllllllllllllllllllll000000000000000000000")
+            await self.push_sub_service.send_to_user(
                 user_id, 
-                "Reserva cancelada - Rota UEFS 🚍"
+                "Reserva cancelada - Rota UEFS 🚍",
                 f"Sua reserva para { trip_name } foi cancelada com sucesso."
             )
+            
+            print("Ollllllllllllllllllllllll222222222222222222222222222222222")
 
         except Exception as e:
             logger.error(f"Erro notificacao cancelamento estudante: {e}")

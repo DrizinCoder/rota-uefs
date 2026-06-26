@@ -25,6 +25,7 @@ router = APIRouter()
 
 class EmailRequest(BaseModel):
     target_email: str  
+    
   
 @router.post("/enviar-push")
 async def testar_envio_push(

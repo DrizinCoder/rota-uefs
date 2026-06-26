@@ -33,5 +33,6 @@ async def unsubscribe_web_push(
     current_user: TokenData = Depends(get_current_user),
     service: PushSubscriptionService = Depends(get_push_subscription_service)
 ):
+    print(f"Desinscrevendo usuário {current_user.sub} da notificação push-up...")
     result = await service.unsubscribe(current_user.sub, data)
     return ResponseHandler.ok(result)
