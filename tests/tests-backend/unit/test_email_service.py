@@ -5,26 +5,28 @@ from app.services.email.email_service import EmailService
 from app.services.email.use_cases import EmailUseCases
 
 
-def test_email_service_send_uses_smtp_connection(monkeypatch):
+def test_email_service_send_uses_resend_api(monkeypatch):
+    monkeypatch.setattr('app.services.email.email_service.resend.api_key', 'test_key')
+    mock_send = MagicMock()
+    monkeypatch.setattr('app.services.email.email_service.resend.Emails.send', mock_send)
+
     service = EmailService()
-    fake_server = MagicMock()
-    fake_server.sendmail.return_value = True
-
-    monkeypatch.setattr(service, '_connect', lambda: fake_server)
-
     service.send(subject='Teste', email_to='user@test.com', html_content='<p>Ok</p>')
 
-    fake_server.sendmail.assert_called_once()
-    called_args = fake_server.sendmail.call_args.args
-    assert called_args[0] == service.from_email
-    assert called_args[1] == ['user@test.com']
+    mock_send.assert_called_once()
+    called_args = mock_send.call_args.args[0]
+    assert called_args['from'] == service.from_email
+    assert called_args['to'] == 'user@test.com'
+    assert called_args['subject'] == 'Teste'
+    assert called_args['html'] == '<p>Ok</p>'
 
 
-def test_email_service_send_with_inline_image_attaches_image(monkeypatch):
+def test_email_service_send_with_inline_image_uses_resend_api(monkeypatch):
+    monkeypatch.setattr('app.services.email.email_service.resend.api_key', 'test_key')
+    mock_send = MagicMock()
+    monkeypatch.setattr('app.services.email.email_service.resend.Emails.send', mock_send)
+
     service = EmailService()
-    fake_server = MagicMock()
-    fake_server.sendmail.return_value = True
-    monkeypatch.setattr(service, '_connect', lambda: fake_server)
 
     valid_png_base64 = base64.b64encode(
         b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\x0cIDAT\x08\xd7c\xf8\x0f\x00\x01\x01\x01\x00\x18\xdd\x8d\xf7\x00\x00\x00\x00IEND\xaeB`\x82'
@@ -38,10 +40,18 @@ def test_email_service_send_with_inline_image_attaches_image(monkeypatch):
         image_cid='test'
     )
 
-    fake_server.sendmail.assert_called_once()
-    payload = fake_server.sendmail.call_args.args[2]
-    assert 'Content-ID: <test>' in payload
-    assert 'Content-Type: multipart/related' in payload
+    mock_send.assert_called_once()
+    called_args = mock_send.call_args.args[0]
+    assert called_args['from'] == service.from_email
+    assert called_args['to'] == 'user@test.com'
+    assert called_args['subject'] == 'Teste'
+    assert called_args['html'] == '<p><img src="cid:test"></p>'
+    
+    assert len(called_args['attachments']) == 1
+    attachment = called_args['attachments'][0]
+    assert attachment['filename'] == 'test.png'
+    assert attachment['content_id'] == 'test'
+    assert isinstance(attachment['content'], list)
 
 
 def test_email_use_cases_send_welcome_calls_render_and_send(monkeypatch):
