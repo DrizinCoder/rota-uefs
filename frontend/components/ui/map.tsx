@@ -2,6 +2,7 @@
 
 import MapLibreGL, { type PopupOptions, type MarkerOptions } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import type { StyleSpecification } from 'maplibre-gl';
 import {
   createContext,
   forwardRef,
@@ -41,7 +42,7 @@ const defaultStyles = {
         maxzoom: 19
       }
     ]
-  }
+  } as StyleSpecification
 };
 
 type Theme = "light" | "dark";
