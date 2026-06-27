@@ -7,6 +7,7 @@ import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { AdminTopbar } from "@/components/admin/admin-topbar";
 import { AdminViagensList, type ViagemTela } from "@/features/gerenciar-viagens/ui/admin-viagens-list";
 import { adminService } from "@/services/adminService";
+import { authService } from "@/services/authService";
 
 const tradutorStatus: Record<string, string> = {
   "Pending": "Pendente",
@@ -42,27 +43,43 @@ export default function AdminViagensPage() {
     router.push(`/admin/viagens/cadastro?id=${id}`);
   };
 
-  useEffect(() => {
-    async function carregarDados() {
-      try {
-        setLoading(true);
-        const data = await adminService.listarViagens();
-        
-        // Mapeia os dados pra ajustar o status
-        const viagensMapeadas = data.map((viagem) => ({
-          ...viagem, // Puxa tudo que veio do banco (id, rota, onibus, etc)
-          status: tradutorStatus[viagem.status] || viagem.status,
-        }));
-        
-        setViagens(viagensMapeadas);
-      } catch (err) {
-        console.error("Erro ao carregar viagens:", err);
-      } finally {
-        setLoading(false);
-      }
+  
+
+  const carregarDados = async () => {
+    try {
+      setLoading(true);
+      const data = await adminService.listarViagens();
+      
+      // Mapeia os dados pra ajustar o status
+      const viagensMapeadas = data.map((viagem) => ({
+        ...viagem, // Puxa tudo que veio do banco (id, rota, onibus, etc)
+        status: tradutorStatus[viagem.status] || viagem.status,
+      }));
+      
+      setViagens(viagensMapeadas);
+    } catch (err) {
+      console.error("Erro ao carregar viagens:", err);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     carregarDados();
   }, []);
+
+  const handleCancelar = async (id: string) => {
+    const confirmado = window.confirm("Tem certeza que deseja cancelar esta viagem?");
+    if (!confirmado) return;
+
+    try {
+      await authService.cancelTrip(id);
+      await carregarDados();
+      window.alert("Viagem cancelada com sucesso.");
+    } catch (err) {
+      window.alert("Erro ao cancelar a viagem. Tente novamente.");
+    }
+  }
 
   const viagensFiltradas = useMemo(() => {
     let filtradas = [...viagens];
@@ -147,7 +164,7 @@ export default function AdminViagensPage() {
               setStatusFilter={setStatusFilter}
               onEditar={handleEditar}
               onRemover={handleExcluir}
-              onCancelar={() => {}}
+              onCancelar={handleCancelar}
             />
           </div>
         </div>
