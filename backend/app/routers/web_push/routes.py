@@ -21,7 +21,7 @@ async def subscribe_web_push(
 ):
     try:
         result = await service.subscribe(current_user.sub, data)
-        PushNotificationUseCases().send_welcome(current_user.sub)
+        await PushNotificationUseCases(service.push_subscription_repo).send_welcome(current_user.sub)
     except:
         return InternalServerException("Erro na inscricao de notificacao push-up")
     
@@ -33,6 +33,5 @@ async def unsubscribe_web_push(
     current_user: TokenData = Depends(get_current_user),
     service: PushSubscriptionService = Depends(get_push_subscription_service)
 ):
-    print(f"Desinscrevendo usuário {current_user.sub} da notificação push-up...")
     result = await service.unsubscribe(current_user.sub, data)
     return ResponseHandler.ok(result)
