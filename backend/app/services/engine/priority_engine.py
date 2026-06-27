@@ -216,7 +216,6 @@ class PriorityEngine:
 
         user = reservation.user
         trip = reservation.trip
-        print("Olllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllla")
         await self.notifications.cancel_subscription_notifications(user, profile, trip, reservation, background_tasks)
         
         return ResponseHandler.ok(message="Reserva cancelada com sucesso.")

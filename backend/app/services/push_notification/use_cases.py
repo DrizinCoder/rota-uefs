@@ -12,9 +12,9 @@ class PushNotificationUseCases:
     def __init__(self, pushup_repo: PushSubscriptionRepository):
         self.push_sub_service = PushSubscriptionService(pushup_repo)
 
-    def send_quorum_not_reached_notification(self, user_id: uuid.UUID, trip_name: str):
+    async def send_quorum_not_reached_notification(self, user_id: uuid.UUID, trip_name: str):
         try:
-            self.push_sub_service.send_to_user(
+            await self.push_sub_service.send_to_user(
                 user_id, 
                 "⚠️ Alerta de Quórum", 
                 f"A viagem {trip_name} não atingiu o quórum mínimo necessário."
@@ -25,10 +25,10 @@ class PushNotificationUseCases:
                 message=f"Erro ao enviar notificação push de quórum: {str(e)}"
             )
 
-    def send_welcome(self, user_id: uuid.UUID):
+    async def send_welcome(self, user_id: uuid.UUID):
         try:
 
-            self.push_sub_service.send_to_user(
+            await self.push_sub_service.send_to_user(
                 user_id, 
                 "Bem-vindo ao Rota UEFS 🚍", 
                 f"Aproveite!"
@@ -95,9 +95,9 @@ class PushNotificationUseCases:
     #             message=f"Erro ao enviar email de confirmação de conta: {str(e)}"
     #         )
 
-    def send_trip_cancelled(self, user_id: uuid.UUID, trip_name: str, trip_date: str):
+    async def send_trip_cancelled(self, user_id: uuid.UUID, trip_name: str, trip_date: str):
         try:
-            self.push_sub_service.send_to_user(
+            await self.push_sub_service.send_to_user(
                 user_id, 
                 "Viagem cancelada - Rota UEFS 🚍", 
                 f"Informamos que Infelizmente, a viagem {trip_name} agendada para {trip_date} foi cancelada. \nPor favor, procure consultar outras rotas disponíveis ou entre em contato com o suporte para mais informações."
@@ -108,9 +108,9 @@ class PushNotificationUseCases:
                 message=f"Erro ao enviar notificacao push-up de cancelamento de viagem: {str(e)}"
             )
 
-    def send_subscription_confirmation_staff(self, user_id: uuid.UUID, name: str, trip_name: str):
+    async def send_subscription_confirmation_staff(self, user_id: uuid.UUID, name: str, trip_name: str):
         try:
-            self.push_sub_service.send_to_user(
+            await self.push_sub_service.send_to_user(
                 user_id, 
                 "Inscrição confirmada - Rota UEFS 🚍", 
                 f"Sua inscrição na viagem {trip_name} foi realizada com sucesso!"
@@ -121,9 +121,9 @@ class PushNotificationUseCases:
                 message=f"Erro ao enviar notificação de lista de espera: {str(e)}"
             )
     
-    def send_subscription_confirmation_staff_for_extra_name(self, user_id: uuid.UUID, trip_name: str, extra_name: str):
+    async def send_subscription_confirmation_staff_for_extra_name(self, user_id: uuid.UUID, trip_name: str, extra_name: str):
         try:
-            self.push_sub_service.send_to_user(
+            await self.push_sub_service.send_to_user(
                 user_id, 
                 "Inscrição confirmada - Rota UEFS 🚍", 
                 f"A inscrição de {extra_name} na viagem {trip_name} foi realizada com sucesso!"
@@ -134,9 +134,9 @@ class PushNotificationUseCases:
                 message=f"Erro ao enviar notificação de lista de espera: {str(e)}"
             )
 
-    def send_subscription_confirmation_student(self, user_id: uuid.UUID, name: str, trip_name: str):
+    async def send_subscription_confirmation_student(self, user_id: uuid.UUID, name: str, trip_name: str):
         try:
-            self.push_sub_service.send_to_user(
+            await self.push_sub_service.send_to_user(
                 user_id, 
                 "Inscrição confirmada - Rota UEFS 🚍", 
                 f"Confirmada sua solicitação de vaga para viagem {trip_name}!\nLembramos que, de acordo com as normas do Rota UEFS, as vagas são ocupadas prioritariamente por servidores. Caso o limite de vagas seja atingido por professores/staff, sua inscrição poderá ser movida automaticamente para a lista de espera."
@@ -148,9 +148,9 @@ class PushNotificationUseCases:
             )
         
 
-    def send_reactivation_confirmation_staff(self, user_id: uuid.UUID, trip_name: str):
+    async def send_reactivation_confirmation_staff(self, user_id: uuid.UUID, trip_name: str):
         try:
-            self.push_sub_service.send_to_user(
+            await self.push_sub_service.send_to_user(
                 user_id, 
                 "Reserva reativada - Rota UEFS 🚍", 
                 f"Informamos que sua reserva para a viagem { trip_name } foi reativada com sucesso!"
@@ -159,10 +159,10 @@ class PushNotificationUseCases:
         except Exception as e:
             logger.error(f"Erro notificacao reativação staff: {e}")
 
-    def send_reactivation_confirmation_staff_for_extra_name(self, user_id: uuid.UUID, trip_name: str, extra_name: str):
+    async def send_reactivation_confirmation_staff_for_extra_name(self, user_id: uuid.UUID, trip_name: str, extra_name: str):
         try:
 
-            self.push_sub_service.send_to_user(
+            await self.push_sub_service.send_to_user(
                 user_id, 
                 "Reserva reativada - Rota UEFS 🚍", 
                 f"Informamos que a reserva de {extra_name} para a viagem { trip_name } foi reativada com sucesso!"
@@ -171,9 +171,9 @@ class PushNotificationUseCases:
         except Exception as e:
             logger.error(f"Erro notificacao reativação extra: {e}")
 
-    def send_reactivation_confirmation_student(self, user_id: uuid.UUID, trip_name: str):
+    async def send_reactivation_confirmation_student(self, user_id: uuid.UUID, trip_name: str):
         try:
-            self.push_sub_service.send_to_user(
+            await self.push_sub_service.send_to_user(
                 user_id, 
                 "Reserva reativada - Rota UEFS 🚍", 
                 f"Boas notícias! Sua reserva para { trip_name } foi reativada. Sua vaga está garantida novamente no sistema"
@@ -182,11 +182,11 @@ class PushNotificationUseCases:
         except Exception as e:
             logger.error(f"Erro notificacao reativação estudante: {e}")
 
-    def send_cancellation_confirmation_staff(self, user_id: uuid.UUID, trip_name: str):
+    async def send_cancellation_confirmation_staff(self, user_id: uuid.UUID, trip_name: str):
         try:
-            self.push_sub_service.send_to_user(
+            await self.push_sub_service.send_to_user(
                 user_id, 
-                "Reserva cancelada - Rota UEFS 🚍"
+                "Reserva cancelada - Rota UEFS 🚍",
                 f"Confirmamos o cancelamento da sua reserva para a viagem { trip_name }."
             )
         except Exception as e:
@@ -196,24 +196,20 @@ class PushNotificationUseCases:
         try:
             await self.push_sub_service.send_to_user(
                 user_id, 
-                "Reserva cancelada - Rota UEFS 🚍"
+                "Reserva cancelada - Rota UEFS 🚍",
                 f"Confirmamos o cancelamento da reserva de {extra_name} para a viagem { trip_name }."
             )
         except Exception as e:
             logger.error(f"Erro notificacao cancelamento staff: {e}")
         
     async def send_cancellation_confirmation_student(self, user_id: uuid.UUID, trip_name: str):
-        print("Ollllllllllllllllllllllll888888888888888888888888")
         try:
-            print("Ollllllllllllllllllllllll000000000000000000000")
             await self.push_sub_service.send_to_user(
                 user_id, 
                 "Reserva cancelada - Rota UEFS 🚍",
                 f"Sua reserva para { trip_name } foi cancelada com sucesso."
             )
             
-            print("Ollllllllllllllllllllllll222222222222222222222222222222222")
-
         except Exception as e:
             logger.error(f"Erro notificacao cancelamento estudante: {e}")
         

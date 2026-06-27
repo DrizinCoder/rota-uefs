@@ -71,7 +71,6 @@ class PushSubscriptionService:
 
     async def send_to_user(self, user_id: uuid.UUID, title: str, body: str):
         logger.info(f"Sending push notification | User ID: {user_id}")
-        print("Olllllllllllllllllllllllllllll1555555555555555555555555555551")
         subscriptions = await self.push_subscription_repo.find_all_by_user_id(user_id)
 
         if not subscriptions:
