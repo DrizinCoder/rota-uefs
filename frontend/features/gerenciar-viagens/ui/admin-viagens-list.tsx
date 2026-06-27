@@ -275,7 +275,12 @@ export function AdminViagensList({
                   </button>
                   <button 
                     onClick={() => onCancelar(viagem.trip_id)}
-                    className="px-4 py-2 text-sm font-bold text-red-500 bg-red-50 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"
+                    disabled={viagem.status === "Cancelada" || viagem.status === "Cancelled"}
+                    className={`px-4 py-2 text-sm font-bold border rounded-lg flex items-center justify-center gap-2 transition-colors ${
+                      viagem.status === "Cancelada" || viagem.status === "Cancelled"
+                        ? "text-slate-400 bg-slate-100 border-slate-200 cursor-not-allowed"
+                        : "text-red-500 bg-red-50 border-slate-200 hover:bg-slate-50"
+                    }`}
                   >
                     <X className="h-4 w-4" />
                     Cancelar
