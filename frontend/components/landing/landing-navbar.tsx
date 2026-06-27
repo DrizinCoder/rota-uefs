@@ -110,9 +110,9 @@ export function LandingNavbar() {
       {/* ── Desktop ─────────────────────────────────────────────── */}
       <motion.div
         animate={{
-          width: visible ? "65%" : "100%",
-          y: visible ? 14 : 0,
-          borderRadius: visible ? 9999 : 0,
+          width: "100%",
+          y: 0,
+          borderRadius: 0,
           backgroundColor: visible
             ? "rgba(2, 6, 23, 0.92)"
             : "rgb(15, 23, 42)",
@@ -181,9 +181,9 @@ export function LandingNavbar() {
       {/* ── Mobile ──────────────────────────────────────────────── */}
       <motion.div
         animate={{
-          width: visible ? "92%" : "100%",
-          y: visible ? 12 : 0,
-          borderRadius: visible ? 16 : 0,
+          width: "100%",
+          y: 0,
+          borderRadius: 0,
           backgroundColor: visible
             ? "rgba(2, 6, 23, 0.92)"
             : "rgb(15, 23, 42)",

@@ -61,6 +61,11 @@ export const authService = {
     });
     return response.data;
   },
+
+  cancelTrip: async (tripId: string) => {
+    const response = await api.patch(`/admin/cancel/trip/${tripId}`);
+    return response.data;
+  },
 };
 
 // DTO de redefinição de senha
