@@ -19,9 +19,12 @@ def test_get_by_id_returns_user():
 
 
 def test_patch_returns_none_when_user_missing():
-    repository = UserRepository(AsyncMock())
-    repository.get_by_id = AsyncMock(return_value=None)
+    session = AsyncMock()
+    mock_result = MagicMock()
+    mock_result.scalar_one_or_none.return_value = None
+    session.execute.return_value = mock_result
 
+    repository = UserRepository(session)
     result = asyncio.run(repository.patch('00000000-0000-0000-0000-000000000000', MagicMock()))
 
     assert result is None

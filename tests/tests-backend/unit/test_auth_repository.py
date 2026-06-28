@@ -35,9 +35,12 @@ def test_get_by_registration_id_returns_expected_user():
 
 
 def test_anonymize_returns_none_when_user_not_found():
-    repository = UserRepository(AsyncMock())
-    repository.get_by_id = AsyncMock(return_value=None)
+    session = AsyncMock()
+    mock_result = MagicMock()
+    mock_result.scalar_one_or_none.return_value = None
+    session.execute.return_value = mock_result
 
+    repository = UserRepository(session)
     result = asyncio.run(repository.anonymize('00000000-0000-0000-0000-000000000000'))
 
     assert result is None
