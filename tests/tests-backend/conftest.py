@@ -15,6 +15,7 @@ os.environ.setdefault("MISFIRE_GRACE_TIME", "30")
 os.environ.setdefault("VAPID_PRIVATE_KEY", "test-private-key")
 os.environ.setdefault("VAPID_PUBLIC_KEY", "test-public-key")
 os.environ.setdefault("VAPID_CLAIMS_EMAIL", "test@example.com")
+os.environ.setdefault("RESEND_API_KEY", "re_test_fake_key")
 os.environ.setdefault("SCHEDULER_DATA_DIR", "/tmp/scheduler_data")
 
 import pytest

@@ -3,6 +3,7 @@ import uuid
 
 import pytest
 from types import SimpleNamespace
+from unittest.mock import AsyncMock
 
 import app.services.engine.notifications as notifications_module
 from app.enums.enums import UserProfile
@@ -46,12 +47,19 @@ async def test_notifications_subscribe_queues_boarding_qr_code_for_student(monke
     dummy_email = DummyEmailUseCases()
     monkeypatch.setattr(notifications_module, "EmailUseCases", lambda *args, **kwargs: dummy_email)
 
-    notifications = Notifications(DummyRepo(), DummyRepo(), DummyRepo(), DummyRepo())
+    trip_repo = AsyncMock()
+    trip_repo.get_name_route_by_trip_id.return_value = [{"route_name": "Rota Teste"}]
+
+    pushup_repo = AsyncMock()
+    pushup_repo.find_all_by_user_id.return_value = []
+
+    notifications = Notifications(DummyRepo(), trip_repo, DummyRepo(), DummyRepo(), pushup_repo)
     user = SimpleNamespace(
         profile=UserProfile.STUDENT,
         email="student@example.com",
         full_name="Test Student",
-        registration_id="REG123"
+        registration_id="REG123",
+        user_id=uuid.uuid4(),
     )
     trip = SimpleNamespace(
         route=SimpleNamespace(boarding_point="A", drop_off_point="B"),
@@ -73,12 +81,19 @@ async def test_notifications_cancel_subscription_schedules_staff_cancellation_fo
     dummy_email = DummyEmailUseCases()
     monkeypatch.setattr(notifications_module, "EmailUseCases", lambda *args, **kwargs: dummy_email)
 
-    notifications = Notifications(DummyRepo(), DummyRepo(), DummyRepo(), DummyRepo())
+    trip_repo = AsyncMock()
+    trip_repo.get_name_route_by_trip_id.return_value = [{"route_name": "Rota Teste"}]
+
+    pushup_repo = AsyncMock()
+    pushup_repo.find_all_by_user_id.return_value = []
+
+    notifications = Notifications(DummyRepo(), trip_repo, DummyRepo(), DummyRepo(), pushup_repo)
     user = SimpleNamespace(
         profile=UserProfile.STAFF,
         email="staff@example.com",
         full_name="Staff Test",
-        registration_id="SRV123"
+        registration_id="SRV123",
+        user_id=uuid.uuid4(),
     )
     trip = SimpleNamespace(
         route=SimpleNamespace(boarding_point="A", drop_off_point="B"),

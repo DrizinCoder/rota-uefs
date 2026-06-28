@@ -7,7 +7,7 @@ from app.enums.enums import UserProfile
 
 
 def test_get_priority_returns_expected_values():
-    engine = PriorityEngine(None, None, None, None)
+    engine = PriorityEngine(None, None, None, None, None)
     assert engine.get_priority(UserProfile.STAFF, None) == 0
     assert engine.get_priority(UserProfile.STUDENT, None) == 2
     assert engine.get_priority("unknown", None) == 99
@@ -31,7 +31,7 @@ async def test_get_valid_reservation_returns_only_capacity_reservations():
     bus_repo.get_by_plate.return_value = bus
     res_repo.get_by_trip_id.return_value = [reservation1, reservation2]
 
-    engine = PriorityEngine(user_repo, trip_repo, res_repo, bus_repo)
+    engine = PriorityEngine(user_repo, trip_repo, res_repo, bus_repo, None)
     result = await engine.get_valid_reservation(trip_id)
 
     assert len(result) == 1
