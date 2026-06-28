@@ -1,7 +1,7 @@
 from app.controllers.notification_controller import NotificationController
 from app.routers.checkin.routes import get_reservation_service
 from app.routers.users.dependencies import get_push_subscription_service
-from app.services.web_push_service import PushSubscriptionService
+from app.services.push_notification.web_push_service import PushSubscriptionService
 from app.services.reservation_service import ReservationService
 from fastapi import Depends
 

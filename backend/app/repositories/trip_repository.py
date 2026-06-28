@@ -153,10 +153,9 @@ class TripRepository:
 
         result = await self.session.execute(statement)
 
-        return [{
-                "route_name": row.route_name,
-                "route_id": row.route_id
-            } for row in  result]
+        return [
+            {"route_name": row.route_name, "route_id": row.route_id } for row in  result
+            ]
 
     async def get_by_date(self, trip_date: date):
         statement = select(Trip).where(Trip.trip_date == trip_date)

@@ -1,6 +1,6 @@
 from app.services.reservation_service import ReservationService
 from app.repositories.web_push_repository import PushSubscriptionRepository
-from app.services.web_push_service import PushSubscriptionService
+from app.services.push_notification.web_push_service import PushSubscriptionService
 from app.repositories.reservation_repository import ReservationRepository
 from app.repositories.bus_repository import BusRepository
 from app.services.engine.priority_engine import PriorityEngine
@@ -54,12 +54,14 @@ async def get_priority_engine(
     trip_repo = TripRepository(session)
     res_repo = ReservationRepository(session)
     bus_repo = BusRepository(session)
-
+    pushup_repo=PushSubscriptionRepository(session) 
+       
     return PriorityEngine(
         user_repo=user_repo,
         trip_repo=trip_repo,
         res_repo=res_repo,
-        bus_repo=bus_repo
+        bus_repo=bus_repo,
+        pushup_repo=pushup_repo
     )
 
 async def get_trip_controller(
