@@ -38,7 +38,7 @@ class DummyBackgroundTasks:
 
 class DummyUserRepo:
     async def list_all_admins_full(self):
-        return [SimpleNamespace(user=SimpleNamespace(email="admin@example.com", full_name="Admin"))]
+        return [SimpleNamespace(admin_id="admin-001", user=SimpleNamespace(email="admin@example.com", full_name="Admin"))]
 
 
 class DummyReservationRepository:

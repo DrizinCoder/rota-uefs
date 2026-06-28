@@ -1,5 +1,5 @@
 from app.services.reservation_service import ReservationService
-from app.services.web_push_service import PushSubscriptionService
+from app.services.push_notification.web_push_service import PushSubscriptionService
 import uuid
 import logging
 

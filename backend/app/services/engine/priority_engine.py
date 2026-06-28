@@ -9,15 +9,16 @@ from app.core.exceptions import ForbiddenException, InternalServerException, Not
 from app.enums.enums import BoardingStatus, TripStatus, UserProfile
 from app.core.responses import ResponseHandler
 from app.core.config import Settings
+from app.repositories.web_push_repository import PushSubscriptionRepository
 from .notifications import Notifications
 
 class PriorityEngine:
-    def __init__(self, user_repo: UserRepository, trip_repo: TripRepository, res_repo: ReservationRepository, bus_repo: BusRepository):
+    def __init__(self, user_repo: UserRepository, trip_repo: TripRepository, res_repo: ReservationRepository, bus_repo: BusRepository, pushup_repo: PushSubscriptionRepository):
         self.user_repository = user_repo
         self.trip_repository = trip_repo
         self.reservation_repository = res_repo
         self.bus_repository = bus_repo
-        self.notifications = Notifications(user_repo, trip_repo, res_repo, bus_repo)
+        self.notifications = Notifications(user_repo, trip_repo, res_repo, bus_repo, pushup_repo)
 
     def get_priority(self, profile: UserProfile, boarding_status: BoardingStatus, extra_name: str = None):
         if boarding_status == BoardingStatus.BOARDED:
@@ -215,7 +216,6 @@ class PriorityEngine:
 
         user = reservation.user
         trip = reservation.trip
-        
         await self.notifications.cancel_subscription_notifications(user, profile, trip, reservation, background_tasks)
         
         return ResponseHandler.ok(message="Reserva cancelada com sucesso.")
@@ -230,8 +230,7 @@ class PriorityEngine:
         for user in users:
             if user.user_id != "STAFF_UNREGISTERED":
                 await self.notifications.send_trip_cancelled(
-                    user.email, user.full_name, trip.id, trip.date.strftime("%d/%m/%Y"),
-                    background_tasks
+                    user, trip, background_tasks
                 )
 
         return ResponseHandler.ok(message="Viagem cancelada e usuários notificados.")

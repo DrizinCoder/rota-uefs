@@ -32,10 +32,13 @@ def test_get_by_id_returns_none_when_route_not_found():
     assert route is None
 
 
-def test_delete_returns_none_when_route_missing():
-    repository = RouteRepository(AsyncMock())
-    repository.get_by_id = AsyncMock(return_value=None)
+def test_delete_returns_false_when_route_missing():
+    session = AsyncMock()
+    mock_result = MagicMock()
+    mock_result.rowcount = 0
+    session.execute.return_value = mock_result
 
+    repository = RouteRepository(session)
     result = asyncio.run(repository.delete('00000000-0000-0000-0000-000000000000'))
 
-    assert result is None
+    assert result is False
