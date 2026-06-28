@@ -60,7 +60,6 @@ export default function PaginaPassageiro() {
         setUser(userData);
 
         const trips = await passengerService.getUserTrips(userData.user_id);
-        console.log("Viagens do usuário:", trips);
         setMinhasViagens(trips);
       } catch (error) {
         console.error("Erro ao buscar dados", error);
