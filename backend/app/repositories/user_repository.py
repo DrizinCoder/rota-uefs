@@ -1,3 +1,5 @@
+from ast import stmt
+
 from app.enums.enums import RegistrationStatus
 import random
 from app.core.exceptions import InternalServerException
@@ -10,7 +12,7 @@ from app.DTOs.auth import RegisterServidorDTO
 from sqlmodel import SQLModel
 import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import and_, select 
+from sqlalchemy import and_, select , update
 from sqlalchemy.orm import defer 
 from passlib.context import CryptContext
 from app.models.models import User
@@ -214,14 +216,13 @@ class UserRepository:
 
     async def list_all_admins_full(self):
         from sqlalchemy.orm import selectinload
-        statement = select(Admin).options(selectinload(Admin.user)).where(
-            Admin.admin_id.in_(
-                select(User.user_id).where(
-                    and_(
-                        User.profile == UserProfile.ADMIN,
-                        User.is_anonymized == False
-                    )
-                )
+        statement = (
+            select(Admin)
+            .join(User)
+            .options(selectinload(Admin.user))
+            .where(
+                User.profile == UserProfile.ADMIN,
+                User.is_anonymized == False
             )
         )
         result = await self.session.execute(statement)
@@ -298,42 +299,55 @@ class UserRepository:
         return db_obj
     
     async def patch(self, user_id: uuid.UUID, update_data: SQLModel):
-        db_user = await self.get_by_id(user_id)
-        if not db_user:
-            return None
-
         update_dict = update_data.model_dump(exclude_unset=True)
 
-        db_user.sqlmodel_update(update_dict)
+        stmt = (
+            update(User)
+            .where(User.user_id == user_id)
+            .values(**update_dict)
+            .returning(User)
+        )
 
-        self.session.add(db_user)
+        result = await self.session.execute(stmt)
         await self.session.commit()
-        await self.session.refresh(db_user)
-        return db_user
+
+        return result.scalar_one_or_none()
 
     async def anonymize(self, user_id: uuid.UUID):
-        db_user = await self.get_by_id(user_id)
-        if not db_user:
-            return None
+        stmt = (
+            update(User)
+            .where(User.user_id == user_id)
+            .values(
+                full_name="Usuário Anonimizado",
+                email=f"deleted_{user_id}@system.local",
+                phone="00000000000",
+                is_anonymized=True,
+                password="",
+                registration_id=f"anon_{user_id}"
+            )
+            .returning(User)
+        )
 
-        db_user.full_name = "Usuário Anonimizado"
-        db_user.email = f"deleted_{user_id}@system.local"
-        db_user.phone = "00000000000"
-        db_user.is_anonymized = True
-        db_user.password = ""
-        db_user.registration_id = f"anon_{user_id}"
-        
-        self.session.add(db_user)
+        result = await self.session.execute(stmt)
         await self.session.commit()
-        return db_user
+
+        return result.scalar_one_or_none()
 
     async def update_status_staff(self, user_id: uuid.UUID, status: bool):
-        db_user = await self.get_by_id(user_id)
-        if not db_user:
-            return None
-        
-        db_user.registration_status = RegistrationStatus.ACTIVE if status else RegistrationStatus.PENDING
-        self.session.add(db_user)
+        stmt = (
+            update(User)
+            .where(User.user_id == user_id)
+            .values(
+                registration_status=(
+                    RegistrationStatus.ACTIVE
+                    if status
+                    else RegistrationStatus.PENDING
+                )
+            )
+            .returning(User)
+        )
+
+        result = await self.session.execute(stmt)
         await self.session.commit()
-        await self.session.refresh(db_user)
-        return db_user
+
+        return result.scalar_one_or_none()

@@ -437,6 +437,7 @@ class FakeReservationService:
 class FakeWebPushSubscriptionService:
     def __init__(self):
         self.subscriptions: dict[str, dict[str, Any]] = {}
+        self.push_subscription_repo = AsyncMock()
 
     async def subscribe(self, user_id, data):
         if data.endpoint in self.subscriptions:

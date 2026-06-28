@@ -148,6 +148,8 @@ class DashboardRepository:
         trip_rows = trip_result.all()
 
         trip_ids = [t.trip_id for t in trip_rows]
+        if not trip_ids:
+            return []
 
         passengers_statement = (
             select(

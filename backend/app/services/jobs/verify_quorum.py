@@ -10,6 +10,7 @@ from app.repositories.trip_repository import TripRepository
 from app.repositories.reservation_repository import ReservationRepository
 from app.repositories.bus_repository import BusRepository
 from app.services.engine.priority_engine import PriorityEngine
+from app.repositories.web_push_repository import PushSubscriptionRepository
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +23,8 @@ def verify_quorum_job(trip_id: str):
                 user_repo=UserRepository(session),
                 trip_repo=TripRepository(session),
                 res_repo=ReservationRepository(session),
-                bus_repo=BusRepository(session),
+                bus_repo=BusRepository(session),    
+                pushup_repo=PushSubscriptionRepository(session),
             )
 
             notification_controller = get_notification_controller(session)

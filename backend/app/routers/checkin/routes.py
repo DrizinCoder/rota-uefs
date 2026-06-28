@@ -14,6 +14,7 @@ from fastapi import Depends
 from fastapi import APIRouter
 
 from app.middleware import require_profile
+from app.repositories.web_push_repository import PushSubscriptionRepository
 
 checkin_router = APIRouter(
     dependencies=[Depends(require_profile(UserProfile.DRIVER))]
@@ -25,6 +26,7 @@ async def get_priority_engine(session: AsyncSession = Depends(get_session)) -> P
         trip_repo=TripRepository(session),
         res_repo=ReservationRepository(session),
         bus_repo=BusRepository(session),
+        pushup_repo=PushSubscriptionRepository(session)
     )
 
 async def get_reservation_service(
