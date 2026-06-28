@@ -5,7 +5,7 @@ from app.DTOs.fleet import BusCreateDTO
 from app.DTOs.fleet import BusUpdateBatchDTO
 from app.DTOs.fleet import BusUpdateDTO
 from typing import List
-from sqlalchemy import select, delete
+from sqlalchemy import select, delete, update
 from app.models.models import Bus
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -36,16 +36,20 @@ class BusRepository:
         return True
 
     async def patch(self, bus_plate, data: BusUpdateDTO):
-        bus = await self.get_by_plate(bus_plate)
-        
-        if not bus:
-            return None
+        update_dict = data.model_dump(exclude_unset=True)
 
-        bus.sqlmodel_update(data.model_dump(exclude_unset=True))
-        self.session.add(bus)
+        stmt = (
+            update(Bus)
+            .where(Bus.bus_plate == bus_plate)
+            .values(**update_dict)
+            .returning(Bus)
+        )
+
+        result = await self.session.execute(stmt)
+
         await self.session.commit()
-        await self.session.refresh(bus)
-        return bus
+
+        return result.scalar_one_or_none()
 
     async def patch_batch(self, updates: BusUpdateBatchDTO):
 
