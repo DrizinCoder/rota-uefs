@@ -33,7 +33,6 @@ function isViagemConcluida(viagem: ViagemAdmin) {
 
 export default function AdminRelatoriosPage() {
   const router = useRouter();
-  const [abaAtiva, setAbaAtiva] = useState<"gestao" | "seguro">("gestao");
   const [mesSelecionado, setMesSelecionado] = useState(getMesAtual());
   const [viagens, setViagens] = useState<ViagemAdmin[]>([]);
   const [buscaSeguro, setBuscaSeguro] = useState("");
@@ -132,10 +131,8 @@ export default function AdminRelatoriosPage() {
         />
 
         <div className="flex-1 overflow-auto p-4 sm:p-6 bg-slate-50/50">
-          <div className="max-w-5xl mx-auto pb-10">
+          <div className="max-w-7xl mx-auto pb-10">
             <AdminRelatoriosTabs
-              abaAtiva={abaAtiva}
-              setAbaAtiva={setAbaAtiva}
               mesSelecionado={mesSelecionado}
               setMesSelecionado={setMesSelecionado}
               handleDownloadGestao={handleDownloadGestao}
