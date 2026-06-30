@@ -253,7 +253,7 @@ class EmailUseCases:
         except Exception as e:
             logger.error(f"Erro e-mail cancelamento staff: {e}")
 
-    async def send_cancellation_confirmation_staff_for_extra_name(self, email: str, name: str, trip_name: str, extra_name: str):
+    def send_cancellation_confirmation_staff_for_extra_name(self, email: str, name: str, trip_name: str, extra_name: str):
         try:
             html = self.template_service.render(
                 "cancellation_staff_extra.html",
@@ -263,14 +263,14 @@ class EmailUseCases:
         except Exception as e:
             logger.error(f"Erro e-mail cancelamento extra: {e}")
         
-    async def send_cancellation_confirmation_student(self, email: str, name: str, trip_name: str):
+    def send_cancellation_confirmation_student(self, email: str, name: str, trip_name: str):
         try:
             html = self.template_service.render(
                 "cancellation_student.html",
                 {"name": name.split(" ")[0], "trip_name": trip_name}
             )
             print(f"Enviando e-mail de cancelamento para estudante {name} email {email}")
-            await self.email_service.send("Confirmação de cancelamento - Rota UEFS 🚍", email, html)
+            self.email_service.send("Confirmação de cancelamento - Rota UEFS 🚍", email, html)
             print(f"E-mail de cancelamento enviado para estudante {name} email {email}")
         except Exception as e:
             logger.error(f"Erro e-mail cancelamento estudante: {e}")

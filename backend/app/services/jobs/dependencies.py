@@ -25,5 +25,5 @@ def get_priority_engine(session: AsyncSession = Depends(get_session)) -> Priorit
 def get_notification_controller(session: AsyncSession = Depends(get_session)) -> NotificationController:
     return NotificationController(
         push_subscription_service=PushSubscriptionService(PushSubscriptionRepository(session)),
-        reservation_service=ReservationService(ReservationRepository(session)),
+        reservation_service=ReservationService(ReservationRepository(session), get_priority_engine(session)),
     )
