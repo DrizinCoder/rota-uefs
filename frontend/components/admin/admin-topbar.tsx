@@ -33,7 +33,10 @@ export function AdminTopbar({
   return (
     <header className="h-20 bg-white flex items-center justify-between px-6 shadow-sm z-10 shrink-0 border-b border-slate-200">
       <div className="flex items-center gap-4">
-        <button className="text-gray-500 hover:text-cyan-600 lg:hidden">
+        <button 
+          onClick={() => document.dispatchEvent(new CustomEvent('toggle-sidebar'))}
+          className="text-gray-500 hover:text-cyan-600 lg:hidden"
+        >
           <Menu size={24} />
         </button>
         <div>

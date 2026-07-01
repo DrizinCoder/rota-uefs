@@ -76,7 +76,7 @@ export default function PaginaPassageiro() {
     }
   }, [data]);
 
-  const viagensDoDia = (data?.trips || []).filter(viagem => viagem.weekday === diaAtivo);
+  const viagensDoDia = (data?.trips || []).filter(viagem => viagem.weekday === diaAtivo && viagem.status !== "Cancelled");
 
   // IDs das viagens em que o usuário já está inscrito
   const idsInscritos = new Set(minhasViagens.map(v => v.trip_id));
@@ -139,10 +139,6 @@ export default function PaginaPassageiro() {
                   ) : viagem.status === "Completed" ? (
                     <button disabled className="w-full bg-slate-100 text-slate-400 font-bold py-3.5 text-sm rounded-xl">
                       Viagem Concluída
-                    </button>
-                  ) : viagem.status === "Cancelled" ? (
-                    <button disabled className="w-full bg-slate-100 text-slate-400 font-bold py-3.5 text-sm rounded-xl">
-                      Viagem Cancelada
                     </button>
                   ) : (
                     <>

@@ -183,9 +183,7 @@ export default function MotoristaPage() {
     }
   }, [data]);
 
-  const viagensDoDia = (data?.trips || []).filter(viagem => viagem.weekday === diaAtivo);
-  //console.log("VIAGENS DO DIA: ", viagensDoDia);  
-  //console.log("departure_time: ", viagensDoDia[0].departure_time, "weekday: ", viagensDoDia[0].weekday);
+  const viagensDoDia = (data?.trips || []).filter(viagem => viagem.weekday === diaAtivo && viagem.status !== "Cancelled");
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f0f4f8]">

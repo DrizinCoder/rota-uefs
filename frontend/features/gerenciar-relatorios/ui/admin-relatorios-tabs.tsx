@@ -75,7 +75,7 @@ export function AdminRelatoriosTabs({
       {/* SEÇÃO 1: Gestão Logística */}
       <section className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
         <div>
-          <h2 className="text-xl font-bold text-[#103173]">Gestão Logística e Faturamento</h2>
+          <h2 className="text-xl font-bold text-[#103173]">Gestão Logística</h2>
           <p className="text-sm text-slate-500 mt-1">Gere o relatório consolidado mensal em PDF ou CSV.</p>
         </div>
 
