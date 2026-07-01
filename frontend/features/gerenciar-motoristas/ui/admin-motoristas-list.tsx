@@ -61,12 +61,7 @@ export function AdminMotoristasList({
               <div>
                 <div className="flex items-center gap-2 mb-0.5">
                   <p className="text-lg font-bold text-[#103173]">{motorista.full_name}</p>
-                  <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full tracking-wider ${
-                    motorista.registration_status === "ACTIVE"
-                      ? "bg-[#23B99A]/10 text-[#23B99A]"
-                      : "bg-slate-100 text-slate-500"
-                  }`}>
-                    {motorista.registration_status === "ACTIVE" ? "Ativo" : "Inativo"}
+                  <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full tracking-wider`}>
                   </span>
                 </div>
                 <div className="flex items-center gap-3 text-sm text-slate-500 font-medium">

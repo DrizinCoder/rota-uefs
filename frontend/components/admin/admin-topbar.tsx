@@ -40,10 +40,10 @@ export function AdminTopbar({
           <Menu size={24} />
         </button>
         <div>
-          <h1 className="font-bold text-slate-800 tracking-wide text-lg flex items-center gap-2">
+          <h1 className="font-bold text-slate-800 tracking-wide text-sm sm:text-base md:text-lg flex items-center gap-2">
            {title.toUpperCase()}
           </h1>
-          <p className="text-xs text-slate-500 font-medium">{subtitle}</p>
+          <p className="text-[10px] sm:text-xs text-slate-500 font-medium mt-0.5 sm:mt-0 leading-tight">{subtitle}</p>
         </div>
       </div>
       <div className="flex items-center gap-6">
@@ -52,10 +52,10 @@ export function AdminTopbar({
         </div>
         {handleClick && (
           <Button
-            className={`h-10 font-semibold shadow-sm transition-all rounded-lg ${variantClasses[buttonVariant]}`}
+            className={`h-9 sm:h-10 text-xs sm:text-sm px-3 sm:px-4 font-semibold shadow-sm transition-all rounded-lg ${variantClasses[buttonVariant]}`}
             onClick={handleClick}
           >
-            <Icon className="h-4 w-4 mr-2" /> {buttonText}
+            <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" /> {buttonText}
           </Button>
         )}
       </div>
